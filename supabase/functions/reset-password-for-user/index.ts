@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0'
+// Use @latest to ensure we get the most recent version and bypass caches
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@latest'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,27 +26,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Step 1: Verify the user exists before attempting to reset the password.
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
-
-    if (userError || !user) {
-      console.error(`Password reset attempted for non-existent user: ${email}`, userError);
-      return new Response(JSON.stringify({ error: `User with email ${email} not found.` }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404,
-      });
-    }
-
     const redirectTo = 'https://www.macm.dev/update-password';
 
-    // Step 2: Proceed with the password reset.
-    const { error: resetError } = await supabaseAdmin.auth.admin.resetPasswordForEmail(email, {
+    // This is the most direct and reliable method to send a password reset email.
+    const { data, error } = await supabaseAdmin.auth.admin.resetPasswordForEmail(email, {
       redirectTo: redirectTo,
     });
 
-    if (resetError) {
-      console.error("Error from resetPasswordForEmail:", resetError);
-      throw resetError;
+    if (error) {
+      console.error("Error from Supabase resetPasswordForEmail:", JSON.stringify(error, null, 2));
+      throw error;
     }
 
     return new Response(JSON.stringify({ message: "Password reset email sent successfully." }), {
@@ -54,8 +44,9 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Full error object in reset password function:", JSON.stringify(error, null, 2));
-    return new Response(JSON.stringify({ error: error.message || "An unknown server error occurred." }), {
+    console.error("Caught an error in the main try-catch block:", JSON.stringify(error, null, 2));
+    const errorMessage = error.message || "An unknown server error occurred.";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
