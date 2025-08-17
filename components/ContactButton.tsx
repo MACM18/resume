@@ -29,6 +29,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { supabase } from "@/lib/supabase";
 import { toast } from "./ui/sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -94,15 +95,18 @@ export function ContactButton() {
         transition={{ duration: 0.5, delay: 1.5 }}
         className="fixed bottom-6 right-6 z-50"
       >
-        <GlassCard className="rounded-full p-0" hover={true}>
-          <Button
-            onClick={() => setIsOpen(true)}
-            size="icon"
-            className="rounded-full w-14 h-14 shadow-lg bg-primary/80 hover:bg-primary/90"
-          >
-            <Mail className="h-6 w-6" />
-          </Button>
-        </GlassCard>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button onClick={() => setIsOpen(true)} className="group">
+              <GlassCard className="rounded-full p-4" hover={true}>
+                <Mail className="h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300" />
+              </GlassCard>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left">
+            <p>Contact Me</p>
+          </TooltipContent>
+        </Tooltip>
       </motion.div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -29,17 +29,15 @@ export const AuthButton = () => {
       transition={{ duration: 0.5, delay: 1 }}
       className="fixed top-6 left-6 z-50"
     >
-      <GlassCard className="p-2">
-        <div className="flex gap-2">
+      <GlassCard className="p-1 rounded-full">
+        <div className="flex items-center gap-1">
           {session ? (
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild size="icon" className="rounded-full shadow-lg bg-primary hover:bg-primary/90">
-                    <Link href="/admin">
-                      <LayoutDashboard className="h-5 w-5" />
-                    </Link>
-                  </Button>
+                  <Link href="/admin" className="group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-primary/10">
+                    <LayoutDashboard className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
+                  </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <p>Dashboard</p>
@@ -47,13 +45,9 @@ export const AuthButton = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={handleLogout}
-                    size="icon"
-                    className="rounded-full shadow-lg bg-destructive hover:bg-destructive/90"
-                  >
-                    <LogOut className="h-5 w-5" />
-                  </Button>
+                  <button onClick={handleLogout} className="group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-destructive/10">
+                    <LogOut className="h-5 w-5 text-foreground/70 group-hover:text-destructive" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <p>Logout</p>
@@ -63,11 +57,9 @@ export const AuthButton = () => {
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button asChild size="icon" className="rounded-full shadow-lg bg-secondary hover:bg-secondary/90">
-                  <Link href="/login">
-                    <Wrench className="h-5 w-5" />
-                  </Link>
-                </Button>
+                <Link href="/login" className="group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-secondary/10">
+                  <Wrench className="h-5 w-5 text-foreground/70 group-hover:text-secondary" />
+                </Link>
               </TooltipTrigger>
               <TooltipContent side="right">
                 <p>Modify</p>

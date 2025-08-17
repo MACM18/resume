@@ -83,13 +83,23 @@ export function ThemeEditor() {
           <div key={key} className="space-y-2">
             <label className="text-sm font-medium capitalize">{key.replace('--', '').replace(/-/g, ' ')}</label>
             <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={hslStringToHex(value)}
-                onChange={(e) => handleColorChange(key, hexToHslString(e.target.value))}
-                className="w-10 h-10 p-1 bg-transparent border-none rounded-full cursor-pointer"
-                style={{ border: '1px solid hsl(var(--border))' }}
-              />
+              <div className="relative w-10 h-10">
+                <label
+                  htmlFor={`color-picker-${key}`}
+                  className="block w-full h-full rounded-full cursor-pointer"
+                  style={{
+                    backgroundColor: hslStringToHex(value),
+                    border: '1px solid hsl(var(--border))'
+                  }}
+                />
+                <input
+                  id={`color-picker-${key}`}
+                  type="color"
+                  value={hslStringToHex(value)}
+                  onChange={(e) => handleColorChange(key, hexToHslString(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
               <input
                 type="text"
                 value={value}
