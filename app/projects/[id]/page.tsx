@@ -4,7 +4,9 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { projects } from "@/data/portfolio";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectById } from "@/lib/projects";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   params: {
@@ -13,7 +15,27 @@ interface Props {
 }
 
 const ProjectDetail = ({ params }: Props) => {
-  const project = projects.find((p) => p.id === params.id);
+  const { data: project, isLoading } = useQuery({
+    queryKey: ["project", params.id],
+    queryFn: () => getProjectById(params.id),
+  });
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen relative pt-24 pb-12 px-6'>
+        <div className='max-w-4xl mx-auto'>
+          <Skeleton className="h-8 w-40 mb-8" />
+          <Skeleton className="h-16 w-3/4 mb-6" />
+          <Skeleton className="h-6 w-full mb-8" />
+          <div className="flex gap-4 mb-8">
+            <Skeleton className="h-12 w-32" />
+            <Skeleton className="h-12 w-32" />
+          </div>
+          <Skeleton className="aspect-video w-full" />
+        </div>
+      </div>
+    )
+  }
 
   if (!project) {
     return (
@@ -71,10 +93,10 @@ const ProjectDetail = ({ params }: Props) => {
           </p>
 
           <div className='flex flex-wrap gap-4 mb-8'>
-            {project.demoUrl && (
+            {project.demo_url && (
               <Button asChild size='lg'>
                 <a
-                  href={project.demoUrl}
+                  href={project.demo_url}
                   target='_blank'
                   rel='noopener noreferrer'
                 >
@@ -83,10 +105,10 @@ const ProjectDetail = ({ params }: Props) => {
                 </a>
               </Button>
             )}
-            {project.githubUrl && (
+            {project.github_url && (
               <Button asChild variant='outline' size='lg'>
                 <a
-                  href={project.githubUrl}
+                  href={project.github_url}
                   target='_blank'
                   rel='noopener noreferrer'
                 >
@@ -108,7 +130,7 @@ const ProjectDetail = ({ params }: Props) => {
           <GlassCard className='overflow-hidden'>
             <div className='aspect-video bg-glass-bg/20'>
               <img
-                src={project.image}
+                src={project.image || "/placeholder.svg"}
                 alt={project.title}
                 className='w-full h-full object-cover'
               />
@@ -130,7 +152,7 @@ const ProjectDetail = ({ params }: Props) => {
                 </h2>
                 <div className='prose prose-invert max-w-none'>
                   <p className='text-foreground/80 leading-relaxed'>
-                    {project.longDescription}
+                    {project.long_description}
                   </p>
                 </div>
               </GlassCard>

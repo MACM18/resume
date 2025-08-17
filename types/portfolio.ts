@@ -1,0 +1,81 @@
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  long_description: string;
+  image: string;
+  tech: string[];
+  demo_url?: string;
+  github_url?: string;
+  featured: boolean;
+  user_id: string;
+  created_at: string;
+}
+
+export interface Resume {
+  role: string;
+  title: string;
+  summary: string;
+  experience: {
+    company: string;
+    position: string;
+    duration: string;
+    description: string[];
+  }[];
+  skills: string[];
+  education: {
+    degree: string;
+    school: string;
+    year: string;
+  }[];
+  projects: string[]; // Project IDs
+}
+
+export interface HomePageData {
+  name: string;
+  tagline: string;
+  socialLinks: {
+    platform: string;
+    icon: string;
+    href: string;
+    label: string;
+  }[];
+  experienceHighlights: {
+    metric: string;
+    title: string;
+    subtitle: string;
+    description: string;
+  }[];
+  technicalExpertise: {
+    name: string;
+    skills: string[];
+    icon: string;
+  }[];
+  achievements: {
+    title: string;
+    description: string;
+    metric: string;
+    label: string;
+  }[];
+  callToAction: {
+    title: string;
+    description: string;
+    email: string;
+  };
+}
+
+export interface AboutPageData {
+  title: string;
+  subtitle: string;
+  story: string[];
+  skills: {
+    category: string;
+    icon: string;
+    items: string[];
+  }[];
+  callToAction: {
+    title: string;
+    description: string;
+    email: string;
+  };
+}
