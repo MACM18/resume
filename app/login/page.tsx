@@ -69,6 +69,8 @@ const LoginPage = () => {
             }}
             providers={[]}
             theme="dark"
+            view="sign_in"
+            showLinks={false}
           />
         </GlassCard>
       </motion.div>
