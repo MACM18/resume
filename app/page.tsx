@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 
 const socialIconMap = {
   Github,
@@ -52,17 +53,7 @@ export default function Page() {
   }
 
   if (!profileData || !profileData.home_page_data) {
-    return (
-      <div className='min-h-screen flex items-center justify-center text-center'>
-        <div>
-          <h1 className='text-2xl font-bold'>Welcome to Your Portfolio</h1>
-          <p className='text-foreground/70'>
-            This domain isn&apos;t linked to a profile yet. Log in as an admin
-            to claim it.
-          </p>
-        </div>
-      </div>
-    );
+    return <DomainNotClaimed />;
   }
 
   const homePageData = {
@@ -398,9 +389,7 @@ export default function Page() {
                 size='lg'
                 className='bg-primary hover:bg-primary/90 text-primary-foreground'
               >
-                <a href={`mailto:${homePageData.callToAction.email}`}>
-                  Start a Project
-                </a>
+                <a href={`mailto:${homePageData.callToAction.email}`}>Start a Project</a>
               </Button>
               <Button
                 asChild

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 
 const iconMap = {
   Code,
@@ -48,11 +49,7 @@ const About = () => {
   }
 
   if (!profileData || !profileData.about_page_data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>About page data not found.</p>
-      </div>
-    );
+    return <DomainNotClaimed />;
   }
 
   const aboutPageData = profileData.about_page_data;

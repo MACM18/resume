@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
+import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 
 const ResumePageSkeleton = () => (
   <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
@@ -40,22 +41,22 @@ const Resume = () => {
     setHostname(window.location.hostname);
   }, []);
 
+  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["profileData", hostname],
+    queryFn: () => getProfileData(hostname),
+    enabled: !!hostname,
+  });
+
   const { data: resume, isLoading: isLoadingResume } = useQuery({
     queryKey: ["activeResume", hostname],
     queryFn: () => getActiveResume(hostname),
-    enabled: !!hostname,
+    enabled: !!hostname && !!profileData,
   });
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
     queryKey: ["projects", hostname],
     queryFn: () => getProjects(hostname),
-    enabled: !!hostname,
-  });
-
-  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["profileData", hostname],
-    queryFn: () => getProfileData(hostname),
-    enabled: !!hostname,
+    enabled: !!hostname && !!profileData,
   });
 
   const generatePdfMutation = useMutation({
@@ -94,13 +95,17 @@ const Resume = () => {
     }
   };
 
-  const isLoading = isLoadingResume || isLoadingProjects || isLoadingProfile;
+  const isLoading = isLoadingProfile || isLoadingResume || isLoadingProjects;
 
-  if (isLoading) {
+  if (isLoading || !hostname) {
     return <ResumePageSkeleton />;
   }
 
-  if (!resume || !profileData) {
+  if (!profileData) {
+    return <DomainNotClaimed />;
+  }
+
+  if (!resume) {
     return (
       <div className='min-h-screen relative pt-24 pb-12 px-6 flex items-center justify-center'>
         <GlassCard className='p-8 text-center'>

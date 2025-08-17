@@ -42,8 +42,11 @@ export async function getProjectsForCurrentUser(): Promise<Project[]> {
   return data || [];
 }
 
-export async function getProjectById(id: string): Promise<Project | null> {
-    const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('published', true).single();
+export async function getProjectById(id: string, domain: string): Promise<Project | null> {
+    const userId = await getUserIdByDomain(domain);
+    if (!userId) return null;
+
+    const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('user_id', userId).eq('published', true).single();
     if (error) {
         console.error('Error fetching project by id:', error);
         return null;
