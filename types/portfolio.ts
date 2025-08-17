@@ -54,7 +54,6 @@ export interface HomePageData {
   technicalExpertise: {
     name: string;
     skills: string[];
-    icon: string;
   }[];
   achievements: {
     title: string;

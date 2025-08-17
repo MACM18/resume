@@ -248,11 +248,10 @@ export default function Page() {
                 transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
               >
                 <GlassCard className='p-6 text-center' hover>
-                  <div className='text-3xl mb-4'>{category.icon}</div>
-                  <h3 className='text-lg font-semibold mb-3'>
+                  <h3 className='text-xl font-semibold mb-4'>
                     {category.name}
                   </h3>
-                  <div className='space-y-1'>
+                  <div className='space-y-2'>
                     {category.skills.map((skill) => (
                       <div key={skill} className='text-sm text-foreground/70'>
                         {skill}

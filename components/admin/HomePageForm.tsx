@@ -48,7 +48,6 @@ const homePageSchema = z.object({
   technicalExpertise: z.array(z.object({
     name: z.string().min(1, "Required"),
     skills: z.string().min(1, "Required"),
-    icon: z.string().min(1, "Required"),
   })),
   achievements: z.array(z.object({
     title: z.string().min(1, "Required"),
@@ -181,7 +180,6 @@ export function HomePageForm() {
               <div key={field.id} className="p-4 border rounded-lg bg-glass-bg/10 relative">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name={`technicalExpertise.${index}.name`} render={({ field }) => <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-                    <FormField control={form.control} name={`technicalExpertise.${index}.icon`} render={({ field }) => <FormItem><FormLabel>Icon</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                     <div className="md:col-span-2"><FormField control={form.control} name={`technicalExpertise.${index}.skills`} render={({ field }) => <FormItem><FormLabel>Skills (comma-separated)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} /></div>
                 </div>
                 <div className="absolute top-2 right-2">
@@ -193,7 +191,7 @@ export function HomePageForm() {
               </div>
             ))}
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => appendTech({ name: "", icon: "", skills: "" })} className="mt-4">Add Expertise Area</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => appendTech({ name: "", skills: "" })} className="mt-4">Add Expertise Area</Button>
         </div>
 
         <Separator />

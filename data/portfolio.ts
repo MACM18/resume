@@ -116,22 +116,18 @@ export const homePageData: Omit<HomePageData, 'name' | 'tagline'> = {
     {
       name: "Frontend",
       skills: ["React", "TypeScript", "Next.js"],
-      icon: "⚛️"
     },
     {
       name: "Backend",
       skills: ["Node.js", "Python", "GraphQL"],
-      icon: "🔧"
     },
     {
       name: "Design",
       skills: ["Figma", "UI/UX", "Prototyping"],
-      icon: "🎨"
     },
     {
       name: "Cloud",
       skills: ["AWS", "Docker", "CI/CD"],
-      icon: "☁️"
     }
   ],
   achievements: [
