@@ -10,6 +10,15 @@ import { Loader2, RotateCcw } from "lucide-react";
 import { defaultTheme } from "@/data/theme";
 import { hslStringToHex, hexToHslString } from "@/lib/colors";
 
+const editableColors = [
+  '--background',
+  '--foreground',
+  '--primary',
+  '--secondary',
+  '--glass-bg',
+  '--glass-border',
+];
+
 export function ThemeEditor() {
   const queryClient = useQueryClient();
   const { data: profile, isLoading } = useQuery({
@@ -62,20 +71,23 @@ export function ThemeEditor() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-primary">Theme Editor</h2>
-          <p className="text-foreground/70">Customize the colors of your portfolio. Changes are previewed live.</p>
+          <p className="text-foreground/70">Customize the core colors of your portfolio. Changes are previewed live.</p>
         </div>
         <Button variant="outline" onClick={handleReset}><RotateCcw className="mr-2" size={16} /> Reset to Default</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Object.entries(theme).map(([key, value]) => (
+        {Object.entries(theme)
+          .filter(([key]) => editableColors.includes(key))
+          .map(([key, value]) => (
           <div key={key} className="space-y-2">
-            <label className="text-sm font-medium">{key.replace('--', '').replace(/-/g, ' ')}</label>
+            <label className="text-sm font-medium capitalize">{key.replace('--', '').replace(/-/g, ' ')}</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={hslStringToHex(value)}
                 onChange={(e) => handleColorChange(key, hexToHslString(e.target.value))}
-                className="w-10 h-10 p-1 bg-transparent border border-input rounded-md cursor-pointer"
+                className="w-10 h-10 p-1 bg-transparent border-none rounded-full cursor-pointer"
+                style={{ border: '1px solid hsl(var(--border))' }}
               />
               <input
                 type="text"
