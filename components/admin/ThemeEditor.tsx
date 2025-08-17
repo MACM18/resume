@@ -15,6 +15,7 @@ const editableColors = [
   '--foreground',
   '--primary',
   '--secondary',
+  '--accent',
   '--glass-bg',
   '--glass-border',
 ];
