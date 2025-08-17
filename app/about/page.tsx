@@ -56,6 +56,7 @@ const About = () => {
   }
 
   const aboutPageData = profileData.about_page_data;
+  const contactEmail = profileData.home_page_data.callToAction.email;
 
   return (
     <div className='min-h-screen relative pt-24 pb-12 px-6'>
@@ -150,7 +151,7 @@ const About = () => {
                 {aboutPageData.callToAction.description}
               </p>
               <a
-                href={`mailto:${aboutPageData.callToAction.email}`}
+                href={`mailto:${contactEmail}`}
                 className='inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:shadow-glow'
               >
                 Get In Touch

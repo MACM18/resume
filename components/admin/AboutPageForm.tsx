@@ -44,7 +44,6 @@ const aboutPageSchema = z.object({
   callToAction: z.object({
     title: z.string().min(1, "Required"),
     description: z.string().min(1, "Required"),
-    email: z.string().email("Must be a valid email"),
   }),
 });
 
@@ -65,7 +64,7 @@ export function AboutPageForm() {
       subtitle: profile?.about_page_data?.subtitle || "",
       story: profile?.about_page_data?.story.join("\n\n") || "",
       skills: profile?.about_page_data?.skills.map(s => ({...s, items: s.items.join(', ')})) || [],
-      callToAction: profile?.about_page_data?.callToAction || { title: '', description: '', email: '' },
+      callToAction: profile?.about_page_data?.callToAction || { title: '', description: '' },
     },
     enableReinitialize: true,
   });
@@ -77,7 +76,11 @@ export function AboutPageForm() {
         const processedData = {
             ...data,
             story: data.story.split("\n\n"),
-            skills: data.skills.map(s => ({...s, items: s.items.split(',').map(i => i.trim())}))
+            skills: data.skills.map(s => ({...s, items: s.items.split(',').map(i => i.trim())})),
+            callToAction: {
+              ...data.callToAction,
+              email: profile?.home_page_data.callToAction.email || ''
+            }
         };
         return updateCurrentUserProfile({ about_page_data: processedData as any });
     },
@@ -136,7 +139,6 @@ export function AboutPageForm() {
           <div className="p-3 border rounded-md space-y-2">
             <FormField control={form.control} name="callToAction.title" render={({ field }) => <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
             <FormField control={form.control} name="callToAction.description" render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>} />
-            <FormField control={form.control} name="callToAction.email" render={({ field }) => <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
           </div>
         </div>
 
