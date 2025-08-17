@@ -103,7 +103,10 @@ const Resume = () => {
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `resume-${resume?.role || "download"}.pdf`;
+      const sanitizedFullName = profileData?.full_name
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, "-");
+      a.download = `resume-${sanitizedFullName || resume?.role || "download"}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
