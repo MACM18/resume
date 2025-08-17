@@ -38,19 +38,18 @@ export function ProfileManagement() {
     mutationFn: async (domain: string) => {
       if (!session) throw new Error("Not authenticated");
 
-      // Check if the domain is already taken by another user
-      const { data: existingProfile, error: checkError } = await supabase
+      // More robust check for existing domain
+      const { data: existingProfiles, error: checkError } = await supabase
         .from("profiles")
         .select("id")
         .eq("domain", domain)
-        .not("id", "eq", session.user.id)
-        .single();
+        .not("id", "eq", session.user.id);
 
-      if (checkError && checkError.code !== 'PGRST116') { // Ignore "no rows found" error
+      if (checkError) {
         throw checkError;
       }
 
-      if (existingProfile) {
+      if (existingProfiles && existingProfiles.length > 0) {
         throw new Error("This domain is already claimed by another user.");
       }
 
