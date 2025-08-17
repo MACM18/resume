@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getProjectsForCurrentUser, deleteProject } from "@/lib/projects";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash, Loader2, Link as LinkIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,8 +30,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/lib/supabase";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const AdminPage = () => {
   const { session } = useSupabase();
@@ -39,10 +37,12 @@ const AdminPage = () => {
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [username, setUsername] = useState('');
-  const [isSavingUsername, setIsSavingUsername] = useState(false);
+  const [hostname, setHostname] = useState("");
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
     if (!session) {
       router.push("/login");
     }
@@ -52,10 +52,7 @@ const AdminPage = () => {
     queryKey: ['profile', session?.user.id],
     queryFn: async () => {
         if (!session?.user.id) return null;
-        const { data } = await supabase.from('profiles').select('username').eq('id', session.user.id).single();
-        if (data?.username) {
-          setUsername(data.username);
-        }
+        const { data } = await supabase.from('profiles').select('domain').eq('id', session.user.id).single();
         return data;
     },
     enabled: !!session,
@@ -67,30 +64,31 @@ const AdminPage = () => {
     enabled: !!session,
   });
 
+  const claimDomainMutation = useMutation({
+    mutationFn: async (domain: string) => {
+      if (!session) throw new Error("Not authenticated");
+      const { error } = await supabase.from('profiles').update({ domain }).eq('id', session.user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(`Domain ${hostname} claimed successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to claim domain: ${error.message}`);
+    }
+  });
+
   const deleteMutation = useMutation({
     mutationFn: deleteProject,
     onSuccess: () => {
       toast.success("Project deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-projects"] });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
     onError: () => {
       toast.error("Failed to delete project.");
     },
   });
-
-  const handleSaveUsername = async () => {
-    if (!session || !username) return;
-    setIsSavingUsername(true);
-    const { error } = await supabase.from('profiles').update({ username }).eq('id', session.user.id);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Username saved!");
-      queryClient.invalidateQueries({ queryKey: ['profile', session.user.id] });
-    }
-    setIsSavingUsername(false);
-  };
 
   const handleEdit = (project: Project) => {
     setSelectedProject(project);
@@ -106,28 +104,24 @@ const AdminPage = () => {
     return null;
   }
 
+  const isDomainClaimed = profile?.domain === hostname;
+
   return (
     <div className="min-h-screen relative pt-24 pb-12 px-6">
       <div className="max-w-4xl mx-auto">
         <GlassCard className="p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-secondary">Your Profile</h2>
-          <div className="space-y-2">
-            <Label htmlFor="username">Your Public Username</Label>
-            <div className="flex gap-2">
-              <Input 
-                id="username" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                placeholder="e.g., alex-chen"
-              />
-              <Button onClick={handleSaveUsername} disabled={isSavingUsername}>
-                {isSavingUsername ? <Loader2 className="animate-spin" /> : "Save"}
-              </Button>
+          <h2 className="text-2xl font-bold mb-4 text-secondary">Your Domain</h2>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 p-2 border border-glass-border rounded-md bg-glass-bg/20">
+              <code>{hostname}</code>
             </div>
-            {profile?.username && (
-              <p className="text-sm text-foreground/70">
-                Your portfolio is live at: <a href={`/${profile.username}`} className="text-primary underline">{`/${profile.username}`}</a>
-              </p>
+            {isDomainClaimed ? (
+              <p className="text-green-400">This domain is linked to your profile.</p>
+            ) : (
+              <Button onClick={() => claimDomainMutation.mutate(hostname)} disabled={claimDomainMutation.isPending}>
+                <LinkIcon className="mr-2" size={16} />
+                {claimDomainMutation.isPending ? "Claiming..." : "Claim this Domain"}
+              </Button>
             )}
           </div>
         </GlassCard>

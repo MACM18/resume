@@ -3,17 +3,17 @@
 import { supabase } from './supabase';
 import { Project } from '@/types/portfolio';
 
-async function getUserIdByUsername(username: string): Promise<string | null> {
-  const { data, error } = await supabase.from('profiles').select('id').eq('username', username).single();
+async function getUserIdByDomain(domain: string): Promise<string | null> {
+  const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
   if (error || !data) {
-    console.error('Error fetching user by username:', error?.message);
+    console.error('Error fetching user by domain:', error?.message);
     return null;
   }
   return data.id;
 }
 
-export async function getProjects(username: string): Promise<Project[]> {
-  const userId = await getUserIdByUsername(username);
+export async function getProjects(domain: string): Promise<Project[]> {
+  const userId = await getUserIdByDomain(domain);
   if (!userId) return [];
 
   const { data, error } = await supabase.from('projects').select('*').eq('user_id', userId);
@@ -51,8 +51,8 @@ export async function getProjectById(id: string): Promise<Project | null> {
     return data;
 }
 
-export async function getFeaturedProjects(username: string): Promise<Project[]> {
-    const userId = await getUserIdByUsername(username);
+export async function getFeaturedProjects(domain: string): Promise<Project[]> {
+    const userId = await getUserIdByDomain(domain);
     if (!userId) return [];
 
     const { data, error } = await supabase.from('projects').select('*').eq('featured', true).eq('user_id', userId);

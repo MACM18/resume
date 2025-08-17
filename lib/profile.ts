@@ -10,14 +10,14 @@ interface ProfileData {
   about_page_data: AboutPageData;
 }
 
-export async function getProfileData(username: string): Promise<ProfileData | null> {
+export async function getProfileData(domain: string): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select('full_name, tagline, home_page_data, about_page_data')
-    .eq('username', username)
+    .eq('domain', domain)
     .single();
 
-  if (error) {
+  if (error && error.code !== 'PGRST116') { // Ignore "no rows found" error
     console.error('Error fetching profile data:', error.message);
     return null;
   }

@@ -3,10 +3,10 @@
 import { supabase } from './supabase';
 import { Resume } from '@/types/portfolio';
 
-export async function getResumes(username: string): Promise<Resume[]> {
-  const { data: profile, error: profileError } = await supabase.from('profiles').select('id').eq('username', username).single();
+export async function getResumes(domain: string): Promise<Resume[]> {
+  const { data: profile, error: profileError } = await supabase.from('profiles').select('id').eq('domain', domain).single();
   if (profileError || !profile) {
-    console.error('Error fetching user by username:', profileError?.message);
+    console.error('Error fetching user by domain:', profileError?.message);
     return [];
   }
 
