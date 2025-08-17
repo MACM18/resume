@@ -45,7 +45,7 @@ export function UserInvitationForm() {
       toast.success(`Invitation sent to ${variables.email}`);
       form.reset();
     },
-    onError: (error: any) => {
+    onError: (error: Error | { message: string }) => {
       toast.error(`Failed to send invitation: ${error.message}`);
     },
   });

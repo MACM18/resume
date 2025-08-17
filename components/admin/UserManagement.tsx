@@ -45,7 +45,7 @@ export function UserManagement() {
     onSuccess: (_, email) => {
       toast.success(`Password reset link sent to ${email}`);
     },
-    onError: (error: any) => {
+    onError: (error: Error | { message: string }) => {
       toast.error(`Failed to send reset link: ${error.message}`);
     },
   });

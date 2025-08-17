@@ -1,8 +1,7 @@
 "use client";
 
 import { useSupabase } from "@/components/providers/AuthProvider";
-// import { Button } from "@/components/ui/button";
-import { Wrench, LogOut, LayoutDashboard } from "lucide-react";
+import { Wrench, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -12,15 +11,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GlassCard } from "./GlassCard";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUserProfile } from "@/lib/profile";
 
 export const AuthButton = () => {
   const { session, supabase } = useSupabase();
   const router = useRouter();
 
+  const { data: profile } = useQuery({
+    queryKey: ["currentUserProfile"],
+    queryFn: getCurrentUserProfile,
+    enabled: !!session, // Only fetch profile if user is logged in
+  });
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.refresh();
   };
+
+  const isSuperAdmin = profile?.domain === "www.macm.dev";
 
   return (
     <motion.div
@@ -33,19 +42,35 @@ export const AuthButton = () => {
         <div className='flex items-center gap-1'>
           {session ? (
             <>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href='/admin'
-                    className='group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-primary/10'
-                  >
-                    <LayoutDashboard className='h-5 w-5 text-foreground/70 group-hover:text-primary' />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side='right'>
-                  <p>Dashboard</p>
-                </TooltipContent>
-              </Tooltip>
+              {isSuperAdmin ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href='/super-admin'
+                      className='group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-secondary/10'
+                    >
+                      <ShieldCheck className='h-5 w-5 text-foreground/70 group-hover:text-secondary' />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side='right'>
+                    <p>Super Admin</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href='/admin'
+                      className='group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-primary/10'
+                    >
+                      <LayoutDashboard className='h-5 w-5 text-foreground/70 group-hover:text-primary' />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side='right'>
+                    <p>Dashboard</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
