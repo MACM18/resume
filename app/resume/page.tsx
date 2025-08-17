@@ -1,15 +1,17 @@
 "use client";
 import { motion } from "framer-motion";
-import { Download, Mail, MapPin, Calendar, ExternalLink } from "lucide-react";
+import { Download, Mail, MapPin, Calendar, ExternalLink, Loader2 } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { getActiveResume } from "@/lib/resumes";
 import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
 import { Project } from "@/types/portfolio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/components/ui/sonner";
 
 const ResumePageSkeleton = () => (
   <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
@@ -56,6 +58,42 @@ const Resume = () => {
     enabled: !!hostname,
   });
 
+  const generatePdfMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("generate-resume", {
+        body: { resume, profile: profileData, projects },
+        responseType: 'blob'
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (pdfBlob) => {
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resume-${resume?.role || 'download'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Resume downloaded!");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to generate PDF: ${error.message}`);
+    },
+  });
+
+  const handleDownload = () => {
+    if (!resume) return;
+    if (resume.pdf_source === 'generated') {
+      generatePdfMutation.mutate();
+    } else if (resume.resume_url) {
+      window.open(resume.resume_url, '_blank');
+    } else {
+      toast.error("No PDF available for download.");
+    }
+  };
+
   const isLoading = isLoadingResume || isLoadingProjects || isLoadingProfile;
 
   if (isLoading) {
@@ -92,15 +130,17 @@ const Resume = () => {
             Resume
           </h1>
           <Button
-            asChild
+            onClick={handleDownload}
             size='lg'
             className='bg-primary hover:bg-primary/90'
-            disabled={!resume.resume_url}
+            disabled={generatePdfMutation.isPending || (resume.pdf_source === 'uploaded' && !resume.resume_url)}
           >
-            <a href={resume.resume_url!} target="_blank" rel="noopener noreferrer">
+            {generatePdfMutation.isPending ? (
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+            ) : (
               <Download className='mr-2' size={20} />
-              Download PDF
-            </a>
+            )}
+            {generatePdfMutation.isPending ? 'Generating...' : 'Download PDF'}
           </Button>
         </motion.div>
 
