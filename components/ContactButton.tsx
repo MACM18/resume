@@ -94,13 +94,15 @@ export function ContactButton() {
         transition={{ duration: 0.5, delay: 1.5 }}
         className="fixed bottom-6 right-6 z-50"
       >
-        <Button
-          onClick={() => setIsOpen(true)}
-          size="icon"
-          className="rounded-full w-14 h-14 shadow-lg bg-primary hover:bg-primary/90"
-        >
-          <Mail className="h-6 w-6" />
-        </Button>
+        <GlassCard className="rounded-full p-0" hover={true}>
+          <Button
+            onClick={() => setIsOpen(true)}
+            size="icon"
+            className="rounded-full w-14 h-14 shadow-lg bg-primary/80 hover:bg-primary/90"
+          >
+            <Mail className="h-6 w-6" />
+          </Button>
+        </GlassCard>
       </motion.div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -11,6 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { GlassCard } from "./GlassCard";
 
 export const AuthButton = () => {
   const { session, supabase } = useSupabase();
@@ -26,51 +27,55 @@ export const AuthButton = () => {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: 1 }}
-      className="fixed top-6 left-6 z-50 flex gap-2"
+      className="fixed top-6 left-6 z-50"
     >
-      {session ? (
-        <>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button asChild size="icon" className="rounded-full shadow-lg bg-primary hover:bg-primary/90">
-                <Link href="/admin">
-                  <LayoutDashboard className="h-5 w-5" />
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Dashboard</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={handleLogout}
-                size="icon"
-                className="rounded-full shadow-lg bg-destructive hover:bg-destructive/90"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Logout</p>
-            </TooltipContent>
-          </Tooltip>
-        </>
-      ) : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button asChild size="icon" className="rounded-full shadow-lg bg-secondary hover:bg-secondary/90">
-              <Link href="/login">
-                <Wrench className="h-5 w-5" />
-              </Link>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            <p>Modify</p>
-          </TooltipContent>
-        </Tooltip>
-      )}
+      <GlassCard className="p-2">
+        <div className="flex gap-2">
+          {session ? (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button asChild size="icon" className="rounded-full shadow-lg bg-primary hover:bg-primary/90">
+                    <Link href="/admin">
+                      <LayoutDashboard className="h-5 w-5" />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>Dashboard</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={handleLogout}
+                    size="icon"
+                    className="rounded-full shadow-lg bg-destructive hover:bg-destructive/90"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>Logout</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild size="icon" className="rounded-full shadow-lg bg-secondary hover:bg-secondary/90">
+                  <Link href="/login">
+                    <Wrench className="h-5 w-5" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Modify</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </GlassCard>
     </motion.div>
   );
 };
