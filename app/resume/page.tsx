@@ -76,6 +76,11 @@ const Resume = () => {
       return data;
     },
     onSuccess: (pdfBlob) => {
+      if (!(pdfBlob instanceof Blob)) {
+        toast.error("Failed to generate PDF: Invalid response from server.");
+        console.error("Invalid response:", pdfBlob);
+        return;
+      }
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
@@ -86,8 +91,9 @@ const Resume = () => {
       URL.revokeObjectURL(url);
       toast.success("Resume downloaded!");
     },
-    onError: (error: { message: string }) => {
-      toast.error(`Failed to generate PDF: ${error.message}`);
+    onError: (error: any) => {
+      const message = error?.message || "An unknown error occurred.";
+      toast.error(`Failed to generate PDF: ${message}`);
     },
   });
 

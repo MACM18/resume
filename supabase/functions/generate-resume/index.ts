@@ -6,6 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Sanitize text to remove characters not supported by standard PDF fonts (WinAnsiEncoding)
+const sanitizeText = (text: string | null | undefined): string => {
+  if (!text) return '';
+  // This regex removes characters outside the common set, including most emojis.
+  return text.replace(/[^a-zA-Z0-9.,!?'"#$%&'()*+,-./:;<=>@[\]^_`{|}~ \n\r]/g, '');
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -30,18 +37,18 @@ serve(async (req) => {
     const contentWidth = rightMargin - leftMargin;
 
     const drawText = (text: string, x: number, yPos: number, size: number, isBold = false, color = rgb(0, 0, 0)) => {
-      if (yPos < 50) return 0; // Stop drawing if we're at the bottom of the page
-      page.drawText(text, { x, y: yPos, font: isBold ? boldFont : font, size, color });
-      return size + 4; // Return line height
+      if (yPos < 50) return 0;
+      page.drawText(sanitizeText(text), { x, y: yPos, font: isBold ? boldFont : font, size, color });
+      return size + 4;
     };
     
     // Header
-    page.drawText(profile.full_name || 'Name Not Provided', { x: leftMargin, y, font: boldFont, size: 24 });
+    drawText(profile.full_name, leftMargin, y, 24, true);
     y -= 30;
-    page.drawText(resume.title || 'Title Not Provided', { x: leftMargin, y, font: font, size: 18, color: rgb(0.3, 0.3, 0.3) });
+    drawText(resume.title, leftMargin, y, 18, false, rgb(0.3, 0.3, 0.3));
     y -= 20;
     const contactEmail = profile.home_page_data?.callToAction?.email || 'No Email Provided';
-    page.drawText(`${contactEmail} | San Francisco, CA`, { x: leftMargin, y, font: font, size: 12 });
+    drawText(`${contactEmail} | San Francisco, CA`, leftMargin, y, 12);
     y -= 20;
     
     page.drawLine({ start: { x: leftMargin, y }, end: { x: rightMargin, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
@@ -50,20 +57,18 @@ serve(async (req) => {
     // Summary
     if (resume.summary) {
       y -= drawText('Summary', leftMargin, y, 14, true);
-      const summaryLines = [];
-      const words = resume.summary.split(' ');
+      const words = sanitizeText(resume.summary).split(' ');
       let currentLine = '';
       for (const word of words) {
           const testLine = currentLine + word + ' ';
           if (font.widthOfTextAtSize(testLine, 10) > contentWidth) {
-              summaryLines.push(currentLine);
+              y -= drawText(currentLine, leftMargin, y, 10);
               currentLine = word + ' ';
           } else {
               currentLine = testLine;
           }
       }
-      summaryLines.push(currentLine);
-      for (const line of summaryLines) { y -= drawText(line, leftMargin, y, 10); }
+      y -= drawText(currentLine, leftMargin, y, 10);
       y -= 20;
     }
 
@@ -71,9 +76,10 @@ serve(async (req) => {
     if (resume.experience && resume.experience.length > 0) {
       y -= drawText('Experience', leftMargin, y, 14, true);
       for (const exp of resume.experience) {
+        const positionLineY = y;
         y -= drawText(exp.position, leftMargin, y, 12, true);
-        page.drawText(exp.duration, { x: rightMargin - font.widthOfTextAtSize(exp.duration, 10), y, font: font, size: 10 });
-        y -= 16;
+        drawText(exp.duration, rightMargin - font.widthOfTextAtSize(sanitizeText(exp.duration), 10), positionLineY, 10);
+        y -= 4;
         y -= drawText(exp.company, leftMargin, y, 11, false, rgb(0.3, 0.3, 0.3));
         for (const desc of exp.description || []) { y -= drawText(`• ${desc}`, leftMargin + 10, y, 10); }
         y -= 10;
@@ -85,9 +91,10 @@ serve(async (req) => {
     if (resume.education && resume.education.length > 0) {
       y -= drawText('Education', leftMargin, y, 14, true);
       for (const edu of resume.education) {
+        const degreeLineY = y;
         y -= drawText(edu.degree, leftMargin, y, 12, true);
-        page.drawText(edu.year, { x: rightMargin - font.widthOfTextAtSize(edu.year, 10), y, font: font, size: 10 });
-        y -= 16;
+        drawText(edu.year, rightMargin - font.widthOfTextAtSize(sanitizeText(edu.year), 10), degreeLineY, 10);
+        y -= 4;
         y -= drawText(edu.school, leftMargin, y, 11);
         y -= 10;
       }
