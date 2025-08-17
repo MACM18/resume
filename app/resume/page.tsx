@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
+import { resumes as defaultResumes, projects as defaultProjects } from "@/data/portfolio";
 
 const ResumePageSkeleton = () => (
   <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
@@ -84,11 +85,15 @@ const Resume = () => {
   });
 
   const handleDownload = () => {
-    if (!resume) return;
-    if (resume.pdf_source === 'generated') {
+    if (!displayResume) return;
+    if (displayResume.pdf_source === 'generated') {
+      if (!isProfileSet) {
+        toast.error("Cannot generate PDF for placeholder resume.");
+        return;
+      }
       generatePdfMutation.mutate();
-    } else if (resume.resume_url) {
-      window.open(resume.resume_url, '_blank');
+    } else if (displayResume.resume_url) {
+      window.open(displayResume.resume_url, '_blank');
     } else {
       toast.error("No PDF available for download.");
     }
@@ -100,21 +105,11 @@ const Resume = () => {
     return <ResumePageSkeleton />;
   }
 
-  if (!resume || !profileData) {
-    return (
-      <div className='min-h-screen relative pt-24 pb-12 px-6 flex items-center justify-center'>
-        <GlassCard className='p-8 text-center'>
-          <h1 className='text-2xl font-bold mb-4'>Resume Not Available</h1>
-          <p className='text-foreground/70'>
-            An active resume has not been set for this profile.
-          </p>
-        </GlassCard>
-      </div>
-    );
-  }
-
-  const fullName = profileData.full_name;
-  const contactEmail = profileData.home_page_data.callToAction.email;
+  const isProfileSet = !!(resume && profileData);
+  const displayResume = resume || defaultResumes.developer;
+  const displayProjects = (isProfileSet ? projects : defaultProjects) as Project[];
+  const fullName = profileData?.full_name || "Alex Chen";
+  const contactEmail = profileData?.home_page_data.callToAction.email || "hello@example.com";
 
   return (
     <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
@@ -133,7 +128,7 @@ const Resume = () => {
             onClick={handleDownload}
             size='lg'
             className='bg-primary hover:bg-primary/90'
-            disabled={generatePdfMutation.isPending || (resume.pdf_source === 'uploaded' && !resume.resume_url)}
+            disabled={generatePdfMutation.isPending || (displayResume.pdf_source === 'uploaded' && !displayResume.resume_url)}
           >
             {generatePdfMutation.isPending ? (
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
@@ -156,7 +151,7 @@ const Resume = () => {
               <div className='text-center mb-6'>
                 <h2 className='text-4xl font-bold mb-2'>{fullName}</h2>
                 <h3 className='text-2xl text-primary mb-4'>
-                  {resume.title}
+                  {displayResume.title}
                 </h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
                   <div className='flex items-center'>
@@ -170,7 +165,7 @@ const Resume = () => {
                 </div>
               </div>
               <p className='text-foreground/80 text-center max-w-3xl mx-auto leading-relaxed'>
-                {resume.summary}
+                {displayResume.summary}
               </p>
             </GlassCard>
           </motion.div>
@@ -189,7 +184,7 @@ const Resume = () => {
                     Professional Experience
                   </h3>
                   <div className='space-y-6'>
-                    {resume.experience.map((exp, index) => (
+                    {displayResume.experience.map((exp, index) => (
                       <div
                         key={index}
                         className='border-l-2 border-primary/30 pl-6'
@@ -229,8 +224,8 @@ const Resume = () => {
                     Featured Projects
                   </h3>
                   <div className='space-y-4'>
-                    {resume.project_ids.map((projectId) => {
-                      const project = projects?.find((p) => p.id === projectId);
+                    {displayResume.project_ids.map((projectId) => {
+                      const project = displayProjects?.find((p) => p.id === projectId);
                       if (!project) return null;
 
                       return (
@@ -285,7 +280,7 @@ const Resume = () => {
                 <GlassCard className='p-6'>
                   <h3 className='text-xl font-bold mb-4 text-accent'>Skills</h3>
                   <div className='flex flex-wrap gap-2'>
-                    {resume.skills.map((skill) => (
+                    {displayResume.skills.map((skill) => (
                       <span
                         key={skill}
                         className='px-3 py-2 text-sm rounded-full bg-glass-bg/20 border border-glass-border/30 text-foreground/80'
@@ -308,7 +303,7 @@ const Resume = () => {
                     Education
                   </h3>
                   <div className='space-y-4'>
-                    {resume.education.map((edu, index) => (
+                    {displayResume.education.map((edu, index) => (
                       <div key={index}>
                         <h4 className='font-semibold'>{edu.degree}</h4>
                         <p className='text-foreground/70'>{edu.school}</p>

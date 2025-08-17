@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { homePageData as defaultHomePageData } from "@/data/portfolio";
 
 const socialIconMap = {
   Github,
@@ -51,24 +52,14 @@ export default function Page() {
     return <HomePageSkeleton />;
   }
 
-  if (!profileData || !profileData.home_page_data) {
-    return (
-      <div className='min-h-screen flex items-center justify-center text-center'>
-        <div>
-          <h1 className='text-2xl font-bold'>Welcome to Your Portfolio</h1>
-          <p className='text-foreground/70'>
-            This domain isn&apos;t linked to a profile yet. Log in as an admin
-            to claim it.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const homePageData = {
+  const homePageData = (profileData && profileData.home_page_data) ? {
     ...profileData.home_page_data,
     name: profileData.full_name,
     tagline: profileData.tagline,
+  } : {
+    ...defaultHomePageData,
+    name: "Your Name Here",
+    tagline: "A passionate developer creating modern web applications.",
   };
 
   return (
@@ -110,7 +101,7 @@ export default function Page() {
               size='lg'
               className='border-glass-border/50 hover:border-primary/50'
             >
-              <Link href={`/resume/developer`}>Download Resume</Link>
+              <Link href={`/resume`}>Download Resume</Link>
             </Button>
           </motion.div>
         </div>
@@ -332,7 +323,7 @@ export default function Page() {
                 variant='ghost'
                 className='text-accent hover:text-accent/80'
               >
-                <Link href={`/resume/developer`}>
+                <Link href={`/resume`}>
                   View Resume <ArrowRight className='ml-2' size={16} />
                 </Link>
               </Button>
@@ -398,9 +389,7 @@ export default function Page() {
                 size='lg'
                 className='bg-primary hover:bg-primary/90 text-primary-foreground'
               >
-                <a href={`mailto:${homePageData.callToAction.email}`}>
-                  Start a Project
-                </a>
+                <a href={`mailto:${homePageData.callToAction.email}`}>Start a Project</a>
               </Button>
               <Button
                 asChild

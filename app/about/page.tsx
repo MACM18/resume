@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { aboutPageData as defaultAboutPageData } from "@/data/portfolio";
 
 const iconMap = {
   Code,
@@ -47,16 +48,8 @@ const About = () => {
     return <AboutPageSkeleton />;
   }
 
-  if (!profileData || !profileData.about_page_data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>About page data not found.</p>
-      </div>
-    );
-  }
-
-  const aboutPageData = profileData.about_page_data;
-  const contactEmail = profileData.home_page_data.callToAction.email;
+  const aboutPageData = profileData?.about_page_data || defaultAboutPageData;
+  const contactEmail = profileData?.home_page_data.callToAction.email || defaultAboutPageData.callToAction.email;
 
   return (
     <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>

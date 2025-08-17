@@ -2,6 +2,7 @@
 
 import { supabase } from './supabase';
 import { Project } from '@/types/portfolio';
+import { projects as defaultProjects } from '@/data/portfolio';
 
 async function getUserIdByDomain(domain: string): Promise<string | null> {
   const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
@@ -44,11 +45,21 @@ export async function getProjectsForCurrentUser(): Promise<Project[]> {
 
 export async function getProjectById(id: string): Promise<Project | null> {
     const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('published', true).single();
-    if (error) {
+    
+    if (error && error.code !== 'PGRST116') {
         console.error('Error fetching project by id:', error);
-        return null;
     }
-    return data;
+
+    if (data) {
+        return data;
+    }
+
+    const defaultProject = defaultProjects.find(p => p.id === id);
+    if (defaultProject) {
+        return { ...defaultProject, user_id: 'default', created_at: new Date().toISOString() };
+    }
+
+    return null;
 }
 
 export async function getFeaturedProjects(domain: string): Promise<Project[]> {

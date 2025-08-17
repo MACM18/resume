@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getProjects } from "@/lib/projects";
+import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { projects as defaultProjects } from "@/data/portfolio";
 
 const Projects = () => {
   const [hostname, setHostname] = useState("");
@@ -17,14 +19,23 @@ const Projects = () => {
     setHostname(window.location.hostname);
   }, []);
 
-  const { data: projects, isLoading } = useQuery({
+  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["profileData", hostname],
+    queryFn: () => getProfileData(hostname),
+    enabled: !!hostname,
+  });
+
+  const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects", hostname],
     queryFn: () => getProjects(hostname),
     enabled: !!hostname,
   });
 
-  const featuredProjects = projects?.filter((p) => p.featured) || [];
-  const otherProjects = projects?.filter((p) => !p.featured) || [];
+  const isLoading = isLoadingProfile || isLoadingProjects;
+
+  const displayProjects = profileData ? projects : defaultProjects;
+  const featuredProjects = displayProjects?.filter((p) => p.featured) || [];
+  const otherProjects = displayProjects?.filter((p) => !p.featured) || [];
 
   return (
     <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
