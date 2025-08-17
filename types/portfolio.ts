@@ -83,6 +83,8 @@ export interface AboutPageData {
   };
 }
 
+export type Theme = Record<string, string>;
+
 export interface Profile {
   id: string;
   full_name: string;
@@ -90,5 +92,7 @@ export interface Profile {
   domain: string | null;
   home_page_data: HomePageData;
   about_page_data: AboutPageData;
+  active_resume_role: string | null;
+  theme: Theme | null;
   updated_at: string;
 }

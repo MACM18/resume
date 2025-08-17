@@ -10,6 +10,7 @@ import { ProfileManagement } from "@/components/admin/ProfileManagement";
 import { HomePageForm } from "@/components/admin/HomePageForm";
 import { AboutPageForm } from "@/components/admin/AboutPageForm";
 import { ResumeManagement } from "@/components/admin/ResumeManagement";
+import { ThemeEditor } from "@/components/admin/ThemeEditor";
 
 const AdminPage = () => {
   const { session } = useSupabase();
@@ -33,8 +34,9 @@ const AdminPage = () => {
         </h1>
         <GlassCard>
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-glass-bg/20">
+            <TabsList className="grid w-full grid-cols-6 bg-glass-bg/20">
               <TabsTrigger value="profile">Profile & Domain</TabsTrigger>
+              <TabsTrigger value="theme">Theme</TabsTrigger>
               <TabsTrigger value="home">Home Page</TabsTrigger>
               <TabsTrigger value="about">About Page</TabsTrigger>
               <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -42,6 +44,9 @@ const AdminPage = () => {
             </TabsList>
             <TabsContent value="profile" className="p-6">
               <ProfileManagement />
+            </TabsContent>
+            <TabsContent value="theme" className="p-6 max-h-[70vh] overflow-y-auto">
+              <ThemeEditor />
             </TabsContent>
             <TabsContent value="home" className="p-6 max-h-[70vh] overflow-y-auto">
               <HomePageForm />

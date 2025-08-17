@@ -1,0 +1,26 @@
+import { Theme } from "@/types/portfolio";
+
+export const defaultTheme: Theme = {
+  "--background": "222 47% 7%",
+  "--background-secondary": "222 47% 9%",
+  "--foreground": "210 40% 98%",
+  "--glass-bg": "222 47% 11%",
+  "--glass-border": "222 40% 25%",
+  "--primary": "186 100% 69%",
+  "--primary-foreground": "222 47% 7%",
+  "--secondary": "270 95% 75%",
+  "--secondary-foreground": "222 47% 7%",
+  "--accent": "270 95% 75%",
+  "--accent-foreground": "222 47% 7%",
+  "--card": "222 47% 11%",
+  "--card-foreground": "210 40% 98%",
+  "--border": "222 40% 20%",
+  "--input": "222 40% 15%",
+  "--ring": "186 100% 69%",
+  "--muted": "222 40% 15%",
+  "--muted-foreground": "215 20.2% 65.1%",
+  "--destructive": "0 84.2% 60.2%",
+  "--destructive-foreground": "210 40% 98%",
+  "--popover": "222 47% 11%",
+  "--popover-foreground": "210 40% 98%",
+};
