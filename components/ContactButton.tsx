@@ -74,8 +74,12 @@ export function ContactButton() {
       form.reset();
       setIsOpen(false);
     },
-    onError: (error: any) => {
-      toast.error(`Failed to send message: ${error.message}`);
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to send message: ${error.message}`);
+      } else {
+        toast.error("Failed to send message.");
+      }
     },
   });
 

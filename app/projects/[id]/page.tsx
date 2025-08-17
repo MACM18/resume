@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProjectById } from "@/lib/projects";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
-interface Props {
-  params: {
-    id: string;
-  };
+interface PageProps {
+  params: { id: string };
 }
 
-const ProjectDetail = ({ params }: Props) => {
+export default function Page({ params }: PageProps) {
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", params.id],
     queryFn: () => getProjectById(params.id),
@@ -24,17 +23,17 @@ const ProjectDetail = ({ params }: Props) => {
     return (
       <div className='min-h-screen relative pt-24 pb-12 px-6'>
         <div className='max-w-4xl mx-auto'>
-          <Skeleton className="h-8 w-40 mb-8" />
-          <Skeleton className="h-16 w-3/4 mb-6" />
-          <Skeleton className="h-6 w-full mb-8" />
-          <div className="flex gap-4 mb-8">
-            <Skeleton className="h-12 w-32" />
-            <Skeleton className="h-12 w-32" />
+          <Skeleton className='h-8 w-40 mb-8' />
+          <Skeleton className='h-16 w-3/4 mb-6' />
+          <Skeleton className='h-6 w-full mb-8' />
+          <div className='flex gap-4 mb-8'>
+            <Skeleton className='h-12 w-32' />
+            <Skeleton className='h-12 w-32' />
           </div>
-          <Skeleton className="aspect-video w-full" />
+          <Skeleton className='aspect-video w-full' />
         </div>
       </div>
-    )
+    );
   }
 
   if (!project) {
@@ -129,10 +128,14 @@ const ProjectDetail = ({ params }: Props) => {
         >
           <GlassCard className='overflow-hidden'>
             <div className='aspect-video bg-glass-bg/20'>
-              <img
+              <Image
                 src={project.image || "/placeholder.svg"}
                 alt={project.title}
                 className='w-full h-full object-cover'
+                width={800}
+                height={450}
+                style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                priority
               />
             </div>
           </GlassCard>
@@ -152,7 +155,7 @@ const ProjectDetail = ({ params }: Props) => {
                 </h2>
                 <div className='prose prose-invert max-w-none'>
                   <p className='text-foreground/80 leading-relaxed'>
-                    {project.long_description}
+                    {project.long_description?.replace(/"/g, "&quot;")}
                   </p>
                 </div>
               </GlassCard>
@@ -240,6 +243,4 @@ const ProjectDetail = ({ params }: Props) => {
       </div>
     </div>
   );
-};
-
-export default ProjectDetail;
+}

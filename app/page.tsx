@@ -18,18 +18,18 @@ const socialIconMap = {
 };
 
 const HomePageSkeleton = () => (
-  <div className="min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto">
-    <div className="text-center mb-16">
-      <Skeleton className="h-20 w-3/4 mx-auto mb-6" />
-      <Skeleton className="h-8 w-full max-w-3xl mx-auto mb-8" />
-      <div className="flex justify-center gap-4">
-        <Skeleton className="h-12 w-40" />
-        <Skeleton className="h-12 w-40" />
+  <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto'>
+    <div className='text-center mb-16'>
+      <Skeleton className='h-20 w-3/4 mx-auto mb-6' />
+      <Skeleton className='h-8 w-full max-w-3xl mx-auto mb-8' />
+      <div className='flex justify-center gap-4'>
+        <Skeleton className='h-12 w-40' />
+        <Skeleton className='h-12 w-40' />
       </div>
     </div>
-    <div className="grid md:grid-cols-2 gap-8 mb-16">
-      <Skeleton className="h-40 w-full" />
-      <Skeleton className="h-40 w-full" />
+    <div className='grid md:grid-cols-2 gap-8 mb-16'>
+      <Skeleton className='h-40 w-full' />
+      <Skeleton className='h-40 w-full' />
     </div>
   </div>
 );
@@ -53,11 +53,12 @@ export default function Page() {
 
   if (!profileData || !profileData.home_page_data) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-center">
+      <div className='min-h-screen flex items-center justify-center text-center'>
         <div>
-          <h1 className="text-2xl font-bold">Welcome to Your Portfolio</h1>
-          <p className="text-foreground/70">
-            This domain isn't linked to a profile yet. Log in as an admin to claim it.
+          <h1 className='text-2xl font-bold'>Welcome to Your Portfolio</h1>
+          <p className='text-foreground/70'>
+            This domain isn&apos;t linked to a profile yet. Log in as an admin
+            to claim it.
           </p>
         </div>
       </div>
@@ -397,7 +398,9 @@ export default function Page() {
                 size='lg'
                 className='bg-primary hover:bg-primary/90 text-primary-foreground'
               >
-                <a href={`mailto:${homePageData.callToAction.email}`}>Start a Project</a>
+                <a href={`mailto:${homePageData.callToAction.email}`}>
+                  Start a Project
+                </a>
               </Button>
               <Button
                 asChild

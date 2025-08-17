@@ -40,7 +40,6 @@ export function ProfileForm() {
       full_name: profile?.full_name || "",
       tagline: profile?.tagline || "",
     },
-    enableReinitialize: true, 
   });
 
   const mutation = useMutation({
@@ -50,8 +49,12 @@ export function ProfileForm() {
       queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
       queryClient.invalidateQueries({ queryKey: ["profileData"] });
     },
-    onError: (error: any) => {
-      toast.error(`Failed to update profile: ${error.message}`);
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to update profile: ${error.message}`);
+      } else {
+        toast.error("Failed to update profile.");
+      }
     },
   });
 
@@ -61,25 +64,25 @@ export function ProfileForm() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-24" />
+      <div className='space-y-4'>
+        <Skeleton className='h-10 w-full' />
+        <Skeleton className='h-10 w-full' />
+        <Skeleton className='h-10 w-24' />
       </div>
     );
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
         <FormField
           control={form.control}
-          name="full_name"
+          name='full_name'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="Your full name" {...field} />
+                <Input placeholder='Your full name' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -87,19 +90,23 @@ export function ProfileForm() {
         />
         <FormField
           control={form.control}
-          name="tagline"
+          name='tagline'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tagline</FormLabel>
               <FormControl>
-                <Input placeholder="Your professional tagline" {...field} />
+                <Input placeholder='Your professional tagline' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? <Loader2 className="animate-spin" /> : "Save Profile"}
+        <Button type='submit' disabled={mutation.isPending}>
+          {mutation.isPending ? (
+            <Loader2 className='animate-spin' />
+          ) : (
+            "Save Profile"
+          )}
         </Button>
       </form>
     </Form>
