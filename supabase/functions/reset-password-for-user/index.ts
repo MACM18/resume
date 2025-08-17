@@ -1,6 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
-// Use @latest to ensure we get the most recent version and bypass caches
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@latest'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,21 +19,28 @@ serve(async (req) => {
       });
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!; // Use anon key for public auth endpoint
 
     const redirectTo = 'https://www.macm.dev/update-password';
 
-    // This is the most direct and reliable method to send a password reset email.
-    const { data, error } = await supabaseAdmin.auth.admin.resetPasswordForEmail(email, {
-      redirectTo: redirectTo,
+    // Make a direct HTTP POST request to the Supabase Auth API's recover endpoint
+    const response = await fetch(`${supabaseUrl}/auth/v1/recover`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey, // Use apikey header for authentication
+      },
+      body: JSON.stringify({
+        email: email,
+        redirect_to: redirectTo,
+      }),
     });
 
-    if (error) {
-      console.error("Error from Supabase resetPasswordForEmail:", JSON.stringify(error, null, 2));
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Supabase Auth API Error:", errorData);
+      throw new Error(errorData.message || "Failed to send password reset email via Supabase Auth API.");
     }
 
     return new Response(JSON.stringify({ message: "Password reset email sent successfully." }), {
