@@ -69,6 +69,7 @@ export function ProfileManagement() {
       queryClient.invalidateQueries({
         queryKey: ["profile", session?.user.id],
       });
+      queryClient.invalidateQueries({ queryKey: ["profileData", hostname] });
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
