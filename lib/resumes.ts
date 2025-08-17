@@ -3,17 +3,65 @@
 import { supabase } from './supabase';
 import { Resume } from '@/types/portfolio';
 
-export async function getResumes(domain: string): Promise<Resume[]> {
-  const { data: profile, error: profileError } = await supabase.from('profiles').select('id').eq('domain', domain).single();
-  if (profileError || !profile) {
-    console.error('Error fetching user by domain:', profileError?.message);
-    return [];
+async function getUserIdByDomain(domain: string): Promise<string | null> {
+  const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
+  if (error || !data) {
+    console.error('Error fetching user by domain:', error?.message);
+    return null;
   }
+  return data.id;
+}
 
-  const { data, error } = await supabase.from('resumes').select('*').eq('user_id', profile.id);
+export async function getResumes(domain: string): Promise<Resume[]> {
+  const userId = await getUserIdByDomain(domain);
+  if (!userId) return [];
+
+  const { data, error } = await supabase.from('resumes').select('*').eq('user_id', userId);
   if (error) {
     console.error('Error fetching resumes:', error);
     return [];
   }
   return data || [];
+}
+
+export async function getResumesForCurrentUser(): Promise<Resume[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return [];
+
+  const { data, error } = await supabase.from('resumes').select('*').eq('user_id', session.user.id);
+  if (error) {
+    console.error('Error fetching current user resumes:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function addResume(resume: Omit<Resume, 'id' | 'user_id' | 'created_at'>): Promise<Resume | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+
+  const { data, error } = await supabase.from('resumes').insert([{ ...resume, user_id: session.user.id }]).select().single();
+  if (error) {
+    console.error("Error adding resume:", error);
+    return null;
+  }
+  return data;
+}
+
+export async function updateResume(id: string, resume: Partial<Resume>): Promise<Resume | null> {
+  const { data, error } = await supabase.from('resumes').update(resume).eq('id', id).select().single();
+  if (error) {
+    console.error("Error updating resume:", error);
+    return null;
+  }
+  return data;
+}
+
+export async function deleteResume(id: string): Promise<boolean> {
+  const { error } = await supabase.from('resumes').delete().eq('id', id);
+  if (error) {
+    console.error("Error deleting resume:", error);
+    return false;
+  }
+  return true;
 }

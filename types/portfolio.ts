@@ -13,6 +13,7 @@ export interface Project {
 }
 
 export interface Resume {
+  id: string;
   role: string;
   title: string;
   summary: string;
@@ -28,7 +29,9 @@ export interface Resume {
     school: string;
     year: string;
   }[];
-  projects: string[]; // Project IDs
+  project_ids: string[];
+  user_id: string;
+  created_at: string;
 }
 
 export interface HomePageData {
