@@ -20,9 +20,32 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const redirectTo = 'https://www.macm.dev/update-password';
+    // 1. Find the user by email to get their ID
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    if (userError || !user) throw new Error('User not found.');
 
-    // Step 1: Generate the secure, single-use recovery link
+    // 2. Find the user's profile to get their claimed domain
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('domain')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') throw profileError;
+
+    // 3. Dynamically construct the redirect URL
+    const userDomain = profile?.domain;
+    let redirectTo;
+    if (userDomain) {
+      // Handle localhost for development and https for production
+      const protocol = userDomain.startsWith('localhost') ? 'http://' : 'https://';
+      redirectTo = `${protocol}${userDomain}/update-password`;
+    } else {
+      // Fallback for users who haven't claimed a domain yet
+      redirectTo = 'https://www.macm.dev/update-password';
+    }
+
+    // 4. Generate the secure, single-use recovery link with the correct URL
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
         type: "recovery",
         email: email,
@@ -32,7 +55,7 @@ serve(async (req) => {
 
     const resetLink = linkData.properties.action_link;
 
-    // Step 2: Manually send the email using the Resend API
+    // 5. Manually send the email using the Resend API
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     if (!resendApiKey) throw new Error("RESEND_API_KEY is not configured.");
 
