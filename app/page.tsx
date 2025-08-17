@@ -30,7 +30,9 @@ export default function Page() {
               {homePageData.name}
             </h1>
             <p className='text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto'>
-              {homePageData.tagline}
+              {typeof homePageData.tagline === "string"
+                ? homePageData.tagline.replace(/'/g, "&apos;")
+                : homePageData.tagline}
             </p>
           </motion.div>
 

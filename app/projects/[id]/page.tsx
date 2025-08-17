@@ -21,7 +21,7 @@ const ProjectDetail = ({ params }: Props) => {
         <GlassCard className='p-8 text-center'>
           <h1 className='text-2xl font-bold mb-4'>Project Not Found</h1>
           <p className='text-foreground/70 mb-6'>
-            The project you're looking for doesn't exist.
+            The project you&apos;re looking for doesn&apos;t exist.
           </p>
           <Button asChild>
             <Link href='/projects'>

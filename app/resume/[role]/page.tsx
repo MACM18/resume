@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 import { Download, Mail, MapPin, Calendar, ExternalLink } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,8 @@ import {
 import { resumes, projects } from "@/data/portfolio";
 
 const Resume = () => {
-  const { role } = useParams<{ role: string }>();
+  const params = useParams();
+  const role = Array.isArray(params.role) ? params.role[0] : params.role;
   const [selectedRole, setSelectedRole] = useState(role || "developer");
 
   const currentResume = resumes[selectedRole];
@@ -27,7 +28,7 @@ const Resume = () => {
         <GlassCard className='p-8 text-center'>
           <h1 className='text-2xl font-bold mb-4'>Resume Not Found</h1>
           <p className='text-foreground/70'>
-            The resume role you're looking for doesn't exist.
+            The resume role you&apos;re looking for doesn&apos;t exist.
           </p>
         </GlassCard>
       </div>

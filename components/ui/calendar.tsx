@@ -51,10 +51,7 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
-      }}
+      // Remove custom IconLeft/IconRight as react-day-picker v8+ does not support these props
       {...props}
     />
   );

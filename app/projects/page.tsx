@@ -5,6 +5,7 @@ import { ExternalLink, Github, Star } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { projects } from "@/data/portfolio";
+import Image from "next/image";
 
 const Projects = () => {
   const featuredProjects = projects.filter((p) => p.featured);
@@ -51,10 +52,18 @@ const Projects = () => {
                 >
                   <GlassCard className='overflow-hidden group' hover>
                     <div className='aspect-video bg-glass-bg/20 relative overflow-hidden'>
-                      <img
+                      <Image
                         src={project.image}
                         alt={project.title}
                         className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+                        width={800}
+                        height={450}
+                        priority={index === 0}
+                        style={{
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
                       />
                       <div className='absolute inset-0 bg-gradient-to-t from-glass-bg/80 to-transparent' />
                     </div>
