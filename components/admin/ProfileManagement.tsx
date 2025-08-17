@@ -37,11 +37,32 @@ export function ProfileManagement() {
   const claimDomainMutation = useMutation({
     mutationFn: async (domain: string) => {
       if (!session) throw new Error("Not authenticated");
-      const { error } = await supabase
+
+      // Check if the domain is already taken by another user
+      const { data: existingProfile, error: checkError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("domain", domain)
+        .not("id", "eq", session.user.id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // Ignore "no rows found" error
+        throw checkError;
+      }
+
+      if (existingProfile) {
+        throw new Error("This domain is already claimed by another user.");
+      }
+
+      // If not taken, proceed with the update
+      const { error: updateError } = await supabase
         .from("profiles")
         .update({ domain })
         .eq("id", session.user.id);
-      if (error) throw error;
+
+      if (updateError) {
+        throw updateError;
+      }
     },
     onSuccess: () => {
       toast.success(`Domain ${hostname} claimed successfully!`);
