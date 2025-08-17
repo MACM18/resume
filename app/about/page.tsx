@@ -5,6 +5,7 @@ import { Code, Palette, Zap, Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 const iconMap = {
   Code,
@@ -30,12 +31,19 @@ const AboutPageSkeleton = () => (
 );
 
 const About = () => {
+  const [hostname, setHostname] = useState("");
+
+  useEffect(() => {
+    setHostname(window.location.hostname);
+  }, []);
+
   const { data: profileData, isLoading } = useQuery({
-    queryKey: ["profileData"],
-    queryFn: getProfileData,
+    queryKey: ["profileData", hostname],
+    queryFn: () => getProfileData(hostname),
+    enabled: !!hostname,
   });
 
-  if (isLoading) {
+  if (isLoading || !hostname) {
     return <AboutPageSkeleton />;
   }
 

@@ -8,11 +8,19 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getProjects } from "@/lib/projects";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 const Projects = () => {
+  const [hostname, setHostname] = useState("");
+
+  useEffect(() => {
+    setHostname(window.location.hostname);
+  }, []);
+
   const { data: projects, isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: getProjects,
+    queryKey: ["projects", hostname],
+    queryFn: () => getProjects(hostname),
+    enabled: !!hostname,
   });
 
   const featuredProjects = projects?.filter((p) => p.featured) || [];
@@ -37,7 +45,7 @@ const Projects = () => {
           </p>
         </motion.div>
 
-        {isLoading ? (
+        {isLoading || !hostname ? (
           <div className="space-y-8">
             <Skeleton className="h-8 w-64" />
             <div className="grid lg:grid-cols-2 gap-8">
