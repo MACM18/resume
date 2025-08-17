@@ -17,7 +17,6 @@ import { getProfileData } from "@/lib/profile";
 import { Project } from "@/types/portfolio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 
@@ -68,7 +67,8 @@ const Resume = () => {
 
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
-      const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4YWhqYXB5YW1td3RzZG1vZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzOTUxOTIsImV4cCI6MjA3MDk3MTE5Mn0.YOQo_BMjNFCHzAu_15foSa_c2J423fZTa0c4r3yzMTk";
+      const anonKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4YWhqYXB5YW1td3RzZG1vZWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzOTUxOTIsImV4cCI6MjA3MDk3MTE5Mn0.YOQo_BMjNFCHzAu_15foSa_c2J423fZTa0c4r3yzMTk";
       const response = await fetch(
         "https://dxahjapyammwtsdmoeah.supabase.co/functions/v1/generate-resume",
         {
@@ -87,7 +87,7 @@ const Resume = () => {
         try {
           const errorJson = JSON.parse(errorText);
           throw new Error(errorJson.error || "Failed to generate PDF");
-        } catch (e) {
+        } catch {
           throw new Error(errorText || "Failed to generate PDF");
         }
       }
@@ -106,14 +106,16 @@ const Resume = () => {
       const sanitizedFullName = profileData?.full_name
         .replace(/[^a-zA-Z0-9\s]/g, "")
         .replace(/\s+/g, "-");
-      a.download = `resume-${sanitizedFullName || resume?.role || "download"}.pdf`;
+      a.download = `resume-${
+        sanitizedFullName || resume?.role || "download"
+      }.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast.success("Resume downloaded!");
     },
-    onError: (error: any) => {
+    onError: (error: Error | { message?: string }) => {
       const message = error?.message || "An unknown error occurred.";
       toast.error(`Failed to generate PDF: ${message}`);
     },
