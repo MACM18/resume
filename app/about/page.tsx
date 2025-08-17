@@ -59,7 +59,7 @@ const About = () => {
   const contactEmail = profileData.home_page_data.callToAction.email;
 
   return (
-    <div className='min-h-screen relative pt-24 pb-12 px-6'>
+    <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
       <div className='max-w-4xl mx-auto'>
         {/* Header */}
         <motion.div
