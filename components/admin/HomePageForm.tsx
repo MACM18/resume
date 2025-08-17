@@ -20,6 +20,17 @@ import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 import { Loader2, Trash } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const homePageSchema = z.object({
   socialLinks: z.array(z.object({
@@ -107,34 +118,108 @@ export function HomePageForm() {
         
         {/* Social Links */}
         <div>
-          <h3 className="text-lg font-medium mb-2">Social Links</h3>
-          {socialFields.map((field, index) => (
-            <div key={field.id} className="p-3 border rounded-md space-y-2 relative mb-2">
-              <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeSocial(index)}><Trash size={14} /></Button>
-              <FormField control={form.control} name={`socialLinks.${index}.platform`} render={({ field }) => <FormItem><FormLabel>Platform</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`socialLinks.${index}.icon`} render={({ field }) => <FormItem><FormLabel>Icon Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`socialLinks.${index}.href`} render={({ field }) => <FormItem><FormLabel>URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`socialLinks.${index}.label`} render={({ field }) => <FormItem><FormLabel>Label</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-            </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => appendSocial({ platform: "", icon: "", href: "", label: "" })}>Add Social Link</Button>
+          <h3 className="text-lg font-medium mb-4">Social Links</h3>
+          <div className="space-y-4">
+            {socialFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg bg-glass-bg/10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name={`socialLinks.${index}.platform`} render={({ field }) => <FormItem><FormLabel>Platform</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name={`socialLinks.${index}.label`} render={({ field }) => <FormItem><FormLabel>Label</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name={`socialLinks.${index}.icon`} render={({ field }) => <FormItem><FormLabel>Icon Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name={`socialLinks.${index}.href`} render={({ field }) => <FormItem><FormLabel>URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                </div>
+                <div className="absolute top-2 right-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"><Trash size={16} /></Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader><AlertDialogTitle>Delete Social Link?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                      <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeSocial(index)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => appendSocial({ platform: "", icon: "", href: "", label: "" })} className="mt-4">Add Social Link</Button>
         </div>
 
         <Separator />
 
         {/* Experience Highlights */}
         <div>
-          <h3 className="text-lg font-medium mb-2">Experience Highlights</h3>
-          {expFields.map((field, index) => (
-            <div key={field.id} className="p-3 border rounded-md space-y-2 relative mb-2">
-              <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeExp(index)}><Trash size={14} /></Button>
-              <FormField control={form.control} name={`experienceHighlights.${index}.metric`} render={({ field }) => <FormItem><FormLabel>Metric</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`experienceHighlights.${index}.title`} render={({ field }) => <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`experienceHighlights.${index}.subtitle`} render={({ field }) => <FormItem><FormLabel>Subtitle</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`experienceHighlights.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>} />
-            </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ metric: "", title: "", subtitle: "", description: "" })}>Add Highlight</Button>
+          <h3 className="text-lg font-medium mb-4">Experience Highlights</h3>
+          <div className="space-y-4">
+            {expFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg bg-glass-bg/10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name={`experienceHighlights.${index}.metric`} render={({ field }) => <FormItem><FormLabel>Metric</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name={`experienceHighlights.${index}.title`} render={({ field }) => <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name={`experienceHighlights.${index}.subtitle`} render={({ field }) => <FormItem><FormLabel>Subtitle</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <div className="md:col-span-2"><FormField control={form.control} name={`experienceHighlights.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>} /></div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"><Trash size={16} /></Button></AlertDialogTrigger>
+                    <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Highlight?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeExp(index)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ metric: "", title: "", subtitle: "", description: "" })} className="mt-4">Add Highlight</Button>
+        </div>
+
+        <Separator />
+
+        {/* Technical Expertise */}
+        <div>
+          <h3 className="text-lg font-medium mb-4">Technical Expertise</h3>
+          <div className="space-y-4">
+            {techFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg bg-glass-bg/10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name={`technicalExpertise.${index}.name`} render={({ field }) => <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField control={form.control} name={`technicalExpertise.${index}.icon`} render={({ field }) => <FormItem><FormLabel>Icon</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <div className="md:col-span-2"><FormField control={form.control} name={`technicalExpertise.${index}.skills`} render={({ field }) => <FormItem><FormLabel>Skills (comma-separated)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} /></div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"><Trash size={16} /></Button></AlertDialogTrigger>
+                    <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Expertise Area?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeTech(index)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => appendTech({ name: "", icon: "", skills: "" })} className="mt-4">Add Expertise Area</Button>
+        </div>
+
+        <Separator />
+
+        {/* Achievements */}
+        <div>
+          <h3 className="text-lg font-medium mb-4">Achievements</h3>
+          <div className="space-y-4">
+            {achievementFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg bg-glass-bg/10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name={`achievements.${index}.metric`} render={({ field }) => <FormItem><FormLabel>Metric</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField control={form.control} name={`achievements.${index}.label`} render={({ field }) => <FormItem><FormLabel>Label</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField control={form.control} name={`achievements.${index}.title`} render={({ field }) => <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField control={form.control} name={`achievements.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                </div>
+                <div className="absolute top-2 right-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"><Trash size={16} /></Button></AlertDialogTrigger>
+                    <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Achievement?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeAchievement(index)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => appendAchievement({ metric: "", label: "", title: "", description: "" })} className="mt-4">Add Achievement</Button>
         </div>
 
         <Separator />

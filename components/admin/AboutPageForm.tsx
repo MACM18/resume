@@ -20,6 +20,17 @@ import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 import { Loader2, Trash } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const aboutPageSchema = z.object({
   title: z.string().min(1, "Required"),
@@ -90,22 +101,31 @@ export function AboutPageForm() {
         
         <FormField control={form.control} name="title" render={({ field }) => <FormItem><FormLabel>Page Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
         <FormField control={form.control} name="subtitle" render={({ field }) => <FormItem><FormLabel>Page Subtitle</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-        <FormField control={form.control} name="story" render={({ field }) => <FormItem><FormLabel>Your Story</FormLabel><FormControl><Textarea rows={8} {...field} /></FormControl><FormMessage /></FormItem>} />
+        <FormField control={form.control} name="story" render={({ field }) => <FormItem><FormLabel>Your Story (separate paragraphs with a blank line)</FormLabel><FormControl><Textarea rows={8} {...field} /></FormControl><FormMessage /></FormItem>} />
 
         <Separator />
 
         {/* Skills */}
         <div>
-          <h3 className="text-lg font-medium mb-2">Skills</h3>
-          {skillFields.map((field, index) => (
-            <div key={field.id} className="p-3 border rounded-md space-y-2 relative mb-2">
-              <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeSkill(index)}><Trash size={14} /></Button>
-              <FormField control={form.control} name={`skills.${index}.category`} render={({ field }) => <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`skills.${index}.icon`} render={({ field }) => <FormItem><FormLabel>Icon Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-              <FormField control={form.control} name={`skills.${index}.items`} render={({ field }) => <FormItem><FormLabel>Items (comma-separated)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-            </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => appendSkill({ category: "", icon: "", items: "" })}>Add Skill Category</Button>
+          <h3 className="text-lg font-medium mb-4">Skills</h3>
+          <div className="space-y-4">
+            {skillFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg bg-glass-bg/10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name={`skills.${index}.category`} render={({ field }) => <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name={`skills.${index}.icon`} render={({ field }) => <FormItem><FormLabel>Icon Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <div className="md:col-span-2"><FormField control={form.control} name={`skills.${index}.items`} render={({ field }) => <FormItem><FormLabel>Items (comma-separated)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} /></div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"><Trash size={16} /></Button></AlertDialogTrigger>
+                    <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Skill Category?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeSkill(index)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => appendSkill({ category: "", icon: "", items: "" })} className="mt-4">Add Skill Category</Button>
         </div>
 
         <Separator />
