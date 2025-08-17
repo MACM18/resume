@@ -69,9 +69,15 @@ export async function addProject(project: Omit<Project, 'id' | 'created_at' | 'u
     throw new Error('You must be logged in to add a project.');
   }
 
+  const projectData = {
+    ...project,
+    user_id: session.user.id,
+    image: project.image || '/placeholder.svg' // Provide default image if none is provided
+  };
+
   const { data, error } = await supabase
     .from('projects')
-    .insert([{ ...project, user_id: session.user.id }])
+    .insert([projectData])
     .select()
     .single();
 

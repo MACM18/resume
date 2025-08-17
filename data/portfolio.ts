@@ -11,7 +11,8 @@ export const projects: Omit<Project, 'user_id' | 'created_at'>[] = [
     tech: ["React", "TypeScript", "Framer Motion", "Tailwind CSS", "Recharts"],
     demo_url: "#",
     github_url: "#",
-    featured: true
+    featured: true,
+    published: true
   },
   {
     id: "ai-portfolio-generator",
@@ -22,7 +23,8 @@ export const projects: Omit<Project, 'user_id' | 'created_at'>[] = [
     tech: ["Next.js", "TypeScript", "OpenAI API", "Supabase", "Tailwind CSS"],
     demo_url: "#",
     github_url: "#",
-    featured: false
+    featured: false,
+    published: true
   }
 ];
 
@@ -61,7 +63,8 @@ export const resumes: Record<string, Omit<Resume, 'user_id' | 'id' | 'created_at
         year: "2020"
       }
     ],
-    project_ids: ["glassmorphic-dashboard", "ai-portfolio-generator"]
+    project_ids: ["glassmorphic-dashboard", "ai-portfolio-generator"],
+    resume_url: null
   },
   designer: {
     role: "designer",
@@ -87,7 +90,8 @@ export const resumes: Record<string, Omit<Resume, 'user_id' | 'id' | 'created_at
         year: "2021"
       }
     ],
-    project_ids: ["glassmorphic-dashboard"]
+    project_ids: ["glassmorphic-dashboard"],
+    resume_url: null
   }
 };
 
