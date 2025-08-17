@@ -1,103 +1,442 @@
-import Image from "next/image";
+"use client";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowRight, Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { GlassCard } from "@/components/GlassCard";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
+import { homePageData } from "@/data/portfolio";
+
+const socialIconMap = {
+  Github,
+  Linkedin,
+  Twitter,
+  Mail,
+  ArrowRight,
+};
+
+export default function Page() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className='min-h-screen relative pt-24 pb-12 px-6'>
+      <div className='max-w-6xl mx-auto'>
+        {/* Hero Section */}
+        <div className='text-center mb-16'>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className='text-6xl md:text-8xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+              {homePageData.name}
+            </h1>
+            <p className='text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto'>
+              {homePageData.tagline}
+            </p>
+          </motion.div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className='flex flex-wrap justify-center gap-4 mb-12'
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Button
+              asChild
+              size='lg'
+              className='bg-primary hover:bg-primary/90 text-primary-foreground'
+            >
+              <Link href='/projects'>
+                View Projects <ArrowRight className='ml-2' size={20} />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant='outline'
+              size='lg'
+              className='border-glass-border/50 hover:border-primary/50'
+            >
+              <Link href='/resume/developer'>Download Resume</Link>
+            </Button>
+          </motion.div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        {/* Experience Highlights */}
+        <div className='mb-16'>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className='text-3xl font-bold text-center mb-12 text-secondary'
+          >
+            Experience Highlights
+          </motion.h2>
+
+          <div className='grid md:grid-cols-2 gap-8 mb-12'>
+            {homePageData.experienceHighlights.map((highlight, index) => (
+              <motion.div
+                key={highlight.title}
+                initial={{ opacity: 0, x: index === 0 ? -50 : 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+              >
+                <GlassCard className='p-6' hover>
+                  <div className='flex items-center mb-4'>
+                    <div
+                      className={`w-12 h-12 ${
+                        index === 0 ? "bg-primary/20" : "bg-secondary/20"
+                      } rounded-full flex items-center justify-center mr-4`}
+                    >
+                      <span
+                        className={`${
+                          index === 0 ? "text-primary" : "text-secondary"
+                        } font-bold text-xl`}
+                      >
+                        {highlight.metric}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className='text-lg font-semibold'>
+                        {highlight.title}
+                      </h3>
+                      <p className='text-foreground/60 text-sm'>
+                        {highlight.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <p className='text-foreground/70 text-sm'>
+                    {highlight.description}
+                  </p>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Work Preview */}
+        <div className='mb-16'>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className='text-3xl font-bold text-center mb-12 text-accent'
+          >
+            Featured Work
+          </motion.h2>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+          >
+            <GlassCard className='p-8' hover>
+              <div className='grid md:grid-cols-2 gap-8 items-center'>
+                <div>
+                  <h3 className='text-2xl font-bold mb-4 text-primary'>
+                    Glassmorphic Dashboard
+                  </h3>
+                  <p className='text-foreground/80 mb-6'>
+                    A modern analytics dashboard featuring cutting-edge
+                    glassmorphism design, real-time data visualization, and
+                    seamless user experience.
+                  </p>
+                  <div className='flex flex-wrap gap-2 mb-6'>
+                    {[
+                      "React",
+                      "TypeScript",
+                      "Framer Motion",
+                      "Tailwind CSS",
+                    ].map((tech) => (
+                      <span
+                        key={tech}
+                        className='px-3 py-1 text-sm rounded-full bg-primary/10 border border-primary/20 text-primary'
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                  <Button asChild className='bg-primary hover:bg-primary/90'>
+                    <Link href='/projects'>
+                      View All Projects{" "}
+                      <ArrowRight className='ml-2' size={16} />
+                    </Link>
+                  </Button>
+                </div>
+                <div className='aspect-video bg-glass-bg/20 rounded-lg border border-glass-border/30 flex items-center justify-center'>
+                  <div className='text-foreground/40 text-center'>
+                    <div className='w-16 h-16 bg-primary/20 rounded-lg mx-auto mb-3 flex items-center justify-center'>
+                      <span className='text-2xl'>🎨</span>
+                    </div>
+                    <p className='text-sm'>Project Preview</p>
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        </div>
+
+        {/* Technical Expertise */}
+        <div className='mb-16'>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.0 }}
+            className='text-3xl font-bold text-center mb-12 text-primary'
+          >
+            Technical Expertise
+          </motion.h2>
+
+          <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
+            {[
+              {
+                name: "Frontend",
+                skills: ["React", "TypeScript", "Next.js"],
+                icon: "⚛️",
+              },
+              {
+                name: "Backend",
+                skills: ["Node.js", "Python", "GraphQL"],
+                icon: "🔧",
+              },
+              {
+                name: "Design",
+                skills: ["Figma", "UI/UX", "Prototyping"],
+                icon: "🎨",
+              },
+              { name: "Cloud", skills: ["AWS", "Docker", "CI/CD"], icon: "☁️" },
+            ].map((category, index) => (
+              <motion.div
+                key={category.name}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
+              >
+                <GlassCard className='p-6 text-center' hover>
+                  <div className='text-3xl mb-4'>{category.icon}</div>
+                  <h3 className='text-lg font-semibold mb-3'>
+                    {category.name}
+                  </h3>
+                  <div className='space-y-1'>
+                    {category.skills.map((skill) => (
+                      <div key={skill} className='text-sm text-foreground/70'>
+                        {skill}
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Access Cards */}
+        <div className='grid md:grid-cols-3 gap-8 mb-16'>
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 1.5 }}
+          >
+            <GlassCard className='p-8 h-full' hover>
+              <h3 className='text-2xl font-bold mb-4 text-primary'>About Me</h3>
+              <p className='text-foreground/70 mb-6'>
+                Passionate developer with 5+ years of experience creating modern
+                web applications
+              </p>
+              <Button
+                asChild
+                variant='ghost'
+                className='text-primary hover:text-primary-glow'
+              >
+                <Link href='/about'>
+                  Learn More <ArrowRight className='ml-2' size={16} />
+                </Link>
+              </Button>
+            </GlassCard>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.6 }}
+          >
+            <GlassCard className='p-8 h-full' hover>
+              <h3 className='text-2xl font-bold mb-4 text-secondary'>
+                Projects
+              </h3>
+              <p className='text-foreground/70 mb-6'>
+                Explore my latest work featuring modern technologies and
+                innovative solutions
+              </p>
+              <Button
+                asChild
+                variant='ghost'
+                className='text-secondary hover:text-secondary-glow'
+              >
+                <Link href='/projects'>
+                  View Portfolio <ArrowRight className='ml-2' size={16} />
+                </Link>
+              </Button>
+            </GlassCard>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 1.7 }}
+          >
+            <GlassCard className='p-8 h-full' hover>
+              <h3 className='text-2xl font-bold mb-4 text-accent'>
+                Experience
+              </h3>
+              <p className='text-foreground/70 mb-6'>
+                Professional background and skills across multiple disciplines
+              </p>
+              <Button
+                asChild
+                variant='ghost'
+                className='text-accent hover:text-accent/80'
+              >
+                <Link href='/resume/developer'>
+                  View Resume <ArrowRight className='ml-2' size={16} />
+                </Link>
+              </Button>
+            </GlassCard>
+          </motion.div>
+        </div>
+
+        {/* Achievements & Recognition */}
+        <div className='mb-16'>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.8 }}
+            className='text-3xl font-bold text-center mb-12 text-secondary'
+          >
+            Achievements & Recognition
+          </motion.h2>
+
+          <div className='grid md:grid-cols-3 gap-6'>
+            {[
+              {
+                title: "Top Performer",
+                description:
+                  "Recognized for exceptional code quality and delivery speed",
+                metric: "98%",
+                label: "Client Satisfaction",
+              },
+              {
+                title: "Open Source",
+                description:
+                  "Active contributor to popular React and TypeScript projects",
+                metric: "15+",
+                label: "Contributions",
+              },
+              {
+                title: "Team Leadership",
+                description:
+                  "Successfully led cross-functional teams on major projects",
+                metric: "3",
+                label: "Teams Led",
+              },
+            ].map((achievement, index) => (
+              <motion.div
+                key={achievement.title}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 1.9 + index * 0.1 }}
+              >
+                <GlassCard className='p-6 text-center' hover>
+                  <div className='text-3xl font-bold text-primary mb-2'>
+                    {achievement.metric}
+                  </div>
+                  <div className='text-sm text-foreground/60 mb-3'>
+                    {achievement.label}
+                  </div>
+                  <h3 className='text-lg font-semibold mb-2'>
+                    {achievement.title}
+                  </h3>
+                  <p className='text-foreground/70 text-sm'>
+                    {achievement.description}
+                  </p>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 2.2 }}
+          className='text-center mb-16'
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <GlassCard className='p-12'>
+            <h2 className='text-3xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+              Ready to Build Something Amazing?
+            </h2>
+            <p className='text-xl text-foreground/80 mb-8 max-w-2xl mx-auto'>
+              Let's collaborate on your next project. I bring technical
+              expertise, creative vision, and a passion for excellence to every
+              engagement.
+            </p>
+            <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+              <Button
+                asChild
+                size='lg'
+                className='bg-primary hover:bg-primary/90 text-primary-foreground'
+              >
+                <a href='mailto:alex.chen@example.com'>Start a Project</a>
+              </Button>
+              <Button
+                asChild
+                variant='outline'
+                size='lg'
+                className='border-secondary/50 hover:border-secondary text-secondary hover:text-secondary-glow'
+              >
+                <Link href='/about'>Learn More About Me</Link>
+              </Button>
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        {/* Social Links */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 2.4 }}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <GlassCard className='p-8'>
+            <h3 className='text-xl font-semibold mb-6 text-center'>
+              Connect With Me
+            </h3>
+            <div className='flex justify-center space-x-6'>
+              {homePageData.socialLinks.map((social, index) => {
+                const Icon =
+                  socialIconMap[social.icon as keyof typeof socialIconMap];
+                return (
+                  <motion.a
+                    key={social.label}
+                    href={social.href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 1.4 + index * 0.1 }}
+                  >
+                    <Icon
+                      size={24}
+                      className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
+                    />
+                  </motion.a>
+                );
+              })}
+            </div>
+          </GlassCard>
+        </motion.div>
+      </div>
     </div>
   );
 }

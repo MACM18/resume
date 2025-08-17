@@ -29,6 +29,55 @@ export interface Resume {
   projects: string[]; // Project IDs
 }
 
+export interface HomePageData {
+  name: string;
+  tagline: string;
+  socialLinks: {
+    platform: string;
+    icon: string;
+    href: string;
+    label: string;
+  }[];
+  experienceHighlights: {
+    metric: string;
+    title: string;
+    subtitle: string;
+    description: string;
+  }[];
+  technicalExpertise: {
+    name: string;
+    skills: string[];
+    icon: string;
+  }[];
+  achievements: {
+    title: string;
+    description: string;
+    metric: string;
+    label: string;
+  }[];
+  callToAction: {
+    title: string;
+    description: string;
+    email: string;
+  };
+}
+
+export interface AboutPageData {
+  title: string;
+  subtitle: string;
+  story: string[];
+  skills: {
+    category: string;
+    icon: string;
+    items: string[];
+  }[];
+  callToAction: {
+    title: string;
+    description: string;
+    email: string;
+  };
+}
+
 export const projects: Project[] = [
   {
     id: "glassmorphic-dashboard",
@@ -127,5 +176,114 @@ export const resumes: Record<string, Resume> = {
       }
     ],
     projects: ["glassmorphic-dashboard"]
+  }
+};
+
+export const homePageData: HomePageData = {
+  name: "Alex Chen",
+  tagline: "Full Stack Developer & UI/UX Designer crafting digital experiences with modern technologies and beautiful design",
+  socialLinks: [
+    { platform: "github", icon: "Github", href: "https://github.com", label: "GitHub" },
+    { platform: "linkedin", icon: "Linkedin", href: "https://linkedin.com", label: "LinkedIn" },
+    { platform: "twitter", icon: "Twitter", href: "https://twitter.com", label: "Twitter" },
+    { platform: "email", icon: "Mail", href: "mailto:hello@example.com", label: "Email" }
+  ],
+  experienceHighlights: [
+    {
+      metric: "5+",
+      title: "Years Experience",
+      subtitle: "Full-stack development",
+      description: "Building scalable web applications with modern technologies and best practices"
+    },
+    {
+      metric: "50+",
+      title: "Projects Delivered",
+      subtitle: "Successful launches",
+      description: "From startups to enterprise solutions, delivering quality code and design"
+    }
+  ],
+  technicalExpertise: [
+    {
+      name: "Frontend",
+      skills: ["React", "TypeScript", "Next.js"],
+      icon: "⚛️"
+    },
+    {
+      name: "Backend",
+      skills: ["Node.js", "Python", "GraphQL"],
+      icon: "🔧"
+    },
+    {
+      name: "Design",
+      skills: ["Figma", "UI/UX", "Prototyping"],
+      icon: "🎨"
+    },
+    {
+      name: "Cloud",
+      skills: ["AWS", "Docker", "CI/CD"],
+      icon: "☁️"
+    }
+  ],
+  achievements: [
+    {
+      title: "Top Performer",
+      description: "Recognized for exceptional code quality and delivery speed",
+      metric: "98%",
+      label: "Client Satisfaction"
+    },
+    {
+      title: "Open Source",
+      description: "Active contributor to popular React and TypeScript projects",
+      metric: "15+",
+      label: "Contributions"
+    },
+    {
+      title: "Team Leadership",
+      description: "Successfully led cross-functional teams on major projects",
+      metric: "3",
+      label: "Teams Led"
+    }
+  ],
+  callToAction: {
+    title: "Ready to Build Something Amazing?",
+    description: "Let's collaborate on your next project. I bring technical expertise, creative vision, and a passion for excellence to every engagement.",
+    email: "alex.chen@example.com"
+  }
+};
+
+export const aboutPageData: AboutPageData = {
+  title: "About Me",
+  subtitle: "Passionate about creating digital experiences that make a difference",
+  story: [
+    "I'm a passionate full-stack developer and UI/UX designer with over 5 years of experience creating modern, scalable web applications. My journey began in computer science, but my passion for beautiful, functional design led me to specialize in the intersection of development and design.",
+    "I believe that great software isn't just about clean code—it's about creating experiences that users love. Whether I'm building a complex backend system or crafting pixel-perfect user interfaces, I always keep the human element at the center of my work.",
+    "When I'm not coding, you'll find me exploring new design trends, contributing to open-source projects, or mentoring junior developers. I'm always excited to take on new challenges and collaborate with teams that share my passion for innovation."
+  ],
+  skills: [
+    {
+      category: "Frontend",
+      icon: "Code",
+      items: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion"]
+    },
+    {
+      category: "Backend",
+      icon: "Zap",
+      items: ["Node.js", "Python", "PostgreSQL", "GraphQL", "AWS"]
+    },
+    {
+      category: "Design",
+      icon: "Palette",
+      items: ["Figma", "Adobe Creative Suite", "UI/UX Design", "Prototyping"]
+    },
+    {
+      category: "Other",
+      icon: "Heart",
+      items: ["Git", "Docker", "CI/CD", "Agile", "Team Leadership"]
+    }
+  ],
+  callToAction: {
+    title: "Let's Work Together",
+    description: "I'm always open to discussing new opportunities, interesting projects, or just having a chat about technology and design.",
+    email: "hello@example.com"
   }
 };
