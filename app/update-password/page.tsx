@@ -44,8 +44,8 @@ const UpdatePasswordPage = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Password updated successfully! Redirecting to admin...');
-      router.push('/admin');
+      toast.success('Password set successfully! Welcome!');
+      router.push('/welcome');
     },
     onError: (error) => {
       toast.error(`Failed to update password: ${error.message}`);
@@ -70,7 +70,7 @@ const UpdatePasswordPage = () => {
       >
         <GlassCard className="p-8">
           <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-primary bg-clip-text text-transparent">
-            Set New Password
+            Set Your Password
           </h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit((data) => mutate(data))} className="space-y-4">
@@ -88,7 +88,7 @@ const UpdatePasswordPage = () => {
                 )}
               />
               <Button type="submit" disabled={isPending} className="w-full">
-                {isPending ? <Loader2 className="animate-spin" /> : 'Update Password'}
+                {isPending ? <Loader2 className="animate-spin" /> : 'Save Password & Continue'}
               </Button>
             </form>
           </Form>

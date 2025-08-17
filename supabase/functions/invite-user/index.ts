@@ -18,14 +18,18 @@ serve(async (req) => {
       throw new Error("Email and domain are required.");
     }
 
-    // The service_role key has admin privileges and should only be used on the server.
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
+    // Get the site's URL from the request origin to create a dynamic redirect
+    const siteUrl = new URL(req.headers.get('origin')!).origin;
+    const redirectTo = `${siteUrl}/update-password`;
+
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: { domain: domain } // We store the domain here, to be used by our trigger later
+      data: { domain: domain },
+      redirectTo: redirectTo
     });
 
     if (error) {
