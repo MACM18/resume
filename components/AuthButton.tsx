@@ -6,6 +6,11 @@ import { Wrench, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const AuthButton = () => {
   const { session, supabase } = useSupabase();
@@ -21,23 +26,36 @@ export const AuthButton = () => {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: 1 }}
-      className="fixed bottom-6 right-6 z-50"
+      className="fixed top-6 left-6 z-50"
     >
       {session ? (
-        <Button
-          onClick={handleLogout}
-          className="rounded-full shadow-lg bg-destructive hover:bg-destructive/90"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={handleLogout}
+              size="icon"
+              className="rounded-full shadow-lg bg-destructive hover:bg-destructive/90"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p>Logout</p>
+          </TooltipContent>
+        </Tooltip>
       ) : (
-        <Button asChild className="rounded-full shadow-lg bg-secondary hover:bg-secondary/90">
-          <Link href="/login">
-            <Wrench className="mr-2 h-4 w-4" />
-            Modify
-          </Link>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button asChild size="icon" className="rounded-full shadow-lg bg-secondary hover:bg-secondary/90">
+              <Link href="/login">
+                <Wrench className="h-5 w-5" />
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p>Modify</p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </motion.div>
   );
