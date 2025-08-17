@@ -1,0 +1,78 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSupabase } from "@/components/providers/AuthProvider";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
+import { Link as LinkIcon } from "lucide-react";
+import { ProfileForm } from "./ProfileForm";
+
+export function ProfileManagement() {
+  const { session } = useSupabase();
+  const queryClient = useQueryClient();
+  const [hostname, setHostname] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
+  }, []);
+
+  const { data: profile } = useQuery({
+    queryKey: ['profile', session?.user.id],
+    queryFn: async () => {
+        if (!session?.user.id) return null;
+        const { data } = await supabase.from('profiles').select('domain').eq('id', session.user.id).single();
+        return data;
+    },
+    enabled: !!session,
+  });
+
+  const claimDomainMutation = useMutation({
+    mutationFn: async (domain: string) => {
+      if (!session) throw new Error("Not authenticated");
+      const { error } = await supabase.from('profiles').update({ domain }).eq('id', session.user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(`Domain ${hostname} claimed successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to claim domain: ${error.message}`);
+    }
+  });
+
+  const isDomainClaimed = profile?.domain === hostname;
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold text-primary mb-4">
+          Your Domain
+        </h2>
+        <div className="flex items-center gap-4">
+          <div className="flex-1 p-2 border border-glass-border rounded-md bg-glass-bg/20">
+            <code>{hostname}</code>
+          </div>
+          {isDomainClaimed ? (
+            <p className="text-green-400">This domain is linked to your profile.</p>
+          ) : (
+            <Button onClick={() => claimDomainMutation.mutate(hostname)} disabled={claimDomainMutation.isPending}>
+              <LinkIcon className="mr-2" size={16} />
+              {claimDomainMutation.isPending ? "Claiming..." : "Claim this Domain"}
+            </Button>
+          )}
+        </div>
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold text-primary mb-4">
+          Your Profile
+        </h2>
+        <ProfileForm />
+      </div>
+    </div>
+  );
+}

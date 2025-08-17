@@ -79,3 +79,13 @@ export interface AboutPageData {
     email: string;
   };
 }
+
+export interface Profile {
+  id: string;
+  full_name: string;
+  tagline: string;
+  domain: string | null;
+  home_page_data: HomePageData;
+  about_page_data: AboutPageData;
+  updated_at: string;
+}
