@@ -101,7 +101,7 @@ export default function Page() {
               size='lg'
               className='border-glass-border/50 hover:border-primary/50'
             >
-              <Link href={`/resume/developer`}>Download Resume</Link>
+              <Link href={`/resume`}>Download Resume</Link>
             </Button>
           </motion.div>
         </div>
@@ -323,7 +323,7 @@ export default function Page() {
                 variant='ghost'
                 className='text-accent hover:text-accent/80'
               >
-                <Link href={`/resume/developer`}>
+                <Link href={`/resume`}>
                   View Resume <ArrowRight className='ml-2' size={16} />
                 </Link>
               </Button>
