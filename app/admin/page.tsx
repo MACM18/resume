@@ -7,8 +7,8 @@ import { GlassCard } from "@/components/GlassCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectManagement } from "@/components/admin/ProjectManagement";
 import { ProfileManagement } from "@/components/admin/ProfileManagement";
-import { JsonEditor } from "@/components/admin/JsonEditor";
-import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
+import { HomePageForm } from "@/components/admin/HomePageForm";
+import { AboutPageForm } from "@/components/admin/AboutPageForm";
 import { ResumeManagement } from "@/components/admin/ResumeManagement";
 
 const AdminPage = () => {
@@ -43,25 +43,11 @@ const AdminPage = () => {
             <TabsContent value="profile" className="p-6">
               <ProfileManagement />
             </TabsContent>
-            <TabsContent value="home" className="p-6">
-              <JsonEditor 
-                queryKey={["currentUserProfile"]}
-                queryFn={getCurrentUserProfile}
-                mutationFn={(data) => updateCurrentUserProfile(data)}
-                dataKey="home_page_data"
-                title="Home Page Content"
-                description="Edit the JSON data for your home page. Be careful with the structure."
-              />
+            <TabsContent value="home" className="p-6 max-h-[70vh] overflow-y-auto">
+              <HomePageForm />
             </TabsContent>
-            <TabsContent value="about" className="p-6">
-              <JsonEditor 
-                queryKey={["currentUserProfile"]}
-                queryFn={getCurrentUserProfile}
-                mutationFn={(data) => updateCurrentUserProfile(data)}
-                dataKey="about_page_data"
-                title="About Page Content"
-                description="Edit the JSON data for your about page. Be careful with the structure."
-              />
+            <TabsContent value="about" className="p-6 max-h-[70vh] overflow-y-auto">
+              <AboutPageForm />
             </TabsContent>
             <TabsContent value="projects" className="p-6">
               <ProjectManagement />
