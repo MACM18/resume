@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 
 const passwordSchema = z.object({
@@ -25,12 +25,18 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 const UpdatePasswordPage = () => {
   const { session } = useSupabase();
   const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
+  const [authFlow, setAuthFlow] = useState<'loading' | 'ready' | 'error'>('loading');
 
   useEffect(() => {
-    if (session) {
-      setIsReady(true);
-    }
+    const timer = setTimeout(() => {
+      if (session) {
+        setAuthFlow('ready');
+      } else {
+        setAuthFlow('error');
+      }
+    }, 2000); // Wait 2 seconds for Supabase to process the token
+
+    return () => clearTimeout(timer);
   }, [session]);
 
   const form = useForm<PasswordFormValues>({
@@ -51,10 +57,25 @@ const UpdatePasswordPage = () => {
     },
   });
 
-  if (!isReady) {
+  if (authFlow === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-foreground/70">
         <Loader2 className="animate-spin" />
+        <p className="ml-3">Verifying your link...</p>
+      </div>
+    );
+  }
+
+  if (authFlow === 'error') {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <GlassCard className="p-8 text-center">
+          <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-6" />
+          <h1 className="text-2xl font-bold mb-4">Invalid Link</h1>
+          <p className="text-foreground/70">
+            This link is invalid or has expired. Please request a new one.
+          </p>
+        </GlassCard>
       </div>
     );
   }
