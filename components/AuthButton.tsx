@@ -42,7 +42,7 @@ export const AuthButton = () => {
         <div className='flex items-center gap-1'>
           {session ? (
             <>
-              {isSuperAdmin ? (
+              {isSuperAdmin && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
@@ -56,21 +56,21 @@ export const AuthButton = () => {
                     <p>Super Admin</p>
                   </TooltipContent>
                 </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href='/admin'
-                      className='group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-primary/10'
-                    >
-                      <LayoutDashboard className='h-5 w-5 text-foreground/70 group-hover:text-primary' />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side='right'>
-                    <p>Dashboard</p>
-                  </TooltipContent>
-                </Tooltip>
               )}
+              {/* Always show the regular admin dashboard link if logged in */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href='/admin'
+                    className='group flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-300 hover:bg-primary/10'
+                  >
+                    <LayoutDashboard className='h-5 w-5 text-foreground/70 group-hover:text-primary' />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side='right'>
+                  <p>Dashboard</p>
+                </TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
