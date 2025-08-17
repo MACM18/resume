@@ -56,15 +56,15 @@ export function UserInvitationForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
         <FormField
           control={form.control}
-          name="email"
+          name='email'
           render={({ field }) => (
             <FormItem>
               <FormLabel>User Email</FormLabel>
               <FormControl>
-                <Input placeholder="new.user@example.com" {...field} />
+                <Input placeholder='new.user@example.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,20 +72,20 @@ export function UserInvitationForm() {
         />
         <FormField
           control={form.control}
-          name="domain"
+          name='domain'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Assign Domain</FormLabel>
               <FormControl>
-                <Input placeholder="portfolio.newuser.com" {...field} />
+                <Input placeholder='portfolio.newuser.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type='submit' disabled={mutation.isPending}>
           {mutation.isPending ? (
-            <Loader2 className="animate-spin" />
+            <Loader2 className='animate-spin' />
           ) : (
             "Send Invitation"
           )}

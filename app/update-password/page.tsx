@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 
 const passwordSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters.'),
@@ -47,7 +48,7 @@ const UpdatePasswordPage = () => {
       toast.success('Password set successfully! Welcome!');
       router.push('/welcome');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error(`Failed to update password: ${error.message}`);
     },
   });

@@ -30,16 +30,23 @@ async function getAllUsers(): Promise<User[]> {
 }
 
 export function UserManagement() {
-  const { data: users, isLoading, error } = useQuery({
+  const {
+    data: users,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["all-users"],
     queryFn: getAllUsers,
   });
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.functions.invoke("reset-password-for-user", {
-        body: { email },
-      });
+      const { error } = await supabase.functions.invoke(
+        "reset-password-for-user",
+        {
+          body: { email },
+        }
+      );
       if (error) throw error;
     },
     onSuccess: (_, email) => {
@@ -51,15 +58,23 @@ export function UserManagement() {
   });
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-40"><Loader2 className="animate-spin" /></div>;
+    return (
+      <div className='flex justify-center items-center h-40'>
+        <Loader2 className='animate-spin' />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-destructive">Failed to load users: {error.message}</div>;
+    return (
+      <div className='text-destructive'>
+        Failed to load users: {error.message}
+      </div>
+    );
   }
 
   return (
-    <div className="border rounded-lg">
+    <div className='border rounded-lg'>
       <Table>
         <TableHeader>
           <TableRow>
@@ -73,22 +88,32 @@ export function UserManagement() {
           {users?.map((user) => (
             <TableRow key={user.id}>
               <TableCell>{user.email}</TableCell>
-              <TableCell><code>{user.domain}</code></TableCell>
+              <TableCell>
+                <code>{user.domain}</code>
+              </TableCell>
               <TableCell>
                 {user.email_confirmed_at ? (
-                  <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">Verified</Badge>
+                  <Badge
+                    variant='default'
+                    className='bg-green-500/20 text-green-400 border-green-500/30'
+                  >
+                    Verified
+                  </Badge>
                 ) : (
-                  <Badge variant="secondary">Invited</Badge>
+                  <Badge variant='secondary'>Invited</Badge>
                 )}
               </TableCell>
               <TableCell>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => resetPasswordMutation.mutate(user.email!)}
-                  disabled={resetPasswordMutation.isPending && resetPasswordMutation.variables === user.email}
+                  disabled={
+                    resetPasswordMutation.isPending &&
+                    resetPasswordMutation.variables === user.email
+                  }
                 >
-                  <KeyRound className="mr-2" size={16} />
+                  <KeyRound className='mr-2' size={16} />
                   Send Password Reset
                 </Button>
               </TableCell>
