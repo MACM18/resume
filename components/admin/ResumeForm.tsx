@@ -16,10 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addResume, updateResume } from "@/lib/resumes";
+import { addResume, updateResume, uploadResumePdf } from "@/lib/resumes";
 import { Resume } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
-import { Trash } from "lucide-react";
+import { Trash, FileUp, Loader2, CheckCircle } from "lucide-react";
+import { useSupabase } from "../providers/AuthProvider";
+import { useState } from "react";
 
 const resumeSchema = z.object({
   role: z.string().min(2, "Role is required."),
@@ -27,6 +29,7 @@ const resumeSchema = z.object({
   summary: z.string().min(10, "Summary is required."),
   skills: z.string().min(1, "Please add at least one skill."),
   project_ids: z.string(),
+  resume_url: z.string().url().nullable(),
   experience: z.array(z.object({
     company: z.string().min(1, "Company is required."),
     position: z.string().min(1, "Position is required."),
@@ -49,6 +52,8 @@ interface ResumeFormProps {
 
 export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   const queryClient = useQueryClient();
+  const { session } = useSupabase();
+  const [isUploading, setIsUploading] = useState(false);
   
   const form = useForm<ResumeFormValues>({
     resolver: zodResolver(resumeSchema),
@@ -58,6 +63,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       summary: resume?.summary || "",
       skills: resume?.skills.join(", ") || "",
       project_ids: resume?.project_ids.join(", ") || "",
+      resume_url: resume?.resume_url || null,
       experience: resume?.experience.map(exp => ({...exp, description: exp.description.join("\n")})) || [],
       education: resume?.education || [],
     },
@@ -89,12 +95,52 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
     },
   });
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    const role = form.getValues("role");
+    if (!file || !session?.user.id || !role) {
+      toast.error("Please provide a role name before uploading a file.");
+      return;
+    }
+    setIsUploading(true);
+    const publicUrl = await uploadResumePdf(file, session.user.id, role);
+    setIsUploading(false);
+    if (publicUrl) {
+      form.setValue("resume_url", publicUrl);
+      toast.success("PDF uploaded successfully!");
+    } else {
+      toast.error("Failed to upload PDF.");
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(data => mutation.mutate(data))} className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
         {/* Core Fields */}
         <FormField control={form.control} name="role" render={({ field }) => <FormItem><FormLabel>Role</FormLabel><FormControl><Input placeholder="developer" {...field} /></FormControl><FormMessage /></FormItem>} />
         <FormField control={form.control} name="title" render={({ field }) => <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="Full Stack Developer" {...field} /></FormControl><FormMessage /></FormItem>} />
+        
+        {/* PDF Upload */}
+        <FormItem>
+          <FormLabel>Resume PDF</FormLabel>
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline">
+              <label htmlFor="resume-upload" className="cursor-pointer">
+                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileUp className="mr-2 h-4 w-4" />}
+                {isUploading ? "Uploading..." : "Upload PDF"}
+              </label>
+            </Button>
+            <Input id="resume-upload" type="file" accept=".pdf" className="hidden" onChange={handleFileUpload} />
+            {form.watch("resume_url") && (
+              <div className="flex items-center gap-2 text-sm text-green-400">
+                <CheckCircle size={16} />
+                <span>PDF Linked</span>
+              </div>
+            )}
+          </div>
+          <FormDescription>Upload a PDF version of this resume.</FormDescription>
+        </FormItem>
+
         <FormField control={form.control} name="summary" render={({ field }) => <FormItem><FormLabel>Summary</FormLabel><FormControl><Textarea placeholder="A brief summary..." {...field} /></FormControl><FormMessage /></FormItem>} />
         <FormField control={form.control} name="skills" render={({ field }) => <FormItem><FormLabel>Skills</FormLabel><FormControl><Input placeholder="React, TypeScript, ..." {...field} /></FormControl><FormDescription>Comma-separated list.</FormDescription><FormMessage /></FormItem>} />
         <FormField control={form.control} name="project_ids" render={({ field }) => <FormItem><FormLabel>Project IDs</FormLabel><FormControl><Input placeholder="project-1, project-2" {...field} /></FormControl><FormDescription>Comma-separated list of project IDs to feature.</FormDescription><FormMessage /></FormItem>} />

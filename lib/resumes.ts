@@ -3,13 +3,19 @@
 import { supabase } from './supabase';
 import { Resume } from '@/types/portfolio';
 
-async function getUserIdByDomain(domain: string): Promise<string | null> {
-  const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
-  if (error || !data) {
-    console.error('Error fetching user by domain:', error?.message);
+export async function uploadResumePdf(file: File, userId: string, role: string): Promise<string | null> {
+  const filePath = `${userId}/${role}-${Date.now()}.pdf`;
+  const { error: uploadError } = await supabase.storage
+    .from('resumes')
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) {
+    console.error('Error uploading resume PDF:', uploadError);
     return null;
   }
-  return data.id;
+
+  const { data: { publicUrl } } = supabase.storage.from('resumes').getPublicUrl(filePath);
+  return publicUrl;
 }
 
 export async function getActiveResume(domain: string): Promise<Resume | null> {

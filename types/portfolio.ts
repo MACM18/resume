@@ -31,6 +31,7 @@ export interface Resume {
     year: string;
   }[];
   project_ids: string[];
+  resume_url: string | null;
   user_id: string;
   created_at: string;
 }

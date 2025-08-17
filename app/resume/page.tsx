@@ -68,10 +68,6 @@ const Resume = () => {
     );
   }
 
-  const handleDownloadPDF = () => {
-    alert(`PDF download for ${resume.title} would start here!`);
-  };
-
   return (
     <div className='min-h-screen relative pt-24 pb-12 px-6'>
       <div className='max-w-4xl mx-auto'>
@@ -86,12 +82,15 @@ const Resume = () => {
             Resume
           </h1>
           <Button
-            onClick={handleDownloadPDF}
+            asChild
             size='lg'
             className='bg-primary hover:bg-primary/90'
+            disabled={!resume.resume_url}
           >
-            <Download className='mr-2' size={20} />
-            Download PDF
+            <a href={resume.resume_url!} target="_blank" rel="noopener noreferrer">
+              <Download className='mr-2' size={20} />
+              Download PDF
+            </a>
           </Button>
         </motion.div>
 
