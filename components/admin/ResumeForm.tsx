@@ -15,20 +15,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addResume, updateResume, uploadResumePdf } from "@/lib/resumes";
+import { getProjectsForCurrentUser } from "@/lib/projects";
 import { Resume } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
 import { Trash, FileUp, Loader2, CheckCircle } from "lucide-react";
 import { useSupabase } from "../providers/AuthProvider";
 import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const resumeSchema = z.object({
   role: z.string().min(2, "Role is required."),
   title: z.string().min(2, "Title is required."),
   summary: z.string().min(10, "Summary is required."),
   skills: z.string().min(1, "Please add at least one skill."),
-  project_ids: z.string(),
+  project_ids: z.array(z.string()).optional(),
   resume_url: z.string().url().nullable(),
   experience: z.array(z.object({
     company: z.string().min(1, "Company is required."),
@@ -54,6 +56,11 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   const queryClient = useQueryClient();
   const { session } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
+
+  const { data: projects, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ["user-projects"],
+    queryFn: getProjectsForCurrentUser,
+  });
   
   const form = useForm<ResumeFormValues>({
     resolver: zodResolver(resumeSchema),
@@ -62,7 +69,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       title: resume?.title || "",
       summary: resume?.summary || "",
       skills: resume?.skills.join(", ") || "",
-      project_ids: resume?.project_ids.join(", ") || "",
+      project_ids: resume?.project_ids || [],
       resume_url: resume?.resume_url || null,
       experience: resume?.experience.map(exp => ({...exp, description: exp.description.join("\n")})) || [],
       education: resume?.education || [],
@@ -77,7 +84,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       const processedData = {
         ...data,
         skills: data.skills.split(',').map(t => t.trim()),
-        project_ids: data.project_ids.split(',').map(t => t.trim()),
+        project_ids: data.project_ids || [],
         experience: data.experience.map(exp => ({...exp, description: exp.description.split("\n")})),
       };
       if (resume) {
@@ -143,7 +150,60 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
 
         <FormField control={form.control} name="summary" render={({ field }) => <FormItem><FormLabel>Summary</FormLabel><FormControl><Textarea placeholder="A brief summary..." {...field} /></FormControl><FormMessage /></FormItem>} />
         <FormField control={form.control} name="skills" render={({ field }) => <FormItem><FormLabel>Skills</FormLabel><FormControl><Input placeholder="React, TypeScript, ..." {...field} /></FormControl><FormDescription>Comma-separated list.</FormDescription><FormMessage /></FormItem>} />
-        <FormField control={form.control} name="project_ids" render={({ field }) => <FormItem><FormLabel>Project IDs</FormLabel><FormControl><Input placeholder="project-1, project-2" {...field} /></FormControl><FormDescription>Comma-separated list of project IDs to feature.</FormDescription><FormMessage /></FormItem>} />
+        
+        {/* Project Selector */}
+        <FormField
+          control={form.control}
+          name="project_ids"
+          render={() => (
+            <FormItem>
+              <FormLabel>Featured Projects</FormLabel>
+              <FormDescription>
+                Select the projects you want to feature on this resume.
+              </FormDescription>
+              <div className="space-y-2">
+                {isLoadingProjects ? (
+                  <p>Loading projects...</p>
+                ) : (
+                  projects?.map((project) => (
+                    <FormField
+                      key={project.id}
+                      control={form.control}
+                      name="project_ids"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={project.id}
+                            className="flex flex-row items-start space-x-3 space-y-0"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(project.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...(field.value || []), project.id])
+                                    : field.onChange(
+                                        (field.value || []).filter(
+                                          (value) => value !== project.id
+                                        )
+                                      )
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {project.title}
+                            </FormLabel>
+                          </FormItem>
+                        )
+                      }}
+                    />
+                  ))
+                )}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Experience */}
         <div className="space-y-2">
