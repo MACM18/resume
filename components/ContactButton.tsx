@@ -93,43 +93,47 @@ export function ContactButton() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 1.5 }}
-        className="fixed bottom-6 right-6 z-50"
+        className='fixed bottom-6 right-6 z-50'
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <button onClick={() => setIsOpen(true)} className="group">
-              <GlassCard className="rounded-full p-4" hover={true}>
-                <Mail className="h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300" />
+            <button onClick={() => setIsOpen(true)} className='group'>
+              <GlassCard className='rounded-full p-4' hover={true}>
+                <Mail className='h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300' />
               </GlassCard>
             </button>
           </TooltipTrigger>
-          <TooltipContent side="left">
+          <TooltipContent side='left'>
             <p>Contact Me</p>
           </TooltipContent>
         </Tooltip>
       </motion.div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-transparent border-none shadow-none p-0 max-w-lg">
-          <GlassCard className="p-8" hover={false}>
+        <DialogContent className='bg-transparent border-none shadow-none p-0 max-w-lg'>
+          <GlassCard className='p-8' hover={false}>
             <DialogHeader>
-              <DialogTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-                Let's Create Something Amazing
+              <DialogTitle className='text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2'>
+                Let&apos;s Create Something Amazing
               </DialogTitle>
-              <DialogDescription className="text-foreground/70">
-                I'm always excited to hear about new projects and opportunities. Drop me a line and let's chat.
+              <DialogDescription className='text-foreground/70'>
+                I&apos;m always excited to hear about new projects and
+                opportunities. Drop me a line and let&apos;s chat.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-4 mt-6'
+              >
                 <FormField
                   control={form.control}
-                  name="name"
+                  name='name'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Your Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder='John Doe' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,12 +141,12 @@ export function ContactButton() {
                 />
                 <FormField
                   control={form.control}
-                  name="email"
+                  name='email'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Your Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="john.doe@example.com" {...field} />
+                        <Input placeholder='john.doe@example.com' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -150,20 +154,28 @@ export function ContactButton() {
                 />
                 <FormField
                   control={form.control}
-                  name="message"
+                  name='message'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Message</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Your message here..." {...field} rows={5} />
+                        <Textarea
+                          placeholder='Your message here...'
+                          {...field}
+                          rows={5}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={mutation.isPending} className="w-full">
+                <Button
+                  type='submit'
+                  disabled={mutation.isPending}
+                  className='w-full'
+                >
                   {mutation.isPending ? (
-                    <Loader2 className="animate-spin" />
+                    <Loader2 className='animate-spin' />
                   ) : (
                     "Send Message"
                   )}

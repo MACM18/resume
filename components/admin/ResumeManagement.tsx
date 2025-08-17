@@ -45,7 +45,8 @@ export function ResumeManagement() {
   });
 
   const setActiveMutation = useMutation({
-    mutationFn: (role: string) => updateCurrentUserProfile({ active_resume_role: role }),
+    mutationFn: (role: string) =>
+      updateCurrentUserProfile({ active_resume_role: role }),
     onSuccess: () => {
       toast.success("Active resume updated!");
       queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
@@ -76,19 +77,17 @@ export function ResumeManagement() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-primary">
-          Manage Your Resumes
-        </h2>
+      <div className='flex justify-between items-center mb-6'>
+        <h2 className='text-2xl font-bold text-primary'>Manage Your Resumes</h2>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleAddNew}>
-              <Plus className="mr-2" size={20} /> Add New Resume
+              <Plus className='mr-2' size={20} /> Add New Resume
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-background/80 backdrop-blur-md border-glass-border">
+          <DialogContent className='bg-background/80 backdrop-blur-md border-glass-border'>
             <DialogHeader>
-              <DialogTitle className="text-primary">
+              <DialogTitle className='text-primary'>
                 {selectedResume ? "Edit Resume" : "Add New Resume"}
               </DialogTitle>
             </DialogHeader>
@@ -101,37 +100,48 @@ export function ResumeManagement() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className='flex justify-center items-center h-64'>
+          <Loader2 className='h-8 w-8 animate-spin text-primary' />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {resumes?.map((resume) => {
             const isActive = profile?.active_resume_role === resume.role;
             return (
-              <GlassCard key={resume.id} className="p-4 flex justify-between items-center bg-glass-bg/10">
+              <GlassCard
+                key={resume.id}
+                className='p-4 flex justify-between items-center bg-glass-bg/10'
+              >
                 <div>
-                  <h3 className="font-bold text-lg flex items-center">
+                  <h3 className='font-bold text-lg flex items-center'>
                     {resume.title}
-                    {isActive && <CheckCircle className="ml-2 h-5 w-5 text-green-400" />}
+                    {isActive && (
+                      <CheckCircle className='ml-2 h-5 w-5 text-green-400' />
+                    )}
                   </h3>
-                  <p className="text-sm text-foreground/70">Role: {resume.role}</p>
+                  <p className='text-sm text-foreground/70'>
+                    Role: {resume.role}
+                  </p>
                 </div>
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
+                <div className='flex gap-2'>
+                  <Button
+                    size='sm'
                     variant={isActive ? "default" : "outline"}
                     onClick={() => setActiveMutation.mutate(resume.role)}
                     disabled={isActive || setActiveMutation.isPending}
                   >
                     {isActive ? "Active" : "Set Active"}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(resume)}>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onClick={() => handleEdit(resume)}
+                  >
                     <Edit size={16} />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="destructive">
+                      <Button size='sm' variant='destructive'>
                         <Trash size={16} />
                       </Button>
                     </AlertDialogTrigger>
@@ -139,12 +149,15 @@ export function ResumeManagement() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently delete your resume for the '{resume.role}' role.
+                          This will permanently delete your resume for the
+                          &apos;{resume.role}&apos; role.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteMutation.mutate(resume.id)}>
+                        <AlertDialogAction
+                          onClick={() => deleteMutation.mutate(resume.id)}
+                        >
                           Delete
                         </AlertDialogAction>
                       </AlertDialogFooter>
@@ -152,7 +165,7 @@ export function ResumeManagement() {
                   </AlertDialog>
                 </div>
               </GlassCard>
-            )
+            );
           })}
         </div>
       )}
