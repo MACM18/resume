@@ -28,8 +28,6 @@ const UpdatePasswordPage = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Supabase client needs time to process the recovery token from the URL
-    // and establish a session. We wait for the session object to be available.
     if (session) {
       setIsReady(true);
     }
@@ -45,8 +43,8 @@ const UpdatePasswordPage = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Password set successfully! Welcome!');
-      router.push('/welcome');
+      toast.success('Password set successfully!');
+      router.push('/claim-domain');
     },
     onError: (error: Error) => {
       toast.error(`Failed to update password: ${error.message}`);

@@ -20,7 +20,6 @@ import { Loader2 } from "lucide-react";
 
 const invitationSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
-  domain: z.string().min(3, "Domain must be at least 3 characters long."),
 });
 
 type InvitationFormValues = z.infer<typeof invitationSchema>;
@@ -30,14 +29,13 @@ export function UserInvitationForm() {
     resolver: zodResolver(invitationSchema),
     defaultValues: {
       email: "",
-      domain: "",
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: InvitationFormValues) => {
       const { error } = await supabase.functions.invoke("invite-user", {
-        body: data,
+        body: { email: data.email },
       });
       if (error) throw error;
     },
@@ -65,19 +63,6 @@ export function UserInvitationForm() {
               <FormLabel>User Email</FormLabel>
               <FormControl>
                 <Input placeholder='new.user@example.com' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='domain'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Assign Domain</FormLabel>
-              <FormControl>
-                <Input placeholder='portfolio.newuser.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
