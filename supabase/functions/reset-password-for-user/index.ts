@@ -20,16 +20,15 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!; // Use anon key for public auth endpoint
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
     const redirectTo = 'https://www.macm.dev/update-password';
 
-    // Make a direct HTTP POST request to the Supabase Auth API's recover endpoint
     const response = await fetch(`${supabaseUrl}/auth/v1/recover`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': supabaseAnonKey, // Use apikey header for authentication
+        'apikey': supabaseAnonKey,
       },
       body: JSON.stringify({
         email: email,
@@ -39,8 +38,10 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Supabase Auth API Error:", errorData);
-      throw new Error(errorData.message || "Failed to send password reset email via Supabase Auth API.");
+      // Log the full error from Supabase for server-side debugging
+      console.error("Supabase Auth API Error Response:", JSON.stringify(errorData, null, 2));
+      // Return the specific message from Supabase to the client
+      throw new Error(errorData.msg || errorData.message || "Failed to send password reset email via Supabase Auth API.");
     }
 
     return new Response(JSON.stringify({ message: "Password reset email sent successfully." }), {
