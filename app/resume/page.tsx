@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getActiveResume } from "@/lib/resumes";
 import { getProjects } from "@/lib/projects";
+import { getProfileData } from "@/lib/profile";
 import { Project } from "@/types/portfolio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
@@ -49,13 +50,19 @@ const Resume = () => {
     enabled: !!hostname,
   });
 
-  const isLoading = isLoadingResume || isLoadingProjects;
+  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["profileData", hostname],
+    queryFn: () => getProfileData(hostname),
+    enabled: !!hostname,
+  });
+
+  const isLoading = isLoadingResume || isLoadingProjects || isLoadingProfile;
 
   if (isLoading) {
     return <ResumePageSkeleton />;
   }
 
-  if (!resume) {
+  if (!resume || !profileData) {
     return (
       <div className='min-h-screen relative pt-24 pb-12 px-6 flex items-center justify-center'>
         <GlassCard className='p-8 text-center'>
@@ -67,6 +74,9 @@ const Resume = () => {
       </div>
     );
   }
+
+  const fullName = profileData.full_name;
+  const contactEmail = profileData.home_page_data.callToAction.email;
 
   return (
     <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
@@ -104,14 +114,14 @@ const Resume = () => {
           >
             <GlassCard className='p-8'>
               <div className='text-center mb-6'>
-                <h2 className='text-4xl font-bold mb-2'>Alex Chen</h2>
+                <h2 className='text-4xl font-bold mb-2'>{fullName}</h2>
                 <h3 className='text-2xl text-primary mb-4'>
                   {resume.title}
                 </h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
                   <div className='flex items-center'>
                     <Mail size={16} className='mr-2' />
-                    alex.chen@example.com
+                    {contactEmail}
                   </div>
                   <div className='flex items-center'>
                     <MapPin size={16} className='mr-2' />
