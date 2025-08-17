@@ -24,6 +24,7 @@ import { Trash, FileUp, Loader2, CheckCircle } from "lucide-react";
 import { useSupabase } from "../providers/AuthProvider";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const resumeSchema = z.object({
   role: z.string().min(2, "Role is required."),
@@ -32,6 +33,7 @@ const resumeSchema = z.object({
   skills: z.string().min(1, "Please add at least one skill."),
   project_ids: z.array(z.string()).optional(),
   resume_url: z.string().url().nullable(),
+  pdf_source: z.enum(['uploaded', 'generated']).default('uploaded'),
   experience: z.array(
     z.object({
       company: z.string().min(1, "Company is required."),
@@ -75,6 +77,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       skills: resume?.skills.join(", ") || "",
       project_ids: resume?.project_ids || [],
       resume_url: resume?.resume_url || null,
+      pdf_source: resume?.pdf_source || 'uploaded',
       experience:
         resume?.experience.map((exp) => ({
           ...exp,
@@ -116,9 +119,8 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       queryClient.invalidateQueries({ queryKey: ["user-resumes"] });
       onSuccess();
     },
-    // error is defined but never used, so remove it
-    onError: () => {
-      toast.error(`Failed to ${resume ? "update" : "add"} resume.`);
+    onError: (error) => {
+      toast.error(`Failed to ${resume ? "update" : "add"} resume: ${error}`);
     },
   });
 
@@ -176,38 +178,72 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
           )}
         />
 
+        {/* PDF Source */}
+        <FormField
+          control={form.control}
+          name="pdf_source"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>PDF Source</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex space-x-4"
+                >
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="uploaded" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Uploaded</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="generated" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Generated</FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* PDF Upload */}
-        <FormItem>
-          <FormLabel>Resume PDF</FormLabel>
-          <div className='flex items-center gap-4'>
-            <Button asChild variant='outline'>
-              <label htmlFor='resume-upload' className='cursor-pointer'>
-                {isUploading ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : (
-                  <FileUp className='mr-2 h-4 w-4' />
-                )}
-                {isUploading ? "Uploading..." : "Upload PDF"}
-              </label>
-            </Button>
-            <Input
-              id='resume-upload'
-              type='file'
-              accept='.pdf'
-              className='hidden'
-              onChange={handleFileUpload}
-            />
-            {form.watch("resume_url") && (
-              <div className='flex items-center gap-2 text-sm text-green-400'>
-                <CheckCircle size={16} />
-                <span>PDF Linked</span>
-              </div>
-            )}
-          </div>
-          <FormDescription>
-            Upload a PDF version of this resume.
-          </FormDescription>
-        </FormItem>
+        {form.watch('pdf_source') === 'uploaded' && (
+          <FormItem>
+            <FormLabel>Resume PDF</FormLabel>
+            <div className='flex items-center gap-4'>
+              <Button asChild variant='outline'>
+                <label htmlFor='resume-upload' className='cursor-pointer'>
+                  {isUploading ? (
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  ) : (
+                    <FileUp className='mr-2 h-4 w-4' />
+                  )}
+                  {isUploading ? "Uploading..." : "Upload PDF"}
+                </label>
+              </Button>
+              <Input
+                id='resume-upload'
+                type='file'
+                accept='.pdf'
+                className='hidden'
+                onChange={handleFileUpload}
+              />
+              {form.watch("resume_url") && (
+                <div className='flex items-center gap-2 text-sm text-green-400'>
+                  <CheckCircle size={16} />
+                  <span>PDF Linked</span>
+                </div>
+              )}
+            </div>
+            <FormDescription>
+              Upload a PDF version of this resume.
+            </FormDescription>
+          </FormItem>
+        )}
 
         <FormField
           control={form.control}

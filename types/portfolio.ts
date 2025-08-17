@@ -32,6 +32,7 @@ export interface Resume {
   }[];
   project_ids: string[];
   resume_url: string | null;
+  pdf_source: 'uploaded' | 'generated';
   user_id: string;
   created_at: string;
 }
