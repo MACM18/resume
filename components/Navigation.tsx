@@ -10,7 +10,7 @@ const navItems = [
   { path: "/", label: "Home", icon: Home },
   { path: "/about", label: "About", icon: User },
   { path: "/projects", label: "Projects", icon: FolderOpen },
-  { path: "/resume/developer", label: "Resume", icon: FileText },
+  { path: "/resume", label: "Resume", icon: FileText },
 ];
 
 export function Navigation() {
@@ -29,10 +29,7 @@ export function Navigation() {
         <GlassCard className='px-6 py-3'>
           <div className='flex items-center space-x-8'>
             {navItems.map((item) => {
-              const isActive =
-                pathname === item.path ||
-                (item.path === "/resume/developer" &&
-                  pathname.startsWith("/resume"));
+              const isActive = pathname === item.path;
               const Icon = item.icon;
 
               return (
@@ -83,10 +80,7 @@ export function Navigation() {
         <GlassCard className='px-4 py-3'>
           <div className='flex items-center space-x-6'>
             {navItems.map((item) => {
-              const isActive =
-                pathname === item.path ||
-                (item.path === "/resume/developer" &&
-                  pathname.startsWith("/resume"));
+              const isActive = pathname === item.path;
               const Icon = item.icon;
 
               return (
@@ -159,10 +153,7 @@ export function Navigation() {
         <div className='flex flex-col items-center justify-center h-full space-y-8'>
           {navItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive =
-              pathname === item.path ||
-              (item.path === "/resume/developer" &&
-                pathname.startsWith("/resume"));
+            const isActive = pathname === item.path;
 
             return (
               <motion.div

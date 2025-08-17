@@ -12,17 +12,33 @@ async function getUserIdByDomain(domain: string): Promise<string | null> {
   return data.id;
 }
 
-export async function getResumes(domain: string): Promise<Resume[]> {
-  const userId = await getUserIdByDomain(domain);
-  if (!userId) return [];
+export async function getActiveResume(domain: string): Promise<Resume | null> {
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, active_resume_role')
+    .eq('domain', domain)
+    .single();
 
-  const { data, error } = await supabase.from('resumes').select('*').eq('user_id', userId);
-  if (error) {
-    console.error('Error fetching resumes:', error);
-    return [];
+  if (profileError || !profile || !profile.active_resume_role) {
+    console.error('Error fetching profile or no active resume set:', profileError?.message);
+    return null;
   }
-  return data || [];
+
+  const { data: resume, error: resumeError } = await supabase
+    .from('resumes')
+    .select('*')
+    .eq('user_id', profile.id)
+    .eq('role', profile.active_resume_role)
+    .single();
+
+  if (resumeError) {
+    console.error('Error fetching active resume:', resumeError.message);
+    return null;
+  }
+
+  return resume;
 }
+
 
 export async function getResumesForCurrentUser(): Promise<Resume[]> {
   const { data: { session } } = await supabase.auth.getSession();

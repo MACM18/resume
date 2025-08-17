@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getResumesForCurrentUser, deleteResume } from "@/lib/resumes";
+import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash, Loader2, CheckCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,9 +34,23 @@ export function ResumeManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
 
-  const { data: resumes, isLoading } = useQuery({
+  const { data: resumes, isLoading: isLoadingResumes } = useQuery({
     queryKey: ["user-resumes"],
     queryFn: getResumesForCurrentUser,
+  });
+
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["currentUserProfile"],
+    queryFn: getCurrentUserProfile,
+  });
+
+  const setActiveMutation = useMutation({
+    mutationFn: (role: string) => updateCurrentUserProfile({ active_resume_role: role }),
+    onSuccess: () => {
+      toast.success("Active resume updated!");
+      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+    },
+    onError: () => toast.error("Failed to set active resume."),
   });
 
   const deleteMutation = useMutation({
@@ -44,9 +59,7 @@ export function ResumeManagement() {
       toast.success("Resume deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-resumes"] });
     },
-    onError: () => {
-      toast.error("Failed to delete resume.");
-    },
+    onError: () => toast.error("Failed to delete resume."),
   });
 
   const handleEdit = (resume: Resume) => {
@@ -58,6 +71,8 @@ export function ResumeManagement() {
     setSelectedResume(null);
     setIsFormOpen(true);
   };
+
+  const isLoading = isLoadingResumes || isLoadingProfile;
 
   return (
     <div>
@@ -91,40 +106,54 @@ export function ResumeManagement() {
         </div>
       ) : (
         <div className="space-y-4">
-          {resumes?.map((resume) => (
-            <GlassCard key={resume.id} className="p-4 flex justify-between items-center bg-glass-bg/10">
-              <div>
-                <h3 className="font-bold text-lg">{resume.title}</h3>
-                <p className="text-sm text-foreground/70">Role: {resume.role}</p>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleEdit(resume)}>
-                  <Edit size={16} />
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="destructive">
-                      <Trash size={16} />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete your resume for the '{resume.role}' role.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => deleteMutation.mutate(resume.id)}>
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </GlassCard>
-          ))}
+          {resumes?.map((resume) => {
+            const isActive = profile?.active_resume_role === resume.role;
+            return (
+              <GlassCard key={resume.id} className="p-4 flex justify-between items-center bg-glass-bg/10">
+                <div>
+                  <h3 className="font-bold text-lg flex items-center">
+                    {resume.title}
+                    {isActive && <CheckCircle className="ml-2 h-5 w-5 text-green-400" />}
+                  </h3>
+                  <p className="text-sm text-foreground/70">Role: {resume.role}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant={isActive ? "default" : "outline"}
+                    onClick={() => setActiveMutation.mutate(resume.role)}
+                    disabled={isActive || setActiveMutation.isPending}
+                  >
+                    {isActive ? "Active" : "Set Active"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(resume)}>
+                    <Edit size={16} />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="destructive">
+                        <Trash size={16} />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete your resume for the '{resume.role}' role.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteMutation.mutate(resume.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </GlassCard>
+            )
+          })}
         </div>
       )}
     </div>

@@ -1,31 +1,20 @@
 "use client";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { useParams } from "next/navigation";
 import { Download, Mail, MapPin, Calendar, ExternalLink } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import { getResumes } from "@/lib/resumes";
+import { getActiveResume } from "@/lib/resumes";
 import { getProjects } from "@/lib/projects";
-import { Resume as ResumeType, Project } from "@/types/portfolio";
+import { Project } from "@/types/portfolio";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 const ResumePageSkeleton = () => (
   <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
     <div className="text-center mb-12">
       <Skeleton className="h-16 w-1/2 mx-auto mb-6" />
-      <div className="flex justify-center gap-4">
-        <Skeleton className="h-12 w-48" />
-        <Skeleton className="h-12 w-48" />
-      </div>
+      <Skeleton className="h-12 w-48 mx-auto" />
     </div>
     <Skeleton className="h-48 w-full mb-8" />
     <div className="grid lg:grid-cols-3 gap-8">
@@ -42,44 +31,37 @@ const ResumePageSkeleton = () => (
 );
 
 const Resume = () => {
-  const params = useParams();
-  const role = Array.isArray(params.role) ? params.role[0] : params.role;
-  const [selectedRole, setSelectedRole] = useState(role || "developer");
+  const [hostname, setHostname] = useState("");
 
-  const { data: resumes, isLoading: isLoadingResumes } = useQuery<ResumeType[]>({
-    queryKey: ["resumes"],
-    queryFn: getResumes,
+  useEffect(() => {
+    setHostname(window.location.hostname);
+  }, []);
+
+  const { data: resume, isLoading: isLoadingResume } = useQuery({
+    queryKey: ["activeResume", hostname],
+    queryFn: () => getActiveResume(hostname),
+    enabled: !!hostname,
   });
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
-    queryKey: ["projects"],
-    queryFn: getProjects,
+    queryKey: ["projects", hostname],
+    queryFn: () => getProjects(hostname),
+    enabled: !!hostname,
   });
 
-  const isLoading = isLoadingResumes || isLoadingProjects;
-
-  const resumesRecord = React.useMemo(() => {
-    if (!resumes) return {};
-    return resumes.reduce((acc, resume) => {
-      acc[resume.role] = resume;
-      return acc;
-    }, {} as Record<string, ResumeType>);
-  }, [resumes]);
-
-  const currentResume = resumesRecord[selectedRole];
-  const availableRoles = Object.keys(resumesRecord);
+  const isLoading = isLoadingResume || isLoadingProjects;
 
   if (isLoading) {
     return <ResumePageSkeleton />;
   }
 
-  if (!currentResume) {
+  if (!resume) {
     return (
       <div className='min-h-screen relative pt-24 pb-12 px-6 flex items-center justify-center'>
         <GlassCard className='p-8 text-center'>
-          <h1 className='text-2xl font-bold mb-4'>Resume Not Found</h1>
+          <h1 className='text-2xl font-bold mb-4'>Resume Not Available</h1>
           <p className='text-foreground/70'>
-            The resume role you&apos;re looking for doesn&apos;t exist.
+            An active resume has not been set for this profile.
           </p>
         </GlassCard>
       </div>
@@ -87,7 +69,7 @@ const Resume = () => {
   }
 
   const handleDownloadPDF = () => {
-    alert(`PDF download for ${currentResume.title} would start here!`);
+    alert(`PDF download for ${resume.title} would start here!`);
   };
 
   return (
@@ -103,31 +85,14 @@ const Resume = () => {
           <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
             Resume
           </h1>
-
-          {/* Role Selector */}
-          <div className='flex flex-col sm:flex-row items-center justify-center gap-4 mb-8'>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className='w-48 bg-glass-bg/20 border-glass-border/30'>
-                <SelectValue placeholder='Select role' />
-              </SelectTrigger>
-              <SelectContent className='bg-popover border-glass-border/30'>
-                {availableRoles.map((roleKey) => (
-                  <SelectItem key={roleKey} value={roleKey}>
-                    {resumesRecord[roleKey].title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Button
-              onClick={handleDownloadPDF}
-              size='lg'
-              className='bg-primary hover:bg-primary/90'
-            >
-              <Download className='mr-2' size={20} />
-              Download PDF
-            </Button>
-          </div>
+          <Button
+            onClick={handleDownloadPDF}
+            size='lg'
+            className='bg-primary hover:bg-primary/90'
+          >
+            <Download className='mr-2' size={20} />
+            Download PDF
+          </Button>
         </motion.div>
 
         {/* Resume Content */}
@@ -142,7 +107,7 @@ const Resume = () => {
               <div className='text-center mb-6'>
                 <h2 className='text-4xl font-bold mb-2'>Alex Chen</h2>
                 <h3 className='text-2xl text-primary mb-4'>
-                  {currentResume.title}
+                  {resume.title}
                 </h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
                   <div className='flex items-center'>
@@ -156,7 +121,7 @@ const Resume = () => {
                 </div>
               </div>
               <p className='text-foreground/80 text-center max-w-3xl mx-auto leading-relaxed'>
-                {currentResume.summary}
+                {resume.summary}
               </p>
             </GlassCard>
           </motion.div>
@@ -175,7 +140,7 @@ const Resume = () => {
                     Professional Experience
                   </h3>
                   <div className='space-y-6'>
-                    {currentResume.experience.map((exp, index) => (
+                    {resume.experience.map((exp, index) => (
                       <div
                         key={index}
                         className='border-l-2 border-primary/30 pl-6'
@@ -215,7 +180,7 @@ const Resume = () => {
                     Featured Projects
                   </h3>
                   <div className='space-y-4'>
-                    {currentResume.project_ids.map((projectId) => {
+                    {resume.project_ids.map((projectId) => {
                       const project = projects?.find((p) => p.id === projectId);
                       if (!project) return null;
 
@@ -271,7 +236,7 @@ const Resume = () => {
                 <GlassCard className='p-6'>
                   <h3 className='text-xl font-bold mb-4 text-accent'>Skills</h3>
                   <div className='flex flex-wrap gap-2'>
-                    {currentResume.skills.map((skill) => (
+                    {resume.skills.map((skill) => (
                       <span
                         key={skill}
                         className='px-3 py-2 text-sm rounded-full bg-glass-bg/20 border border-glass-border/30 text-foreground/80'
@@ -294,7 +259,7 @@ const Resume = () => {
                     Education
                   </h3>
                   <div className='space-y-4'>
-                    {currentResume.education.map((edu, index) => (
+                    {resume.education.map((edu, index) => (
                       <div key={index}>
                         <h4 className='font-semibold'>{edu.degree}</h4>
                         <p className='text-foreground/70'>{edu.school}</p>
