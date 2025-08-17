@@ -8,6 +8,7 @@ import "./globals.css"; // or your global styles
 import AuthProvider from "@/components/providers/AuthProvider";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ContactButton } from "@/components/ContactButton";
 
 export default function RootLayout({
   children,
@@ -51,6 +52,7 @@ export default function RootLayout({
                   <Navigation />
                   <PageTransition>{children}</PageTransition>
                   <AuthButton />
+                  <ContactButton />
                 </div>
               </TooltipProvider>
             </ThemeProvider>
