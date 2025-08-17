@@ -9,11 +9,19 @@ import { useQuery } from "@tanstack/react-query";
 import { getProjectById } from "@/lib/projects";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function ProjectClient({ id }: { id: string }) {
+  const [hostname, setHostname] = useState("");
+
+  useEffect(() => {
+    setHostname(window.location.hostname);
+  }, []);
+
   const { data: project, isLoading } = useQuery({
-    queryKey: ["project", id],
-    queryFn: () => getProjectById(id),
+    queryKey: ["project", id, hostname],
+    queryFn: () => getProjectById(id, hostname),
+    enabled: !!hostname,
   });
 
   if (isLoading) {

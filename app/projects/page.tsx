@@ -6,7 +6,8 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { getProjects, getProfileData } from "@/lib/projects";
+import { getProjects } from "@/lib/projects";
+import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
@@ -34,11 +35,11 @@ const Projects = () => {
 
   if (isLoading || !hostname) {
     return (
-      <div className="min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto space-y-8">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid lg:grid-cols-2 gap-8">
-          <Skeleton className="h-[400px] w-full" />
-          <Skeleton className="h-[400px] w-full" />
+      <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto space-y-8'>
+        <Skeleton className='h-8 w-64' />
+        <div className='grid lg:grid-cols-2 gap-8'>
+          <Skeleton className='h-[400px] w-full' />
+          <Skeleton className='h-[400px] w-full' />
         </div>
       </div>
     );

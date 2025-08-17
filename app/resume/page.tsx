@@ -1,6 +1,13 @@
 "use client";
 import { motion } from "framer-motion";
-import { Download, Mail, MapPin, Calendar, ExternalLink, Loader2 } from "lucide-react";
+import {
+  Download,
+  Mail,
+  MapPin,
+  Calendar,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -15,20 +22,20 @@ import { toast } from "@/components/ui/sonner";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 
 const ResumePageSkeleton = () => (
-  <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
-    <div className="text-center mb-12">
-      <Skeleton className="h-16 w-1/2 mx-auto mb-6" />
-      <Skeleton className="h-12 w-48 mx-auto" />
+  <div className='min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto'>
+    <div className='text-center mb-12'>
+      <Skeleton className='h-16 w-1/2 mx-auto mb-6' />
+      <Skeleton className='h-12 w-48 mx-auto' />
     </div>
-    <Skeleton className="h-48 w-full mb-8" />
-    <div className="grid lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 space-y-8">
-        <Skeleton className="h-96 w-full" />
-        <Skeleton className="h-64 w-full" />
+    <Skeleton className='h-48 w-full mb-8' />
+    <div className='grid lg:grid-cols-3 gap-8'>
+      <div className='lg:col-span-2 space-y-8'>
+        <Skeleton className='h-96 w-full' />
+        <Skeleton className='h-64 w-full' />
       </div>
-      <div className="space-y-6">
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div className='space-y-6'>
+        <Skeleton className='h-48 w-full' />
+        <Skeleton className='h-48 w-full' />
       </div>
     </div>
   </div>
@@ -61,35 +68,37 @@ const Resume = () => {
 
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("generate-resume", {
-        body: { resume, profile: profileData, projects },
-        responseType: 'blob'
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "generate-resume",
+        {
+          body: { resume, profile: profileData, projects },
+        }
+      );
       if (error) throw error;
       return data;
     },
     onSuccess: (pdfBlob) => {
       const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `resume-${resume?.role || 'download'}.pdf`;
+      a.download = `resume-${resume?.role || "download"}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast.success("Resume downloaded!");
     },
-    onError: (error: any) => {
+    onError: (error: { message: string }) => {
       toast.error(`Failed to generate PDF: ${error.message}`);
     },
   });
 
   const handleDownload = () => {
     if (!resume) return;
-    if (resume.pdf_source === 'generated') {
+    if (resume.pdf_source === "generated") {
       generatePdfMutation.mutate();
     } else if (resume.resume_url) {
-      window.open(resume.resume_url, '_blank');
+      window.open(resume.resume_url, "_blank");
     } else {
       toast.error("No PDF available for download.");
     }
@@ -138,14 +147,17 @@ const Resume = () => {
             onClick={handleDownload}
             size='lg'
             className='bg-primary hover:bg-primary/90'
-            disabled={generatePdfMutation.isPending || (resume.pdf_source === 'uploaded' && !resume.resume_url)}
+            disabled={
+              generatePdfMutation.isPending ||
+              (resume.pdf_source === "uploaded" && !resume.resume_url)
+            }
           >
             {generatePdfMutation.isPending ? (
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
             ) : (
               <Download className='mr-2' size={20} />
             )}
-            {generatePdfMutation.isPending ? 'Generating...' : 'Download PDF'}
+            {generatePdfMutation.isPending ? "Generating..." : "Download PDF"}
           </Button>
         </motion.div>
 
@@ -160,9 +172,7 @@ const Resume = () => {
             <GlassCard className='p-8'>
               <div className='text-center mb-6'>
                 <h2 className='text-4xl font-bold mb-2'>{fullName}</h2>
-                <h3 className='text-2xl text-primary mb-4'>
-                  {resume.title}
-                </h3>
+                <h3 className='text-2xl text-primary mb-4'>{resume.title}</h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
                   <div className='flex items-center'>
                     <Mail size={16} className='mr-2' />

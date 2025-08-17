@@ -64,7 +64,8 @@ export const resumes: Record<string, Omit<Resume, 'user_id' | 'id' | 'created_at
       }
     ],
     project_ids: ["glassmorphic-dashboard", "ai-portfolio-generator"],
-    resume_url: null
+    resume_url: null,
+    pdf_source: "generated"
   },
   designer: {
     role: "designer",
@@ -91,7 +92,8 @@ export const resumes: Record<string, Omit<Resume, 'user_id' | 'id' | 'created_at
       }
     ],
     project_ids: ["glassmorphic-dashboard"],
-    resume_url: null
+    resume_url: null,
+    pdf_source: "generated"
   }
 };
 

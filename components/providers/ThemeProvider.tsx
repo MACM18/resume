@@ -21,13 +21,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { data: theme } = useQuery({
     queryKey: ["theme", hostname],
     queryFn: async () => {
-      if (!hostname) return null;
+      if (!hostname) return {};
       const { data } = await supabase
         .from("profiles")
         .select("theme")
         .eq("domain", hostname)
         .single();
-      return data?.theme;
+      return data?.theme || {};
     },
     enabled: !!hostname,
   });
@@ -35,7 +35,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {theme && (
-        <style dangerouslySetInnerHTML={{ __html: generateCssVariables(theme) }} />
+        <style
+          dangerouslySetInnerHTML={{ __html: generateCssVariables(theme) }}
+        />
       )}
       {children}
     </>
