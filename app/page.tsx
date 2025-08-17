@@ -4,8 +4,9 @@ import Link from "next/link";
 import { ArrowRight, Github, Linkedin, Mail, Twitter } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-
-import { homePageData } from "@/data/portfolio";
+import { useQuery } from "@tanstack/react-query";
+import { getProfileData } from "@/lib/profile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const socialIconMap = {
   Github,
@@ -15,7 +16,52 @@ const socialIconMap = {
   ArrowRight,
 };
 
+const HomePageSkeleton = () => (
+  <div className="min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto">
+    <div className="text-center mb-16">
+      <Skeleton className="h-20 w-3/4 mx-auto mb-6" />
+      <Skeleton className="h-8 w-full max-w-3xl mx-auto mb-8" />
+      <div className="flex justify-center gap-4">
+        <Skeleton className="h-12 w-40" />
+        <Skeleton className="h-12 w-40" />
+      </div>
+    </div>
+    <div className="grid md:grid-cols-2 gap-8 mb-16">
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  </div>
+);
+
 export default function Page() {
+  const { data: profileData, isLoading } = useQuery({
+    queryKey: ["profileData"],
+    queryFn: getProfileData,
+  });
+
+  if (isLoading) {
+    return <HomePageSkeleton />;
+  }
+
+  if (!profileData || !profileData.home_page_data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center">
+        <div>
+          <h1 className="text-2xl font-bold">Welcome!</h1>
+          <p className="text-foreground/70">
+            No portfolio data found. Please log in as an admin to seed the database.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const homePageData = {
+    ...profileData.home_page_data,
+    name: profileData.full_name,
+    tagline: profileData.tagline,
+  };
+
   return (
     <div className='min-h-screen relative pt-24 pb-12 px-6'>
       <div className='max-w-6xl mx-auto'>
@@ -30,9 +76,7 @@ export default function Page() {
               {homePageData.name}
             </h1>
             <p className='text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto'>
-              {typeof homePageData.tagline === "string"
-                ? homePageData.tagline.replace(/'/g, "&apos;")
-                : homePageData.tagline}
+              {homePageData.tagline}
             </p>
           </motion.div>
 
@@ -188,24 +232,7 @@ export default function Page() {
           </motion.h2>
 
           <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
-            {[
-              {
-                name: "Frontend",
-                skills: ["React", "TypeScript", "Next.js"],
-                icon: "⚛️",
-              },
-              {
-                name: "Backend",
-                skills: ["Node.js", "Python", "GraphQL"],
-                icon: "🔧",
-              },
-              {
-                name: "Design",
-                skills: ["Figma", "UI/UX", "Prototyping"],
-                icon: "🎨",
-              },
-              { name: "Cloud", skills: ["AWS", "Docker", "CI/CD"], icon: "☁️" },
-            ].map((category, index) => (
+            {homePageData.technicalExpertise.map((category, index) => (
               <motion.div
                 key={category.name}
                 initial={{ opacity: 0, y: 30 }}
@@ -317,29 +344,7 @@ export default function Page() {
           </motion.h2>
 
           <div className='grid md:grid-cols-3 gap-6'>
-            {[
-              {
-                title: "Top Performer",
-                description:
-                  "Recognized for exceptional code quality and delivery speed",
-                metric: "98%",
-                label: "Client Satisfaction",
-              },
-              {
-                title: "Open Source",
-                description:
-                  "Active contributor to popular React and TypeScript projects",
-                metric: "15+",
-                label: "Contributions",
-              },
-              {
-                title: "Team Leadership",
-                description:
-                  "Successfully led cross-functional teams on major projects",
-                metric: "3",
-                label: "Teams Led",
-              },
-            ].map((achievement, index) => (
+            {homePageData.achievements.map((achievement, index) => (
               <motion.div
                 key={achievement.title}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -374,12 +379,10 @@ export default function Page() {
         >
           <GlassCard className='p-12'>
             <h2 className='text-3xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
-              Ready to Build Something Amazing?
+              {homePageData.callToAction.title}
             </h2>
             <p className='text-xl text-foreground/80 mb-8 max-w-2xl mx-auto'>
-              Let's collaborate on your next project. I bring technical
-              expertise, creative vision, and a passion for excellence to every
-              engagement.
+              {homePageData.callToAction.description}
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <Button
@@ -387,7 +390,7 @@ export default function Page() {
                 size='lg'
                 className='bg-primary hover:bg-primary/90 text-primary-foreground'
               >
-                <a href='mailto:alex.chen@example.com'>Start a Project</a>
+                <a href={`mailto:${homePageData.callToAction.email}`}>Start a Project</a>
               </Button>
               <Button
                 asChild

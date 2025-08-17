@@ -12,15 +12,66 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { resumes, projects } from "@/data/portfolio";
+import { useQuery } from "@tanstack/react-query";
+import { getResumes } from "@/lib/resumes";
+import { getProjects } from "@/lib/projects";
+import { Resume as ResumeType, Project } from "@/types/portfolio";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const ResumePageSkeleton = () => (
+  <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
+    <div className="text-center mb-12">
+      <Skeleton className="h-16 w-1/2 mx-auto mb-6" />
+      <div className="flex justify-center gap-4">
+        <Skeleton className="h-12 w-48" />
+        <Skeleton className="h-12 w-48" />
+      </div>
+    </div>
+    <Skeleton className="h-48 w-full mb-8" />
+    <div className="grid lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-8">
+        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+      <div className="space-y-6">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    </div>
+  </div>
+);
 
 const Resume = () => {
   const params = useParams();
   const role = Array.isArray(params.role) ? params.role[0] : params.role;
   const [selectedRole, setSelectedRole] = useState(role || "developer");
 
-  const currentResume = resumes[selectedRole];
-  const availableRoles = Object.keys(resumes);
+  const { data: resumes, isLoading: isLoadingResumes } = useQuery<ResumeType[]>({
+    queryKey: ["resumes"],
+    queryFn: getResumes,
+  });
+
+  const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
+    queryKey: ["projects"],
+    queryFn: getProjects,
+  });
+
+  const isLoading = isLoadingResumes || isLoadingProjects;
+
+  const resumesRecord = React.useMemo(() => {
+    if (!resumes) return {};
+    return resumes.reduce((acc, resume) => {
+      acc[resume.role] = resume;
+      return acc;
+    }, {} as Record<string, ResumeType>);
+  }, [resumes]);
+
+  const currentResume = resumesRecord[selectedRole];
+  const availableRoles = Object.keys(resumesRecord);
+
+  if (isLoading) {
+    return <ResumePageSkeleton />;
+  }
 
   if (!currentResume) {
     return (
@@ -36,9 +87,6 @@ const Resume = () => {
   }
 
   const handleDownloadPDF = () => {
-    // In a real implementation, this would generate and download a PDF
-    console.log(`Downloading PDF resume for ${selectedRole}`);
-    // For now, we'll just show a toast
     alert(`PDF download for ${currentResume.title} would start here!`);
   };
 
@@ -65,7 +113,7 @@ const Resume = () => {
               <SelectContent className='bg-popover border-glass-border/30'>
                 {availableRoles.map((roleKey) => (
                   <SelectItem key={roleKey} value={roleKey}>
-                    {resumes[roleKey].title}
+                    {resumesRecord[roleKey].title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -167,8 +215,8 @@ const Resume = () => {
                     Featured Projects
                   </h3>
                   <div className='space-y-4'>
-                    {currentResume.projects.map((projectId) => {
-                      const project = projects.find((p) => p.id === projectId);
+                    {currentResume.project_ids.map((projectId) => {
+                      const project = projects?.find((p) => p.id === projectId);
                       if (!project) return null;
 
                       return (
@@ -180,9 +228,9 @@ const Resume = () => {
                             <h4 className='text-lg font-semibold'>
                               {project.title}
                             </h4>
-                            {project.demoUrl && (
+                            {project.demo_url && (
                               <a
-                                href={project.demoUrl}
+                                href={project.demo_url}
                                 target='_blank'
                                 rel='noopener noreferrer'
                                 className='text-primary hover:text-primary-glow'

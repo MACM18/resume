@@ -2,7 +2,9 @@
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { Code, Palette, Zap, Heart } from "lucide-react";
-import { aboutPageData } from "@/data/portfolio";
+import { useQuery } from "@tanstack/react-query";
+import { getProfileData } from "@/lib/profile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const iconMap = {
   Code,
@@ -11,7 +13,42 @@ const iconMap = {
   Heart,
 };
 
+const AboutPageSkeleton = () => (
+  <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
+    <div className="text-center mb-16">
+      <Skeleton className="h-16 w-1/2 mx-auto mb-6" />
+      <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+    </div>
+    <Skeleton className="h-64 w-full mb-12" />
+    <div className="grid md:grid-cols-2 gap-6">
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  </div>
+);
+
 const About = () => {
+  const { data: profileData, isLoading } = useQuery({
+    queryKey: ["profileData"],
+    queryFn: getProfileData,
+  });
+
+  if (isLoading) {
+    return <AboutPageSkeleton />;
+  }
+
+  if (!profileData || !profileData.about_page_data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>About page data not found.</p>
+      </div>
+    );
+  }
+
+  const aboutPageData = profileData.about_page_data;
+
   return (
     <div className='min-h-screen relative pt-24 pb-12 px-6'>
       <div className='max-w-4xl mx-auto'>

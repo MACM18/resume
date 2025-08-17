@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getProjectsForCurrentUser, deleteProject } from "@/lib/projects";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash, Loader2, DatabaseZap } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useSeedDatabase } from "@/hooks/use-seed-database";
+import { supabase } from "@/lib/supabase";
 
 const AdminPage = () => {
   const { session } = useSupabase();
@@ -36,12 +38,23 @@ const AdminPage = () => {
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const seedMutation = useSeedDatabase();
 
   useEffect(() => {
     if (!session) {
       router.push("/login");
     }
   }, [session, router]);
+
+  const { data: profile } = useQuery({
+    queryKey: ['profile', session?.user.id],
+    queryFn: async () => {
+        if (!session?.user.id) return null;
+        const { data } = await supabase.from('profiles').select('tagline').eq('id', session.user.id).single();
+        return data;
+    },
+    enabled: !!session,
+  });
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ["user-projects"],
@@ -72,7 +85,7 @@ const AdminPage = () => {
   };
 
   if (!session) {
-    return null; // or a loading spinner
+    return null;
   }
 
   return (
@@ -82,24 +95,32 @@ const AdminPage = () => {
           <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Manage Projects
           </h1>
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleAddNew}>
-                <Plus className="mr-2" size={20} /> Add New Project
+          <div className="flex gap-2">
+            {profile && !profile.tagline && (
+              <Button onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
+                <DatabaseZap className="mr-2" size={16} />
+                {seedMutation.isPending ? "Seeding..." : "Seed Initial Data"}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-background/80 backdrop-blur-md border-glass-border">
-              <DialogHeader>
-                <DialogTitle className="text-primary">
-                  {selectedProject ? "Edit Project" : "Add New Project"}
-                </DialogTitle>
-              </DialogHeader>
-              <ProjectForm
-                project={selectedProject}
-                onSuccess={() => setIsFormOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+            )}
+            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={handleAddNew}>
+                  <Plus className="mr-2" size={20} /> Add New Project
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-background/80 backdrop-blur-md border-glass-border">
+                <DialogHeader>
+                  <DialogTitle className="text-primary">
+                    {selectedProject ? "Edit Project" : "Add New Project"}
+                  </DialogTitle>
+                </DialogHeader>
+                <ProjectForm
+                  project={selectedProject}
+                  onSuccess={() => setIsFormOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {isLoading ? (

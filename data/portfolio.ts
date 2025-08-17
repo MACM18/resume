@@ -1,6 +1,32 @@
-import { Resume, HomePageData, AboutPageData } from "@/types/portfolio";
+import { Project, Resume, HomePageData, AboutPageData } from "@/types/portfolio";
 
-export const resumes: Record<string, Resume> = {
+// This static data is used to seed the database for a new user.
+export const projects: Omit<Project, 'user_id' | 'created_at'>[] = [
+  {
+    id: "glassmorphic-dashboard",
+    title: "Glassmorphic Dashboard",
+    description: "A modern analytics dashboard with a glassmorphism design.",
+    long_description: "This project is a proof-of-concept for a modern analytics dashboard. It features a cutting-edge glassmorphism design, real-time data visualization, and a seamless user experience. The entire UI is built with reusable components and is fully responsive.",
+    image: "https://raw.githubusercontent.com/ask-dyad/portfolio-template/main/public/project-1.png",
+    tech: ["React", "TypeScript", "Framer Motion", "Tailwind CSS", "Recharts"],
+    demo_url: "#",
+    github_url: "#",
+    featured: true
+  },
+  {
+    id: "ai-portfolio-generator",
+    title: "AI Portfolio Generator",
+    description: "An AI-powered tool to generate professional portfolios in minutes.",
+    long_description: "This tool leverages AI to help developers and designers create stunning portfolios with minimal effort. Users can input their information, and the AI will generate a complete, customizable portfolio website. It's built with Next.js for performance and scalability.",
+    image: "https://raw.githubusercontent.com/ask-dyad/portfolio-template/main/public/project-2.png",
+    tech: ["Next.js", "TypeScript", "OpenAI API", "Supabase", "Tailwind CSS"],
+    demo_url: "#",
+    github_url: "#",
+    featured: false
+  }
+];
+
+export const resumes: Record<string, Omit<Resume, 'user_id' | 'id' | 'created_at'>> = {
   developer: {
     role: "developer",
     title: "Full Stack Developer",
@@ -35,7 +61,7 @@ export const resumes: Record<string, Resume> = {
         year: "2020"
       }
     ],
-    projects: ["glassmorphic-dashboard", "ai-portfolio-generator"]
+    project_ids: ["glassmorphic-dashboard", "ai-portfolio-generator"]
   },
   designer: {
     role: "designer",
@@ -61,13 +87,11 @@ export const resumes: Record<string, Resume> = {
         year: "2021"
       }
     ],
-    projects: ["glassmorphic-dashboard"]
+    project_ids: ["glassmorphic-dashboard"]
   }
 };
 
-export const homePageData: HomePageData = {
-  name: "Alex Chen",
-  tagline: "Full Stack Developer & UI/UX Designer crafting digital experiences with modern technologies and beautiful design",
+export const homePageData: Omit<HomePageData, 'name' | 'tagline'> = {
   socialLinks: [
     { platform: "github", icon: "Github", href: "https://github.com", label: "GitHub" },
     { platform: "linkedin", icon: "Linkedin", href: "https://linkedin.com", label: "LinkedIn" },
