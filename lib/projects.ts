@@ -16,7 +16,7 @@ export async function getProjects(domain: string): Promise<Project[]> {
   const userId = await getUserIdByDomain(domain);
   if (!userId) return [];
 
-  const { data, error } = await supabase.from('projects').select('*').eq('user_id', userId);
+  const { data, error } = await supabase.from('projects').select('*').eq('user_id', userId).eq('published', true);
   if (error) {
     console.error('Error fetching projects:', error);
     return [];
@@ -43,7 +43,7 @@ export async function getProjectsForCurrentUser(): Promise<Project[]> {
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
-    const { data, error } = await supabase.from('projects').select('*').eq('id', id).single();
+    const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('published', true).single();
     if (error) {
         console.error('Error fetching project by id:', error);
         return null;
@@ -55,7 +55,7 @@ export async function getFeaturedProjects(domain: string): Promise<Project[]> {
     const userId = await getUserIdByDomain(domain);
     if (!userId) return [];
 
-    const { data, error } = await supabase.from('projects').select('*').eq('featured', true).eq('user_id', userId);
+    const { data, error } = await supabase.from('projects').select('*').eq('featured', true).eq('user_id', userId).eq('published', true);
     if (error) {
       console.error('Error fetching featured projects:', error);
       return [];

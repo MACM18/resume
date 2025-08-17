@@ -30,6 +30,7 @@ const projectSchema = z.object({
   demo_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   github_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   featured: z.boolean().default(false),
+  published: z.boolean().default(true),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -53,6 +54,7 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
       demo_url: project?.demo_url || "",
       github_url: project?.github_url || "",
       featured: project?.featured || false,
+      published: project?.published ?? true,
     },
   });
 
@@ -197,6 +199,28 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                 </FormLabel>
                 <FormDescription>
                   Featured projects are displayed prominently on the projects page.
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="published"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Publish this project
+                </FormLabel>
+                <FormDescription>
+                  Unpublished projects will not be visible on your public portfolio.
                 </FormDescription>
               </div>
             </FormItem>

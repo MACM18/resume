@@ -8,6 +8,7 @@ export interface Project {
   demo_url?: string;
   github_url?: string;
   featured: boolean;
+  published: boolean;
   user_id: string;
   created_at: string;
 }
