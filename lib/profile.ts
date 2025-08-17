@@ -10,17 +10,15 @@ interface ProfileData {
   about_page_data: AboutPageData;
 }
 
-export async function getProfileData(): Promise<ProfileData | null> {
-  // For now, this fetches the first profile found.
-  // This will be updated later to support multiple users, for example by using subdomains.
+export async function getProfileData(username: string): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select('full_name, tagline, home_page_data, about_page_data')
-    .limit(1)
+    .eq('username', username)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-    console.error('Error fetching profile data:', error);
+  if (error) {
+    console.error('Error fetching profile data:', error.message);
     return null;
   }
   

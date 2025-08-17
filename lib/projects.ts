@@ -3,8 +3,20 @@
 import { supabase } from './supabase';
 import { Project } from '@/types/portfolio';
 
-export async function getProjects(): Promise<Project[]> {
-  const { data, error } = await supabase.from('projects').select('*');
+async function getUserIdByUsername(username: string): Promise<string | null> {
+  const { data, error } = await supabase.from('profiles').select('id').eq('username', username).single();
+  if (error || !data) {
+    console.error('Error fetching user by username:', error?.message);
+    return null;
+  }
+  return data.id;
+}
+
+export async function getProjects(username: string): Promise<Project[]> {
+  const userId = await getUserIdByUsername(username);
+  if (!userId) return [];
+
+  const { data, error } = await supabase.from('projects').select('*').eq('user_id', userId);
   if (error) {
     console.error('Error fetching projects:', error);
     return [];
@@ -39,8 +51,11 @@ export async function getProjectById(id: string): Promise<Project | null> {
     return data;
 }
 
-export async function getFeaturedProjects(): Promise<Project[]> {
-    const { data, error } = await supabase.from('projects').select('*').eq('featured', true);
+export async function getFeaturedProjects(username: string): Promise<Project[]> {
+    const userId = await getUserIdByUsername(username);
+    if (!userId) return [];
+
+    const { data, error } = await supabase.from('projects').select('*').eq('featured', true).eq('user_id', userId);
     if (error) {
       console.error('Error fetching featured projects:', error);
       return [];
