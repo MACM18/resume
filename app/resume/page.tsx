@@ -68,19 +68,12 @@ const Resume = () => {
 
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
-      const response = await supabase.functions.invoke("generate-resume", {
+      const { data, error } = await supabase.functions.invoke("generate-resume", {
         body: { resume, profile: profileData, projects },
+        responseType: 'blob'
       });
-      if (response.error) throw response.error;
-
-      // Convert base64 to Blob
-      const byteCharacters = atob(response.data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      return new Blob([byteArray], { type: "application/pdf" });
+      if (error) throw error;
+      return data;
     },
     onSuccess: (pdfBlob) => {
       const url = URL.createObjectURL(pdfBlob);
