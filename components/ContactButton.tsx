@@ -105,7 +105,7 @@ export function ContactButton() {
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="bg-transparent border-none shadow-none p-0 max-w-lg">
-          <GlassCard className="p-8 backdrop-blur-2xl bg-glass-bg/5">
+          <GlassCard className="p-8">
             <DialogHeader>
               <DialogTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
                 Let's Create Something Amazing
