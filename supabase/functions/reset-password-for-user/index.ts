@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +29,6 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
 
     if (userError || !user) {
-      // For an admin panel, it's better to be explicit about the error.
       console.error(`Password reset attempted for non-existent user: ${email}`, userError);
       return new Response(JSON.stringify({ error: `User with email ${email} not found.` }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
