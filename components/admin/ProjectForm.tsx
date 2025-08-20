@@ -17,12 +17,24 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addProject, updateProject, uploadProjectImage } from "@/lib/projects";
+import { addProject, updateProject, uploadProjectImage, deleteProjectImage } from "@/lib/projects";
 import { Project } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
 import { useState } from "react";
-import { FileUp, Loader2, CheckCircle } from "lucide-react";
+import { FileUp, Loader2, CheckCircle, Trash } from "lucide-react";
 import Image from "next/image";
+import { useSupabase } from "../providers/AuthProvider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const projectSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
@@ -63,6 +75,7 @@ interface ProjectFormProps {
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const queryClient = useQueryClient();
+  const { session } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProjectFormValues>({
@@ -103,6 +116,19 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
       console.error(error);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!imageUrl || !session?.user.id) return;
+
+    try {
+      await deleteProjectImage(session.user.id, imageUrl);
+      form.setValue("image", "", { shouldValidate: true }); // Clear the image field
+      toast.success("Image removed successfully!");
+    } catch (error) {
+      toast.error("Failed to remove image.");
+      console.error(error);
     }
   };
 
@@ -202,7 +228,7 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                     {isUploading ? "Uploading..." : "Upload Image"}
                   </label>
                 </Button>
-                <Input
+                <input
                   id="image-upload"
                   type="file"
                   accept=".jpg,.jpeg,.png,.webp"
@@ -218,8 +244,36 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                 )}
               </div>
               {imageUrl && (
-                <div className="mt-4 aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-glass-border">
-                  <Image src={imageUrl} alt="Project preview" width={400} height={225} className="object-cover w-full h-full" />
+                <div className="mt-4 space-y-2">
+                  <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-glass-border">
+                    <Image src={imageUrl} alt="Project preview" width={400} height={225} className="object-cover w-full h-full" />
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="w-full max-w-sm"
+                      >
+                        <Trash className="mr-2" size={16} /> Remove Image
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action will permanently delete this image from your storage.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRemoveImage}>
+                          Delete Image
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               )}
               <FormMessage />

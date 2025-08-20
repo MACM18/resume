@@ -28,6 +28,22 @@ export async function uploadProjectImage(file: File): Promise<string> {
   return data.publicUrl;
 }
 
+export async function deleteProjectImage(userId: string, imageUrl: string): Promise<boolean> {
+  const pathSegments = imageUrl.split('/');
+  const fileName = pathSegments[pathSegments.length - 1];
+  const filePath = `${userId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('project-images')
+    .remove([filePath]);
+
+  if (error) {
+    console.error('Error deleting project image:', error);
+    throw error;
+  }
+  return true;
+}
+
 async function getUserIdByDomain(domain: string): Promise<string | null> {
   const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
   if (error || !data) {
