@@ -9,6 +9,8 @@ import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { getProjects } from "@/lib/projects"; // Import getProjects
+import Image from "next/image";
 
 const socialIconMap = {
   Github,
@@ -42,11 +44,19 @@ export default function Page() {
     setHostname(window.location.hostname);
   }, []);
 
-  const { data: profileData, isLoading } = useQuery({
+  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profileData", hostname],
     queryFn: () => getProfileData(hostname),
     enabled: !!hostname,
   });
+
+  const { data: allPublishedProjects, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ["projects", hostname],
+    queryFn: () => getProjects(hostname), // This fetches all published projects
+    enabled: !!hostname && !!profileData,
+  });
+
+  const isLoading = isLoadingProfile || isLoadingProjects;
 
   if (isLoading || !hostname) {
     return <HomePageSkeleton />;
@@ -61,6 +71,11 @@ export default function Page() {
     name: profileData.full_name,
     tagline: profileData.tagline,
   };
+
+  const featuredProject = allPublishedProjects?.find((p) => p.featured);
+  const otherProjectsForDisplay = allPublishedProjects
+    ?.filter((p) => p.id !== featuredProject?.id)
+    .slice(0, 2); // Get up to 2 other projects
 
   return (
     <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
@@ -158,67 +173,144 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Featured Work Preview */}
-        <div className='mb-16'>
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className='text-3xl font-bold text-center mb-12 text-accent'
-          >
-            Featured Work
-          </motion.h2>
+        {/* Dynamic Featured Work Preview */}
+        {featuredProject && (
+          <section className='mb-16'>
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className='text-3xl font-bold text-center mb-12 text-accent'
+            >
+              Featured Work
+            </motion.h2>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
-          >
-            <GlassCard className='p-8' hover>
-              <div className='grid md:grid-cols-2 gap-8 items-center'>
-                <div>
-                  <h3 className='text-2xl font-bold mb-4 text-primary'>
-                    Glassmorphic Dashboard
-                  </h3>
-                  <p className='text-foreground/80 mb-6'>
-                    A modern analytics dashboard featuring cutting-edge
-                    glassmorphism design, real-time data visualization, and
-                    seamless user experience.
-                  </p>
-                  <div className='flex flex-wrap gap-2 mb-6'>
-                    {[
-                      "React",
-                      "TypeScript",
-                      "Framer Motion",
-                      "Tailwind CSS",
-                    ].map((tech) => (
-                      <span
-                        key={tech}
-                        className='px-3 py-1 text-sm rounded-full bg-primary/10 border border-primary/20 text-primary'
-                      >
-                        {tech}
-                      </span>
-                    ))}
+            <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+              {/* Featured Project (Left, twice the size) */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+                className='lg:col-span-2'
+              >
+                <GlassCard className='overflow-hidden group h-full' hover>
+                  <div className='aspect-video bg-glass-bg/20 relative overflow-hidden'>
+                    <Image
+                      src={featuredProject.image || "/placeholder.svg"}
+                      alt={featuredProject.title}
+                      className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+                      width={800}
+                      height={450}
+                      priority
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
+                    <div className='absolute inset-0 bg-gradient-to-t from-glass-bg/80 to-transparent' />
                   </div>
-                  <Button asChild className='bg-primary hover:bg-primary/90'>
-                    <Link href={`/projects`}>
-                      View All Projects{" "}
-                      <ArrowRight className='ml-2' size={16} />
-                    </Link>
-                  </Button>
-                </div>
-                <div className='aspect-video bg-glass-bg/20 rounded-lg border border-glass-border/30 flex items-center justify-center'>
-                  <div className='text-foreground/40 text-center'>
-                    <div className='w-16 h-16 bg-primary/20 rounded-lg mx-auto mb-3 flex items-center justify-center'>
-                      <span className='text-2xl'>🎨</span>
+                  <div className='p-6'>
+                    <h3 className='text-2xl font-bold mb-3 text-primary group-hover:text-primary-glow transition-colors duration-300'>
+                      {featuredProject.title}
+                    </h3>
+                    <p className='text-foreground/80 mb-4'>
+                      {featuredProject.description}
+                    </p>
+                    <div className='flex flex-wrap gap-2 mb-6'>
+                      {featuredProject.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          className='px-3 py-1 text-sm rounded-full bg-primary/10 border border-primary/20 text-primary'
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
-                    <p className='text-sm'>Project Preview</p>
+                    <div className='flex space-x-3'>
+                      <Button asChild size='sm' className='flex-1'>
+                        <Link href={`/projects/${featuredProject.id}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                      {featuredProject.demo_url && (
+                        <Button asChild variant='outline' size='sm'>
+                          <a
+                            href={featuredProject.demo_url}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                          >
+                            <ExternalLink size={16} />
+                          </a>
+                        </Button>
+                      )}
+                      {featuredProject.github_url && (
+                        <Button asChild variant='outline' size='sm'>
+                          <a
+                            href={featuredProject.github_url}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                          >
+                            <Github size={16} />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
+                </GlassCard>
+              </motion.div>
+
+              {/* Other Projects (Right, stacked) */}
+              {otherProjectsForDisplay && otherProjectsForDisplay.length > 0 && (
+                <div className='lg:col-span-1 flex flex-col gap-6'>
+                  {otherProjectsForDisplay.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 1.0 + index * 0.1 }}
+                      className='flex-1'
+                    >
+                      <GlassCard className='p-6 h-full group' hover>
+                        <h3 className='text-xl font-bold mb-3 text-foreground group-hover:text-secondary transition-colors duration-300'>
+                          {project.title}
+                        </h3>
+                        <p className='text-foreground/70 mb-4 text-sm'>
+                          {project.description}
+                        </p>
+                        <div className='flex flex-wrap gap-1 mb-4'>
+                          {project.tech.slice(0, 3).map((tech) => (
+                            <span
+                              key={tech}
+                              className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                          {project.tech.length > 3 && (
+                            <span className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'>
+                              +{project.tech.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          asChild
+                          size='sm'
+                          variant='ghost'
+                          className='w-full'
+                        >
+                          <Link href={`/projects/${project.id}`}>
+                            View Project
+                          </Link>
+                        </Button>
+                      </GlassCard>
+                    </motion.div>
+                  ))}
                 </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-        </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Technical Expertise */}
         <div className='mb-16'>

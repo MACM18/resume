@@ -29,7 +29,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that extracts key features from project descriptions. Provide a concise list of 3-5 bullet points. Respond only with the bullet points, each on a new line, without any introductory or concluding remarks. Each bullet point should be a single sentence.",
+          content: "You are a helpful assistant that extracts key features from project descriptions. Provide a concise list of 3-5 bullet points. Respond only with the bullet points, each on a new line, without any introductory or concluding remarks. Each bullet point should be a single sentence. no need to add the bullet symbol at the start. just seperate each by line",
         },
         {
           role: "user",
