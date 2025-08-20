@@ -129,6 +129,19 @@ export function HomePageForm() {
         ...data,
         name: profile?.home_page_data?.name ?? "",
         tagline: profile?.home_page_data?.tagline ?? "",
+
+        // Process social links to add mailto: for email links
+        socialLinks: data.socialLinks.map((link) => ({
+          ...link,
+          href:
+            link.platform.toLowerCase() === "mail" ||
+            link.platform.toLowerCase() === "email"
+              ? link.href.startsWith("mailto:")
+                ? link.href
+                : `mailto:${link.href}`
+              : link.href,
+        })),
+
         technicalExpertise: data.technicalExpertise.map((e) => ({
           ...e,
           skills: e.skills.split(",").map((s) => s.trim()),

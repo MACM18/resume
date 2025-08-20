@@ -102,7 +102,7 @@ export const homePageData: Omit<HomePageData, 'name' | 'tagline'> = {
     { platform: "github", icon: "Github", href: "https://github.com", label: "GitHub" },
     { platform: "linkedin", icon: "Linkedin", href: "https://linkedin.com", label: "LinkedIn" },
     { platform: "twitter", icon: "Twitter", href: "https://twitter.com", label: "Twitter" },
-    { platform: "email", icon: "Mail", href: "mailto:hello@example.com", label: "Email" }
+    { platform: "email", icon: "Mail", href: "hello@example.com", label: "Email" }
   ],
   experienceHighlights: [
     {
