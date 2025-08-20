@@ -1,8 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Github, Linkedin, Mail, Twitter } from "lucide-react";
-import { GlassCard } => "@/components/GlassCard";
+import { ArrowRight, Github, Linkedin, Mail, Twitter, ExternalLink } from "lucide-react";
+import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
