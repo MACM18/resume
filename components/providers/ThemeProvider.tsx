@@ -5,7 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/types/portfolio";
 
-const generateCssVariables = (theme: Theme, backgroundImageUrl: string | null) => {
+const generateCssVariables = (
+  theme: Theme,
+  backgroundImageUrl: string | null
+) => {
   let css = `:root { ${Object.entries(theme)
     .map(([key, value]) => `${key}: ${value};`)
     .join(" ")} }`;
@@ -52,7 +55,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <>
       {profileData && (
         <style
-          dangerouslySetInnerHTML={{ __html: generateCssVariables(profileData.theme, profileData.background_image_url) }}
+          dangerouslySetInnerHTML={{
+            __html: generateCssVariables(
+              profileData.theme,
+              profileData.background_image_url
+            ),
+          }}
         />
       )}
       {children}

@@ -409,8 +409,8 @@ export default function Page() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 1.7 }}
           >
             <GlassCard className='p-8 h-full' hover>

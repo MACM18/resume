@@ -25,29 +25,32 @@ export default function RootLayout({
                 <div className='min-h-screen bg-background relative overflow-hidden'>
                   {/* Base gradient background that's always visible */}
                   <div className='fixed inset-0 bg-gradient-to-br from-background via-background-secondary to-background z-0' />
-                  
+
                   {/* Animated gradient orbs */}
                   <div className='fixed top-10 left-10 w-96 h-96 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full blur-3xl animate-float opacity-60 z-0' />
-                  <div className='fixed bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-secondary/8 to-accent/8 rounded-full blur-3xl animate-float opacity-50 z-0' style={{ animationDelay: "2s" }} />
-                  
+                  <div
+                    className='fixed bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-secondary/8 to-accent/8 rounded-full blur-3xl animate-float opacity-50 z-0'
+                    style={{ animationDelay: "2s" }}
+                  />
+
                   {/* Background Image Layer - only visible when image is set */}
-                  <div 
-                    className='fixed inset-0 transition-opacity duration-700 z-0' 
+                  <div
+                    className='fixed inset-0 transition-opacity duration-700 z-0'
                     style={{
-                      backgroundImage: 'var(--background-image-url)',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundAttachment: 'fixed',
-                      opacity: 'calc(var(--has-background-image) * 0.7)'
+                      backgroundImage: "var(--background-image-url)",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundAttachment: "fixed",
+                      opacity: "calc(var(--has-background-image) * 0.7)",
                     }}
                   />
-                  
+
                   {/* Overlay gradient - slightly darker when image is present */}
-                  <div 
+                  <div
                     className='fixed inset-0 bg-gradient-to-br from-background/90 via-background-secondary/80 to-background/90 transition-opacity duration-700 z-0'
                     style={{
-                      opacity: 'var(--has-background-image)'
+                      opacity: "var(--has-background-image)",
                     }}
                   />
                   <div
