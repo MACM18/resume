@@ -23,7 +23,7 @@ export default function RootLayout({
             <ThemeProvider>
               <TooltipProvider>
                 <div className='min-h-screen bg-background relative overflow-hidden'>
-                  {/* Animated Background Elements (these stay full screen, behind the main content) */}
+                  {/* Animated Background Elements */}
                   <div className='fixed inset-0 bg-gradient-to-br from-background via-background-secondary to-background' />
                   <div className='fixed top-10 left-10 w-96 h-96 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full blur-3xl animate-float opacity-60' />
                   <div
@@ -47,18 +47,10 @@ export default function RootLayout({
                     className='fixed top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-secondary/10 to-transparent animate-pulse opacity-20'
                     style={{ animationDelay: "2s" }}
                   />
-
-                  {/* Main content wrapper with dynamic background image */}
-                  <div className="relative z-10 p-4 md:p-8"> {/* Added padding here */}
-                    <div className="site-background-container relative z-10 overflow-hidden rounded-xl"> {/* Rounded corners here */}
-                      <PageTransition>{children}</PageTransition>
-                    </div>
-                  </div>
-
-                  {/* Fixed UI elements (Navigation, AuthButton, ContactButton) */}
                   <Toaster />
                   <Sonner />
                   <Navigation />
+                  <PageTransition>{children}</PageTransition>
                   <AuthButton />
                   <ContactButton />
                 </div>
