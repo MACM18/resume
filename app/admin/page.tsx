@@ -46,18 +46,22 @@ const AdminPage = () => {
   ];
 
   return (
-    <div className="min-h-screen relative pt-24 pb-32 md:pb-12 px-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-8">
+    <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
+      <div className='max-w-4xl mx-auto'>
+        <h1 className='text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-8'>
           Admin Dashboard
         </h1>
-        <GlassCard>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <GlassCard hover={false}>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className='w-full'
+          >
             {isMobile ? (
-              <div className="p-4">
+              <div className='p-4'>
                 <Select value={activeTab} onValueChange={setActiveTab}>
-                  <SelectTrigger className="w-full bg-glass-bg/20 border-glass-border">
-                    <SelectValue placeholder="Select a section to edit" />
+                  <SelectTrigger className='w-full bg-glass-bg/20 border-glass-border'>
+                    <SelectValue placeholder='Select a section to edit' />
                   </SelectTrigger>
                   <SelectContent>
                     {tabs.map((tab) => (
@@ -69,7 +73,7 @@ const AdminPage = () => {
                 </Select>
               </div>
             ) : (
-              <TabsList className="grid w-full grid-cols-6 bg-glass-bg/20">
+              <TabsList className='grid w-full grid-cols-6 bg-glass-bg/20'>
                 {tabs.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value}>
                     {tab.label}
@@ -78,22 +82,31 @@ const AdminPage = () => {
               </TabsList>
             )}
 
-            <TabsContent value="profile" className="p-6">
+            <TabsContent value='profile' className='p-6'>
               <ProfileManagement />
             </TabsContent>
-            <TabsContent value="theme" className="p-6 max-h-[70vh] overflow-y-auto">
+            <TabsContent
+              value='theme'
+              className='p-6 max-h-[70vh] overflow-y-auto'
+            >
               <ThemeEditor />
             </TabsContent>
-            <TabsContent value="home" className="p-6 max-h-[70vh] overflow-y-auto">
+            <TabsContent
+              value='home'
+              className='p-6 max-h-[70vh] overflow-y-auto'
+            >
               <HomePageForm />
             </TabsContent>
-            <TabsContent value="about" className="p-6 max-h-[70vh] overflow-y-auto">
+            <TabsContent
+              value='about'
+              className='p-6 max-h-[70vh] overflow-y-auto'
+            >
               <AboutPageForm />
             </TabsContent>
-            <TabsContent value="projects" className="p-6">
+            <TabsContent value='projects' className='p-6'>
               <ProjectManagement />
             </TabsContent>
-            <TabsContent value="resumes" className="p-6">
+            <TabsContent value='resumes' className='p-6'>
               <ResumeManagement />
             </TabsContent>
           </Tabs>

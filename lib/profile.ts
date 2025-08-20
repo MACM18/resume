@@ -9,12 +9,13 @@ interface ProfileData {
   home_page_data: HomePageData;
   about_page_data: AboutPageData;
   avatar_url: string | null;
+  background_image_url: string | null; // Include background image URL
 }
 
 export async function getProfileData(domain: string): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('full_name, tagline, home_page_data, about_page_data, avatar_url')
+    .select('full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url')
     .eq('domain', domain)
     .single();
 
@@ -108,6 +109,42 @@ export async function deleteProfileImage(userId: string, imageUrl: string): Prom
 
   if (error) {
     console.error('Error deleting profile image:', error);
+    throw error;
+  }
+  return true;
+}
+
+export async function uploadBackgroundImage(file: File, userId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${userId}/background-${Date.now()}.${fileExt}`; // Store in user-specific folder
+
+  const { error: uploadError } = await supabase.storage
+    .from('background-images')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error('Error uploading background image:', uploadError);
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from('background-images')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
+export async function deleteBackgroundImage(userId: string, imageUrl: string): Promise<boolean> {
+  const pathSegments = imageUrl.split('/');
+  const fileName = pathSegments[pathSegments.length - 1];
+  const filePath = `${userId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('background-images')
+    .remove([filePath]);
+
+  if (error) {
+    console.error('Error deleting background image:', error);
     throw error;
   }
   return true;

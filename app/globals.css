@@ -266,6 +266,11 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     background-attachment: fixed;
+    /* Apply dynamic background image */
+    background-image: var(--background-image-url);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   /* Glassmorphism utility classes */

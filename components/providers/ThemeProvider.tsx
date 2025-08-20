@@ -5,10 +5,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/types/portfolio";
 
-const generateCssVariables = (theme: Theme) => {
-  return `:root { ${Object.entries(theme)
+const generateCssVariables = (theme: Theme, backgroundImageUrl: string | null) => {
+  let css = `:root { ${Object.entries(theme)
     .map(([key, value]) => `${key}: ${value};`)
     .join(" ")} }`;
+
+  if (backgroundImageUrl) {
+    css += `\nbody { --background-image-url: url('${backgroundImageUrl}'); }`;
+  } else {
+    css += `\nbody { --background-image-url: none; }`;
+  }
+  return css;
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -18,25 +25,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setHostname(window.location.hostname);
   }, []);
 
-  const { data: theme } = useQuery({
+  const { data: profileData } = useQuery({
     queryKey: ["theme", hostname],
     queryFn: async () => {
-      if (!hostname) return {};
+      if (!hostname) return { theme: {}, background_image_url: null };
       const { data } = await supabase
         .from("profiles")
-        .select("theme")
+        .select("theme, background_image_url")
         .eq("domain", hostname)
         .single();
-      return data?.theme || {};
+      return {
+        theme: data?.theme || {},
+        background_image_url: data?.background_image_url || null,
+      };
     },
     enabled: !!hostname,
   });
 
   return (
     <>
-      {theme && (
+      {profileData && (
         <style
-          dangerouslySetInnerHTML={{ __html: generateCssVariables(theme) }}
+          dangerouslySetInnerHTML={{ __html: generateCssVariables(profileData.theme, profileData.background_image_url) }}
         />
       )}
       {children}

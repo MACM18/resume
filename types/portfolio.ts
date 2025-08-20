@@ -106,4 +106,5 @@ export interface Profile {
   active_resume_role: string | null;
   theme: Theme | null;
   updated_at: string;
+  background_image_url: string | null; // New field for background image
 }
