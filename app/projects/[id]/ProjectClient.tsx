@@ -175,22 +175,16 @@ export default function ProjectClient({ id }: { id: string }) {
                   Key Features
                 </h2>
                 <ul className='space-y-3 text-foreground/80'>
-                  <li className='flex items-start'>
-                    <span className='w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0' />
-                    Modern, responsive design with glassmorphism effects
-                  </li>
-                  <li className='flex items-start'>
-                    <span className='w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0' />
-                    Built with modern React and TypeScript
-                  </li>
-                  <li className='flex items-start'>
-                    <span className='w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0' />
-                    Smooth animations powered by Framer Motion
-                  </li>
-                  <li className='flex items-start'>
-                    <span className='w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0' />
-                    Fully responsive across all device sizes
-                  </li>
+                  {project.key_features && project.key_features.length > 0 ? (
+                    project.key_features.map((feature, index) => (
+                      <li key={index} className='flex items-start'>
+                        <span className='w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0' />
+                        {feature}
+                      </li>
+                    ))
+                  ) : (
+                    <li className='text-foreground/60'>No key features available.</li>
+                  )}
                 </ul>
               </GlassCard>
             </motion.div>

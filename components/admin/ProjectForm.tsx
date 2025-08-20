@@ -21,7 +21,7 @@ import { addProject, updateProject, uploadProjectImage, deleteProjectImage } fro
 import { Project } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
 import { useState } from "react";
-import { FileUp, Loader2, CheckCircle, Trash } from "lucide-react";
+import { FileUp, Loader2, CheckCircle, Trash, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useSupabase } from "../providers/AuthProvider";
 import {
@@ -64,6 +64,7 @@ const projectSchema = z.object({
     .or(z.literal("")),
   featured: z.boolean().default(false),
   published: z.boolean().default(true),
+  key_features: z.string().optional(), // New field for key features (comma-separated in form)
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -75,7 +76,7 @@ interface ProjectFormProps {
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session, supabase } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProjectFormValues>({
@@ -90,10 +91,12 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
       github_url: project?.github_url || "",
       featured: project?.featured || false,
       published: project?.published ?? true,
+      key_features: project?.key_features?.join("\n") || "", // Join with newline for textarea
     },
   });
 
   const imageUrl = form.watch("image");
+  const longDescription = form.watch("long_description");
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -132,11 +135,33 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
     }
   };
 
+  const generateFeaturesMutation = useMutation({
+    mutationFn: async (description: string) => {
+      const { data, error } = await supabase.functions.invoke("generate-features", {
+        body: { long_description: description },
+      });
+      if (error) throw error;
+      return data.key_features as string[];
+    },
+    onSuccess: (features) => {
+      form.setValue("key_features", features.join("\n"), { shouldValidate: true });
+      toast.success("Key features generated successfully!");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to generate features: ${error.message}`);
+      } else {
+        toast.error("Failed to generate features.");
+      }
+    },
+  });
+
   const mutation = useMutation({
     mutationFn: (data: ProjectFormValues) => {
       const processedData = {
         ...data,
         tech: data.tech.split(",").map((t) => t.trim()),
+        key_features: data.key_features ? data.key_features.split("\n").map((f) => f.trim()).filter(f => f.length > 0) : [],
       };
       if (project) {
         return updateProject(project.id, processedData);
@@ -207,6 +232,41 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                   rows={5}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='key_features'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Key Features</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='Feature 1&#10;Feature 2&#10;Feature 3'
+                  {...field}
+                  rows={5}
+                />
+              </FormControl>
+              <FormDescription>
+                List each key feature on a new line.
+              </FormDescription>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => generateFeaturesMutation.mutate(longDescription)}
+                disabled={generateFeaturesMutation.isPending || !longDescription}
+                className="mt-2"
+              >
+                {generateFeaturesMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2" size={16} />
+                )}
+                Generate from Description
+              </Button>
               <FormMessage />
             </FormItem>
           )}

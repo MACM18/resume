@@ -11,6 +11,7 @@ export interface Project {
   published: boolean;
   user_id: string;
   created_at: string;
+  key_features?: string[]; // New field for AI-generated key features
 }
 
 export interface Resume {
