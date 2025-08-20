@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Github, Linkedin, Mail, Twitter } from "lucide-react";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassCard } => "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
@@ -400,7 +400,7 @@ export default function Page() {
 
           <motion.div
             initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.7 }}
           >
             <GlassCard className='p-8 h-full' hover>
@@ -424,42 +424,44 @@ export default function Page() {
         </div>
 
         {/* Achievements & Recognition */}
-        <div className='mb-16'>
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.8 }}
-            className='text-3xl font-bold text-center mb-12 text-secondary'
-          >
-            Achievements & Recognition
-          </motion.h2>
+        {homePageData.achievements.length > 0 && (
+          <div className='mb-16'>
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.8 }}
+              className='text-3xl font-bold text-center mb-12 text-secondary'
+            >
+              Achievements & Recognition
+            </motion.h2>
 
-          <div className='grid md:grid-cols-3 gap-6'>
-            {homePageData.achievements.map((achievement, index) => (
-              <motion.div
-                key={achievement.title}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 1.9 + index * 0.1 }}
-              >
-                <GlassCard className='p-6 text-center' hover>
-                  <div className='text-3xl font-bold text-primary mb-2'>
-                    {achievement.metric}
-                  </div>
-                  <div className='text-sm text-foreground/60 mb-3'>
-                    {achievement.label}
-                  </div>
-                  <h3 className='text-lg font-semibold mb-2'>
-                    {achievement.title}
-                  </h3>
-                  <p className='text-foreground/70 text-sm'>
-                    {achievement.description}
-                  </p>
-                </GlassCard>
-              </motion.div>
-            ))}
+            <div className='grid md:grid-cols-3 gap-6'>
+              {homePageData.achievements.map((achievement, index) => (
+                <motion.div
+                  key={achievement.title}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 1.9 + index * 0.1 }}
+                >
+                  <GlassCard className='p-6 text-center' hover>
+                    <div className='text-3xl font-bold text-primary mb-2'>
+                      {achievement.metric}
+                    </div>
+                    <div className='text-sm text-foreground/60 mb-3'>
+                      {achievement.label}
+                    </div>
+                    <h3 className='text-lg font-semibold mb-2'>
+                      {achievement.title}
+                    </h3>
+                    <p className='text-foreground/70 text-sm'>
+                      {achievement.description}
+                    </p>
+                  </GlassCard>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Call to Action */}
         <motion.div

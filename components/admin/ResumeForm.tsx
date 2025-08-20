@@ -49,6 +49,14 @@ const resumeSchema = z.object({
       year: z.string().min(4, "Year is required."),
     })
   ),
+  certifications: z.array( // New certifications array
+    z.object({
+      name: z.string().min(1, "Certification name is required."),
+      issuer: z.string().min(1, "Issuer is required."),
+      date: z.string().min(4, "Date is required (e.g., 2023)."),
+      url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+    })
+  ).optional(),
 });
 
 type ResumeFormValues = z.infer<typeof resumeSchema>;
@@ -84,6 +92,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
           description: exp.description.join("\n"),
         })) || [],
       education: resume?.education || [],
+      certifications: resume?.certifications || [], // Initialize certifications
     },
   });
 
@@ -97,6 +106,11 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
     append: appendEdu,
     remove: removeEdu,
   } = useFieldArray({ control: form.control, name: "education" });
+  const {
+    fields: certFields,
+    append: appendCert,
+    remove: removeCert,
+  } = useFieldArray({ control: form.control, name: "certifications" }); // New field array for certifications
 
   const mutation = useMutation({
     mutationFn: (data: ResumeFormValues) => {
@@ -108,6 +122,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
           ...exp,
           description: exp.description.split("\n"),
         })),
+        certifications: data.certifications || [], // Ensure certifications are included
       };
       if (resume) {
         return updateResume(resume.id, processedData);
@@ -484,6 +499,87 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
             onClick={() => appendEdu({ degree: "", school: "", year: "" })}
           >
             Add Education
+          </Button>
+        </div>
+
+        {/* Certifications */}
+        <div className='space-y-2'>
+          <h3 className='text-lg font-medium'>Certifications</h3>
+          {certFields.map((field, index) => (
+            <div
+              key={field.id}
+              className='p-3 border rounded-md space-y-2 relative'
+            >
+              <Button
+                type='button'
+                variant='ghost'
+                size='icon'
+                className='absolute top-1 right-1 h-6 w-6'
+                onClick={() => removeCert(index)}
+              >
+                <Trash size={14} />
+              </Button>
+              <FormField
+                control={form.control}
+                name={`certifications.${index}.name`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Certification Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`certifications.${index}.issuer`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Issuer</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`certifications.${index}.date`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date (e.g., 2023)</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`certifications.${index}.url`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Credential URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          ))}
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={() => appendCert({ name: "", issuer: "", date: "", url: "" })}
+          >
+            Add Certification
           </Button>
         </div>
 

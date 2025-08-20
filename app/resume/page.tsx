@@ -7,6 +7,7 @@ import {
   Calendar,
   ExternalLink,
   Loader2,
+  Award, // New icon for certifications
 } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -361,6 +362,46 @@ const Resume = () => {
                   </div>
                 </GlassCard>
               </motion.div>
+
+              {/* Certifications */}
+              {resume.certifications && resume.certifications.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  <GlassCard className='p-6'>
+                    <h3 className='text-xl font-bold mb-4 text-primary'>
+                      Certifications
+                    </h3>
+                    <div className='space-y-4'>
+                      {resume.certifications.map((cert, index) => (
+                        <div key={index}>
+                          <h4 className='font-semibold flex items-center'>
+                            <Award size={16} className='mr-2 text-primary' />
+                            {cert.name}
+                          </h4>
+                          <p className='text-foreground/70'>{cert.issuer}</p>
+                          <div className='flex items-center text-foreground/60 text-sm'>
+                            <Calendar size={14} className='mr-1' />
+                            {cert.date}
+                            {cert.url && (
+                              <a
+                                href={cert.url}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='ml-auto text-primary hover:text-primary-glow flex items-center'
+                              >
+                                View <ExternalLink size={14} className='ml-1' />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              )}
             </div>
           </div>
         </div>

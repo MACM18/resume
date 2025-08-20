@@ -36,6 +36,12 @@ export interface Resume {
   pdf_source: 'uploaded' | 'generated';
   user_id: string;
   created_at: string;
+  certifications?: { // New field for certifications
+    name: string;
+    issuer: string;
+    date: string;
+    url?: string;
+  }[];
 }
 
 export interface HomePageData {
