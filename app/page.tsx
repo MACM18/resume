@@ -1,7 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Github, Linkedin, Mail, Twitter, ExternalLink } from "lucide-react";
+import {
+  ArrowRight,
+  Github,
+  Linkedin,
+  Mail,
+  Twitter,
+  ExternalLink,
+} from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -50,11 +57,13 @@ export default function Page() {
     enabled: !!hostname,
   });
 
-  const { data: allPublishedProjects, isLoading: isLoadingProjects } = useQuery({
-    queryKey: ["projects", hostname],
-    queryFn: () => getProjects(hostname), // This fetches all published projects
-    enabled: !!hostname && !!profileData,
-  });
+  const { data: allPublishedProjects, isLoading: isLoadingProjects } = useQuery(
+    {
+      queryKey: ["projects", hostname],
+      queryFn: () => getProjects(hostname), // This fetches all published projects
+      enabled: !!hostname && !!profileData,
+    }
+  );
 
   const isLoading = isLoadingProfile || isLoadingProjects;
 
@@ -261,53 +270,54 @@ export default function Page() {
               </motion.div>
 
               {/* Other Projects (Right, stacked) */}
-              {otherProjectsForDisplay && otherProjectsForDisplay.length > 0 && (
-                <div className='lg:col-span-1 flex flex-col gap-6'>
-                  {otherProjectsForDisplay.map((project, index) => (
-                    <motion.div
-                      key={project.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 1.0 + index * 0.1 }}
-                      className='flex-1'
-                    >
-                      <GlassCard className='p-6 h-full group' hover>
-                        <h3 className='text-xl font-bold mb-3 text-foreground group-hover:text-secondary transition-colors duration-300'>
-                          {project.title}
-                        </h3>
-                        <p className='text-foreground/70 mb-4 text-sm'>
-                          {project.description}
-                        </p>
-                        <div className='flex flex-wrap gap-1 mb-4'>
-                          {project.tech.slice(0, 3).map((tech) => (
-                            <span
-                              key={tech}
-                              className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                          {project.tech.length > 3 && (
-                            <span className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'>
-                              +{project.tech.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                        <Button
-                          asChild
-                          size='sm'
-                          variant='ghost'
-                          className='w-full'
-                        >
-                          <Link href={`/projects/${project.id}`}>
-                            View Project
-                          </Link>
-                        </Button>
-                      </GlassCard>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+              {otherProjectsForDisplay &&
+                otherProjectsForDisplay.length > 0 && (
+                  <div className='lg:col-span-1 flex flex-col gap-6'>
+                    {otherProjectsForDisplay.map((project, index) => (
+                      <motion.div
+                        key={project.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 1.0 + index * 0.1 }}
+                        className='flex-1'
+                      >
+                        <GlassCard className='p-6 h-full group' hover>
+                          <h3 className='text-xl font-bold mb-3 text-foreground group-hover:text-secondary transition-colors duration-300'>
+                            {project.title}
+                          </h3>
+                          <p className='text-foreground/70 mb-4 text-sm'>
+                            {project.description}
+                          </p>
+                          <div className='flex flex-wrap gap-1 mb-4'>
+                            {project.tech.slice(0, 3).map((tech) => (
+                              <span
+                                key={tech}
+                                className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                            {project.tech.length > 3 && (
+                              <span className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'>
+                                +{project.tech.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                          <Button
+                            asChild
+                            size='sm'
+                            variant='ghost'
+                            className='w-full'
+                          >
+                            <Link href={`/projects/${project.id}`}>
+                              View Project
+                            </Link>
+                          </Button>
+                        </GlassCard>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
             </div>
           </section>
         )}
@@ -399,7 +409,7 @@ export default function Page() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.7 }}
           >
