@@ -18,8 +18,8 @@ export async function getProfileData(domain: string): Promise<ProfileData | null
     .eq('domain', domain)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // Ignore "no rows found" error
-    console.error('Error fetching profile data:', error.message);
+  if (error) { // Log all errors, not just non-PGRST116
+    console.error('Error fetching profile data for domain:', domain, 'Error details:', error);
     return null;
   }
   
@@ -44,7 +44,7 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
 }
 
 export async function updateCurrentUserProfile(profileData: Partial<Profile>) {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } = { session: null } } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
