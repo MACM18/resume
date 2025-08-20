@@ -20,11 +20,12 @@ import { addResume, updateResume, uploadResumePdf } from "@/lib/resumes";
 import { getProjectsForCurrentUser } from "@/lib/projects";
 import { Resume } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
-import { Trash, FileUp, Loader2, CheckCircle } from "lucide-react";
+import { Trash, FileUp, Loader2, CheckCircle, Sparkles } from "lucide-react";
 import { useSupabase } from "../providers/AuthProvider";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getCurrentUserProfile } from "@/lib/profile"; // Import to get profile data
 
 const resumeSchema = z.object({
   role: z.string().min(2, "Role is required."),
@@ -57,6 +58,7 @@ const resumeSchema = z.object({
       url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
     })
   ).optional(),
+  location: z.string().min(2, "Location is required.").optional(), // New location field
 });
 
 type ResumeFormValues = z.infer<typeof resumeSchema>;
@@ -68,12 +70,17 @@ interface ResumeFormProps {
 
 export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session, supabase } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["user-projects"],
     queryFn: getProjectsForCurrentUser,
+  });
+
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["currentUserProfile"],
+    queryFn: getCurrentUserProfile,
   });
 
   const form = useForm<ResumeFormValues>({
@@ -93,6 +100,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
         })) || [],
       education: resume?.education || [],
       certifications: resume?.certifications || [], // Initialize certifications
+      location: resume?.location || "", // Initialize location
     },
   });
 
@@ -111,6 +119,46 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
     append: appendCert,
     remove: removeCert,
   } = useFieldArray({ control: form.control, name: "certifications" }); // New field array for certifications
+
+  const generateSummaryMutation = useMutation({
+    mutationFn: async () => {
+      if (!profile || !projects) {
+        throw new Error("Profile or projects data not loaded for AI generation.");
+      }
+      const currentResumeData = form.getValues(); // Get current form values for resume
+      const { data, error } = await supabase.functions.invoke("generate-resume-summary", {
+        body: {
+          resume: {
+            ...currentResumeData,
+            skills: currentResumeData.skills.split(",").map((s) => s.trim()),
+            experience: currentResumeData.experience.map((exp) => ({
+              ...exp,
+              description: exp.description.split("\n"),
+            })),
+          },
+          profile: {
+            full_name: profile.full_name,
+            tagline: profile.tagline,
+            about_page_data: profile.about_page_data,
+          },
+          projects: projects,
+        },
+      });
+      if (error) throw error;
+      return data.summary as string;
+    },
+    onSuccess: (generatedSummary) => {
+      form.setValue("summary", generatedSummary, { shouldValidate: true });
+      toast.success("Resume summary generated successfully!");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to generate summary: ${error.message}`);
+      } else {
+        toast.error("Failed to generate summary.");
+      }
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: (data: ResumeFormValues) => {
@@ -159,6 +207,9 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
     }
   };
 
+  const isGeneratingSummary = generateSummaryMutation.isPending;
+  const isDataReadyForAI = !isLoadingProfile && !isLoadingProjects && profile && projects;
+
   return (
     <Form {...form}>
       <form
@@ -187,6 +238,19 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
               <FormLabel>Title</FormLabel>
               <FormControl>
                 <Input placeholder='Full Stack Developer' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='location'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input placeholder='San Francisco, CA' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -269,6 +333,24 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
               <FormControl>
                 <Textarea placeholder='A brief summary...' {...field} />
               </FormControl>
+              <FormDescription>
+                A concise overview of your professional profile.
+              </FormDescription>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => generateSummaryMutation.mutate()}
+                disabled={isGeneratingSummary || !isDataReadyForAI}
+                className="mt-2"
+              >
+                {isGeneratingSummary ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2" size={16} />
+                )}
+                Generate with AI
+              </Button>
               <FormMessage />
             </FormItem>
           )}

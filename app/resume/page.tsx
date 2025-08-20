@@ -207,10 +207,12 @@ const Resume = () => {
                     <Mail size={16} className='mr-2' />
                     {contactEmail}
                   </div>
-                  <div className='flex items-center'>
-                    <MapPin size={16} className='mr-2' />
-                    San Francisco, CA
-                  </div>
+                  {resume.location && (
+                    <div className='flex items-center'>
+                      <MapPin size={16} className='mr-2' />
+                      {resume.location}
+                    </div>
+                  )}
                 </div>
               </div>
               <p className='text-foreground/80 text-center max-w-3xl mx-auto leading-relaxed'>
