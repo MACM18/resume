@@ -264,13 +264,68 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    background-attachment: fixed;
-    /* Apply dynamic background image */
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: 1rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background image container */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border-radius: 1.5rem;
     background-image: var(--background-image-url);
-    background-size: cover;
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: -1;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Add a subtle overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border-radius: 1.5rem;
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--background) / 0.7),
+      hsl(var(--background) / 0.3)
+    );
+    z-index: -1;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border-radius: 1.5rem;
+    /* Apply dynamic background image */
+    background-image: var(--background-image-url);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: -1;
+    opacity: 0.8;
   }
 
   /* Glassmorphism utility classes */
