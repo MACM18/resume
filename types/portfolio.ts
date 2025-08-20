@@ -90,6 +90,7 @@ export type Theme = Record<string, string>;
 export interface Profile {
   id: string;
   full_name: string;
+  avatar_url: string | null;
   tagline: string;
   domain: string | null;
   home_page_data: HomePageData;

@@ -8,6 +8,7 @@ import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Link as LinkIcon } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
+import { ProfileImageManager } from "./ProfileImageManager"; // Import the new component
 
 export function ProfileManagement() {
   const { session } = useSupabase();
@@ -109,6 +110,9 @@ export function ProfileManagement() {
       <div>
         <h2 className='text-2xl font-bold text-primary mb-4'>Your Profile</h2>
         <ProfileForm />
+      </div>
+      <div>
+        <ProfileImageManager /> {/* New Profile Image Manager */}
       </div>
     </div>
   );

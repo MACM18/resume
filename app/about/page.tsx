@@ -7,6 +7,7 @@ import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import Image from "next/image";
 
 const iconMap = {
   Code,
@@ -54,6 +55,7 @@ const About = () => {
 
   const aboutPageData = profileData.about_page_data;
   const contactEmail = profileData.home_page_data.callToAction.email;
+  const avatarUrl = profileData.avatar_url;
 
   return (
     <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
@@ -65,6 +67,22 @@ const About = () => {
           transition={{ duration: 0.6 }}
           className='text-center mb-16'
         >
+          {avatarUrl && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className='relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-2 border-primary shadow-lg'
+            >
+              <Image
+                src={avatarUrl}
+                alt='Profile Picture'
+                layout='fill'
+                objectFit='cover'
+                className='object-cover'
+              />
+            </motion.div>
+          )}
           <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
             {aboutPageData.title}
           </h1>
