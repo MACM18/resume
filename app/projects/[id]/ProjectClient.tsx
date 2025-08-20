@@ -26,7 +26,7 @@ export default function ProjectClient({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen relative pt-24 pb-12 px-6'>
+      <div className='min-h-screen relative pt-24 md:pt-40 pb-12 px-6'>
         <div className='max-w-4xl mx-auto'>
           <Skeleton className='h-8 w-40 mb-8' />
           <Skeleton className='h-16 w-3/4 mb-6' />
@@ -43,7 +43,7 @@ export default function ProjectClient({ id }: { id: string }) {
 
   if (!project) {
     return (
-      <div className='min-h-screen relative pt-24 pb-12 px-6 flex items-center justify-center'>
+      <div className='min-h-screen relative pt-24 md:pt-40 pb-12 px-6 flex items-center justify-center'>
         <GlassCard className='p-8 text-center'>
           <h1 className='text-2xl font-bold mb-4'>Project Not Found</h1>
           <p className='text-foreground/70 mb-6'>
@@ -61,7 +61,7 @@ export default function ProjectClient({ id }: { id: string }) {
   }
 
   return (
-    <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
+    <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
       <div className='max-w-4xl mx-auto'>
         {/* Back Button */}
         <motion.div

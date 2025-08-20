@@ -63,7 +63,7 @@ export default function Page() {
   };
 
   return (
-    <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
+    <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
       <div className='max-w-6xl mx-auto'>
         {/* Hero Section */}
         <div className='text-center mb-16'>
