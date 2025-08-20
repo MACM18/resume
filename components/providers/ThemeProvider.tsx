@@ -11,9 +11,9 @@ const generateCssVariables = (theme: Theme, backgroundImageUrl: string | null) =
     .join(" ")} }`;
 
   if (backgroundImageUrl) {
-    css += `\nbody { --background-image-url: url('${backgroundImageUrl}'); }`;
+    css += `\n:root { --dynamic-background-image-url: url('${backgroundImageUrl}'); }`;
   } else {
-    css += `\nbody { --background-image-url: none; }`;
+    css += `\n:root { --dynamic-background-image-url: none; }`;
   }
   return css;
 };
