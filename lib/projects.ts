@@ -3,6 +3,31 @@
 import { supabase } from './supabase';
 import { Project } from '@/types/portfolio';
 
+export async function uploadProjectImage(file: File): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('You must be logged in to upload an image.');
+  }
+
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${session.user.id}/${Date.now()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('project-images')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error('Error uploading image:', uploadError);
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from('project-images')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
 async function getUserIdByDomain(domain: string): Promise<string | null> {
   const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
   if (error || !data) {
@@ -86,7 +111,7 @@ export async function addProject(project: Omit<Project, 'id' | 'created_at' | 'u
 
   if (error) {
     console.error('Error adding project:', error);
-    return null;
+    throw error; // Throw the error to trigger onError in useMutation
   }
   return data;
 }
@@ -101,7 +126,7 @@ export async function updateProject(id: string, project: Partial<Project>): Prom
 
   if (error) {
     console.error('Error updating project:', error);
-    return null;
+    throw error; // Throw the error to trigger onError in useMutation
   }
   return data;
 }
@@ -110,7 +135,7 @@ export async function deleteProject(id: string): Promise<boolean> {
   const { error } = await supabase.from('projects').delete().eq('id', id);
   if (error) {
     console.error('Error deleting project:', error);
-    return false;
+    throw error; // Throw the error to trigger onError in useMutation
   }
   return true;
 }

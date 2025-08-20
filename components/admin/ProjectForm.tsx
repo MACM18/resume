@@ -17,9 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addProject, updateProject } from "@/lib/projects";
+import { addProject, updateProject, uploadProjectImage } from "@/lib/projects";
 import { Project } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
+import { useState } from "react";
+import { FileUp, Loader2, CheckCircle } from "lucide-react";
+import Image from "next/image";
 
 const projectSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
@@ -60,6 +63,7 @@ interface ProjectFormProps {
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const queryClient = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
@@ -75,6 +79,32 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
       published: project?.published ?? true,
     },
   });
+
+  const imageUrl = form.watch("image");
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const publicUrl = await uploadProjectImage(file);
+      form.setValue("image", publicUrl, { shouldValidate: true });
+      toast.success("Image uploaded successfully!");
+    } catch (error) {
+      toast.error("Failed to upload image.");
+      console.error(error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: (data: ProjectFormValues) => {
@@ -158,12 +188,40 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
         <FormField
           control={form.control}
           name='image'
-          render={({ field }) => (
+          render={() => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input placeholder='https://example.com/image.png' {...field} />
-              </FormControl>
+              <FormLabel>Project Image</FormLabel>
+              <div className="flex items-center gap-4">
+                <Button asChild variant="outline">
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    {isUploading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileUp className="mr-2 h-4 w-4" />
+                    )}
+                    {isUploading ? "Uploading..." : "Upload Image"}
+                  </label>
+                </Button>
+                <Input
+                  id="image-upload"
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
+                />
+                {imageUrl && (
+                  <div className="flex items-center gap-2 text-sm text-green-400">
+                    <CheckCircle size={16} />
+                    <span>Image Linked</span>
+                  </div>
+                )}
+              </div>
+              {imageUrl && (
+                <div className="mt-4 aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-glass-border">
+                  <Image src={imageUrl} alt="Project preview" width={400} height={225} className="object-cover w-full h-full" />
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
