@@ -102,7 +102,8 @@ export function HomePageForm() {
         description: "",
         email: "",
       },
-      about_card_description: profile?.home_page_data?.about_card_description || "", // Initialize
+      about_card_description:
+        profile?.home_page_data?.about_card_description || "", // Initialize
     },
   });
 
@@ -131,14 +132,19 @@ export function HomePageForm() {
 
   const generateAboutCardDescriptionMutation = useMutation({
     mutationFn: async (story: string[]) => {
-      const { data, error } = await supabase.functions.invoke("generate-about-card-description", {
-        body: { about_story: story },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "generate-about-card-description",
+        {
+          body: { about_story: story },
+        }
+      );
       if (error) throw error;
       return data.about_card_description as string;
     },
     onSuccess: (generatedDescription) => {
-      form.setValue("about_card_description", generatedDescription, { shouldValidate: true });
+      form.setValue("about_card_description", generatedDescription, {
+        shouldValidate: true,
+      });
       toast.success("About card description generated successfully!");
     },
     onError: (error: unknown) => {
@@ -641,13 +647,17 @@ export function HomePageForm() {
 
         {/* About Me Card Description */}
         <div>
-          <h3 className='text-lg font-medium mb-4'>About Me Card Description</h3>
+          <h3 className='text-lg font-medium mb-4'>
+            About Me Card Description
+          </h3>
           <FormField
             control={form.control}
             name='about_card_description'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description for Home Page &quot;About Me&quot; Card</FormLabel>
+                <FormLabel>
+                  Description for Home Page &quot;About Me&quot; Card
+                </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder='A concise summary for the About Me card on the homepage.'
@@ -656,20 +666,29 @@ export function HomePageForm() {
                   />
                 </FormControl>
                 <FormDescription>
-                  This text appears on the "About Me" quick access card on your homepage.
+                  This text appears on the &quot;About Me&quot; quick access
+                  card on your homepage.
                 </FormDescription>
                 <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => generateAboutCardDescriptionMutation.mutate(aboutPageStory || [])}
-                  disabled={generateAboutCardDescriptionMutation.isPending || !aboutPageStory || aboutPageStory.length === 0}
-                  className="mt-2"
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  onClick={() =>
+                    generateAboutCardDescriptionMutation.mutate(
+                      aboutPageStory || []
+                    )
+                  }
+                  disabled={
+                    generateAboutCardDescriptionMutation.isPending ||
+                    !aboutPageStory ||
+                    aboutPageStory.length === 0
+                  }
+                  className='mt-2'
                 >
                   {generateAboutCardDescriptionMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   ) : (
-                    <Sparkles className="mr-2" size={16} />
+                    <Sparkles className='mr-2' size={16} />
                   )}
                   Generate from About Page Story
                 </Button>

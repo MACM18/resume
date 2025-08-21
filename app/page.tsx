@@ -6,7 +6,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
-import { Skeleton } => "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { getProjects } from "@/lib/projects"; // Import getProjects

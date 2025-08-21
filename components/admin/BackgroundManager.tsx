@@ -11,20 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, FileUp, CheckCircle, Trash, Image as ImageIcon } from "lucide-react";
+import { Loader2, FileUp, Image as ImageIcon } from "lucide-react";
 import { useSupabase } from "@/components/providers/AuthProvider";
 import Image from "next/image";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 export function BackgroundManager() {
   const queryClient = useQueryClient();
@@ -86,7 +75,9 @@ export function BackgroundManager() {
     if (!file || !session?.user.id) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
+      toast.error(
+        "Invalid file type. Please upload a JPG, PNG, or WEBP image."
+      );
       return;
     }
 
@@ -128,10 +119,10 @@ export function BackgroundManager() {
               objectFit='cover'
             />
           </div>
-          <div className="flex-1">
+          <div className='flex-1'>
             <p className='font-medium'>Currently Active:</p>
             <p className='text-sm text-foreground/70 truncate'>
-              {profile.background_image_url.split('/').pop()}
+              {profile.background_image_url.split("/").pop()}
             </p>
             <Button
               variant='ghost'
@@ -169,8 +160,8 @@ export function BackgroundManager() {
       </div>
 
       {!profile?.background_image_url && !isUploading && (
-        <div className="text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10">
-          <ImageIcon size={48} className="mx-auto mb-4 text-foreground/40" />
+        <div className='text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10'>
+          <ImageIcon size={48} className='mx-auto mb-4 text-foreground/40' />
           <p>No background image set yet.</p>
         </div>
       )}
