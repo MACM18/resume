@@ -423,7 +423,7 @@ export default function Page() {
               <Button
                 asChild
                 variant='ghost'
-                className='text-accent hover:text-accent/10'
+                className='text-accent hover:text-accent-foreground'
               >
                 <Link href={`/resume`}>
                   View Resume <ArrowRight className='ml-2' size={16} />
