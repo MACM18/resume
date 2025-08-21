@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
-import { Loader2, Trash } from "lucide-react";
+import { Loader2, Trash, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -31,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useSupabase } from "../providers/AuthProvider"; // Import useSupabase
 
 const homePageSchema = z.object({
   socialLinks: z.array(
@@ -68,12 +70,14 @@ const homePageSchema = z.object({
     description: z.string().min(1, "Required"),
     email: z.string().email("Must be a valid email"),
   }),
+  about_card_description: z.string().optional(), // Add to schema
 });
 
 type HomePageFormValues = z.infer<typeof homePageSchema>;
 
 export function HomePageForm() {
   const queryClient = useQueryClient();
+  const { supabase } = useSupabase(); // Use supabase client
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["currentUserProfile"],
@@ -98,6 +102,7 @@ export function HomePageForm() {
         description: "",
         email: "",
       },
+      about_card_description: profile?.home_page_data?.about_card_description || "", // Initialize
     },
   });
 
@@ -122,13 +127,36 @@ export function HomePageForm() {
     remove: removeAchievement,
   } = useFieldArray({ control: form.control, name: "achievements" });
 
+  const aboutPageStory = profile?.about_page_data?.story;
+
+  const generateAboutCardDescriptionMutation = useMutation({
+    mutationFn: async (story: string[]) => {
+      const { data, error } = await supabase.functions.invoke("generate-about-card-description", {
+        body: { about_story: story },
+      });
+      if (error) throw error;
+      return data.about_card_description as string;
+    },
+    onSuccess: (generatedDescription) => {
+      form.setValue("about_card_description", generatedDescription, { shouldValidate: true });
+      toast.success("About card description generated successfully!");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to generate description: ${error.message}`);
+      } else {
+        toast.error("Failed to generate description.");
+      }
+    },
+  });
+
   const mutation = useMutation({
     mutationFn: (data: HomePageFormValues) => {
       // Add missing HomePageData fields (name, tagline) if needed
       const processedData = {
         ...data,
-        name: profile?.home_page_data?.name ?? "",
-        tagline: profile?.home_page_data?.tagline ?? "",
+        name: profile?.full_name ?? "", // Ensure full_name is passed
+        tagline: profile?.tagline ?? "", // Ensure tagline is passed
 
         // Process social links to add mailto: for email links
         socialLinks: data.socialLinks.map((link) => ({
@@ -607,6 +635,48 @@ export function HomePageForm() {
           >
             Add Achievement
           </Button>
+        </div>
+
+        <Separator />
+
+        {/* About Me Card Description */}
+        <div>
+          <h3 className='text-lg font-medium mb-4'>About Me Card Description</h3>
+          <FormField
+            control={form.control}
+            name='about_card_description'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description for Home Page &quot;About Me&quot; Card</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='A concise summary for the About Me card on the homepage.'
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This text appears on the "About Me" quick access card on your homepage.
+                </FormDescription>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => generateAboutCardDescriptionMutation.mutate(aboutPageStory || [])}
+                  disabled={generateAboutCardDescriptionMutation.isPending || !aboutPageStory || aboutPageStory.length === 0}
+                  className="mt-2"
+                >
+                  {generateAboutCardDescriptionMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2" size={16} />
+                  )}
+                  Generate from About Page Story
+                </Button>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <Separator />

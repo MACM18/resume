@@ -1,19 +1,12 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Github,
-  Linkedin,
-  Mail,
-  Twitter,
-  ExternalLink,
-} from "lucide-react";
+import { ArrowRight, Github, Linkedin, Mail, Twitter, ExternalLink } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } => "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { getProjects } from "@/lib/projects"; // Import getProjects
@@ -368,8 +361,8 @@ export default function Page() {
             <GlassCard className='p-8 h-full' hover>
               <h3 className='text-2xl font-bold mb-4 text-primary'>About Me</h3>
               <p className='text-foreground/70 mb-6'>
-                Passionate developer with 5+ years of experience creating modern
-                web applications
+                {homePageData.about_card_description ||
+                  "Passionate developer with 5+ years of experience creating modern web applications."}
               </p>
               <Button
                 asChild

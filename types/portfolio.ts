@@ -75,6 +75,7 @@ export interface HomePageData {
     description: string;
     email: string;
   };
+  about_card_description?: string; // New field for the About Me card description
 }
 
 export interface AboutPageData {
