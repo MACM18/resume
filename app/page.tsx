@@ -1,7 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Github, Linkedin, Mail, Twitter, ExternalLink } from "lucide-react";
+import {
+  ArrowRight,
+  Github,
+  Linkedin,
+  Mail,
+  Twitter,
+  ExternalLink,
+} from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -416,7 +423,7 @@ export default function Page() {
               <Button
                 asChild
                 variant='ghost'
-                className='text-accent hover:text-accent/80'
+                className='text-accent hover:text-accent/10'
               >
                 <Link href={`/resume`}>
                   View Resume <ArrowRight className='ml-2' size={16} />
