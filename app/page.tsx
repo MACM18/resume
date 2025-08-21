@@ -96,7 +96,7 @@ export default function Page() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <h1 className='text-4xl sm:text-6xl md:text-8xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+            <h1 className='text-4xl spa sm:text-6xl md:text-8xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight md:leading-[1.1]'>
               {homePageData.name}
             </h1>
             <p className='text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto'>
