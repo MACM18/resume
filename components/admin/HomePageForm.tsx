@@ -18,24 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
-import { Loader2, Trash, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPicker } from "./IconPicker";
 import { Separator } from "@/components/ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useSupabase } from "../providers/AuthProvider";
 import { DeleteButton } from "../DeleteButton";
-import { SocialLinkRow } from "./SocialLinkRow";
 
 const homePageSchema = z.object({
   socialLinks: z.array(

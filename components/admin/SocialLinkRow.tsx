@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   FormControl,
@@ -6,12 +5,22 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { UseFormReturn } from "react-hook-form";
 import { IconPicker } from "./IconPicker";
 import { DeleteButton } from "../DeleteButton";
 
+interface HomePageFormData {
+  socialLinks: {
+    platform: string;
+    icon: string;
+    href: string;
+    label: string;
+  }[];
+}
+
 interface SocialLinkRowProps {
   index: number;
-  form: any;
+  form: UseFormReturn<HomePageFormData>;
   onDelete: () => void;
 }
 
