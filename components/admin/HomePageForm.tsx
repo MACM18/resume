@@ -217,77 +217,59 @@ export function HomePageForm() {
             {socialFields.map((field, index) => (
               <div
                 key={field.id}
-                className='p-4 border rounded-lg bg-glass-bg/10 relative'
+                className='p-4 border rounded-lg bg-glass-bg/10 relative flex gap-4 items-start'
               >
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name={`socialLinks.${index}.platform`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Platform</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`socialLinks.${index}.label`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Label</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`socialLinks.${index}.icon`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon</FormLabel>
-                        <FormControl>
-                          <IconPicker
-                            value={field.value}
-                            onChange={({ icon, platform, label }) => {
-                              field.onChange(icon);
-                              form.setValue(
-                                `socialLinks.${index}.platform`,
-                                platform,
-                                { shouldValidate: true }
-                              );
-                              form.setValue(
-                                `socialLinks.${index}.label`,
-                                label,
-                                { shouldValidate: true }
-                              );
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`socialLinks.${index}.href`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <input
+                  type='hidden'
+                  {...form.register(`socialLinks.${index}.platform`)}
+                />
+                <input
+                  type='hidden'
+                  {...form.register(`socialLinks.${index}.label`)}
+                />
+                <FormField
+                  control={form.control}
+                  name={`socialLinks.${index}.icon`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <IconPicker
+                          value={field.value}
+                          onChange={({ icon, platform, label }) => {
+                            field.onChange(icon);
+                            form.setValue(
+                              `socialLinks.${index}.platform`,
+                              platform,
+                              { shouldValidate: true }
+                            );
+                            form.setValue(`socialLinks.${index}.label`, label, {
+                              shouldValidate: true,
+                            });
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`socialLinks.${index}.href`}
+                  render={({ field }) => (
+                    <FormItem className='flex-1'>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={`Enter ${form.getValues(
+                            `socialLinks.${index}.platform`
+                          )} URL`}
+                          className='h-10'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div className='absolute top-2 right-2'>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

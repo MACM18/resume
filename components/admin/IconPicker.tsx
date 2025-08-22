@@ -70,6 +70,18 @@ function prettifyIconName(iconName: string) {
 export function IconPicker({ value, onChange }: IconPickerProps) {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load icons when dialog opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      // Simulate loading time for the icons
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    }
+  }, [isOpen]);
 
   // Get all icons by category
   const iconsByCategory = React.useMemo(() => {
@@ -118,16 +130,14 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
       <DialogTrigger asChild>
         <Button
           variant='outline'
-          className='w-[240px] justify-start text-left font-normal'
+          size='icon'
+          className='h-10 w-10 rounded-full'
         >
-          <div className='w-full flex items-center gap-2'>
-            {CurrentIcon ? (
-              <CurrentIcon className='h-4 w-4' />
-            ) : (
-              <div className='h-4 w-4 rounded border border-foreground/20' />
-            )}
-            {value || "Select an icon..."}
-          </div>
+          {CurrentIcon ? (
+            <CurrentIcon className='h-4 w-4' />
+          ) : (
+            <div className='h-4 w-4 rounded border border-foreground/20' />
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className='max-w-3xl max-h-[80vh] overflow-y-auto'>
@@ -144,28 +154,35 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
           />
         </div>
         <div className='grid grid-cols-8 gap-2 p-2'>
-          {filteredIcons.map(({ name, Icon }) => {
-            // Extract platform/label from icon name
-            const [, iconComponent] = name.split(".");
-            const pretty = prettifyIconName(iconComponent);
-            return (
-              <Button
-                key={name}
-                variant={value === name ? "default" : "outline"}
-                className='h-12 w-12 p-0'
-                onClick={() => {
-                  onChange({
-                    icon: name,
-                    platform: pretty,
-                    label: pretty,
-                  });
-                  setIsOpen(false);
-                }}
-              >
-                <Icon className='h-5 w-5' />
-              </Button>
-            );
-          })}
+          {isLoading
+            ? Array.from({ length: 32 }).map((_, i) => (
+                <div
+                  key={i}
+                  className='h-12 w-12 rounded-md bg-foreground/5 animate-pulse'
+                />
+              ))
+            : filteredIcons.map(({ name, Icon }) => {
+                // Extract platform/label from icon name
+                const [, iconComponent] = name.split(".");
+                const pretty = prettifyIconName(iconComponent);
+                return (
+                  <Button
+                    key={name}
+                    variant={value === name ? "default" : "outline"}
+                    className='h-12 w-12 p-0'
+                    onClick={() => {
+                      onChange({
+                        icon: name,
+                        platform: pretty,
+                        label: pretty,
+                      });
+                      setIsOpen(false);
+                    }}
+                  >
+                    <Icon className='h-5 w-5' />
+                  </Button>
+                );
+              })}
         </div>
       </DialogContent>
     </Dialog>
