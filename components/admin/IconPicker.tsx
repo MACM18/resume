@@ -109,7 +109,8 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
   const CurrentIcon = React.useMemo(() => {
     if (!value) return null;
     const [prefix, name] = value.split(".");
-    return (iconSets as any)[prefix]?.[name];
+    const set = iconSets[prefix as keyof typeof iconSets];
+    return set ? (set as Record<string, IconType>)[name] : undefined;
   }, [value]);
 
   return (
@@ -145,7 +146,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
         <div className='grid grid-cols-8 gap-2 p-2'>
           {filteredIcons.map(({ name, Icon }) => {
             // Extract platform/label from icon name
-            const [prefix, iconComponent] = name.split(".");
+            const [, iconComponent] = name.split(".");
             const pretty = prettifyIconName(iconComponent);
             return (
               <Button

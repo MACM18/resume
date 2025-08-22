@@ -34,8 +34,11 @@ const iconSets = {
   Fc,
 };
 
-export function getDynamicIcon(iconName: string) {
-  if (!iconName) return null;
+import { IconType } from "react-icons";
+
+export function getDynamicIcon(iconName: string): IconType | undefined {
+  if (!iconName) return undefined;
   const [prefix, name] = iconName.split(".");
-  return (iconSets as any)[prefix]?.[name];
+  const set = iconSets[prefix as keyof typeof iconSets];
+  return set ? (set as Record<string, IconType>)[name] : undefined;
 }
