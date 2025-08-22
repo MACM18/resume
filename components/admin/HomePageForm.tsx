@@ -20,6 +20,7 @@ import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 import { Loader2, Trash, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IconPicker } from "./IconPicker";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
@@ -38,7 +39,7 @@ const homePageSchema = z.object({
   socialLinks: z.array(
     z.object({
       platform: z.string().min(1, "Required"),
-      icon: z.string().min(1, "Required"),
+      icon: z.string().min(1, "Please select an icon"),
       href: z.string().url("Must be a valid URL"),
       label: z.string().min(1, "Required"),
     })
@@ -250,9 +251,24 @@ export function HomePageForm() {
                     name={`socialLinks.${index}.icon`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Icon Name</FormLabel>
+                        <FormLabel>Icon</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <IconPicker
+                            value={field.value}
+                            onChange={({ icon, platform, label }) => {
+                              field.onChange(icon);
+                              form.setValue(
+                                `socialLinks.${index}.platform`,
+                                platform,
+                                { shouldValidate: true }
+                              );
+                              form.setValue(
+                                `socialLinks.${index}.label`,
+                                label,
+                                { shouldValidate: true }
+                              );
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

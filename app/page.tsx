@@ -1,14 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Github,
-  Linkedin,
-  Mail,
-  Twitter,
-  ExternalLink,
-} from "lucide-react";
+import { ArrowRight, ExternalLink, Github } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -19,13 +12,7 @@ import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { getProjects } from "@/lib/projects"; // Import getProjects
 import Image from "next/image";
 
-const socialIconMap = {
-  Github,
-  Linkedin,
-  Twitter,
-  Mail,
-  ArrowRight,
-};
+import { getDynamicIcon } from "@/lib/icons";
 
 const HomePageSkeleton = () => (
   <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto'>
@@ -521,8 +508,8 @@ export default function Page() {
             </h3>
             <div className='flex justify-center space-x-6'>
               {homePageData.socialLinks.map((social, index) => {
-                const Icon =
-                  socialIconMap[social.icon as keyof typeof socialIconMap];
+                const Icon = getDynamicIcon(social.icon);
+                if (!Icon) return null;
                 return (
                   <motion.a
                     key={social.label}
