@@ -33,7 +33,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useSupabase } from "../providers/AuthProvider"; // Import useSupabase
+import { useSupabase } from "../providers/AuthProvider";
+import { DeleteButton } from "../DeleteButton";
+import { SocialLinkRow } from "./SocialLinkRow";
 
 const homePageSchema = z.object({
   socialLinks: z.array(
@@ -217,7 +219,7 @@ export function HomePageForm() {
             {socialFields.map((field, index) => (
               <div
                 key={field.id}
-                className='p-4 border rounded-lg bg-glass-bg/10 relative flex gap-4 items-start'
+                className='p-4 border rounded-lg bg-glass-bg/10 flex gap-4 items-center'
               >
                 <input
                   type='hidden'
@@ -258,49 +260,24 @@ export function HomePageForm() {
                   render={({ field }) => (
                     <FormItem className='flex-1'>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder={`Enter ${form.getValues(
-                            `socialLinks.${index}.platform`
-                          )} URL`}
-                          className='h-10'
-                        />
+                        <div className='flex gap-2 items-center'>
+                          <Input
+                            {...field}
+                            placeholder={`Enter ${form.getValues(
+                              `socialLinks.${index}.platform`
+                            )} URL`}
+                            className='h-10'
+                          />
+                          <DeleteButton
+                            onDelete={() => removeSocial(index)}
+                            title='Delete Social Link?'
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className='absolute top-2 right-2'>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon'
-                        className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Social Link?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeSocial(index)}
-                          className='bg-destructive hover:bg-destructive/90'
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
               </div>
             ))}
           </div>
@@ -385,35 +362,10 @@ export function HomePageForm() {
                   </div>
                 </div>
                 <div className='absolute top-2 right-2'>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon'
-                        className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Highlight?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeExp(index)}
-                          className='bg-destructive hover:bg-destructive/90'
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <DeleteButton
+                    onDelete={() => removeExp(index)}
+                    title='Delete Highlight?'
+                  />
                 </div>
               </div>
             ))}
@@ -478,37 +430,10 @@ export function HomePageForm() {
                   </div>
                 </div>
                 <div className='absolute top-2 right-2'>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon'
-                        className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Delete Expertise Area?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeTech(index)}
-                          className='bg-destructive hover:bg-destructive/90'
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <DeleteButton
+                    onDelete={() => removeTech(index)}
+                    title='Delete Expertise Area?'
+                  />
                 </div>
               </div>
             ))}
@@ -590,35 +515,10 @@ export function HomePageForm() {
                   />
                 </div>
                 <div className='absolute top-2 right-2'>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon'
-                        className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Achievement?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeAchievement(index)}
-                          className='bg-destructive hover:bg-destructive/90'
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <DeleteButton
+                    onDelete={() => removeAchievement(index)}
+                    title='Delete Achievement?'
+                  />
                 </div>
               </div>
             ))}
