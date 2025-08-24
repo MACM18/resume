@@ -1,13 +1,13 @@
 "use client";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, Github } from "lucide-react";
+import { AnimatedSection } from "@/components/AnimatedSection";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { getProjects } from "@/lib/projects"; // Import getProjects
 import Image from "next/image";
@@ -78,23 +78,18 @@ export default function Page() {
       <div className='max-w-6xl mx-auto'>
         {/* Hero Section */}
         <div className='text-center mb-16'>
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
+          <AnimatedSection direction='up' delay={0.2}>
             <h1 className='text-4xl spa sm:text-6xl md:text-8xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight md:leading-[1.1]'>
               {homePageData.name}
             </h1>
             <p className='text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto'>
               {homePageData.tagline}
             </p>
-          </motion.div>
+          </AnimatedSection>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+          <AnimatedSection
+            direction='up'
+            delay={0.3}
             className='flex flex-wrap justify-center gap-4 mb-12'
           >
             <Button
@@ -114,27 +109,23 @@ export default function Page() {
             >
               <Link href={`/resume`}>Download Resume</Link>
             </Button>
-          </motion.div>
+          </AnimatedSection>
         </div>
 
         {/* Experience Highlights */}
         <div className='mb-16'>
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className='text-3xl font-bold text-center mb-12 text-secondary'
-          >
-            Experience Highlights
-          </motion.h2>
+          <AnimatedSection direction='up' className='text-center mb-12'>
+            <h2 className='text-3xl font-bold text-secondary'>
+              Experience Highlights
+            </h2>
+          </AnimatedSection>
 
           <div className='grid md:grid-cols-2 gap-8 mb-12'>
             {homePageData.experienceHighlights.map((highlight, index) => (
-              <motion.div
+              <AnimatedSection
                 key={highlight.title}
-                initial={{ opacity: 0, x: index === 0 ? -50 : 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+                direction={index === 0 ? "left" : "right"}
+                delay={0.2 + index * 0.1}
               >
                 <GlassCard className='p-6' hover>
                   <div className='flex items-center mb-4'>
@@ -164,7 +155,7 @@ export default function Page() {
                     {highlight.description}
                   </p>
                 </GlassCard>
-              </motion.div>
+              </AnimatedSection>
             ))}
           </div>
         </div>
@@ -172,21 +163,15 @@ export default function Page() {
         {/* Dynamic Featured Work Preview */}
         {featuredProject && (
           <section className='mb-16'>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className='text-3xl font-bold text-center mb-12 text-accent'
-            >
-              Featured Work
-            </motion.h2>
+            <AnimatedSection direction='up' className='text-center mb-12'>
+              <h2 className='text-3xl font-bold text-accent'>Featured Work</h2>
+            </AnimatedSection>
 
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
               {/* Featured Project (Left, twice the size) */}
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
+              <AnimatedSection
+                direction='left'
+                delay={0.2}
                 className='lg:col-span-2'
               >
                 <GlassCard className='overflow-hidden group h-full' hover>
@@ -254,18 +239,17 @@ export default function Page() {
                     </div>
                   </div>
                 </GlassCard>
-              </motion.div>
+              </AnimatedSection>
 
               {/* Other Projects (Right, stacked) */}
               {otherProjectsForDisplay &&
                 otherProjectsForDisplay.length > 0 && (
                   <div className='lg:col-span-1 flex flex-col gap-6'>
                     {otherProjectsForDisplay.map((project, index) => (
-                      <motion.div
+                      <AnimatedSection
                         key={project.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 1.0 + index * 0.1 }}
+                        direction='right'
+                        delay={0.3 + index * 0.1}
                         className='flex-1'
                       >
                         <GlassCard className='p-6 h-full group' hover>
@@ -301,7 +285,7 @@ export default function Page() {
                             </Link>
                           </Button>
                         </GlassCard>
-                      </motion.div>
+                      </AnimatedSection>
                     ))}
                   </div>
                 )}
@@ -311,22 +295,18 @@ export default function Page() {
 
         {/* Technical Expertise */}
         <div className='mb-16'>
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            className='text-3xl font-bold text-center mb-12 text-primary'
-          >
-            Technical Expertise
-          </motion.h2>
+          <AnimatedSection direction='up' className='text-center mb-12'>
+            <h2 className='text-3xl font-bold text-primary'>
+              Technical Expertise
+            </h2>
+          </AnimatedSection>
 
           <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
             {homePageData.technicalExpertise.map((category, index) => (
-              <motion.div
+              <AnimatedSection
                 key={category.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
+                direction='up'
+                delay={0.2 + index * 0.1}
               >
                 <GlassCard className='p-6 text-center' hover>
                   <h3 className='text-xl font-semibold mb-4'>
@@ -340,18 +320,14 @@ export default function Page() {
                     ))}
                   </div>
                 </GlassCard>
-              </motion.div>
+              </AnimatedSection>
             ))}
           </div>
         </div>
 
         {/* Quick Access Cards */}
         <div className='grid md:grid-cols-3 gap-8 mb-16'>
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 1.5 }}
-          >
+          <AnimatedSection direction='left' delay={0.2}>
             <GlassCard className='p-8 h-full' hover>
               <h3 className='text-2xl font-bold mb-4 text-primary'>About Me</h3>
               <p className='text-foreground/70 mb-6'>
@@ -368,13 +344,9 @@ export default function Page() {
                 </Link>
               </Button>
             </GlassCard>
-          </motion.div>
+          </AnimatedSection>
 
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.6 }}
-          >
+          <AnimatedSection direction='up' delay={0.3}>
             <GlassCard className='p-8 h-full' hover>
               <h3 className='text-2xl font-bold mb-4 text-secondary'>
                 Projects
@@ -393,13 +365,9 @@ export default function Page() {
                 </Link>
               </Button>
             </GlassCard>
-          </motion.div>
+          </AnimatedSection>
 
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 1.7 }}
-          >
+          <AnimatedSection direction='right' delay={0.4}>
             <GlassCard className='p-8 h-full' hover>
               <h3 className='text-2xl font-bold mb-4 text-accent'>
                 Experience
@@ -417,28 +385,25 @@ export default function Page() {
                 </Link>
               </Button>
             </GlassCard>
-          </motion.div>
+          </AnimatedSection>
         </div>
 
         {/* Achievements & Recognition */}
         {homePageData.achievements.length > 0 && (
           <div className='mb-16'>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.8 }}
-              className='text-3xl font-bold text-center mb-12 text-secondary'
-            >
-              Achievements & Recognition
-            </motion.h2>
+            <AnimatedSection direction='up' className='text-center mb-12'>
+              <h2 className='text-3xl font-bold text-secondary'>
+                Achievements & Recognition
+              </h2>
+            </AnimatedSection>
 
             <div className='grid md:grid-cols-3 gap-6'>
               {homePageData.achievements.map((achievement, index) => (
-                <motion.div
+                <AnimatedSection
                   key={achievement.title}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: 1.9 + index * 0.1 }}
+                  direction='up'
+                  delay={0.2 + index * 0.1}
+                  initialScale={0.9}
                 >
                   <GlassCard className='p-6 text-center' hover>
                     <div className='text-3xl font-bold text-primary mb-2'>
@@ -454,17 +419,16 @@ export default function Page() {
                       {achievement.description}
                     </p>
                   </GlassCard>
-                </motion.div>
+                </AnimatedSection>
               ))}
             </div>
           </div>
         )}
 
         {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 2.2 }}
+        <AnimatedSection
+          direction='up'
+          delay={0.2}
           className='text-center mb-16'
         >
           <GlassCard className='p-12'>
@@ -494,14 +458,10 @@ export default function Page() {
               </Button>
             </div>
           </GlassCard>
-        </motion.div>
+        </AnimatedSection>
 
         {/* Social Links */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 2.4 }}
-        >
+        <AnimatedSection direction='up' delay={0.2}>
           <GlassCard className='p-8'>
             <h3 className='text-xl font-semibold mb-6 text-center'>
               Connect With Me
@@ -511,28 +471,28 @@ export default function Page() {
                 const Icon = getDynamicIcon(social.icon);
                 if (!Icon) return null;
                 return (
-                  <motion.a
+                  <AnimatedSection
                     key={social.label}
-                    href={social.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 1.4 + index * 0.1 }}
+                    direction='up'
+                    delay={0.3 + index * 0.1}
                   >
-                    <Icon
-                      size={24}
-                      className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
-                    />
-                  </motion.a>
+                    <a
+                      href={social.href}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
+                    >
+                      <Icon
+                        size={24}
+                        className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
+                      />
+                    </a>
+                  </AnimatedSection>
                 );
               })}
             </div>
           </GlassCard>
-        </motion.div>
+        </AnimatedSection>
       </div>
     </div>
   );
