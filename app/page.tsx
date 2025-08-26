@@ -463,13 +463,16 @@ export default function Page() {
 
         {/* Contact Numbers & Social Links Combined */}
         <AnimatedSection direction='up' delay={0.2}>
-          {profileData.contact_numbers && profileData.contact_numbers.length > 0 ? (
+          {profileData.contact_numbers &&
+          profileData.contact_numbers.length > 0 ? (
             <div className='grid lg:grid-cols-2 gap-8 items-start'>
               {/* Contact Numbers */}
               <div>
-                <ContactNumbersDisplay contactNumbers={profileData.contact_numbers} />
+                <ContactNumbersDisplay
+                  contactNumbers={profileData.contact_numbers}
+                />
               </div>
-              
+
               {/* Social Links */}
               <GlassCard className='p-8'>
                 <h3 className='text-xl font-semibold mb-6 text-center'>

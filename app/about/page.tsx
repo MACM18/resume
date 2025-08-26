@@ -158,13 +158,16 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
           >
-            {profileData.contact_numbers && profileData.contact_numbers.length > 0 ? (
+            {profileData.contact_numbers &&
+            profileData.contact_numbers.length > 0 ? (
               <div className='grid lg:grid-cols-2 gap-8 items-start'>
                 {/* Contact Numbers */}
                 <div>
-                  <ContactNumbersDisplay contactNumbers={profileData.contact_numbers} />
+                  <ContactNumbersDisplay
+                    contactNumbers={profileData.contact_numbers}
+                  />
                 </div>
-                
+
                 {/* Call to Action */}
                 <GlassCard className='p-8'>
                   <h2 className='text-2xl font-bold mb-4 text-accent'>
