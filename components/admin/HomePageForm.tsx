@@ -30,7 +30,15 @@ const homePageSchema = z.object({
     z.object({
       platform: z.string().min(1, "Required"),
       icon: z.string().min(1, "Please select an icon"),
-      href: z.string().url("Must be a valid URL"),
+      href: z
+        .string()
+        .min(1, "Required")
+        .refine((value) => {
+          // Allow URLs or email addresses
+          const urlPattern = /^https?:\/\/.+/;
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return urlPattern.test(value) || emailPattern.test(value);
+        }, "Must be a valid URL or email address"),
       label: z.string().min(1, "Required"),
     })
   ),
@@ -89,8 +97,9 @@ export function HomePageForm() {
         })) || [],
       achievements: profile?.home_page_data?.achievements || [],
       callToAction: profile?.home_page_data?.callToAction || {
-        title: "",
-        description: "",
+        title: "Let's Connect & Collaborate",
+        description:
+          "I'm always excited to discuss new opportunities, share ideas, or explore potential collaborations. Feel free to reach out!",
         email: "",
       },
       about_card_description:
@@ -251,9 +260,18 @@ export function HomePageForm() {
                         <div className='flex gap-2 items-center'>
                           <Input
                             {...field}
-                            placeholder={`Enter ${form.getValues(
-                              `socialLinks.${index}.platform`
-                            )} URL`}
+                            placeholder={
+                              form
+                                .getValues(`socialLinks.${index}.platform`)
+                                ?.toLowerCase() === "email" ||
+                              form
+                                .getValues(`socialLinks.${index}.platform`)
+                                ?.toLowerCase() === "mail"
+                                ? "hello@example.com"
+                                : `Enter ${form.getValues(
+                                    `socialLinks.${index}.platform`
+                                  )} URL`
+                            }
                             className='h-10'
                           />
                           <DeleteButton
@@ -262,6 +280,16 @@ export function HomePageForm() {
                           />
                         </div>
                       </FormControl>
+                      <FormDescription className='text-xs'>
+                        {form
+                          .getValues(`socialLinks.${index}.platform`)
+                          ?.toLowerCase() === "email" ||
+                        form
+                          .getValues(`socialLinks.${index}.platform`)
+                          ?.toLowerCase() === "mail"
+                          ? "Enter email address (e.g., contact@yoursite.com)"
+                          : "Enter full URL (e.g., https://github.com/username)"}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -299,10 +327,14 @@ export function HomePageForm() {
                     name={`experienceHighlights.${index}.metric`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Metric</FormLabel>
+                        <FormLabel>Metric (Number or Symbol)</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='5+, 100%, #1, etc.' />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Short metric or number that stands out (e.g., "5+",
+                          "100%", "#1", "500K")
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -314,8 +346,11 @@ export function HomePageForm() {
                       <FormItem>
                         <FormLabel>Title</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='Years of Experience' />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Main title describing what the metric represents
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -327,8 +362,14 @@ export function HomePageForm() {
                       <FormItem>
                         <FormLabel>Subtitle</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            placeholder='Full-Stack Development'
+                          />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Specific area or specialization
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -341,8 +382,15 @@ export function HomePageForm() {
                         <FormItem>
                           <FormLabel>Description</FormLabel>
                           <FormControl>
-                            <Textarea {...field} />
+                            <Textarea
+                              {...field}
+                              placeholder='Brief description of your experience and achievements in this area...'
+                              rows={3}
+                            />
                           </FormControl>
+                          <FormDescription className='text-xs'>
+                            Detailed explanation of this experience highlight
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -393,10 +441,16 @@ export function HomePageForm() {
                     name={`technicalExpertise.${index}.name`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>Category Name</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            placeholder='Frontend Development'
+                          />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Name of the technical category or domain
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -409,8 +463,15 @@ export function HomePageForm() {
                         <FormItem>
                           <FormLabel>Skills (comma-separated)</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              placeholder='React, TypeScript, Next.js, Tailwind CSS'
+                            />
                           </FormControl>
+                          <FormDescription className='text-xs'>
+                            List specific technologies, tools, or skills
+                            separated by commas
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -597,8 +658,14 @@ export function HomePageForm() {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input 
+                      {...field} 
+                      placeholder="Let's Connect & Collaborate"
+                    />
                   </FormControl>
+                  <FormDescription className='text-xs'>
+                    Compelling headline to encourage visitors to get in touch
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -610,8 +677,15 @@ export function HomePageForm() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea 
+                      {...field} 
+                      placeholder="I'm always excited to discuss new opportunities, share ideas, or explore potential collaborations. Feel free to reach out!"
+                      rows={3}
+                    />
                   </FormControl>
+                  <FormDescription className='text-xs'>
+                    Brief message explaining why visitors should contact you
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -621,10 +695,17 @@ export function HomePageForm() {
               name='callToAction.email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Contact Email</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input 
+                      {...field} 
+                      placeholder="your.email@example.com"
+                      type="email"
+                    />
                   </FormControl>
+                  <FormDescription className='text-xs'>
+                    Primary email address for contact inquiries
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
