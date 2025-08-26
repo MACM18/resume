@@ -29,12 +29,12 @@ import { getCurrentUserProfile } from "@/lib/profile"; // Import to get profile 
 
 const resumeSchema = z.object({
   role: z.string().min(2, "Role is required."),
-  title: z.string().min(2, "Title is required."),
+  title: z.string().optional(),
   summary: z.string().min(10, "Summary is required."),
   skills: z.string().min(1, "Please add at least one skill."),
   project_ids: z.array(z.string()).optional(),
   resume_url: z.string().url().nullable(),
-  pdf_source: z.enum(['uploaded', 'generated']).default('uploaded'),
+  pdf_source: z.enum(["uploaded", "generated"]).default("uploaded"),
   experience: z.array(
     z.object({
       company: z.string().min(1, "Company is required."),
@@ -50,14 +50,17 @@ const resumeSchema = z.object({
       year: z.string().min(4, "Year is required."),
     })
   ),
-  certifications: z.array( // New certifications array
-    z.object({
-      name: z.string().min(1, "Certification name is required."),
-      issuer: z.string().min(1, "Issuer is required."),
-      date: z.string().min(4, "Date is required (e.g., 2023)."),
-      url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-    })
-  ).optional(),
+  certifications: z
+    .array(
+      // New certifications array
+      z.object({
+        name: z.string().min(1, "Certification name is required."),
+        issuer: z.string().min(1, "Issuer is required."),
+        date: z.string().min(4, "Date is required (e.g., 2023)."),
+        url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+      })
+    )
+    .optional(),
   location: z.string().min(2, "Location is required.").optional(), // New location field
 });
 
@@ -92,7 +95,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       skills: resume?.skills.join(", ") || "",
       project_ids: resume?.project_ids || [],
       resume_url: resume?.resume_url || null,
-      pdf_source: resume?.pdf_source || 'uploaded',
+      pdf_source: resume?.pdf_source || "uploaded",
       experience:
         resume?.experience.map((exp) => ({
           ...exp,
@@ -123,27 +126,32 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   const generateSummaryMutation = useMutation({
     mutationFn: async () => {
       if (!profile || !projects) {
-        throw new Error("Profile or projects data not loaded for AI generation.");
+        throw new Error(
+          "Profile or projects data not loaded for AI generation."
+        );
       }
       const currentResumeData = form.getValues(); // Get current form values for resume
-      const { data, error } = await supabase.functions.invoke("generate-resume-summary", {
-        body: {
-          resume: {
-            ...currentResumeData,
-            skills: currentResumeData.skills.split(",").map((s) => s.trim()),
-            experience: currentResumeData.experience.map((exp) => ({
-              ...exp,
-              description: exp.description.split("\n"),
-            })),
+      const { data, error } = await supabase.functions.invoke(
+        "generate-resume-summary",
+        {
+          body: {
+            resume: {
+              ...currentResumeData,
+              skills: currentResumeData.skills.split(",").map((s) => s.trim()),
+              experience: currentResumeData.experience.map((exp) => ({
+                ...exp,
+                description: exp.description.split("\n"),
+              })),
+            },
+            profile: {
+              full_name: profile.full_name,
+              tagline: profile.tagline,
+              about_page_data: profile.about_page_data,
+            },
+            projects: projects,
           },
-          profile: {
-            full_name: profile.full_name,
-            tagline: profile.tagline,
-            about_page_data: profile.about_page_data,
-          },
-          projects: projects,
-        },
-      });
+        }
+      );
       if (error) throw error;
       return data.summary as string;
     },
@@ -208,7 +216,8 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   };
 
   const isGeneratingSummary = generateSummaryMutation.isPending;
-  const isDataReadyForAI = !isLoadingProfile && !isLoadingProjects && profile && projects;
+  const isDataReadyForAI =
+    !isLoadingProfile && !isLoadingProjects && profile && projects;
 
   return (
     <Form {...form}>
@@ -235,10 +244,13 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
           name='title'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Title (Optional)</FormLabel>
               <FormControl>
                 <Input placeholder='Full Stack Developer' {...field} />
               </FormControl>
+              <FormDescription>
+                Optional custom title for this resume
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -260,27 +272,27 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
         {/* PDF Source */}
         <FormField
           control={form.control}
-          name="pdf_source"
+          name='pdf_source'
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className='space-y-3'>
               <FormLabel>PDF Source</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="flex space-x-4"
+                  className='flex space-x-4'
                 >
-                  <FormItem className="flex items-center space-x-2 space-y-0">
+                  <FormItem className='flex items-center space-x-2 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value="uploaded" />
+                      <RadioGroupItem value='uploaded' />
                     </FormControl>
-                    <FormLabel className="font-normal">Uploaded</FormLabel>
+                    <FormLabel className='font-normal'>Uploaded</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-2 space-y-0">
+                  <FormItem className='flex items-center space-x-2 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value="generated" />
+                      <RadioGroupItem value='generated' />
                     </FormControl>
-                    <FormLabel className="font-normal">Generated</FormLabel>
+                    <FormLabel className='font-normal'>Generated</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -290,7 +302,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
         />
 
         {/* PDF Upload */}
-        {form.watch('pdf_source') === 'uploaded' && (
+        {form.watch("pdf_source") === "uploaded" && (
           <FormItem>
             <FormLabel>Resume PDF</FormLabel>
             <div className='flex items-center gap-4'>
@@ -337,17 +349,17 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
                 A concise overview of your professional profile.
               </FormDescription>
               <Button
-                type="button"
-                variant="outline"
-                size="sm"
+                type='button'
+                variant='outline'
+                size='sm'
                 onClick={() => generateSummaryMutation.mutate()}
                 disabled={isGeneratingSummary || !isDataReadyForAI}
-                className="mt-2"
+                className='mt-2'
               >
                 {isGeneratingSummary ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 ) : (
-                  <Sparkles className="mr-2" size={16} />
+                  <Sparkles className='mr-2' size={16} />
                 )}
                 Generate with AI
               </Button>
@@ -659,7 +671,9 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
             type='button'
             variant='outline'
             size='sm'
-            onClick={() => appendCert({ name: "", issuer: "", date: "", url: "" })}
+            onClick={() =>
+              appendCert({ name: "", issuer: "", date: "", url: "" })
+            }
           >
             Add Certification
           </Button>

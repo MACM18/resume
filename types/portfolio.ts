@@ -17,7 +17,7 @@ export interface Project {
 export interface Resume {
   id: string;
   role: string;
-  title: string;
+  title?: string;
   summary: string;
   experience: {
     company: string;
@@ -108,4 +108,11 @@ export interface Profile {
   theme: Theme | null;
   updated_at: string;
   background_image_url: string | null; // New field for background image
+  contact_numbers?: {
+    id: string;
+    number: string;
+    label: string;
+    isActive: boolean;
+    isPrimary: boolean;
+  }[];
 }

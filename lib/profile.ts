@@ -10,12 +10,19 @@ interface ProfileData {
   about_page_data: AboutPageData;
   avatar_url: string | null;
   background_image_url: string | null; // Include background image URL
+  contact_numbers?: {
+    id: string;
+    number: string;
+    label: string;
+    isActive: boolean;
+    isPrimary: boolean;
+  }[];
 }
 
 export async function getProfileData(domain: string): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url')
+    .select('full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url, contact_numbers')
     .eq('domain', domain)
     .single();
 

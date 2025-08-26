@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
-import { Loader2, Trash } from "lucide-react";
+import { Loader2, Trash, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -32,6 +32,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { IconPicker } from "./IconPicker";
+import { Switch } from "@/components/ui/switch";
 
 const aboutPageSchema = z.object({
   title: z.string().min(1, "Required"),
@@ -42,6 +44,15 @@ const aboutPageSchema = z.object({
       category: z.string().min(1, "Required"),
       icon: z.string().min(1, "Required"),
       items: z.string().min(1, "Required"),
+    })
+  ),
+  contactNumbers: z.array(
+    z.object({
+      id: z.string(),
+      number: z.string().min(1, "Phone number is required"),
+      label: z.string().min(1, "Label is required"),
+      isActive: z.boolean(),
+      isPrimary: z.boolean(),
     })
   ),
   callToAction: z.object({
@@ -71,6 +82,7 @@ export function AboutPageForm() {
           ...s,
           items: Array.isArray(s.items) ? s.items.join(", ") : s.items || "",
         })) || [],
+      contactNumbers: profile?.contact_numbers || [],
       callToAction: profile?.about_page_data?.callToAction || {
         title: "Ready to Work Together?",
         description:
@@ -84,6 +96,12 @@ export function AboutPageForm() {
     append: appendSkill,
     remove: removeSkill,
   } = useFieldArray({ control: form.control, name: "skills" });
+
+  const {
+    fields: contactFields,
+    append: appendContact,
+    remove: removeContact,
+  } = useFieldArray({ control: form.control, name: "contactNumbers" });
 
   const mutation = useMutation({
     mutationFn: (data: AboutPageFormValues) => {
@@ -101,6 +119,7 @@ export function AboutPageForm() {
       };
       return updateCurrentUserProfile({
         about_page_data: processedData,
+        contact_numbers: data.contactNumbers,
       });
     },
     onSuccess: () => {
@@ -253,9 +272,19 @@ Today, I combine my technical expertise with a deep understanding of business ne
                       name={`skills.${index}.icon`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Icon Name</FormLabel>
+                          <FormLabel>Icon</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <div className='flex items-center gap-2'>
+                              <IconPicker
+                                value={field.value}
+                                onChange={(data) => field.onChange(data.icon)}
+                              />
+                              <span className='text-sm text-muted-foreground'>
+                                {field.value
+                                  ? `Selected: ${field.value}`
+                                  : "Select an icon"}
+                              </span>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -322,6 +351,161 @@ Today, I combine my technical expertise with a deep understanding of business ne
             >
               Add Skill Category
             </Button>
+          </div>
+
+          <Separator />
+
+          {/* Contact Numbers */}
+          <div>
+            <h3 className='text-lg font-medium mb-4'>Contact Numbers</h3>
+            <p className='text-sm text-muted-foreground mb-4'>
+              Add phone numbers that visitors can request to view. Active
+              numbers will be shown publicly with privacy protection.
+            </p>
+            <div className='space-y-4'>
+              {contactFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className='p-4 border rounded-lg bg-glass-bg/10 relative'
+                >
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <FormField
+                      control={form.control}
+                      name={`contactNumbers.${index}.label`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Label</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder='Mobile' />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`contactNumbers.${index}.number`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder='+1 234 567 8900' />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className='md:col-span-2 flex items-center gap-6'>
+                      <FormField
+                        control={form.control}
+                        name={`contactNumbers.${index}.isActive`}
+                        render={({ field }) => (
+                          <FormItem className='flex flex-row items-center space-x-3 space-y-0'>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className='text-sm font-normal'>
+                              Show publicly (with privacy protection)
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`contactNumbers.${index}.isPrimary`}
+                        render={({ field }) => (
+                          <FormItem className='flex flex-row items-center space-x-3 space-y-0'>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={(checked) => {
+                                  // If setting as primary, unset all other numbers as primary
+                                  if (checked) {
+                                    contactFields.forEach((_, i) => {
+                                      if (i !== index) {
+                                        form.setValue(
+                                          `contactNumbers.${i}.isPrimary`,
+                                          false
+                                        );
+                                      }
+                                    });
+                                  }
+                                  field.onChange(checked);
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className='text-sm font-normal'>
+                              Primary number
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className='absolute top-2 right-2'>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                        >
+                          <Trash size={16} />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Delete Contact Number?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => removeContact(index)}
+                            className='bg-destructive hover:bg-destructive/90'
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {contactFields.length < 5 && (
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={() =>
+                  appendContact({
+                    id: `contact-${Date.now()}`,
+                    label: "",
+                    number: "",
+                    isActive: false,
+                    isPrimary: false,
+                  })
+                }
+                className='mt-4'
+              >
+                <Plus className='w-4 h-4 mr-2' />
+                Add Contact Number
+              </Button>
+            )}
+            {contactFields.length >= 5 && (
+              <p className='text-sm text-muted-foreground mt-4'>
+                Maximum of 5 contact numbers allowed.
+              </p>
+            )}
           </div>
 
           <Separator />

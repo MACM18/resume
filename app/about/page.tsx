@@ -7,6 +7,7 @@ import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import Image from "next/image";
 
 const iconMap = {
@@ -150,6 +151,20 @@ const About = () => {
               })}
             </div>
           </motion.div>
+
+          {/* Contact Numbers */}
+          {profileData.contact_numbers && profileData.contact_numbers.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              <ContactNumbersDisplay 
+                contactNumbers={profileData.contact_numbers}
+                className="max-w-md mx-auto"
+              />
+            </motion.div>
+          )}
 
           {/* Call to Action */}
           <motion.div

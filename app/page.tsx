@@ -9,6 +9,7 @@ import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { getProjects } from "@/lib/projects"; // Import getProjects
 import Image from "next/image";
 
@@ -459,6 +460,15 @@ export default function Page() {
             </div>
           </GlassCard>
         </AnimatedSection>
+
+        {/* Contact Numbers */}
+        {profileData.contact_numbers && profileData.contact_numbers.length > 0 && (
+          <AnimatedSection direction='up' delay={0.1} className='mb-16'>
+            <div className='max-w-md mx-auto'>
+              <ContactNumbersDisplay contactNumbers={profileData.contact_numbers} />
+            </div>
+          </AnimatedSection>
+        )}
 
         {/* Social Links */}
         <AnimatedSection direction='up' delay={0.2}>
