@@ -492,12 +492,10 @@ export default function Page() {
                           href={social.href}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
+                          className='group relative p-4 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:scale-110 hover:shadow-glow block'
+                          aria-label={social.label}
                         >
-                          <Icon
-                            size={24}
-                            className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
-                          />
+                          <Icon className='h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300' />
                         </a>
                       </AnimatedSection>
                     );
@@ -526,12 +524,10 @@ export default function Page() {
                           href={social.href}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
+                          className='group relative p-4 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:scale-110 hover:shadow-glow block'
+                          aria-label={social.label}
                         >
-                          <Icon
-                            size={24}
-                            className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
-                          />
+                          <Icon className='h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300' />
                         </a>
                       </AnimatedSection>
                     );
