@@ -461,47 +461,82 @@ export default function Page() {
           </GlassCard>
         </AnimatedSection>
 
-        {/* Contact Numbers */}
-        {profileData.contact_numbers && profileData.contact_numbers.length > 0 && (
-          <AnimatedSection direction='up' delay={0.1} className='mb-16'>
-            <div className='max-w-md mx-auto'>
-              <ContactNumbersDisplay contactNumbers={profileData.contact_numbers} />
-            </div>
-          </AnimatedSection>
-        )}
-
-        {/* Social Links */}
+        {/* Contact Numbers & Social Links Combined */}
         <AnimatedSection direction='up' delay={0.2}>
-          <GlassCard className='p-8'>
-            <h3 className='text-xl font-semibold mb-6 text-center'>
-              Connect With Me
-            </h3>
-            <div className='flex justify-center space-x-6'>
-              {homePageData.socialLinks.map((social, index) => {
-                const Icon = getDynamicIcon(social.icon);
-                if (!Icon) return null;
-                return (
-                  <AnimatedSection
-                    key={social.label}
-                    direction='up'
-                    delay={0.3 + index * 0.1}
-                  >
-                    <a
-                      href={social.href}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
-                    >
-                      <Icon
-                        size={24}
-                        className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
-                      />
-                    </a>
-                  </AnimatedSection>
-                );
-              })}
+          {profileData.contact_numbers && profileData.contact_numbers.length > 0 ? (
+            <div className='grid lg:grid-cols-2 gap-8 items-start'>
+              {/* Contact Numbers */}
+              <div>
+                <ContactNumbersDisplay contactNumbers={profileData.contact_numbers} />
+              </div>
+              
+              {/* Social Links */}
+              <GlassCard className='p-8'>
+                <h3 className='text-xl font-semibold mb-6 text-center'>
+                  Connect With Me
+                </h3>
+                <div className='flex justify-center space-x-6'>
+                  {homePageData.socialLinks.map((social, index) => {
+                    const Icon = getDynamicIcon(social.icon);
+                    if (!Icon) return null;
+                    return (
+                      <AnimatedSection
+                        key={social.label}
+                        direction='up'
+                        delay={0.3 + index * 0.1}
+                      >
+                        <a
+                          href={social.href}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
+                        >
+                          <Icon
+                            size={24}
+                            className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
+                          />
+                        </a>
+                      </AnimatedSection>
+                    );
+                  })}
+                </div>
+              </GlassCard>
             </div>
-          </GlassCard>
+          ) : (
+            /* Social Links Only */
+            <div className='max-w-md mx-auto'>
+              <GlassCard className='p-8'>
+                <h3 className='text-xl font-semibold mb-6 text-center'>
+                  Connect With Me
+                </h3>
+                <div className='flex justify-center space-x-6'>
+                  {homePageData.socialLinks.map((social, index) => {
+                    const Icon = getDynamicIcon(social.icon);
+                    if (!Icon) return null;
+                    return (
+                      <AnimatedSection
+                        key={social.label}
+                        direction='up'
+                        delay={0.3 + index * 0.1}
+                      >
+                        <a
+                          href={social.href}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='p-3 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-glow group'
+                        >
+                          <Icon
+                            size={24}
+                            className='text-foreground/70 group-hover:text-primary transition-colors duration-300'
+                          />
+                        </a>
+                      </AnimatedSection>
+                    );
+                  })}
+                </div>
+              </GlassCard>
+            </div>
+          )}
         </AnimatedSection>
       </div>
     </div>

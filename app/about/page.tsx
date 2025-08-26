@@ -18,17 +18,17 @@ const iconMap = {
 };
 
 const AboutPageSkeleton = () => (
-  <div className="min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto">
-    <div className="text-center mb-16">
-      <Skeleton className="h-16 w-1/2 mx-auto mb-6" />
-      <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+  <div className='min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto'>
+    <div className='text-center mb-16'>
+      <Skeleton className='h-16 w-1/2 mx-auto mb-6' />
+      <Skeleton className='h-6 w-full max-w-2xl mx-auto' />
     </div>
-    <Skeleton className="h-64 w-full mb-12" />
-    <div className="grid md:grid-cols-2 gap-6">
-      <Skeleton className="h-40 w-full" />
-      <Skeleton className="h-40 w-full" />
-      <Skeleton className="h-40 w-full" />
-      <Skeleton className="h-40 w-full" />
+    <Skeleton className='h-64 w-full mb-12' />
+    <div className='grid md:grid-cols-2 gap-6'>
+      <Skeleton className='h-40 w-full' />
+      <Skeleton className='h-40 w-full' />
+      <Skeleton className='h-40 w-full' />
+      <Skeleton className='h-40 w-full' />
     </div>
   </div>
 );
@@ -152,41 +152,54 @@ const About = () => {
             </div>
           </motion.div>
 
-          {/* Contact Numbers */}
-          {profileData.contact_numbers && profileData.contact_numbers.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
-              <ContactNumbersDisplay 
-                contactNumbers={profileData.contact_numbers}
-                className="max-w-md mx-auto"
-              />
-            </motion.div>
-          )}
-
-          {/* Call to Action */}
+          {/* Contact Numbers & Call to Action Combined */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className='text-center'
           >
-            <GlassCard className='p-8'>
-              <h2 className='text-2xl font-bold mb-4 text-accent'>
-                {aboutPageData.callToAction.title}
-              </h2>
-              <p className='text-foreground/80 mb-6 max-w-2xl mx-auto'>
-                {aboutPageData.callToAction.description}
-              </p>
-              <a
-                href={`mailto:${contactEmail}`}
-                className='inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:shadow-glow'
-              >
-                Get In Touch
-              </a>
-            </GlassCard>
+            {profileData.contact_numbers && profileData.contact_numbers.length > 0 ? (
+              <div className='grid lg:grid-cols-2 gap-8 items-start'>
+                {/* Contact Numbers */}
+                <div>
+                  <ContactNumbersDisplay contactNumbers={profileData.contact_numbers} />
+                </div>
+                
+                {/* Call to Action */}
+                <GlassCard className='p-8'>
+                  <h2 className='text-2xl font-bold mb-4 text-accent'>
+                    {aboutPageData.callToAction.title}
+                  </h2>
+                  <p className='text-foreground/80 mb-6'>
+                    {aboutPageData.callToAction.description}
+                  </p>
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className='inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:shadow-glow'
+                  >
+                    Get In Touch
+                  </a>
+                </GlassCard>
+              </div>
+            ) : (
+              /* Call to Action Only - Centered */
+              <div className='text-center'>
+                <GlassCard className='p-8 max-w-2xl mx-auto'>
+                  <h2 className='text-2xl font-bold mb-4 text-accent'>
+                    {aboutPageData.callToAction.title}
+                  </h2>
+                  <p className='text-foreground/80 mb-6'>
+                    {aboutPageData.callToAction.description}
+                  </p>
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className='inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:shadow-glow'
+                  >
+                    Get In Touch
+                  </a>
+                </GlassCard>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
