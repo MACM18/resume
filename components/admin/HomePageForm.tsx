@@ -211,7 +211,11 @@ export function HomePageForm() {
       >
         {/* Social Links */}
         <div>
-          <h3 className='text-lg font-medium mb-4'>Social Links</h3>
+          <h3 className='text-lg font-medium mb-4'>Social Links & Contact</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Add your professional social media profiles and contact information
+            to help visitors connect with you.
+          </p>
           <div className='space-y-4'>
             {socialFields.map((field, index) => (
               <div
@@ -315,6 +319,10 @@ export function HomePageForm() {
         {/* Experience Highlights */}
         <div>
           <h3 className='text-lg font-medium mb-4'>Experience Highlights</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Showcase your most impressive professional achievements with
+            compelling metrics and descriptions.
+          </p>
           <div className='space-y-4'>
             {expFields.map((field, index) => (
               <div
@@ -429,6 +437,10 @@ export function HomePageForm() {
         {/* Technical Expertise */}
         <div>
           <h3 className='text-lg font-medium mb-4'>Technical Expertise</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Organize your technical skills into categories to showcase your
+            diverse expertise and specializations.
+          </p>
           <div className='space-y-4'>
             {techFields.map((field, index) => (
               <div
@@ -502,7 +514,13 @@ export function HomePageForm() {
 
         {/* Achievements */}
         <div>
-          <h3 className='text-lg font-medium mb-4'>Achievements</h3>
+          <h3 className='text-lg font-medium mb-4'>
+            Achievements & Recognition
+          </h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Highlight your most significant accomplishments with metrics that
+            demonstrate your impact and value.
+          </p>
           <div className='space-y-4'>
             {achievementFields.map((field, index) => (
               <div
@@ -515,10 +533,14 @@ export function HomePageForm() {
                     name={`achievements.${index}.metric`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Metric</FormLabel>
+                        <FormLabel>Achievement Metric</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='100%, 50+, #1, 10K' />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Impressive number or ranking that highlights your
+                          achievement
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -528,10 +550,14 @@ export function HomePageForm() {
                     name={`achievements.${index}.label`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Label</FormLabel>
+                        <FormLabel>Metric Label</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='Success Rate' />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          What the metric represents (e.g., "Projects
+                          Completed", "Client Satisfaction")
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -541,10 +567,13 @@ export function HomePageForm() {
                     name={`achievements.${index}.title`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Title</FormLabel>
+                        <FormLabel>Achievement Title</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='Top Performer Award' />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Name or title of the achievement
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -554,10 +583,16 @@ export function HomePageForm() {
                     name={`achievements.${index}.description`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Achievement Description</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            placeholder='Recognized for outstanding performance and innovative solutions'
+                          />
                         </FormControl>
+                        <FormDescription className='text-xs'>
+                          Brief description of what this achievement represents
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -594,27 +629,28 @@ export function HomePageForm() {
 
         {/* About Me Card Description */}
         <div>
-          <h3 className='text-lg font-medium mb-4'>
-            About Me Card Description
-          </h3>
+          <h3 className='text-lg font-medium mb-4'>About Me Card Summary</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Create a compelling summary that appears on your homepage About Me
+            card to give visitors a quick overview of who you are.
+          </p>
           <FormField
             control={form.control}
             name='about_card_description'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Description for Home Page &quot;About Me&quot; Card
-                </FormLabel>
+                <FormLabel>About Me Card Summary</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='A concise summary for the About Me card on the homepage.'
+                    placeholder='A passionate developer with expertise in modern web technologies, dedicated to creating innovative solutions that make a difference.'
                     {...field}
                     rows={3}
                   />
                 </FormControl>
                 <FormDescription>
-                  This text appears on the &quot;About Me&quot; quick access
-                  card on your homepage.
+                  This brief summary appears on the &quot;About Me&quot; quick
+                  access card on your homepage. Keep it concise and engaging
+                  (2-3 sentences).
                 </FormDescription>
                 <Button
                   type='button'
@@ -649,7 +685,11 @@ export function HomePageForm() {
 
         {/* Call to Action */}
         <div>
-          <h3 className='text-lg font-medium mb-2'>Call To Action</h3>
+          <h3 className='text-lg font-medium mb-2'>Call to Action</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Create an engaging section that encourages visitors to get in touch
+            with you for opportunities and collaborations.
+          </p>
           <div className='p-3 border rounded-md space-y-2'>
             <FormField
               control={form.control}
@@ -658,8 +698,8 @@ export function HomePageForm() {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       placeholder="Let's Connect & Collaborate"
                     />
                   </FormControl>
@@ -677,8 +717,8 @@ export function HomePageForm() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
+                    <Textarea
+                      {...field}
                       placeholder="I'm always excited to discuss new opportunities, share ideas, or explore potential collaborations. Feel free to reach out!"
                       rows={3}
                     />
@@ -697,10 +737,10 @@ export function HomePageForm() {
                 <FormItem>
                   <FormLabel>Contact Email</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="your.email@example.com"
-                      type="email"
+                    <Input
+                      {...field}
+                      placeholder='your.email@example.com'
+                      type='email'
                     />
                   </FormControl>
                   <FormDescription className='text-xs'>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -71,8 +72,9 @@ export function AboutPageForm() {
           items: Array.isArray(s.items) ? s.items.join(", ") : s.items || "",
         })) || [],
       callToAction: profile?.about_page_data?.callToAction || {
-        title: "",
-        description: "",
+        title: "Ready to Work Together?",
+        description:
+          "I'm always open to discussing new opportunities and interesting projects. Let's connect and see how we can create something amazing together.",
       },
     },
   });
@@ -120,98 +122,125 @@ export function AboutPageForm() {
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className='space-y-8'
-      >
-        <FormField
-          control={form.control}
-          name='title'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Page Title</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='subtitle'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Page Subtitle</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='story'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Your Story (separate paragraphs with a blank line)
-              </FormLabel>
-              <FormControl>
-                <Textarea rows={8} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className='space-y-8'>
+      <div>
+        <h2 className='text-xl font-semibold mb-2'>About Page Content</h2>
+        <p className='text-sm text-muted-foreground mb-6'>
+          Create compelling content for your About page that tells your story,
+          showcases your skills, and connects with visitors.
+        </p>
+      </div>
 
-        <Separator />
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+          className='space-y-8'
+        >
+          {/* Page Header */}
+          <div className='space-y-6'>
+            <div>
+              <h3 className='text-lg font-medium mb-4'>Page Header</h3>
+              <p className='text-sm text-muted-foreground mb-4'>
+                The title and subtitle that appear at the top of your About
+                page.
+              </p>
+            </div>
 
-        {/* Skills */}
-        <div>
-          <h3 className='text-lg font-medium mb-4'>Skills</h3>
-          <div className='space-y-4'>
-            {skillFields.map((field, index) => (
-              <div
-                key={field.id}
-                className='p-4 border rounded-lg bg-glass-bg/10 relative'
-              >
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name={`skills.${index}.category`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`skills.${index}.icon`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className='md:col-span-2'>
+            <FormField
+              control={form.control}
+              name='title'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Page Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder='About Me' />
+                  </FormControl>
+                  <FormDescription>
+                    Main heading for your About page (e.g., "About Me", "My
+                    Story")
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='subtitle'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Page Subtitle</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder='Passionate developer creating innovative digital solutions'
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    A compelling subtitle that summarizes your professional
+                    identity
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Story Section */}
+          <div>
+            <h3 className='text-lg font-medium mb-4'>Your Story</h3>
+            <p className='text-sm text-muted-foreground mb-4'>
+              Tell your professional journey in a compelling narrative. Separate
+              paragraphs with a blank line.
+            </p>
+
+            <FormField
+              control={form.control}
+              name='story'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Personal & Professional Story</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={8}
+                      {...field}
+                      placeholder={`My journey in technology began during my college years when I discovered my passion for creating digital solutions that solve real-world problems.
+
+Throughout my career, I've had the opportunity to work on diverse projects ranging from e-commerce platforms to mobile applications, each teaching me valuable lessons about user experience and technical excellence.
+
+Today, I combine my technical expertise with a deep understanding of business needs to create software that not only functions flawlessly but also drives meaningful results for users and organizations.`}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Write your story in multiple paragraphs. Separate each
+                    paragraph with a blank line. Include your background,
+                    journey, passions, and what drives you professionally.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Skills */}
+          <div>
+            <h3 className='text-lg font-medium mb-4'>Skills</h3>
+            <div className='space-y-4'>
+              {skillFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className='p-4 border rounded-lg bg-glass-bg/10 relative'
+                >
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <FormField
                       control={form.control}
-                      name={`skills.${index}.items`}
+                      name={`skills.${index}.category`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Items (comma-separated)</FormLabel>
+                          <FormLabel>Category</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -219,98 +248,126 @@ export function AboutPageForm() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name={`skills.${index}.icon`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Icon Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className='md:col-span-2'>
+                      <FormField
+                        control={form.control}
+                        name={`skills.${index}.items`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Items (comma-separated)</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className='absolute top-2 right-2'>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                        >
+                          <Trash size={16} />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Delete Skill Category?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => removeSkill(index)}
+                            className='bg-destructive hover:bg-destructive/90'
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
-                <div className='absolute top-2 right-2'>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon'
-                        className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Delete Skill Category?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeSkill(index)}
-                          className='bg-destructive hover:bg-destructive/90'
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={() => appendSkill({ category: "", icon: "", items: "" })}
+              className='mt-4'
+            >
+              Add Skill Category
+            </Button>
           </div>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            onClick={() => appendSkill({ category: "", icon: "", items: "" })}
-            className='mt-4'
-          >
-            Add Skill Category
+
+          <Separator />
+
+          {/* Call to Action */}
+          <div>
+            <h3 className='text-lg font-medium mb-2'>Call To Action</h3>
+            <div className='p-3 border rounded-md space-y-2'>
+              <FormField
+                control={form.control}
+                name='callToAction.title'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='callToAction.description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <Button type='submit' disabled={mutation.isPending}>
+            {mutation.isPending ? (
+              <Loader2 className='animate-spin' />
+            ) : (
+              "Save About Page"
+            )}
           </Button>
-        </div>
-
-        <Separator />
-
-        {/* Call to Action */}
-        <div>
-          <h3 className='text-lg font-medium mb-2'>Call To Action</h3>
-          <div className='p-3 border rounded-md space-y-2'>
-            <FormField
-              control={form.control}
-              name='callToAction.title'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='callToAction.description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <Button type='submit' disabled={mutation.isPending}>
-          {mutation.isPending ? (
-            <Loader2 className='animate-spin' />
-          ) : (
-            "Save About Page"
-          )}
-        </Button>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 }
