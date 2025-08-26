@@ -340,8 +340,8 @@ export function HomePageForm() {
                           <Input {...field} placeholder='5+, 100%, #1, etc.' />
                         </FormControl>
                         <FormDescription className='text-xs'>
-                          Short metric or number that stands out (e.g., "5+",
-                          "100%", "#1", "500K")
+                          Short metric or number that stands out (e.g., 5+,
+                          100%, #1, 500K)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -555,8 +555,8 @@ export function HomePageForm() {
                           <Input {...field} placeholder='Success Rate' />
                         </FormControl>
                         <FormDescription className='text-xs'>
-                          What the metric represents (e.g., "Projects
-                          Completed", "Client Satisfaction")
+                          What the metric represents (e.g., &quot;Projects
+                          Completed&quot;, &quot;Client Satisfaction&quot;)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

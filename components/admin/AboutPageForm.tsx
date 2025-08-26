@@ -156,8 +156,8 @@ export function AboutPageForm() {
                     <Input {...field} placeholder='About Me' />
                   </FormControl>
                   <FormDescription>
-                    Main heading for your About page (e.g., "About Me", "My
-                    Story")
+                    Main heading for your About page (e.g., &quot;About
+                    Me&quot;, &quot;My Story&quot;)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
