@@ -13,6 +13,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -318,58 +325,147 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
 
         {/* Uploaded PDF Selector + Preview */}
         {form.watch("pdf_source") === "uploaded" && (
-          <div className='space-y-2'>
+          <div className='space-y-4'>
             <FormItem>
               <FormLabel>Select an Uploaded PDF</FormLabel>
-              <FormControl>
-                <select
-                  value={form.watch("uploaded_resume_id") || ""}
-                  onChange={async (e) => {
-                    const uploadedResumeId = e.target.value;
-                    if (uploadedResumeId) {
-                      const selectedUpload = uploadedResumes.find(
-                        (ur: UploadedResume) => ur.id === uploadedResumeId
-                      );
-                      if (selectedUpload) {
-                        form.setValue("uploaded_resume_id", uploadedResumeId);
-                        // Try to get a fresh public URL
-                        const publicUrl = await getResumePublicUrl(
-                          selectedUpload.file_path
-                        );
-                        form.setValue(
-                          "resume_url",
-                          publicUrl || selectedUpload.public_url || null
-                        );
-                      }
-                    } else {
-                      form.setValue("uploaded_resume_id", null);
-                      form.setValue("resume_url", null);
-                    }
-                  }}
-                  className='w-full border rounded px-3 py-2'
-                >
-                  <option value=''>Choose uploaded resume</option>
-                  {uploadedResumes.map((uploadedResume: UploadedResume) => (
-                    <option key={uploadedResume.id} value={uploadedResume.id}>
-                      {uploadedResume.original_filename}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
               <FormDescription>
-                Select a previously uploaded PDF to attach to this resume entry.
+                Choose from your previously uploaded PDFs below.
               </FormDescription>
+
+              {uploadedResumes.length === 0 ? (
+                <div className='text-center py-8 text-muted-foreground'>
+                  <p>No uploaded resumes found.</p>
+                  <p className='text-sm'>
+                    Upload a PDF first using the Resume Manager tab.
+                  </p>
+                </div>
+              ) : (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto'>
+                  {uploadedResumes.map((uploadedResume: UploadedResume) => {
+                    const isSelected =
+                      form.watch("uploaded_resume_id") === uploadedResume.id;
+                    return (
+                      <div
+                        key={uploadedResume.id}
+                        className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/5 shadow-md"
+                            : "border-border hover:border-primary/50 hover:shadow-sm"
+                        }`}
+                        onClick={async () => {
+                          form.setValue(
+                            "uploaded_resume_id",
+                            uploadedResume.id
+                          );
+                          // Try to get a fresh public URL
+                          const publicUrl = await getResumePublicUrl(
+                            uploadedResume.file_path
+                          );
+                          form.setValue(
+                            "resume_url",
+                            publicUrl || uploadedResume.public_url || null
+                          );
+                        }}
+                      >
+                        <div className='flex items-start gap-3'>
+                          <div className='w-12 h-16 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-semibold flex-shrink-0'>
+                            PDF
+                          </div>
+                          <div className='flex-1 min-w-0'>
+                            <h4 className='font-medium text-sm truncate'>
+                              {uploadedResume.original_filename}
+                            </h4>
+                            <p className='text-xs text-muted-foreground mt-1'>
+                              {uploadedResume.file_size
+                                ? `${Math.round(
+                                    uploadedResume.file_size / 1024
+                                  )} KB • `
+                                : ""}
+                              {new Date(
+                                uploadedResume.created_at
+                              ).toLocaleDateString()}
+                            </p>
+                            {isSelected && (
+                              <div className='flex items-center gap-2 mt-2'>
+                                <div className='w-2 h-2 bg-primary rounded-full'></div>
+                                <span className='text-xs text-primary font-medium'>
+                                  Selected
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Quick Preview Button */}
+                        <div className='mt-3 flex gap-2'>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant='outline'
+                                size='sm'
+                                className='flex-1'
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Preview
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className='max-w-4xl max-h-[90vh]'>
+                              <DialogHeader>
+                                <DialogTitle>
+                                  {uploadedResume.original_filename}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className='w-full h-[70vh] border rounded overflow-hidden'>
+                                <iframe
+                                  src={
+                                    uploadedResume.public_url ||
+                                    uploadedResume.file_path
+                                  }
+                                  className='w-full h-full'
+                                  title={`Preview of ${uploadedResume.original_filename}`}
+                                />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {isSelected && (
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                form.setValue("uploaded_resume_id", null);
+                                form.setValue("resume_url", null);
+                              }}
+                            >
+                              Clear
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Small Inline Preview */}
+              {form.watch("resume_url") && (
+                <div className='mt-4'>
+                  <h4 className='text-sm font-medium mb-2'>
+                    Selected Resume Preview:
+                  </h4>
+                  <div className='border rounded overflow-hidden bg-gray-50'>
+                    <iframe
+                      src={String(form.watch("resume_url"))}
+                      className='w-full h-48'
+                      title='Selected resume preview'
+                    />
+                  </div>
+                </div>
+              )}
+
               <FormMessage />
             </FormItem>
-
-            {form.watch("resume_url") && (
-              <div className='border rounded overflow-hidden'>
-                <iframe
-                  src={String(form.watch("resume_url"))}
-                  className='w-full h-56'
-                />
-              </div>
-            )}
           </div>
         )}
 
