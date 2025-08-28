@@ -43,6 +43,7 @@ const ResumePageSkeleton = () => (
 
 const Resume = () => {
   const [hostname, setHostname] = useState("");
+  const [isDownloadingUploaded, setIsDownloadingUploaded] = useState(false);
 
   useEffect(() => {
     setHostname(window.location.hostname);
@@ -107,7 +108,7 @@ const Resume = () => {
       const sanitizedFullName = profileData?.full_name
         .replace(/[^a-zA-Z0-9\s]/g, "")
         .replace(/\s+/g, "-");
-      a.download = `resume-${
+      a.download = `Resume-${
         sanitizedFullName || resume?.role || "download"
       }.pdf`;
       document.body.appendChild(a);
@@ -122,12 +123,43 @@ const Resume = () => {
     },
   });
 
+  const downloadUploadedResume = async (url: string) => {
+    setIsDownloadingUploaded(true);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch PDF");
+      }
+      
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      
+      const sanitizedFullName = profileData?.full_name
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, "-");
+      a.download = `Resume-${sanitizedFullName || resume?.role || "download"}.pdf`;
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      toast.success("Resume downloaded!");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download resume");
+    } finally {
+      setIsDownloadingUploaded(false);
+    }
+  };
+
   const handleDownload = () => {
     if (!resume) return;
     if (resume.pdf_source === "generated") {
       generatePdfMutation.mutate();
     } else if (resume.resume_url) {
-      window.open(resume.resume_url, "_blank");
+      downloadUploadedResume(resume.resume_url);
     } else {
       toast.error("No PDF available for download.");
     }
@@ -178,15 +210,20 @@ const Resume = () => {
             className='bg-primary hover:bg-primary/90'
             disabled={
               generatePdfMutation.isPending ||
+              isDownloadingUploaded ||
               (resume.pdf_source === "uploaded" && !resume.resume_url)
             }
           >
-            {generatePdfMutation.isPending ? (
+            {generatePdfMutation.isPending || isDownloadingUploaded ? (
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
             ) : (
               <Download className='mr-2' size={20} />
             )}
-            {generatePdfMutation.isPending ? "Generating..." : "Download PDF"}
+            {generatePdfMutation.isPending
+              ? "Generating..."
+              : isDownloadingUploaded
+              ? "Downloading..."
+              : "Download PDF"}
           </Button>
         </motion.div>
 
