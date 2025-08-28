@@ -10,6 +10,7 @@ import { ProfileManagement } from "@/components/admin/ProfileManagement";
 import { HomePageForm } from "@/components/admin/HomePageForm";
 import { AboutPageForm } from "@/components/admin/AboutPageForm";
 import { ResumeManagement } from "@/components/admin/ResumeManagement";
+import { ResumeManager } from "@/components/admin/ResumeManager";
 import { ThemeEditor } from "@/components/admin/ThemeEditor";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -107,7 +108,14 @@ const AdminPage = () => {
               <ProjectManagement />
             </TabsContent>
             <TabsContent value='resumes' className='p-6'>
-              <ResumeManagement />
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                  <ResumeManagement />
+                </div>
+                <div>
+                  <ResumeManager />
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </GlassCard>

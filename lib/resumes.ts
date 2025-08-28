@@ -1,10 +1,109 @@
 "use client";
 
 import { supabase } from './supabase';
-import { Resume } from '@/types/portfolio';
+import { Resume, UploadedResume } from '@/types/portfolio';
 
-export async function uploadResumePdf(file: File, userId: string, role: string): Promise<string | null> {
-  const filePath = `${userId}/${role}-${Date.now()}.pdf`;
+// ========== UPLOADED RESUMES FUNCTIONS ==========
+
+export async function createUploadedResume(
+  file: File, 
+  userId: string, 
+  filePath: string, 
+  publicUrl: string
+): Promise<UploadedResume | null> {
+  const { data, error } = await supabase
+    .from('uploaded_resumes')
+    .insert([{
+      user_id: userId,
+      file_path: filePath,
+      public_url: publicUrl,
+      original_filename: file.name,
+      file_size: file.size
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating uploaded resume record:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function getUploadedResumesForCurrentUser(): Promise<UploadedResume[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return [];
+
+  const { data, error } = await supabase
+    .from('uploaded_resumes')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching uploaded resumes:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function deleteUploadedResume(id: string): Promise<boolean> {
+  // First get the file_path to delete from storage
+  const { data: uploadedResume, error: fetchError } = await supabase
+    .from('uploaded_resumes')
+    .select('file_path')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) {
+    console.error('Error fetching uploaded resume for deletion:', fetchError);
+    return false;
+  }
+
+  // Delete from storage
+  if (uploadedResume?.file_path) {
+    const { error: storageError } = await supabase.storage
+      .from('resumes')
+      .remove([uploadedResume.file_path]);
+    
+    if (storageError) {
+      console.error('Error deleting file from storage:', storageError);
+      // Continue with DB deletion even if storage deletion fails
+    }
+  }
+
+  // Delete from database
+  const { error } = await supabase
+    .from('uploaded_resumes')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting uploaded resume:', error);
+    return false;
+  }
+  return true;
+}
+
+// ========== EXISTING FUNCTIONS (updated) ==========
+
+export async function uploadResumePdf(file: File, userId: string, role: string): Promise<UploadedResume | null> {
+  // ensure filename is safe
+  const safeRole = role ? role.replace(/[^a-zA-Z0-9-_]/g, '-') : 'resume';
+  const filePath = `${userId}/${safeRole}-${Date.now()}.pdf`;
+
+  // Check if bucket exists by attempting to list; if bucket missing, throw a clear error
+  try {
+    const { error: listError } = await supabase.storage.from('resumes').list('', { limit: 1 });
+    if (listError) {
+      console.error('Bucket "resumes" not accessible:', listError.message || listError);
+      throw new Error('Storage bucket "resumes" not found or inaccessible.');
+    }
+  } catch (err) {
+    console.error('Error checking bucket:', err);
+    return null;
+  }
+
   const { error: uploadError } = await supabase.storage
     .from('resumes')
     .upload(filePath, file, { upsert: true });
@@ -14,8 +113,41 @@ export async function uploadResumePdf(file: File, userId: string, role: string):
     return null;
   }
 
-  const { data: { publicUrl } } = supabase.storage.from('resumes').getPublicUrl(filePath);
-  return publicUrl;
+  // getPublicUrl returns { data: { publicUrl } }
+  const { data } = supabase.storage.from('resumes').getPublicUrl(filePath);
+  let publicUrl = '';
+  
+  // prefer publicUrl if present
+  if (data && 'publicUrl' in data && data.publicUrl) {
+    publicUrl = data.publicUrl;
+  } else {
+    // fallback: createSignedUrl (expires in 1 hour)
+    const { data: signedData, error: signedErr } = await supabase.storage
+      .from('resumes')
+      .createSignedUrl(filePath, 60 * 60);
+    if (signedErr) {
+      console.error('Failed to create signed URL for resume:', signedErr);
+      return null;
+    }
+    publicUrl = signedData?.signedUrl || '';
+  }
+
+  // Create database record
+  const uploadedResume = await createUploadedResume(file, userId, filePath, publicUrl);
+  return uploadedResume;
+}
+
+export async function getResumePublicUrl(filePath: string): Promise<string | null> {
+  // Returns public URL if public access is enabled, otherwise returns a signed URL
+  const { data } = supabase.storage.from('resumes').getPublicUrl(filePath);
+  if (data && 'publicUrl' in data && data.publicUrl) return data.publicUrl;
+
+  const { data: signedData, error: signedErr } = await supabase.storage.from('resumes').createSignedUrl(filePath, 60 * 60);
+  if (signedErr) {
+    console.error('Failed to create signed URL:', signedErr);
+    return null;
+  }
+  return signedData?.signedUrl || null;
 }
 
 export async function getActiveResume(domain: string): Promise<Resume | null> {

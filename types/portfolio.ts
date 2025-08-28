@@ -14,6 +14,16 @@ export interface Project {
   key_features?: string[]; // New field for AI-generated key features
 }
 
+export interface UploadedResume {
+  id: string;
+  user_id: string;
+  file_path: string;
+  public_url?: string | null;
+  original_filename: string;
+  file_size?: number | null;
+  created_at: string;
+}
+
 export interface Resume {
   id: string;
   role: string;
@@ -34,6 +44,7 @@ export interface Resume {
   project_ids: string[];
   resume_url: string | null;
   pdf_source: 'uploaded' | 'generated';
+  uploaded_resume_id?: string | null; // Foreign key to uploaded_resumes
   user_id: string;
   created_at: string;
   certifications?: {

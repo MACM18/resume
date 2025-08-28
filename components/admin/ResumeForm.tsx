@@ -18,7 +18,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addResume, updateResume, uploadResumePdf } from "@/lib/resumes";
 import { getProjectsForCurrentUser } from "@/lib/projects";
-import { Resume } from "@/types/portfolio";
+import {
+  getUploadedResumesForCurrentUser,
+  getResumePublicUrl,
+} from "@/lib/resumes";
+import { Resume, UploadedResume } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
 import { Trash, FileUp, Loader2, CheckCircle, Sparkles } from "lucide-react";
 import { useSupabase } from "../providers/AuthProvider";
@@ -35,6 +39,7 @@ const resumeSchema = z.object({
   project_ids: z.array(z.string()).optional(),
   resume_url: z.string().url().nullable(),
   pdf_source: z.enum(["uploaded", "generated"]).default("uploaded"),
+  uploaded_resume_id: z.string().nullable().optional(), // New field for uploaded resume reference
   experience: z.array(
     z.object({
       company: z.string().min(1, "Company is required."),
@@ -81,6 +86,11 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
     queryFn: getProjectsForCurrentUser,
   });
 
+  const { data: uploadedResumes = [] } = useQuery({
+    queryKey: ["uploaded-resumes"],
+    queryFn: getUploadedResumesForCurrentUser,
+  });
+
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["currentUserProfile"],
     queryFn: getCurrentUserProfile,
@@ -96,6 +106,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       project_ids: resume?.project_ids || [],
       resume_url: resume?.resume_url || null,
       pdf_source: resume?.pdf_source || "uploaded",
+      uploaded_resume_id: resume?.uploaded_resume_id || null,
       experience:
         resume?.experience.map((exp) => ({
           ...exp,
@@ -179,6 +190,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
           description: exp.description.split("\n"),
         })),
         certifications: data.certifications || [], // Ensure certifications are included
+        uploaded_resume_id: data.uploaded_resume_id || null, // Include uploaded resume reference
       };
       if (resume) {
         return updateResume(resume.id, processedData);
@@ -205,11 +217,14 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       return;
     }
     setIsUploading(true);
-    const publicUrl = await uploadResumePdf(file, session.user.id, role);
+    const uploadedResume = await uploadResumePdf(file, session.user.id, role);
     setIsUploading(false);
-    if (publicUrl) {
-      form.setValue("resume_url", publicUrl);
+    if (uploadedResume) {
+      form.setValue("resume_url", uploadedResume.public_url || null);
+      form.setValue("uploaded_resume_id", uploadedResume.id);
       toast.success("PDF uploaded successfully!");
+      // Refresh the uploaded resumes list
+      queryClient.invalidateQueries({ queryKey: ["uploaded-resumes"] });
     } else {
       toast.error("Failed to upload PDF.");
     }
@@ -300,6 +315,63 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
             </FormItem>
           )}
         />
+
+        {/* Uploaded PDF Selector + Preview */}
+        {form.watch("pdf_source") === "uploaded" && (
+          <div className='space-y-2'>
+            <FormItem>
+              <FormLabel>Select an Uploaded PDF</FormLabel>
+              <FormControl>
+                <select
+                  value={form.watch("uploaded_resume_id") || ""}
+                  onChange={async (e) => {
+                    const uploadedResumeId = e.target.value;
+                    if (uploadedResumeId) {
+                      const selectedUpload = uploadedResumes.find(
+                        (ur: UploadedResume) => ur.id === uploadedResumeId
+                      );
+                      if (selectedUpload) {
+                        form.setValue("uploaded_resume_id", uploadedResumeId);
+                        // Try to get a fresh public URL
+                        const publicUrl = await getResumePublicUrl(
+                          selectedUpload.file_path
+                        );
+                        form.setValue(
+                          "resume_url",
+                          publicUrl || selectedUpload.public_url || null
+                        );
+                      }
+                    } else {
+                      form.setValue("uploaded_resume_id", null);
+                      form.setValue("resume_url", null);
+                    }
+                  }}
+                  className='w-full border rounded px-3 py-2'
+                >
+                  <option value=''>Choose uploaded resume</option>
+                  {uploadedResumes.map((uploadedResume: UploadedResume) => (
+                    <option key={uploadedResume.id} value={uploadedResume.id}>
+                      {uploadedResume.original_filename}
+                    </option>
+                  ))}
+                </select>
+              </FormControl>
+              <FormDescription>
+                Select a previously uploaded PDF to attach to this resume entry.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+
+            {form.watch("resume_url") && (
+              <div className='border rounded overflow-hidden'>
+                <iframe
+                  src={String(form.watch("resume_url"))}
+                  className='w-full h-56'
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* PDF Upload */}
         {form.watch("pdf_source") === "uploaded" && (
