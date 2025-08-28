@@ -130,17 +130,19 @@ const Resume = () => {
       if (!response.ok) {
         throw new Error("Failed to fetch PDF");
       }
-      
+
       const blob = await response.blob();
       const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = downloadUrl;
-      
+
       const sanitizedFullName = profileData?.full_name
         .replace(/[^a-zA-Z0-9\s]/g, "")
         .replace(/\s+/g, "-");
-      a.download = `Resume-${sanitizedFullName || resume?.role || "download"}.pdf`;
-      
+      a.download = `Resume-${
+        sanitizedFullName || resume?.role || "download"
+      }.pdf`;
+
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
