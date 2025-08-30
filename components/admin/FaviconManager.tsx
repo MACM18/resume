@@ -85,7 +85,10 @@ export function FaviconManager() {
     }
 
     // If the file is not an .ico, resize to a supported favicon resolution (64x64)
-    const isIco = isIcoByName || file.type === 'image/x-icon' || file.type === 'image/vnd.microsoft.icon';
+    const isIco =
+      isIcoByName ||
+      file.type === "image/x-icon" ||
+      file.type === "image/vnd.microsoft.icon";
 
     setIsUploading(true);
     try {
@@ -111,20 +114,23 @@ export function FaviconManager() {
   // Helper: resize image file to square PNG of given size using canvas
   async function resizeImageFile(file: File, size: number): Promise<File> {
     return new Promise((resolve, reject) => {
-      const img = document.createElement('img') as HTMLImageElement;
+      const img = document.createElement("img") as HTMLImageElement;
       const url = URL.createObjectURL(file);
       img.onload = () => {
         try {
-          const canvas = document.createElement('canvas');
+          const canvas = document.createElement("canvas");
           canvas.width = size;
           canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) throw new Error('Canvas not supported');
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("Canvas not supported");
 
           // Draw image centered and cover-style
           const { width: iw, height: ih } = img;
           const aspect = iw / ih;
-          let sx = 0, sy = 0, sWidth = iw, sHeight = ih;
+          let sx = 0,
+            sy = 0,
+            sWidth = iw,
+            sHeight = ih;
 
           if (aspect > 1) {
             // image is wider -> crop sides
@@ -141,12 +147,16 @@ export function FaviconManager() {
 
           canvas.toBlob(
             (blob) => {
-              if (!blob) return reject(new Error('Failed to create blob'));
-              const resizedFile = new File([blob], `${file.name.split('.')[0]}-favicon.png`, { type: 'image/png' });
+              if (!blob) return reject(new Error("Failed to create blob"));
+              const resizedFile = new File(
+                [blob],
+                `${file.name.split(".")[0]}-favicon.png`,
+                { type: "image/png" }
+              );
               URL.revokeObjectURL(url);
               resolve(resizedFile);
             },
-            'image/png',
+            "image/png",
             0.9
           );
         } catch (err) {
@@ -156,7 +166,7 @@ export function FaviconManager() {
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
-        reject(new Error('Failed to load image'));
+        reject(new Error("Failed to load image"));
       };
       img.src = url;
     });

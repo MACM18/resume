@@ -9,8 +9,8 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ContactButton } from "@/components/ContactButton";
-import { headers } from 'next/headers';
-import { getProfileData } from '@/lib/profile';
+import { headers } from "next/headers";
+import { getProfileDataServer } from "@/lib/profile.server";
 
 export default async function RootLayout({
   children,
@@ -19,8 +19,8 @@ export default async function RootLayout({
 }) {
   // Server-side: determine hostname and fetch profile data to get favicon_url
   const hdr = await headers();
-  const host = hdr.get('host') ?? '';
-  const profileData = host ? await getProfileData(host) : null;
+  const host = hdr.get("host") ?? "";
+  const profileData = host ? await getProfileDataServer(host) : null;
   const faviconUrl = profileData?.favicon_url ?? null;
 
   return (
@@ -28,8 +28,8 @@ export default async function RootLayout({
       <head>
         {faviconUrl && (
           <>
-            <link rel="icon" href={faviconUrl} />
-            <link rel="shortcut icon" href={faviconUrl} />
+            <link rel='icon' href={faviconUrl} />
+            <link rel='shortcut icon' href={faviconUrl} />
           </>
         )}
       </head>
