@@ -44,7 +44,7 @@ export function BackgroundManager() {
     },
   });
 
-  const deleteImageMutation = useMutation({
+  const _deleteImageMutation = useMutation({
     mutationFn: async (imageUrl: string) => {
       if (!session?.user.id) throw new Error("Not authenticated.");
       // If the image being deleted is the current background, clear it from profile

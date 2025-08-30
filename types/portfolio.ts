@@ -119,6 +119,7 @@ export interface Profile {
   theme: Theme | null;
   updated_at: string;
   background_image_url: string | null; // New field for background image
+  favicon_url?: string | null; // Optional favicon URL
   contact_numbers?: {
     id: string;
     number: string;

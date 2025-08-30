@@ -10,6 +10,7 @@ interface ProfileData {
   about_page_data: AboutPageData;
   avatar_url: string | null;
   background_image_url: string | null; // Include background image URL
+  favicon_url?: string | null; // Optional favicon URL
   contact_numbers?: {
     id: string;
     number: string;
@@ -152,6 +153,43 @@ export async function deleteBackgroundImage(userId: string, imageUrl: string): P
 
   if (error) {
     console.error('Error deleting background image:', error);
+    throw error;
+  }
+  return true;
+}
+
+export async function uploadFavicon(file: File, userId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  // Preserve .ico extension if provided
+  const filePath = `${userId}/favicon-${Date.now()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('favicons')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error('Error uploading favicon:', uploadError);
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from('favicons')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
+export async function deleteFavicon(userId: string, imageUrl: string): Promise<boolean> {
+  const pathSegments = imageUrl.split('/');
+  const fileName = pathSegments[pathSegments.length - 1];
+  const filePath = `${userId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('favicons')
+    .remove([filePath]);
+
+  if (error) {
+    console.error('Error deleting favicon:', error);
     throw error;
   }
   return true;

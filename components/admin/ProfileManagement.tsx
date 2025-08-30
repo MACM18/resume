@@ -10,6 +10,7 @@ import { Link as LinkIcon } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileImageManager } from "./ProfileImageManager";
 import { BackgroundManager } from "./BackgroundManager"; // Import the new component
+import { FaviconManager } from "./FaviconManager";
 
 export function ProfileManagement() {
   const { session } = useSupabase();
@@ -117,6 +118,9 @@ export function ProfileManagement() {
       </div>
       <div>
         <BackgroundManager /> {/* New Background Image Manager */}
+      </div>
+      <div>
+        <FaviconManager />
       </div>
     </div>
   );

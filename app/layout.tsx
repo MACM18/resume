@@ -9,14 +9,30 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ContactButton } from "@/components/ContactButton";
+import { headers } from 'next/headers';
+import { getProfileData } from '@/lib/profile';
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Server-side: determine hostname and fetch profile data to get favicon_url
+  const hdr = await headers();
+  const host = hdr.get('host') ?? '';
+  const profileData = host ? await getProfileData(host) : null;
+  const faviconUrl = profileData?.favicon_url ?? null;
+
   return (
     <html lang='en'>
+      <head>
+        {faviconUrl && (
+          <>
+            <link rel="icon" href={faviconUrl} />
+            <link rel="shortcut icon" href={faviconUrl} />
+          </>
+        )}
+      </head>
       <body>
         <ReactQueryProvider>
           <AuthProvider>
