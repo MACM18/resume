@@ -465,43 +465,45 @@ export default function Page() {
         <AnimatedSection direction='up' delay={0.2}>
           {profileData.contact_numbers &&
           profileData.contact_numbers.length > 0 ? (
-            <div className='grid lg:grid-cols-2 gap-8 items-start'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-start'>
               {/* Contact Numbers */}
-              <div>
+              <div className='w-full'>
                 <ContactNumbersDisplay
                   contactNumbers={profileData.contact_numbers}
                 />
               </div>
 
               {/* Social Links */}
-              <GlassCard className='p-8'>
-                <h3 className='text-xl font-semibold mb-6 text-center'>
-                  Connect With Me
-                </h3>
-                <div className='flex justify-center space-x-6'>
-                  {homePageData.socialLinks.map((social, index) => {
-                    const Icon = getDynamicIcon(social.icon);
-                    if (!Icon) return null;
-                    return (
-                      <AnimatedSection
-                        key={social.label}
-                        direction='up'
-                        delay={0.3 + index * 0.1}
-                      >
-                        <a
-                          href={social.href}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='group relative p-4 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:scale-110 hover:shadow-glow block'
-                          aria-label={social.label}
+              <div className='w-full'>
+                <GlassCard className='p-6 w-full'>
+                  <h3 className='text-xl font-semibold mb-6 text-center'>
+                    Connect With Me
+                  </h3>
+                  <div className='flex flex-wrap justify-center gap-6'>
+                    {homePageData.socialLinks.map((social, index) => {
+                      const Icon = getDynamicIcon(social.icon);
+                      if (!Icon) return null;
+                      return (
+                        <AnimatedSection
+                          key={social.label}
+                          direction='up'
+                          delay={0.3 + index * 0.1}
                         >
-                          <Icon className='h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300' />
-                        </a>
-                      </AnimatedSection>
-                    );
-                  })}
-                </div>
-              </GlassCard>
+                          <a
+                            href={social.href}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='group relative p-4 rounded-full bg-glass-bg/20 border border-glass-border/30 hover:border-primary/50 transition-all duration-300 hover:scale-110 hover:shadow-glow block'
+                            aria-label={social.label}
+                          >
+                            <Icon className='h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300' />
+                          </a>
+                        </AnimatedSection>
+                      );
+                    })}
+                  </div>
+                </GlassCard>
+              </div>
             </div>
           ) : (
             /* Social Links Only */
