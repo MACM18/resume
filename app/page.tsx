@@ -140,7 +140,9 @@ export default function Page() {
                   </div>
                   <div className='text-sm text-foreground/60'>
                     {new Date(currentWork.start_date).toLocaleDateString()} –
-                    Present
+                    {currentWork.is_current || !currentWork.end_date
+                      ? "Present"
+                      : new Date(currentWork.end_date).toLocaleDateString()}
                   </div>
                 </div>
                 {currentWork.description?.length ? (
