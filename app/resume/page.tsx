@@ -87,7 +87,12 @@ const Resume = () => {
             apikey: anonKey,
             Authorization: `Bearer ${anonKey}`,
           },
-          body: JSON.stringify({ resume, profile: profileData, projects, workHistory }),
+          body: JSON.stringify({
+            resume,
+            profile: profileData,
+            projects,
+            workHistory,
+          }),
         }
       );
 
@@ -174,7 +179,8 @@ const Resume = () => {
     }
   };
 
-  const isLoading = isLoadingProfile || isLoadingResume || isLoadingProjects || isLoadingWork;
+  const isLoading =
+    isLoadingProfile || isLoadingResume || isLoadingProjects || isLoadingWork;
 
   if (isLoading || !hostname) {
     return <ResumePageSkeleton />;
@@ -282,17 +288,29 @@ const Resume = () => {
                   </h3>
                   <div className='space-y-6'>
                     {workHistory.map((exp) => (
-                      <div key={exp.id} className='border-l-2 border-primary/30 pl-6'>
+                      <div
+                        key={exp.id}
+                        className='border-l-2 border-primary/30 pl-6'
+                      >
                         <div className='flex flex-wrap items-center justify-between mb-2'>
-                          <h4 className='text-xl font-semibold'>{exp.position}</h4>
+                          <h4 className='text-xl font-semibold'>
+                            {exp.position}
+                          </h4>
                           <div className='flex items-center text-foreground/60'>
                             <Calendar size={16} className='mr-1' />
-                            {new Date(exp.start_date).toLocaleDateString()} – {exp.is_current || !exp.end_date ? "Present" : new Date(exp.end_date).toLocaleDateString()}
+                            {new Date(
+                              exp.start_date
+                            ).toLocaleDateString()} –{" "}
+                            {exp.is_current || !exp.end_date
+                              ? "Present"
+                              : new Date(exp.end_date).toLocaleDateString()}
                           </div>
                         </div>
                         <p className='text-primary mb-1'>{exp.company}</p>
                         {exp.location && (
-                          <p className='text-foreground/60 text-sm mb-2'>{exp.location}</p>
+                          <p className='text-foreground/60 text-sm mb-2'>
+                            {exp.location}
+                          </p>
                         )}
                         <ul className='space-y-2 text-foreground/80'>
                           {exp.description?.map((item, i) => (

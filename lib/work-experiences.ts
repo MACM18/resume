@@ -102,7 +102,11 @@ export async function updateWorkExperience(
   const normalized = {
     ...patch,
     end_date:
-      patch.is_current === true ? null : patch.end_date === undefined ? undefined : patch.end_date,
+      patch.is_current === true
+        ? null
+        : patch.end_date === undefined
+        ? undefined
+        : patch.end_date,
   } as Partial<WorkExperience>;
 
   const { data, error } = await supabase
@@ -137,7 +141,5 @@ export async function getCurrentWork(
 ): Promise<WorkExperience | null> {
   const list = await getVisibleWorkExperiences(domain);
   // Prefer current; otherwise latest by end_date/start_date
-  return (
-    list.find((w) => w.is_current) || list[0] || null
-  );
+  return list.find((w) => w.is_current) || list[0] || null;
 }

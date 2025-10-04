@@ -43,7 +43,7 @@ export interface Resume {
   }[];
   project_ids: string[];
   resume_url: string | null;
-  pdf_source: 'uploaded' | 'generated';
+  pdf_source: "uploaded" | "generated";
   uploaded_resume_id?: string | null; // Foreign key to uploaded_resumes
   user_id: string;
   created_at: string;

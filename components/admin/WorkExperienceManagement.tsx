@@ -8,7 +8,12 @@ import {
 } from "@/lib/work-experiences";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/GlassCard";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { WorkExperienceForm } from "./WorkExperienceForm";
 import { WorkExperience } from "@/types/portfolio";
 import { useState } from "react";
@@ -87,15 +92,25 @@ export function WorkExperienceManagement() {
                   <div className='flex items-center gap-2'>
                     <div className='font-semibold'>{exp.position}</div>
                     {exp.is_current && (
-                      <span className='text-xs px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20'>Current</span>
+                      <span className='text-xs px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20'>
+                        Current
+                      </span>
                     )}
                     {!exp.visible && (
-                      <span className='text-xs px-2 py-0.5 rounded bg-foreground/10 text-foreground/70 border border-glass-border/30'>Hidden</span>
+                      <span className='text-xs px-2 py-0.5 rounded bg-foreground/10 text-foreground/70 border border-glass-border/30'>
+                        Hidden
+                      </span>
                     )}
                   </div>
-                  <div className='text-sm text-foreground/70'>{exp.company}{exp.location ? ` • ${exp.location}` : ""}</div>
+                  <div className='text-sm text-foreground/70'>
+                    {exp.company}
+                    {exp.location ? ` • ${exp.location}` : ""}
+                  </div>
                   <div className='text-xs text-foreground/60'>
-                    {new Date(exp.start_date).toLocaleDateString()} - {exp.is_current || !exp.end_date ? "Present" : new Date(exp.end_date).toLocaleDateString()}
+                    {new Date(exp.start_date).toLocaleDateString()} -{" "}
+                    {exp.is_current || !exp.end_date
+                      ? "Present"
+                      : new Date(exp.end_date).toLocaleDateString()}
                   </div>
                 </div>
                 <div className='flex gap-2'>
@@ -123,8 +138,13 @@ export function WorkExperienceManagement() {
                   <Button
                     variant='outline'
                     size='icon'
-                    onClick={() => visibilityMutation.mutate({ id: exp.id, visible: !exp.visible })}
-                    title={exp.visible ? 'Hide' : 'Show'}
+                    onClick={() =>
+                      visibilityMutation.mutate({
+                        id: exp.id,
+                        visible: !exp.visible,
+                      })
+                    }
+                    title={exp.visible ? "Hide" : "Show"}
                   >
                     {exp.visible ? <EyeOff size={16} /> : <Eye size={16} />}
                   </Button>
@@ -146,7 +166,9 @@ export function WorkExperienceManagement() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Work Experience" : "Add Work Experience"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Edit Work Experience" : "Add Work Experience"}
+            </DialogTitle>
           </DialogHeader>
           <WorkExperienceForm
             experience={editing}
@@ -160,7 +182,8 @@ export function WorkExperienceManagement() {
 
       {current && (
         <div className='text-xs text-foreground/60'>
-          Current role: <span className='font-medium'>{current.position}</span> at {current.company}
+          Current role: <span className='font-medium'>{current.position}</span>{" "}
+          at {current.company}
         </div>
       )}
     </div>

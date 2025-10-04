@@ -130,13 +130,17 @@ export default function Page() {
               <GlassCard className='p-6'>
                 <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-2'>
                   <div>
-                    <div className='text-xl font-semibold'>{currentWork.position}</div>
+                    <div className='text-xl font-semibold'>
+                      {currentWork.position}
+                    </div>
                     <div className='text-foreground/70'>
-                      {currentWork.company}{currentWork.location ? ` • ${currentWork.location}` : ""}
+                      {currentWork.company}
+                      {currentWork.location ? ` • ${currentWork.location}` : ""}
                     </div>
                   </div>
                   <div className='text-sm text-foreground/60'>
-                    {new Date(currentWork.start_date).toLocaleDateString()} – Present
+                    {new Date(currentWork.start_date).toLocaleDateString()} –
+                    Present
                   </div>
                 </div>
                 {currentWork.description?.length ? (
@@ -147,7 +151,12 @@ export default function Page() {
                   </ul>
                 ) : null}
                 <div className='mt-4 text-right'>
-                  <Button asChild variant='ghost' size='sm' className='text-primary hover:text-primary-glow'>
+                  <Button
+                    asChild
+                    variant='ghost'
+                    size='sm'
+                    className='text-primary hover:text-primary-glow'
+                  >
                     <Link href='/resume'>View full resume</Link>
                   </Button>
                 </div>

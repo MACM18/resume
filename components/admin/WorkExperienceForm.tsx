@@ -78,17 +78,24 @@ export function WorkExperienceForm({
           : [],
       };
       if (experience) {
-        return updateWorkExperience(experience.id, payload as Partial<WorkExperience>);
+        return updateWorkExperience(
+          experience.id,
+          payload as Partial<WorkExperience>
+        );
       }
       return addWorkExperience(payload as any);
     },
     onSuccess: () => {
-      toast.success(`Work experience ${experience ? "updated" : "added"} successfully!`);
+      toast.success(
+        `Work experience ${experience ? "updated" : "added"} successfully!`
+      );
       queryClient.invalidateQueries({ queryKey: ["user-work-experiences"] });
       onSuccess();
     },
     onError: (error) => {
-      toast.error(`Failed to ${experience ? "update" : "add"} work experience.`);
+      toast.error(
+        `Failed to ${experience ? "update" : "add"} work experience.`
+      );
       console.error(error);
     },
   });
@@ -164,7 +171,11 @@ export function WorkExperienceForm({
               <FormItem>
                 <FormLabel>End Date</FormLabel>
                 <FormControl>
-                  <Input type='date' {...field} disabled={form.watch("is_current")} />
+                  <Input
+                    type='date'
+                    {...field}
+                    disabled={form.watch("is_current")}
+                  />
                 </FormControl>
                 <FormDescription>Leave empty if current</FormDescription>
                 <FormMessage />
@@ -180,7 +191,10 @@ export function WorkExperienceForm({
             render={({ field }) => (
               <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
                 <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
                 <div className='space-y-1 leading-none'>
                   <FormLabel>Current Role</FormLabel>
@@ -197,7 +211,10 @@ export function WorkExperienceForm({
             render={({ field }) => (
               <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
                 <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
                 <div className='space-y-1 leading-none'>
                   <FormLabel>Visible on site</FormLabel>
@@ -218,7 +235,7 @@ export function WorkExperienceForm({
               <FormLabel>Highlights</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder={'Led X...\nImproved Y by Z%...'}
+                  placeholder={"Led X...\nImproved Y by Z%..."}
                   rows={5}
                   {...field}
                 />
