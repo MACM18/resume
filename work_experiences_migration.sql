@@ -18,6 +18,8 @@ CREATE INDEX IF NOT EXISTS idx_work_experiences_user_id ON work_experiences(user
 CREATE INDEX IF NOT EXISTS idx_work_experiences_visible ON work_experiences(visible);
 CREATE INDEX IF NOT EXISTS idx_work_experiences_current ON work_experiences(is_current);
 CREATE INDEX IF NOT EXISTS idx_work_experiences_dates ON work_experiences(user_id, start_date DESC NULLS LAST, end_date DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS idx_work_experiences_sort
+  ON work_experiences(user_id, is_current DESC, end_date DESC NULLS FIRST, start_date DESC);
 
 -- Enable Row Level Security
 ALTER TABLE work_experiences ENABLE ROW LEVEL SECURITY;
