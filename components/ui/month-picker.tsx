@@ -1,7 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn, formatMonthYear } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, CalendarIcon, X } from "lucide-react";
@@ -30,12 +34,20 @@ const MONTHS = [
   "Dec",
 ];
 
-function parseValue(value?: string | null): { year: number; month: number } | null {
+function parseValue(
+  value?: string | null
+): { year: number; month: number } | null {
   if (!value) return null;
   const [y, m] = value.split("-");
   const year = Number(y);
   const month = Number(m) - 1;
-  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 0 || month > 11) return null;
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    month < 0 ||
+    month > 11
+  )
+    return null;
   return { year, month };
 }
 
@@ -64,9 +76,7 @@ export function MonthPicker({
     if (p) setYear(p.year);
   }, [value]);
 
-  const displayText = value
-    ? formatMonthYear(`${value}-01`)
-    : undefined;
+  const displayText = value ? formatMonthYear(`${value}-01`) : undefined;
 
   const selectMonth = (monthIndex: number) => {
     const v = `${year}-${padMonth(monthIndex)}`;
@@ -83,8 +93,8 @@ export function MonthPicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          type="button"
-          variant="outline"
+          type='button'
+          variant='outline'
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
@@ -92,36 +102,49 @@ export function MonthPicker({
           )}
           disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className='mr-2 h-4 w-4' />
           {displayText || placeholder}
           {allowClear && value ? (
             <span
               onClick={clear}
-              className="ml-auto inline-flex items-center text-foreground/60 hover:text-foreground"
-              aria-label="Clear selection"
+              className='ml-auto inline-flex items-center text-foreground/60 hover:text-foreground'
+              aria-label='Clear selection'
             >
-              <X className="h-4 w-4" />
+              <X className='h-4 w-4' />
             </span>
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px]" align="start">
-        <div className="flex items-center justify-between mb-3">
-          <Button variant="ghost" size="icon" onClick={() => setYear((y) => y - 1)}>
-            <ChevronLeft className="h-4 w-4" />
+      <PopoverContent className='w-[320px]' align='start'>
+        <div className='flex items-center justify-between mb-3'>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => setYear((y) => y - 1)}
+          >
+            <ChevronLeft className='h-4 w-4' />
           </Button>
-          <div className="text-sm font-medium">{year}</div>
-          <Button variant="ghost" size="icon" onClick={() => setYear((y) => y + 1)}>
-            <ChevronRight className="h-4 w-4" />
+          <div className='text-sm font-medium'>{year}</div>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => setYear((y) => y + 1)}
+          >
+            <ChevronRight className='h-4 w-4' />
           </Button>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className='grid grid-cols-3 gap-2'>
           {MONTHS.map((label, idx) => (
             <Button
               key={label}
-              type="button"
-              variant={parseValue(value ?? null)?.year === year && parseValue(value ?? null)?.month === idx ? "default" : "outline"}
-              className="w-full"
+              type='button'
+              variant={
+                parseValue(value ?? null)?.year === year &&
+                parseValue(value ?? null)?.month === idx
+                  ? "default"
+                  : "outline"
+              }
+              className='w-full'
               onClick={() => selectMonth(idx)}
             >
               {label}
