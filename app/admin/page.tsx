@@ -12,6 +12,7 @@ import { AboutPageForm } from "@/components/admin/AboutPageForm";
 import { ResumeManagement } from "@/components/admin/ResumeManagement";
 import { ResumeManager } from "@/components/admin/ResumeManager";
 import { ThemeEditor } from "@/components/admin/ThemeEditor";
+import { WorkExperienceManagement } from "@/components/admin/WorkExperienceManagement";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Select,
@@ -43,6 +44,7 @@ const AdminPage = () => {
     { value: "home", label: "Home Page" },
     { value: "about", label: "About Page" },
     { value: "projects", label: "Projects" },
+    { value: "work", label: "Work Experience" },
     { value: "resumes", label: "Resumes" },
   ];
 
@@ -74,7 +76,7 @@ const AdminPage = () => {
                 </Select>
               </div>
             ) : (
-              <TabsList className='grid w-full grid-cols-6 bg-glass-bg/20'>
+              <TabsList className='grid w-full grid-cols-7 bg-glass-bg/20'>
                 {tabs.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value}>
                     {tab.label}
@@ -106,6 +108,9 @@ const AdminPage = () => {
             </TabsContent>
             <TabsContent value='projects' className='p-6'>
               <ProjectManagement />
+            </TabsContent>
+            <TabsContent value='work' className='p-6'>
+              <WorkExperienceManagement />
             </TabsContent>
             <TabsContent value='resumes' className='p-6'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>

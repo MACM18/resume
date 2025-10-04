@@ -56,6 +56,20 @@ export interface Resume {
   location?: string; // New field for resume location
 }
 
+export interface WorkExperience {
+  id: string;
+  user_id: string;
+  company: string;
+  position: string;
+  location?: string | null;
+  start_date: string; // ISO date string
+  end_date?: string | null; // null when current
+  is_current: boolean;
+  visible: boolean; // controls public visibility
+  description: string[]; // bullet points
+  created_at: string;
+}
+
 export interface HomePageData {
   name: string;
   tagline: string;

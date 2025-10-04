@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { getProjects } from "@/lib/projects"; // Import getProjects
+import { getCurrentWork } from "@/lib/work-experiences";
 import Image from "next/image";
 
 import { getDynamicIcon } from "@/lib/icons";
@@ -52,6 +53,12 @@ export default function Page() {
       enabled: !!hostname && !!profileData,
     }
   );
+
+  const { data: currentWork } = useQuery({
+    queryKey: ["current-work", hostname],
+    queryFn: () => getCurrentWork(hostname),
+    enabled: !!hostname && !!profileData,
+  });
 
   const isLoading = isLoadingProfile || isLoadingProjects;
 
@@ -112,6 +119,42 @@ export default function Page() {
             </Button>
           </AnimatedSection>
         </div>
+
+        {/* Current Role (if any) */}
+        {currentWork && (
+          <div className='mb-16'>
+            <AnimatedSection direction='up' className='text-center mb-8'>
+              <h2 className='text-3xl font-bold text-primary'>Current Role</h2>
+            </AnimatedSection>
+            <div className='max-w-3xl mx-auto'>
+              <GlassCard className='p-6'>
+                <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-2'>
+                  <div>
+                    <div className='text-xl font-semibold'>{currentWork.position}</div>
+                    <div className='text-foreground/70'>
+                      {currentWork.company}{currentWork.location ? ` • ${currentWork.location}` : ""}
+                    </div>
+                  </div>
+                  <div className='text-sm text-foreground/60'>
+                    {new Date(currentWork.start_date).toLocaleDateString()} – Present
+                  </div>
+                </div>
+                {currentWork.description?.length ? (
+                  <ul className='mt-4 space-y-1 text-sm text-foreground/80 list-disc pl-5'>
+                    {currentWork.description.slice(0, 3).map((d, i) => (
+                      <li key={i}>{d}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                <div className='mt-4 text-right'>
+                  <Button asChild variant='ghost' size='sm' className='text-primary hover:text-primary-glow'>
+                    <Link href='/resume'>View full resume</Link>
+                  </Button>
+                </div>
+              </GlassCard>
+            </div>
+          </div>
+        )}
 
         {/* Experience Highlights */}
         <div className='mb-16'>
