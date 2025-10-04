@@ -23,6 +23,7 @@ import {
 } from "@/lib/work-experiences";
 import { WorkExperience } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
+import { MonthPicker } from "@/components/ui/month-picker";
 
 const workSchema = z.object({
   company: z.string().min(2, "Company must be at least 2 characters."),
@@ -175,7 +176,10 @@ export function WorkExperienceForm({
               <FormItem>
                 <FormLabel>Start Date</FormLabel>
                 <FormControl>
-                  <Input type='month' {...field} />
+                  <MonthPicker
+                    value={field.value}
+                    onChange={(v) => field.onChange(v ?? "")}
+                  />
                 </FormControl>
                 <FormDescription>
                   Month and year only. Stored as the first of the month.
@@ -191,10 +195,11 @@ export function WorkExperienceForm({
               <FormItem>
                 <FormLabel>End Date</FormLabel>
                 <FormControl>
-                  <Input
-                    type='month'
-                    {...field}
+                  <MonthPicker
+                    value={field.value}
+                    onChange={(v) => field.onChange(v ?? "")}
                     disabled={form.watch("is_current")}
+                    allowClear
                   />
                 </FormControl>
                 <FormDescription>
