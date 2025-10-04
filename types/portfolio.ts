@@ -43,7 +43,7 @@ export interface Resume {
   }[];
   project_ids: string[];
   resume_url: string | null;
-  pdf_source: 'uploaded' | 'generated';
+  pdf_source: "uploaded" | "generated";
   uploaded_resume_id?: string | null; // Foreign key to uploaded_resumes
   user_id: string;
   created_at: string;
@@ -54,6 +54,20 @@ export interface Resume {
     url?: string;
   }[];
   location?: string; // New field for resume location
+}
+
+export interface WorkExperience {
+  id: string;
+  user_id: string;
+  company: string;
+  position: string;
+  location?: string | null;
+  start_date: string; // ISO date string
+  end_date?: string | null; // null when current
+  is_current: boolean;
+  visible: boolean; // controls public visibility
+  description: string[]; // bullet points
+  created_at: string;
 }
 
 export interface HomePageData {

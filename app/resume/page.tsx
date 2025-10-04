@@ -15,6 +15,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getActiveResume } from "@/lib/resumes";
 import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
+import { getVisibleWorkExperiences } from "@/lib/work-experiences";
 import { Project } from "@/types/portfolio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
@@ -67,6 +68,12 @@ const Resume = () => {
     enabled: !!hostname && !!profileData,
   });
 
+  const { data: workHistory = [], isLoading: isLoadingWork } = useQuery({
+    queryKey: ["work-experiences", hostname],
+    queryFn: () => getVisibleWorkExperiences(hostname),
+    enabled: !!hostname && !!profileData,
+  });
+
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
       const anonKey =
@@ -80,7 +87,12 @@ const Resume = () => {
             apikey: anonKey,
             Authorization: `Bearer ${anonKey}`,
           },
-          body: JSON.stringify({ resume, profile: profileData, projects }),
+          body: JSON.stringify({
+            resume,
+            profile: profileData,
+            projects,
+            workHistory,
+          }),
         }
       );
 
@@ -167,7 +179,8 @@ const Resume = () => {
     }
   };
 
-  const isLoading = isLoadingProfile || isLoadingResume || isLoadingProjects;
+  const isLoading =
+    isLoadingProfile || isLoadingResume || isLoadingProjects || isLoadingWork;
 
   if (isLoading || !hostname) {
     return <ResumePageSkeleton />;
@@ -274,9 +287,9 @@ const Resume = () => {
                     Professional Experience
                   </h3>
                   <div className='space-y-6'>
-                    {resume.experience.map((exp, index) => (
+                    {workHistory.map((exp) => (
                       <div
-                        key={index}
+                        key={exp.id}
                         className='border-l-2 border-primary/30 pl-6'
                       >
                         <div className='flex flex-wrap items-center justify-between mb-2'>
@@ -285,12 +298,22 @@ const Resume = () => {
                           </h4>
                           <div className='flex items-center text-foreground/60'>
                             <Calendar size={16} className='mr-1' />
-                            {exp.duration}
+                            {new Date(
+                              exp.start_date
+                            ).toLocaleDateString()} –{" "}
+                            {exp.is_current || !exp.end_date
+                              ? "Present"
+                              : new Date(exp.end_date).toLocaleDateString()}
                           </div>
                         </div>
-                        <p className='text-primary mb-3'>{exp.company}</p>
+                        <p className='text-primary mb-1'>{exp.company}</p>
+                        {exp.location && (
+                          <p className='text-foreground/60 text-sm mb-2'>
+                            {exp.location}
+                          </p>
+                        )}
                         <ul className='space-y-2 text-foreground/80'>
-                          {exp.description.map((item, i) => (
+                          {exp.description?.map((item, i) => (
                             <li key={i} className='flex items-start'>
                               <span className='w-2 h-2 bg-secondary rounded-full mt-2 mr-3 flex-shrink-0' />
                               {item}
