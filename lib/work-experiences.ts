@@ -143,3 +143,25 @@ export async function getCurrentWork(
   // Return only current work experience, or null if none exists
   return list.find((w) => w.is_current) || null;
 }
+
+// Admin helper: ensure only one current by unsetting others first
+export async function setAsCurrent(id: string): Promise<void> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+
+  // Unset all current for this user
+  const { error: unsetErr } = await supabase
+    .from("work_experiences")
+    .update({ is_current: false })
+    .eq("user_id", session.user.id)
+    .eq("is_current", true);
+  if (unsetErr) {
+    console.error("Failed to unset previous current work:", unsetErr);
+    throw unsetErr;
+  }
+
+  // Set the target as current (end_date becomes null via update normalization)
+  await updateWorkExperience(id, { is_current: true });
+}

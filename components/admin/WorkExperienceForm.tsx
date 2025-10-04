@@ -52,8 +52,11 @@ export function WorkExperienceForm({
       company: experience?.company || "",
       position: experience?.position || "",
       location: experience?.location || "",
-      start_date: experience?.start_date?.slice(0, 10) || "",
-      end_date: experience?.end_date?.slice(0, 10) || "",
+      // Show only year-month in the inputs
+      start_date: experience?.start_date
+        ? experience.start_date.slice(0, 7)
+        : "",
+      end_date: experience?.end_date ? experience.end_date.slice(0, 7) : "",
       is_current: experience?.is_current ?? false,
       visible: experience?.visible ?? true,
       description: (experience?.description || []).join("\n"),
@@ -62,6 +65,10 @@ export function WorkExperienceForm({
 
   const mutation = useMutation({
     mutationFn: async (data: WorkFormValues) => {
+      // Convert month inputs (YYYY-MM) to first-of-month date strings (YYYY-MM-01)
+      const monthToDate = (m?: string | null) =>
+        m && m.length === 7 ? `${m}-01` : null;
+
       const payload: Omit<
         WorkExperience,
         "id" | "user_id" | "created_at" | "is_current"
@@ -69,8 +76,14 @@ export function WorkExperienceForm({
         company: data.company,
         position: data.position,
         location: data.location || null,
-        start_date: data.start_date,
-        end_date: data.is_current ? null : data.end_date || null,
+        start_date: (() => {
+          const start = monthToDate(data.start_date);
+          if (!start) {
+            throw new Error("Start date must be in YYYY-MM format.");
+          }
+          return start;
+        })(),
+        end_date: data.is_current ? null : monthToDate(data.end_date),
         is_current: data.is_current,
         visible: data.visible,
         description: data.description
@@ -82,7 +95,10 @@ export function WorkExperienceForm({
       };
       if (experience) {
         // updateWorkExperience accepts a partial update; cast payload to satisfy its parameter type
-        return updateWorkExperience(experience.id, payload as Partial<WorkExperience>);
+        return updateWorkExperience(
+          experience.id,
+          payload as Partial<WorkExperience>
+        );
       }
       return addWorkExperience(payload);
     },
@@ -159,8 +175,11 @@ export function WorkExperienceForm({
               <FormItem>
                 <FormLabel>Start Date</FormLabel>
                 <FormControl>
-                  <Input type='date' {...field} />
+                  <Input type='month' {...field} />
                 </FormControl>
+                <FormDescription>
+                  Month and year only. Stored as the first of the month.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -173,12 +192,14 @@ export function WorkExperienceForm({
                 <FormLabel>End Date</FormLabel>
                 <FormControl>
                   <Input
-                    type='date'
+                    type='month'
                     {...field}
                     disabled={form.watch("is_current")}
                   />
                 </FormControl>
-                <FormDescription>Leave empty if current</FormDescription>
+                <FormDescription>
+                  Leave empty if current. Stored as the first of the month.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
