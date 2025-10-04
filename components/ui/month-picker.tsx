@@ -105,13 +105,16 @@ export function MonthPicker({
           <CalendarIcon className='mr-2 h-4 w-4' />
           {displayText || placeholder}
           {allowClear && value ? (
-            <span
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               onClick={clear}
               className='ml-auto inline-flex items-center text-foreground/60 hover:text-foreground'
               aria-label='Clear selection'
             >
               <X className='h-4 w-4' />
-            </span>
+            </Button>
           ) : null}
         </Button>
       </PopoverTrigger>
