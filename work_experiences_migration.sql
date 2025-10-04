@@ -41,5 +41,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_work_experiences_one_current_per_user
   WHERE is_current = true;
 
 -- Allow public (anon) to view visible experiences
-CREATE POLICY IF NOT EXISTS "Public can view visible work experiences" ON work_experiences
-  FOR SELECT USING (visible = true);
+DO $$
+BEGIN
+  CREATE POLICY "Public can view visible work experiences" ON work_experiences
+    FOR SELECT USING (visible = true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
