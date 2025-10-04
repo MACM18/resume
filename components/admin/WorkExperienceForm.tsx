@@ -76,7 +76,13 @@ export function WorkExperienceForm({
         company: data.company,
         position: data.position,
         location: data.location || null,
-        start_date: monthToDate(data.start_date)!,
+        start_date: (() => {
+          const start = monthToDate(data.start_date);
+          if (!start) {
+            throw new Error("Start date must be in YYYY-MM format.");
+          }
+          return start;
+        })(),
         end_date: data.is_current ? null : monthToDate(data.end_date),
         is_current: data.is_current,
         visible: data.visible,
