@@ -137,22 +137,25 @@ export function MonthPicker({
           </Button>
         </div>
         <div className='grid grid-cols-3 gap-2'>
-          {MONTHS.map((label, idx) => (
-            <Button
-              key={label}
-              type='button'
-              variant={
-                parseValue(value ?? null)?.year === year &&
-                parseValue(value ?? null)?.month === idx
-                  ? "default"
-                  : "outline"
-              }
-              className='w-full'
-              onClick={() => selectMonth(idx)}
-            >
-              {label}
-            </Button>
-          ))}
+          {(() => {
+            const parsedValue = parseValue(value ?? null);
+            return MONTHS.map((label, idx) => (
+              <Button
+                key={label}
+                type='button'
+                variant={
+                  parsedValue?.year === year &&
+                  parsedValue?.month === idx
+                    ? "default"
+                    : "outline"
+                }
+                className='w-full'
+                onClick={() => selectMonth(idx)}
+              >
+                {label}
+              </Button>
+            ));
+          })()}
         </div>
       </PopoverContent>
     </Popover>
