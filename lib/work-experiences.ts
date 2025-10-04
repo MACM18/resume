@@ -140,6 +140,6 @@ export async function getCurrentWork(
   domain: string
 ): Promise<WorkExperience | null> {
   const list = await getVisibleWorkExperiences(domain);
-  // Prefer current; otherwise latest by end_date/start_date
-  return list.find((w) => w.is_current) || list[0] || null;
+  // Return only current work experience, or null if none exists
+  return list.find((w) => w.is_current) || null;
 }
