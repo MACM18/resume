@@ -62,7 +62,10 @@ export function WorkExperienceForm({
 
   const mutation = useMutation({
     mutationFn: async (data: WorkFormValues) => {
-      const payload = {
+      const payload: Omit<
+        WorkExperience,
+        "id" | "user_id" | "created_at" | "is_current"
+      > & { is_current?: boolean } = {
         company: data.company,
         position: data.position,
         location: data.location || null,
@@ -78,12 +81,10 @@ export function WorkExperienceForm({
           : [],
       };
       if (experience) {
-        return updateWorkExperience(
-          experience.id,
-          payload as Partial<WorkExperience>
-        );
+        // updateWorkExperience accepts a partial update; cast payload to satisfy its parameter type
+        return updateWorkExperience(experience.id, payload as Partial<WorkExperience>);
       }
-      return addWorkExperience(payload as any);
+      return addWorkExperience(payload);
     },
     onSuccess: () => {
       toast.success(

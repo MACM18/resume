@@ -53,9 +53,11 @@ export function WorkExperienceManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-work-experiences"] });
     },
-    onError: (e: any) => {
+    onError: (e: unknown) => {
       // unique index may throw conflict if another current exists; user should toggle others off first
-      toast.error(e?.message || "Failed to mark as current");
+      const message =
+        e instanceof Error ? e.message : typeof e === "string" ? e : "Failed to mark as current";
+      toast.error(message);
     },
   });
 
