@@ -5,6 +5,7 @@ import {
   getWorkExperiencesForCurrentUser,
   deleteWorkExperience,
   updateWorkExperience,
+  setAsCurrent,
 } from "@/lib/work-experiences";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/GlassCard";
@@ -19,6 +20,7 @@ import { WorkExperience } from "@/types/portfolio";
 import { useState } from "react";
 import { Loader2, Pencil, Plus, Trash, Eye, EyeOff, Star } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { formatDateRange } from "@/lib/utils";
 
 export function WorkExperienceManagement() {
   const queryClient = useQueryClient();
@@ -49,14 +51,18 @@ export function WorkExperienceManagement() {
   });
 
   const markCurrentMutation = useMutation({
-    mutationFn: (id: string) => updateWorkExperience(id, { is_current: true }),
+    mutationFn: (id: string) => setAsCurrent(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-work-experiences"] });
     },
     onError: (e: unknown) => {
       // unique index may throw conflict if another current exists; user should toggle others off first
       const message =
-        e instanceof Error ? e.message : typeof e === "string" ? e : "Failed to mark as current";
+        e instanceof Error
+          ? e.message
+          : typeof e === "string"
+          ? e
+          : "Failed to mark as current";
       toast.error(message);
     },
   });
@@ -109,10 +115,11 @@ export function WorkExperienceManagement() {
                     {exp.location ? ` • ${exp.location}` : ""}
                   </div>
                   <div className='text-xs text-foreground/60'>
-                    {new Date(exp.start_date).toLocaleDateString()} -{" "}
-                    {exp.is_current || !exp.end_date
-                      ? "Present"
-                      : new Date(exp.end_date).toLocaleDateString()}
+                    {formatDateRange(
+                      exp.start_date,
+                      exp.end_date || undefined,
+                      exp.is_current
+                    )}
                   </div>
                 </div>
                 <div className='flex gap-2'>

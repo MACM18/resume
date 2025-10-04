@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { formatDateRange } from "@/lib/utils";
 
 const ResumePageSkeleton = () => (
   <div className='min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto'>
@@ -277,54 +278,55 @@ const Resume = () => {
             {/* Main Content */}
             <div className='lg:col-span-2 space-y-8'>
               {/* Experience */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <GlassCard className='p-8'>
-                  <h3 className='text-2xl font-bold mb-6 text-primary'>
-                    Professional Experience
-                  </h3>
-                  <div className='space-y-6'>
-                    {workHistory.map((exp) => (
-                      <div
-                        key={exp.id}
-                        className='border-l-2 border-primary/30 pl-6'
-                      >
-                        <div className='flex flex-wrap items-center justify-between mb-2'>
-                          <h4 className='text-xl font-semibold'>
-                            {exp.position}
-                          </h4>
-                          <div className='flex items-center text-foreground/60'>
-                            <Calendar size={16} className='mr-1' />
-                            {new Date(
-                              exp.start_date
-                            ).toLocaleDateString()} –{" "}
-                            {exp.is_current || !exp.end_date
-                              ? "Present"
-                              : new Date(exp.end_date).toLocaleDateString()}
+              {workHistory.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  <GlassCard className='p-8'>
+                    <h3 className='text-2xl font-bold mb-6 text-primary'>
+                      Professional Experience
+                    </h3>
+                    <div className='space-y-6'>
+                      {workHistory.map((exp) => (
+                        <div
+                          key={exp.id}
+                          className='border-l-2 border-primary/30 pl-6'
+                        >
+                          <div className='flex flex-wrap items-center justify-between mb-2'>
+                            <h4 className='text-xl font-semibold'>
+                              {exp.position}
+                            </h4>
+                            <div className='flex items-center text-foreground/60'>
+                              <Calendar size={16} className='mr-1' />
+                              {formatDateRange(
+                                exp.start_date,
+                                exp.end_date || undefined,
+                                exp.is_current
+                              )}
+                            </div>
                           </div>
+                          <p className='text-primary mb-1'>{exp.company}</p>
+                          {exp.location && (
+                            <p className='text-foreground/60 text-sm mb-2'>
+                              {exp.location}
+                            </p>
+                          )}
+                          <ul className='space-y-2 text-foreground/80'>
+                            {exp.description?.map((item, i) => (
+                              <li key={i} className='flex items-start'>
+                                <span className='w-2 h-2 bg-secondary rounded-full mt-2 mr-3 flex-shrink-0' />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <p className='text-primary mb-1'>{exp.company}</p>
-                        {exp.location && (
-                          <p className='text-foreground/60 text-sm mb-2'>
-                            {exp.location}
-                          </p>
-                        )}
-                        <ul className='space-y-2 text-foreground/80'>
-                          {exp.description?.map((item, i) => (
-                            <li key={i} className='flex items-start'>
-                              <span className='w-2 h-2 bg-secondary rounded-full mt-2 mr-3 flex-shrink-0' />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </GlassCard>
-              </motion.div>
+                      ))}
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              )}
 
               {/* Featured Projects */}
               <motion.div

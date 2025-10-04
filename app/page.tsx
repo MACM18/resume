@@ -13,6 +13,7 @@ import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { getProjects } from "@/lib/projects"; // Import getProjects
 import { getCurrentWork } from "@/lib/work-experiences";
 import Image from "next/image";
+import { formatDateRange } from "@/lib/utils";
 
 import { getDynamicIcon } from "@/lib/icons";
 
@@ -139,10 +140,11 @@ export default function Page() {
                     </div>
                   </div>
                   <div className='text-sm text-foreground/60'>
-                    {new Date(currentWork.start_date).toLocaleDateString()} –
-                    {currentWork.is_current || !currentWork.end_date
-                      ? "Present"
-                      : new Date(currentWork.end_date).toLocaleDateString()}
+                    {formatDateRange(
+                      currentWork.start_date,
+                      currentWork.end_date || undefined,
+                      currentWork.is_current
+                    )}
                   </div>
                 </div>
                 {currentWork.description?.length ? (
