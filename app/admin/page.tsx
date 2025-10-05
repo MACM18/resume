@@ -99,7 +99,7 @@ const AdminPage = () => {
               <h1 className='text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent'>
                 Admin Dashboard
               </h1>
-              <SidebarTrigger className='md:hidden' />
+              <SidebarTrigger className='md:hidden' aria-label="Toggle sidebar navigation" />
             </div>
             <GlassCard hover={false}>
               <div className='p-6'>
