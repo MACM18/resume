@@ -83,7 +83,7 @@ export default function AdminPage() {
           <h1 className='text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent'>
             Admin Dashboard
           </h1>
-          <div className='md:hidden'>
+          {/* <div className='md:hidden'>
             <Select value={section} onValueChange={setSection}>
               <SelectTrigger className='w-56 bg-glass-bg/20 border-glass-border'>
                 <SelectValue placeholder='Select a section' />
@@ -96,7 +96,7 @@ export default function AdminPage() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)] gap-6 items-stretch'>

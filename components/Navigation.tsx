@@ -140,87 +140,46 @@ export function Navigation() {
       >
         <GlassCard className='px-4 py-3'>
           <div className='flex items-center space-x-6'>
-            {isAdmin
-              ? adminMobileItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = adminSection === item.key;
-                  return (
-                    <Link
-                      key={item.key}
-                      href={item.href}
-                      className='relative group'
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <motion.div
-                        className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
-                          isActive
-                            ? "text-primary"
-                            : "text-foreground/70 hover:text-primary"
-                        }`}
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Icon size={20} />
-                        <span className='text-xs font-medium mt-1'>
-                          {item.label}
-                        </span>
-                      </motion.div>
+            {navItems.map((item) => {
+              const isActive = pathname === item.path;
+              const Icon = item.icon;
 
-                      {isActive && (
-                        <motion.div
-                          layoutId='activeMobileTab'
-                          className='absolute inset-0 bg-primary/10 rounded-lg border border-primary/20'
-                          initial={false}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30,
-                          }}
-                        />
-                      )}
-                    </Link>
-                  );
-                })
-              : navItems.map((item) => {
-                  const isActive = pathname === item.path;
-                  const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className='relative group'
+                >
+                  <motion.div
+                    className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
+                      isActive
+                        ? "text-primary"
+                        : "text-foreground/70 hover:text-primary"
+                    }`}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Icon size={20} />
+                    <span className='text-xs font-medium mt-1'>
+                      {item.label}
+                    </span>
+                  </motion.div>
 
-                  return (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      className='relative group'
-                    >
-                      <motion.div
-                        className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
-                          isActive
-                            ? "text-primary"
-                            : "text-foreground/70 hover:text-primary"
-                        }`}
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Icon size={20} />
-                        <span className='text-xs font-medium mt-1'>
-                          {item.label}
-                        </span>
-                      </motion.div>
-
-                      {isActive && (
-                        <motion.div
-                          layoutId='activeMobileTab'
-                          className='absolute inset-0 bg-primary/10 rounded-lg border border-primary/20'
-                          initial={false}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30,
-                          }}
-                        />
-                      )}
-                    </Link>
-                  );
-                })}
+                  {isActive && (
+                    <motion.div
+                      layoutId='activeMobileTab'
+                      className='absolute inset-0 bg-primary/10 rounded-lg border border-primary/20'
+                      initial={false}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </GlassCard>
       </motion.nav>
