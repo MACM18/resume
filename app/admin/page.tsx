@@ -54,7 +54,7 @@ export default function AdminPage() {
   return (
     <div className='min-h-screen relative pt-24 pb-32 md:pb-12 px-6'>
       <div className='mx-auto w-full max-w-6xl'>
-        <div className='flex items-center justify-between mb-6'>
+        <div className='flex flex-col items-center justify-between mb-6'>
           <h1 className='text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent'>
             Admin Dashboard
           </h1>
