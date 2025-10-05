@@ -1,7 +1,7 @@
 "use client";
 
 import { useSupabase } from "@/components/providers/AuthProvider";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { AdminNav } from "@/components/admin/AdminNav";
@@ -43,11 +43,36 @@ const ADMIN_ITEMS = [
 export default function AdminPage() {
   const { session } = useSupabase();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [section, setSection] = useState("profile");
 
   useEffect(() => {
     if (!session) router.push("/login");
   }, [session, router]);
+
+  // Initialize from query param and keep in sync when URL changes
+  useEffect(() => {
+    const qp = searchParams?.get("section");
+    if (qp && qp !== section) setSection(qp);
+    if (!qp && section !== "profile") {
+      const sp = new URLSearchParams(searchParams?.toString());
+      sp.set("section", section);
+      router.replace(`${pathname}?${sp.toString()}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // When section changes via sidebar/mobile select, reflect in URL
+  useEffect(() => {
+    const current = searchParams?.get("section") ?? "profile";
+    if (current !== section) {
+      const sp = new URLSearchParams(searchParams?.toString());
+      sp.set("section", section);
+      router.replace(`${pathname}?${sp.toString()}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section]);
 
   if (!session) return null;
 

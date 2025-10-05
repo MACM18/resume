@@ -1,8 +1,19 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, User, FolderOpen, FileText, Menu, X } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import {
+  Home,
+  User,
+  FolderOpen,
+  FileText,
+  Menu,
+  X,
+  Palette,
+  Info,
+  FolderKanban,
+  Briefcase,
+} from "lucide-react";
 import { useState } from "react";
 import { GlassCard } from "./GlassCard";
 
@@ -15,7 +26,57 @@ const navItems = [
 
 export function Navigation() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isAdmin = pathname?.startsWith("/admin");
+  const adminSection = searchParams?.get("section") ?? "profile";
+
+  // Admin mobile menu items map to /admin?section=<value>
+  const adminMobileItems = [
+    {
+      href: "/admin?section=profile",
+      key: "profile",
+      label: "Profile & Domain",
+      icon: User,
+    },
+    {
+      href: "/admin?section=theme",
+      key: "theme",
+      label: "Theme",
+      icon: Palette,
+    },
+    {
+      href: "/admin?section=home",
+      key: "home",
+      label: "Home Page",
+      icon: Home,
+    },
+    {
+      href: "/admin?section=about",
+      key: "about",
+      label: "About Page",
+      icon: Info,
+    },
+    {
+      href: "/admin?section=projects",
+      key: "projects",
+      label: "Projects",
+      icon: FolderKanban,
+    },
+    {
+      href: "/admin?section=work",
+      key: "work",
+      label: "Work Experience",
+      icon: Briefcase,
+    },
+    {
+      href: "/admin?section=resumes",
+      key: "resumes",
+      label: "Resumes",
+      icon: FileText,
+    },
+  ] as const;
 
   return (
     <>
@@ -79,46 +140,87 @@ export function Navigation() {
       >
         <GlassCard className='px-4 py-3'>
           <div className='flex items-center space-x-6'>
-            {navItems.map((item) => {
-              const isActive = pathname === item.path;
-              const Icon = item.icon;
+            {isAdmin
+              ? adminMobileItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = adminSection === item.key;
+                  return (
+                    <Link
+                      key={item.key}
+                      href={item.href}
+                      className='relative group'
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <motion.div
+                        className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
+                          isActive
+                            ? "text-primary"
+                            : "text-foreground/70 hover:text-primary"
+                        }`}
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Icon size={20} />
+                        <span className='text-xs font-medium mt-1'>
+                          {item.label}
+                        </span>
+                      </motion.div>
 
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className='relative group'
-                >
-                  <motion.div
-                    className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
-                      isActive
-                        ? "text-primary"
-                        : "text-foreground/70 hover:text-primary"
-                    }`}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Icon size={20} />
-                    <span className='text-xs font-medium mt-1'>
-                      {item.label}
-                    </span>
-                  </motion.div>
+                      {isActive && (
+                        <motion.div
+                          layoutId='activeMobileTab'
+                          className='absolute inset-0 bg-primary/10 rounded-lg border border-primary/20'
+                          initial={false}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30,
+                          }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })
+              : navItems.map((item) => {
+                  const isActive = pathname === item.path;
+                  const Icon = item.icon;
 
-                  {isActive && (
-                    <motion.div
-                      layoutId='activeMobileTab'
-                      className='absolute inset-0 bg-primary/10 rounded-lg border border-primary/20'
-                      initial={false}
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className='relative group'
+                    >
+                      <motion.div
+                        className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
+                          isActive
+                            ? "text-primary"
+                            : "text-foreground/70 hover:text-primary"
+                        }`}
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Icon size={20} />
+                        <span className='text-xs font-medium mt-1'>
+                          {item.label}
+                        </span>
+                      </motion.div>
+
+                      {isActive && (
+                        <motion.div
+                          layoutId='activeMobileTab'
+                          className='absolute inset-0 bg-primary/10 rounded-lg border border-primary/20'
+                          initial={false}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30,
+                          }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
           </div>
         </GlassCard>
       </motion.nav>
@@ -151,35 +253,65 @@ export function Navigation() {
         className='fixed inset-0 z-40 md:hidden bg-background/95 backdrop-blur-xl'
       >
         <div className='flex flex-col items-center justify-center h-full space-y-8'>
-          {navItems.map((item, index) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.path;
+          {isAdmin
+            ? adminMobileItems.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = adminSection === item.key;
 
-            return (
-              <motion.div
-                key={item.path}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{
-                  opacity: isMobileMenuOpen ? 1 : 0,
-                  y: isMobileMenuOpen ? 0 : 50,
-                }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-              >
-                <Link
-                  href={item.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-4 px-8 py-4 rounded-xl transition-all duration-300 ${
-                    isActive
-                      ? "text-primary bg-primary/10 border border-primary/20"
-                      : "text-foreground/70 hover:text-primary hover:bg-glass-bg/10"
-                  }`}
-                >
-                  <Icon size={24} />
-                  <span className='text-xl font-medium'>{item.label}</span>
-                </Link>
-              </motion.div>
-            );
-          })}
+                return (
+                  <motion.div
+                    key={item.key}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{
+                      opacity: isMobileMenuOpen ? 1 : 0,
+                      y: isMobileMenuOpen ? 0 : 50,
+                    }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center space-x-4 px-8 py-4 rounded-xl transition-all duration-300 ${
+                        isActive
+                          ? "text-primary bg-primary/10 border border-primary/20"
+                          : "text-foreground/70 hover:text-primary hover:bg-glass-bg/10"
+                      }`}
+                    >
+                      <Icon size={24} />
+                      <span className='text-xl font-medium'>{item.label}</span>
+                    </Link>
+                  </motion.div>
+                );
+              })
+            : navItems.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.path;
+
+                return (
+                  <motion.div
+                    key={item.path}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{
+                      opacity: isMobileMenuOpen ? 1 : 0,
+                      y: isMobileMenuOpen ? 0 : 50,
+                    }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <Link
+                      href={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center space-x-4 px-8 py-4 rounded-xl transition-all duration-300 ${
+                        isActive
+                          ? "text-primary bg-primary/10 border border-primary/20"
+                          : "text-foreground/70 hover:text-primary hover:bg-glass-bg/10"
+                      }`}
+                    >
+                      <Icon size={24} />
+                      <span className='text-xl font-medium'>{item.label}</span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
         </div>
       </motion.div>
     </>
