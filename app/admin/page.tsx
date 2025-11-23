@@ -5,13 +5,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { AdminNav } from "@/components/admin/AdminNav";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ProjectManagement } from "@/components/admin/ProjectManagement";
 import { ProfileManagement } from "@/components/admin/ProfileManagement";
 import { HomePageForm } from "@/components/admin/HomePageForm";
@@ -83,20 +76,6 @@ export default function AdminPage() {
           <h1 className='text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent'>
             Admin Dashboard
           </h1>
-          {/* <div className='md:hidden'>
-            <Select value={section} onValueChange={setSection}>
-              <SelectTrigger className='w-56 bg-glass-bg/20 border-glass-border'>
-                <SelectValue placeholder='Select a section' />
-              </SelectTrigger>
-              <SelectContent>
-                {ADMIN_ITEMS.map((it) => (
-                  <SelectItem key={it.value} value={it.value}>
-                    {it.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)] gap-6 items-stretch'>

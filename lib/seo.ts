@@ -1,0 +1,291 @@
+import { Metadata } from "next";
+import { Profile, Project } from "@/types/portfolio";
+
+// Flexible profile type that works with both full Profile and client ProfileData
+type ProfileLike =
+  | Pick<
+      Profile,
+      | "full_name"
+      | "tagline"
+      | "avatar_url"
+      | "home_page_data"
+      | "about_page_data"
+    >
+  | Profile
+  | null;
+
+export interface SEOConfig {
+  siteName: string;
+  siteUrl: string;
+  defaultTitle: string;
+  defaultDescription: string;
+  defaultImage: string;
+  twitterHandle?: string;
+}
+
+const DEFAULT_SEO: SEOConfig = {
+  siteName: "Professional Portfolio",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com",
+  defaultTitle: "Portfolio - Software Developer",
+  defaultDescription:
+    "Professional portfolio showcasing projects, experience, and technical expertise in software development.",
+  defaultImage: "/og-image.png",
+  twitterHandle: "@yourusername",
+};
+
+export function getBaseMetadata(
+  profile: ProfileLike,
+  hostname?: string
+): SEOConfig {
+  const siteUrl = hostname ? `https://${hostname}` : DEFAULT_SEO.siteUrl;
+
+  return {
+    siteName: profile?.full_name || DEFAULT_SEO.siteName,
+    siteUrl,
+    defaultTitle: profile?.full_name
+      ? `${profile.full_name} - ${profile.tagline}`
+      : DEFAULT_SEO.defaultTitle,
+    defaultDescription: profile?.tagline || DEFAULT_SEO.defaultDescription,
+    defaultImage: profile?.avatar_url || DEFAULT_SEO.defaultImage,
+    twitterHandle: DEFAULT_SEO.twitterHandle,
+  };
+}
+
+export function generateHomeMetadata(
+  profile: ProfileLike,
+  hostname?: string
+): Metadata {
+  const config = getBaseMetadata(profile, hostname);
+
+  const title = profile?.full_name || config.defaultTitle;
+  const description =
+    profile?.tagline ||
+    profile?.home_page_data?.callToAction?.description ||
+    config.defaultDescription;
+
+  return {
+    title,
+    description,
+    keywords: [
+      "software developer",
+      "portfolio",
+      "web development",
+      "full stack",
+      profile?.full_name,
+      ...(profile?.home_page_data?.technicalExpertise?.flatMap(
+        (cat) => cat.skills
+      ) || []),
+    ]
+      .filter(Boolean)
+      .join(", "),
+    authors: [{ name: profile?.full_name || "Developer" }],
+    creator: profile?.full_name || "Developer",
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: config.siteUrl,
+      siteName: config.siteName,
+      title,
+      description,
+      images: [
+        {
+          url: config.defaultImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [config.defaultImage],
+      creator: config.twitterHandle,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  };
+}
+
+export function generateAboutMetadata(
+  profile: ProfileLike,
+  hostname?: string
+): Metadata {
+  const config = getBaseMetadata(profile, hostname);
+
+  const title = profile?.full_name ? `About ${profile.full_name}` : "About Me";
+  const description =
+    profile?.about_page_data?.subtitle ||
+    profile?.tagline ||
+    config.defaultDescription;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      type: "profile",
+      url: `${config.siteUrl}/about`,
+      title,
+      description,
+      images: [config.defaultImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [config.defaultImage],
+    },
+  };
+}
+
+export function generateProjectsMetadata(
+  profile: ProfileLike,
+  hostname?: string
+): Metadata {
+  const config = getBaseMetadata(profile, hostname);
+
+  const title = profile?.full_name
+    ? `Projects by ${profile.full_name}`
+    : "Projects";
+  const description = `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      url: `${config.siteUrl}/projects`,
+      title,
+      description,
+      images: [config.defaultImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [config.defaultImage],
+    },
+  };
+}
+
+export function generateProjectMetadata(
+  project: Project | null,
+  profile: ProfileLike,
+  hostname?: string
+): Metadata {
+  const config = getBaseMetadata(profile, hostname);
+
+  if (!project) {
+    return {
+      title: "Project Not Found",
+      description: "The requested project could not be found.",
+    };
+  }
+
+  const title = `${project.title} - ${config.siteName}`;
+  const description = project.description || project.long_description;
+
+  return {
+    title,
+    description,
+    keywords: [...project.tech, "project", "portfolio"].join(", "),
+    openGraph: {
+      type: "article",
+      url: `${config.siteUrl}/projects/${project.id}`,
+      title: project.title,
+      description,
+      images: project.image
+        ? [
+            {
+              url: project.image,
+              width: 1200,
+              height: 630,
+              alt: project.title,
+            },
+          ]
+        : [config.defaultImage],
+      publishedTime: project.created_at,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description,
+      images: [project.image || config.defaultImage],
+    },
+  };
+}
+
+export function generateResumeMetadata(
+  profile: ProfileLike,
+  hostname?: string
+): Metadata {
+  const config = getBaseMetadata(profile, hostname);
+
+  const title = profile?.full_name ? `Resume - ${profile.full_name}` : "Resume";
+  const description =
+    profile?.tagline ||
+    "Professional resume showcasing experience, skills, and qualifications.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      type: "profile",
+      url: `${config.siteUrl}/resume`,
+      title,
+      description,
+      images: [config.defaultImage],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+  };
+}
+
+export function generateStructuredData(
+  profile: ProfileLike,
+  hostname?: string
+) {
+  const config = getBaseMetadata(profile, hostname);
+
+  const personData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: profile?.full_name || config.siteName,
+    jobTitle: profile?.tagline || "Software Developer",
+    url: config.siteUrl,
+    image: config.defaultImage,
+    sameAs:
+      profile?.home_page_data?.socialLinks?.map((link) => link.href) || [],
+    description: profile?.about_page_data?.subtitle || profile?.tagline,
+  };
+
+  const websiteData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: config.siteName,
+    url: config.siteUrl,
+    description: config.defaultDescription,
+    author: {
+      "@type": "Person",
+      name: profile?.full_name || config.siteName,
+    },
+  };
+
+  return {
+    person: personData,
+    website: websiteData,
+  };
+}

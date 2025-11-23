@@ -11,6 +11,15 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
 import { getProfileDataServer } from "@/lib/profile.server";
+import { generateHomeMetadata } from "@/lib/seo";
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const hdr = await headers();
+  const host = hdr.get("host") ?? "";
+  const profileData = host ? await getProfileDataServer(host) : null;
+  return generateHomeMetadata(profileData, host);
+}
 
 export default async function RootLayout({
   children,
