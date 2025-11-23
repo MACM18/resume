@@ -10,7 +10,7 @@ This document outlines the SEO enhancements implemented for your portfolio websi
   - Dynamic title using profile full name and tagline
   - Dynamic description from profile tagline
   - OpenGraph tags for social media sharing (Facebook, LinkedIn)
-  - Twitter Card metadata for Twitter sharing
+  - X (formerly Twitter) social card metadata when profile includes an X link
   - Proper robots meta tags for search engine indexing
 
 ### 2. Structured Data (JSON-LD)
@@ -90,12 +90,13 @@ NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=abc123xyz
 
 ### Social Media Previews
 
-When your portfolio links are shared on social media, they will show:
+When your portfolio links are shared on social platforms, they will show:
 
 - Your name/title
 - Your tagline or page description
 - Your avatar image (or default OG image)
-- Proper metadata for both Facebook (OpenGraph) and Twitter
+- OpenGraph data (Facebook, LinkedIn, etc.)
+- X (formerly Twitter) card metadata only if an X profile link is detected
 
 ### Search Engine Optimization
 
@@ -117,8 +118,10 @@ Visit Google's [Rich Results Test](https://search.google.com/test/rich-results):
 ### 2. Preview Social Sharing
 
 - **Facebook**: [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/)
-- **Twitter**: [Twitter Card Validator](https://cards-dev.twitter.com/validator)
+- **X (Twitter)**: [Card Validator](https://cards-dev.twitter.com/validator) (only applicable if X metadata rendered)
 - **LinkedIn**: Share your URL and see the preview
+
+> Note: X metadata is conditionally included—if no social link referencing x.com or twitter.com is found, those tags are omitted entirely.
 
 ### 3. Verify Search Console
 

@@ -30,7 +30,7 @@ const DEFAULT_SEO: SEOConfig = {
   defaultDescription:
     "Professional portfolio showcasing projects, experience, and technical expertise in software development.",
   defaultImage: "/og-image.png",
-  twitterHandle: "@yourusername",
+  // twitterHandle intentionally blank; derived dynamically from social links (X)
 };
 
 export function getBaseMetadata(
@@ -38,6 +38,53 @@ export function getBaseMetadata(
   hostname?: string
 ): SEOConfig {
   const siteUrl = hostname ? `https://${hostname}` : DEFAULT_SEO.siteUrl;
+
+  // Attempt to derive X (Twitter) handle from social links
+  let derivedHandle: string | undefined;
+  type SocialLink = {
+    platform: string;
+    icon: string;
+    href: string;
+    label: string;
+  };
+  let links: SocialLink[] | undefined;
+  if (profile && typeof profile === "object" && "home_page_data" in profile) {
+    const hp: unknown = (profile as { home_page_data?: unknown })
+      .home_page_data;
+    if (hp && typeof hp === "object" && "socialLinks" in hp) {
+      const maybeLinks = (hp as { socialLinks?: unknown }).socialLinks;
+      if (Array.isArray(maybeLinks)) {
+        links = maybeLinks.filter(
+          (l): l is SocialLink =>
+            typeof l === "object" &&
+            !!l &&
+            "platform" in l &&
+            "icon" in l &&
+            "href" in l &&
+            "label" in l
+        ) as SocialLink[];
+      }
+    }
+  }
+  if (links && links.length) {
+    const xLink = links.find((l) => {
+      const token = `${l.platform} ${l.icon} ${l.label}`.toLowerCase();
+      return (
+        /twitter|\bx\b/.test(token) &&
+        (l.href.includes("twitter.com") || l.href.includes("x.com"))
+      );
+    });
+    if (xLink) {
+      try {
+        const url = new URL(xLink.href);
+        // handle is first path segment
+        const seg = url.pathname.replace(/^\//, "").split("/")[0];
+        if (seg) derivedHandle = `@${seg}`;
+      } catch {
+        /* ignore URL parse errors */
+      }
+    }
+  }
 
   return {
     siteName: profile?.full_name || DEFAULT_SEO.siteName,
@@ -47,7 +94,7 @@ export function getBaseMetadata(
       : DEFAULT_SEO.defaultTitle,
     defaultDescription: profile?.tagline || DEFAULT_SEO.defaultDescription,
     defaultImage: profile?.avatar_url || DEFAULT_SEO.defaultImage,
-    twitterHandle: DEFAULT_SEO.twitterHandle,
+    twitterHandle: derivedHandle,
   };
 }
 
@@ -63,7 +110,7 @@ export function generateHomeMetadata(
     profile?.home_page_data?.callToAction?.description ||
     config.defaultDescription;
 
-  return {
+  const base: Metadata = {
     title,
     description,
     keywords: [
@@ -96,13 +143,6 @@ export function generateHomeMetadata(
         },
       ],
     },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [config.defaultImage],
-      creator: config.twitterHandle,
-    },
     robots: {
       index: true,
       follow: true,
@@ -115,6 +155,16 @@ export function generateHomeMetadata(
       },
     },
   };
+  if (config.twitterHandle) {
+    base.twitter = {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [config.defaultImage],
+      creator: config.twitterHandle,
+    };
+  }
+  return base;
 }
 
 export function generateAboutMetadata(
@@ -129,7 +179,7 @@ export function generateAboutMetadata(
     profile?.tagline ||
     config.defaultDescription;
 
-  return {
+  const meta: Metadata = {
     title,
     description,
     openGraph: {
@@ -139,13 +189,16 @@ export function generateAboutMetadata(
       description,
       images: [config.defaultImage],
     },
-    twitter: {
+  };
+  if (config.twitterHandle) {
+    meta.twitter = {
       card: "summary_large_image",
       title,
       description,
       images: [config.defaultImage],
-    },
-  };
+    };
+  }
+  return meta;
 }
 
 export function generateProjectsMetadata(
@@ -159,7 +212,7 @@ export function generateProjectsMetadata(
     : "Projects";
   const description = `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
 
-  return {
+  const meta: Metadata = {
     title,
     description,
     openGraph: {
@@ -169,13 +222,16 @@ export function generateProjectsMetadata(
       description,
       images: [config.defaultImage],
     },
-    twitter: {
+  };
+  if (config.twitterHandle) {
+    meta.twitter = {
       card: "summary_large_image",
       title,
       description,
       images: [config.defaultImage],
-    },
-  };
+    };
+  }
+  return meta;
 }
 
 export function generateProjectMetadata(
@@ -195,7 +251,7 @@ export function generateProjectMetadata(
   const title = `${project.title} - ${config.siteName}`;
   const description = project.description || project.long_description;
 
-  return {
+  const meta: Metadata = {
     title,
     description,
     keywords: [...project.tech, "project", "portfolio"].join(", "),
@@ -216,13 +272,16 @@ export function generateProjectMetadata(
         : [config.defaultImage],
       publishedTime: project.created_at,
     },
-    twitter: {
+  };
+  if (config.twitterHandle) {
+    meta.twitter = {
       card: "summary_large_image",
       title: project.title,
       description,
       images: [project.image || config.defaultImage],
-    },
-  };
+    };
+  }
+  return meta;
 }
 
 export function generateResumeMetadata(
@@ -236,7 +295,7 @@ export function generateResumeMetadata(
     profile?.tagline ||
     "Professional resume showcasing experience, skills, and qualifications.";
 
-  return {
+  const meta: Metadata = {
     title,
     description,
     openGraph: {
@@ -246,12 +305,15 @@ export function generateResumeMetadata(
       description,
       images: [config.defaultImage],
     },
-    twitter: {
+  };
+  if (config.twitterHandle) {
+    meta.twitter = {
       card: "summary",
       title,
       description,
-    },
-  };
+    };
+  }
+  return meta;
 }
 
 export function generateStructuredData(
