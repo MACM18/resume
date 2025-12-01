@@ -39,7 +39,7 @@ export function SocialLinkRow({ index, form, onDelete }: SocialLinkRowProps) {
           <FormItem>
             <FormControl>
               <IconPicker
-                value={field.value}
+                value={field.value ?? ""}
                 onChange={({ icon, platform, label }) => {
                   field.onChange(icon);
                   form.setValue(`socialLinks.${index}.platform`, platform, {

@@ -237,7 +237,7 @@ export function HomePageForm() {
                     <FormItem>
                       <FormControl>
                         <IconPicker
-                          value={field.value}
+                          value={field.value ?? ""}
                           onChange={({ icon, platform, label }) => {
                             field.onChange(icon);
                             form.setValue(

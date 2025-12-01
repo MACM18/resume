@@ -276,7 +276,7 @@ Today, I combine my technical expertise with a deep understanding of business ne
                           <FormControl>
                             <div className='flex items-center gap-2'>
                               <IconPicker
-                                value={field.value}
+                                value={field.value ?? ""}
                                 onChange={(data) => field.onChange(data.icon)}
                               />
                               <span className='text-sm text-muted-foreground'>
