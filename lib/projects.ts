@@ -45,12 +45,12 @@ export async function deleteProjectImage(userId: string, imageUrl: string): Prom
 }
 
 async function getUserIdByDomain(domain: string): Promise<string | null> {
-  const { data, error } = await supabase.from('profiles').select('id').eq('domain', domain).single();
+  const { data, error } = await supabase.from('profiles').select('user_id').eq('domain', domain).single();
   if (error || !data) {
     console.error('Error fetching user by domain:', error?.message);
     return null;
   }
-  return data.id;
+  return data.user_id;
 }
 
 export async function getProjects(domain: string): Promise<Project[]> {

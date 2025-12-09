@@ -6,14 +6,14 @@ import { WorkExperience } from "@/types/portfolio";
 async function getUserIdByDomain(domain: string): Promise<string | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id")
+    .select("user_id")
     .eq("domain", domain)
     .single();
   if (error || !data) {
     console.error("Error fetching user by domain:", error?.message);
     return null;
   }
-  return data.id;
+  return data.user_id;
 }
 
 // Public/domain-scoped: only return visible experiences, newest first

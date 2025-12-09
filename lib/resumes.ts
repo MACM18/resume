@@ -153,7 +153,7 @@ export async function getResumePublicUrl(filePath: string): Promise<string | nul
 export async function getActiveResume(domain: string): Promise<Resume | null> {
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('id, active_resume_role')
+    .select('user_id, active_resume_role')
     .eq('domain', domain)
     .single();
 
@@ -165,7 +165,7 @@ export async function getActiveResume(domain: string): Promise<Resume | null> {
   const { data: resume, error: resumeError } = await supabase
     .from('resumes')
     .select('*')
-    .eq('user_id', profile.id)
+    .eq('user_id', profile.user_id)
     .eq('role', profile.active_resume_role)
     .single();
 

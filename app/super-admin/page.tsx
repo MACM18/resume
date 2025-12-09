@@ -17,14 +17,17 @@ const SuperAdminPage = () => {
     queryFn: getCurrentUserProfile,
   });
 
+  // Allow both www.macm.dev and macm.dev as super admin domains
+  const isSuperAdmin =
+    profile?.domain === "www.macm.dev" || profile?.domain === "macm.dev";
+
   useEffect(() => {
-    if (!isLoading && profile?.domain !== "macm.dev") {
-      // toast.error("Access Denied"); // This can be annoying on redirects
+    if (!isLoading && !isSuperAdmin) {
       router.push("/admin");
     }
-  }, [profile, isLoading, router]);
+  }, [profile, isLoading, router, isSuperAdmin]);
 
-  if (isLoading || profile?.domain !== "www.macm.dev") {
+  if (isLoading || !isSuperAdmin) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <p>Loading...</p>
