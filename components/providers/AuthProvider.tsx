@@ -22,14 +22,16 @@ export default function AuthProvider({
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setSession(session);
-      
+
       // Ensure profile exists for authenticated users
       if (session) {
         await ensureUserProfile();
       }
-      
+
       setLoading(false);
     };
 
@@ -39,9 +41,9 @@ export default function AuthProvider({
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
-      
+
       // Ensure profile exists when user logs in
-      if (session && (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED')) {
+      if (session && (_event === "SIGNED_IN" || _event === "TOKEN_REFRESHED")) {
         await ensureUserProfile();
       }
     });

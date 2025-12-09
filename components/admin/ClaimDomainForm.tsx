@@ -45,7 +45,7 @@ export function ClaimDomainForm() {
         .eq("domain", data.domain)
         .single();
 
-      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+      if (checkError && checkError.code !== "PGRST116") throw checkError;
       if (existing) throw new Error("This domain is already taken.");
 
       const { error: updateError } = await supabase
@@ -67,22 +67,29 @@ export function ClaimDomainForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+        className='space-y-4'
+      >
         <FormField
           control={form.control}
-          name="domain"
+          name='domain'
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="sr-only">Domain</FormLabel>
+              <FormLabel className='sr-only'>Domain</FormLabel>
               <FormControl>
-                <Input placeholder="your-portfolio.com" {...field} />
+                <Input placeholder='your-portfolio.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={mutation.isPending} className="w-full">
-          {mutation.isPending ? <Loader2 className="animate-spin" /> : "Claim Domain & Continue"}
+        <Button type='submit' disabled={mutation.isPending} className='w-full'>
+          {mutation.isPending ? (
+            <Loader2 className='animate-spin' />
+          ) : (
+            "Claim Domain & Continue"
+          )}
         </Button>
       </form>
     </Form>
