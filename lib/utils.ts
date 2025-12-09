@@ -26,3 +26,34 @@ export function formatDateRange(
   const endStr = isCurrent || !end ? "Present" : formatMonthYear(end);
   return `${startStr} – ${endStr}`;
 }
+
+/**
+ * Normalize a domain/hostname by removing common prefixes like www.
+ * This ensures consistent domain matching regardless of how the user accesses the site.
+ * Examples:
+ *   - "www.example.com" -> "example.com"
+ *   - "example.com" -> "example.com"
+ *   - "WWW.EXAMPLE.COM" -> "example.com"
+ *   - "localhost" -> "localhost"
+ *   - "localhost:3000" -> "localhost"
+ */
+export function normalizeDomain(domain: string): string {
+  if (!domain) return "";
+  
+  // Convert to lowercase
+  let normalized = domain.toLowerCase().trim();
+  
+  // Remove port number if present (e.g., localhost:3000 -> localhost)
+  normalized = normalized.split(":")[0];
+  
+  // Remove common prefixes
+  const prefixesToRemove = ["www.", "www2.", "www3."];
+  for (const prefix of prefixesToRemove) {
+    if (normalized.startsWith(prefix)) {
+      normalized = normalized.slice(prefix.length);
+      break;
+    }
+  }
+  
+  return normalized;
+}

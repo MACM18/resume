@@ -18,6 +18,7 @@ import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 import { useSupabase } from "../providers/AuthProvider";
+import { normalizeDomain } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 const domainSchema = z.object({
@@ -39,10 +40,13 @@ export function ClaimDomainForm() {
     mutationFn: async (data: DomainFormValues) => {
       if (!session) throw new Error("Not authenticated");
 
+      // Normalize domain for consistent storage and lookup
+      const normalizedDomain = normalizeDomain(data.domain);
+
       const { data: existing, error: checkError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("domain", data.domain)
+        .eq("domain", normalizedDomain)
         .single();
 
       if (checkError && checkError.code !== "PGRST116") throw checkError;
@@ -50,7 +54,7 @@ export function ClaimDomainForm() {
 
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ domain: data.domain })
+        .update({ domain: normalizedDomain })
         .eq("user_id", session.user.id);
 
       if (updateError) throw updateError;

@@ -50,12 +50,26 @@ const About = () => {
     return <AboutPageSkeleton />;
   }
 
-  if (!profileData || !profileData.about_page_data) {
+  if (!profileData) {
     return <DomainNotClaimed />;
   }
 
-  const aboutPageData = profileData.about_page_data;
-  const contactEmail = profileData.home_page_data.callToAction.email;
+  // Use profile data with sensible defaults if about_page_data is missing
+  const aboutPageData = profileData.about_page_data || {
+    title: "About Me",
+    subtitle: profileData.tagline || "My Journey",
+    story: [],
+    skills: [],
+    callToAction: {
+      title: "Get in Touch",
+      description: "Let's connect!",
+      email: "",
+    },
+  };
+  const contactEmail =
+    profileData.home_page_data?.callToAction?.email ||
+    aboutPageData.callToAction?.email ||
+    "";
   const avatarUrl = profileData.avatar_url;
 
   return (

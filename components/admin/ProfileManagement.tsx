@@ -11,6 +11,7 @@ import { ProfileForm } from "./ProfileForm";
 import { ProfileImageManager } from "./ProfileImageManager";
 import { BackgroundManager } from "./BackgroundManager"; // Import the new component
 import { FaviconManager } from "./FaviconManager";
+import { normalizeDomain } from "@/lib/utils";
 
 export function ProfileManagement() {
   const { session } = useSupabase();
@@ -41,11 +42,14 @@ export function ProfileManagement() {
     mutationFn: async (domain: string) => {
       if (!session) throw new Error("Not authenticated");
 
+      // Normalize domain for consistent storage and lookup
+      const normalizedDomain = normalizeDomain(domain);
+
       // More robust check for existing domain
       const { data: existingProfiles, error: checkError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("domain", domain)
+        .eq("domain", normalizedDomain)
         .not("user_id", "eq", session.user.id);
 
       if (checkError) {
@@ -59,7 +63,7 @@ export function ProfileManagement() {
       // If not taken, proceed with the update
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ domain })
+        .update({ domain: normalizedDomain })
         .eq("user_id", session.user.id);
 
       if (updateError) {

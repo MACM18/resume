@@ -2,12 +2,14 @@
 
 import { supabase } from "./supabase";
 import { WorkExperience } from "@/types/portfolio";
+import { normalizeDomain } from "./utils";
 
 async function getUserIdByDomain(domain: string): Promise<string | null> {
+  const normalizedDomain = normalizeDomain(domain);
   const { data, error } = await supabase
     .from("profiles")
     .select("user_id")
-    .eq("domain", domain)
+    .eq("domain", normalizedDomain)
     .single();
   if (error || !data) {
     console.error("Error fetching user by domain:", error?.message);

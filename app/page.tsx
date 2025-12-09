@@ -15,6 +15,7 @@ import { getCurrentWork } from "@/lib/work-experiences";
 import Image from "next/image";
 import { formatDateRange } from "@/lib/utils";
 import { generateStructuredData } from "@/lib/seo";
+import { HomePageData } from "@/types/portfolio";
 
 import { getDynamicIcon } from "@/lib/icons";
 
@@ -68,14 +69,27 @@ export default function Page() {
     return <HomePageSkeleton />;
   }
 
-  if (!profileData || !profileData.home_page_data) {
+  if (!profileData) {
     return <DomainNotClaimed />;
   }
 
-  const homePageData = {
-    ...profileData.home_page_data,
-    name: profileData.full_name,
-    tagline: profileData.tagline,
+  // Use profile data with sensible defaults if home_page_data is missing
+  const rawHomeData = profileData.home_page_data;
+  const homePageData: HomePageData & { about_card_description?: string } = {
+    name: profileData.full_name || "Welcome",
+    tagline: profileData.tagline || "My Portfolio",
+    socialLinks: rawHomeData?.socialLinks || [],
+    experienceHighlights: rawHomeData?.experienceHighlights || [],
+    technicalExpertise: rawHomeData?.technicalExpertise || [],
+    achievements: rawHomeData?.achievements || [],
+    about_card_description: (
+      rawHomeData as { about_card_description?: string } | null
+    )?.about_card_description,
+    callToAction: rawHomeData?.callToAction || {
+      title: "Get in Touch",
+      description: "Let's connect!",
+      email: "",
+    },
   };
 
   const featuredProject = allPublishedProjects?.find((p) => p.featured);

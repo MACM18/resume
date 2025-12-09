@@ -2,6 +2,7 @@
 
 import { supabase } from './supabase';
 import { HomePageData, AboutPageData, Profile } from '@/types/portfolio';
+import { normalizeDomain } from './utils';
 
 interface ProfileData {
   full_name: string;
@@ -114,20 +115,21 @@ export async function ensureUserProfile(): Promise<Profile | null> {
 }
 
 export async function getProfileData(domain: string): Promise<ProfileData | null> {
-  console.log('getProfileData called with domain:', domain);
-  
+  const normalizedDomain = normalizeDomain(domain);
   const { data, error } = await supabase
     .from('profiles')
     .select('full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url, contact_numbers')
-    .eq('domain', domain)
+    .eq('domain', normalizedDomain)
     .single();
 
   if (error) {
-    console.error('Error fetching profile data for domain:', domain, 'Error details:', error);
+    // PGRST116 means no rows found - this is expected for unclaimed domains
+    if (error.code !== 'PGRST116') {
+      console.error('Error fetching profile data for domain:', normalizedDomain, error);
+    }
     return null;
   }
   
-  console.log('Profile data found:', data ? 'yes' : 'no');
   return data;
 }
 

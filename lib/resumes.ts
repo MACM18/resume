@@ -2,6 +2,7 @@
 
 import { supabase } from './supabase';
 import { Resume, UploadedResume } from '@/types/portfolio';
+import { normalizeDomain } from './utils';
 
 // ========== UPLOADED RESUMES FUNCTIONS ==========
 
@@ -151,10 +152,11 @@ export async function getResumePublicUrl(filePath: string): Promise<string | nul
 }
 
 export async function getActiveResume(domain: string): Promise<Resume | null> {
+  const normalizedDomain = normalizeDomain(domain);
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('user_id, active_resume_role')
-    .eq('domain', domain)
+    .eq('domain', normalizedDomain)
     .single();
 
   if (profileError || !profile || !profile.active_resume_role) {

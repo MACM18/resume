@@ -1,13 +1,15 @@
 import { supabase } from './supabase';
+import { normalizeDomain } from './utils';
 
 export async function getProfileDataServer(domain: string) {
   if (!domain) return null;
+  const normalizedDomain = normalizeDomain(domain);
   const { data, error } = await supabase
     .from('profiles')
     .select(
       'full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url, favicon_url, contact_numbers'
     )
-    .eq('domain', domain)
+    .eq('domain', normalizedDomain)
     .single();
 
   if (error) {

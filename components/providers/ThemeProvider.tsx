@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/types/portfolio";
+import { normalizeDomain } from "@/lib/utils";
 
 const generateCssVariables = (
   theme: Theme,
@@ -38,10 +39,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     queryKey: ["theme", hostname],
     queryFn: async () => {
       if (!hostname) return { theme: {}, background_image_url: null };
+      const normalizedDomain = normalizeDomain(hostname);
       const { data } = await supabase
         .from("profiles")
         .select("theme, background_image_url")
-        .eq("domain", hostname)
+        .eq("domain", normalizedDomain)
         .single();
       return {
         theme: data?.theme || {},

@@ -2,6 +2,7 @@
 
 import { supabase } from './supabase';
 import { Project } from '@/types/portfolio';
+import { normalizeDomain } from './utils';
 
 export async function uploadProjectImage(file: File): Promise<string> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -45,7 +46,8 @@ export async function deleteProjectImage(userId: string, imageUrl: string): Prom
 }
 
 async function getUserIdByDomain(domain: string): Promise<string | null> {
-  const { data, error } = await supabase.from('profiles').select('user_id').eq('domain', domain).single();
+  const normalizedDomain = normalizeDomain(domain);
+  const { data, error } = await supabase.from('profiles').select('user_id').eq('domain', normalizedDomain).single();
   if (error || !data) {
     console.error('Error fetching user by domain:', error?.message);
     return null;
