@@ -13,3 +13,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Construct a public URL for a file in a Supabase storage bucket.
+ * This is a manual implementation since getPublicUrl may not work 
+ * correctly with self-hosted Supabase instances.
+ * 
+ * @param bucket - The storage bucket name
+ * @param filePath - The path to the file within the bucket
+ * @returns The full public URL to access the file
+ */
+export function getStoragePublicUrl(bucket: string, filePath: string): string {
+  // Supabase storage public URL format: {supabaseUrl}/storage/v1/object/public/{bucket}/{filePath}
+  const cleanUrl = (supabaseUrl || '').replace(/\/$/, ''); // Remove trailing slash if present
+  return `${cleanUrl}/storage/v1/object/public/${bucket}/${filePath}`;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from './supabase';
+import { supabase, getStoragePublicUrl } from './supabase';
 import { Resume, UploadedResume } from '@/types/portfolio';
 import { normalizeDomain } from './utils';
 
@@ -121,24 +121,9 @@ export async function uploadResumePdf(file: File, userId: string, role: string):
     return null;
   }
 
-  // getPublicUrl returns { data: { publicUrl } }
-  const { data } = supabase.storage.from('resumes').getPublicUrl(filePath);
-  let publicUrl = '';
-  
-  // prefer publicUrl if present
-  if (data && 'publicUrl' in data && data.publicUrl) {
-    publicUrl = data.publicUrl;
-  } else {
-    // fallback: createSignedUrl (expires in 1 hour)
-    const { data: signedData, error: signedErr } = await supabase.storage
-      .from('resumes')
-      .createSignedUrl(filePath, 60 * 60);
-    if (signedErr) {
-      console.error('Failed to create signed URL for resume:', signedErr);
-      return null;
-    }
-    publicUrl = signedData?.signedUrl || '';
-  }
+  // Use our custom getStoragePublicUrl for self-hosted Supabase
+  const publicUrl = getStoragePublicUrl('resumes', filePath);
+  console.log('Generated public URL for resume:', publicUrl);
 
   // Create database record
   const uploadedResume = await createUploadedResume(file, userId, filePath, publicUrl);
@@ -146,16 +131,8 @@ export async function uploadResumePdf(file: File, userId: string, role: string):
 }
 
 export async function getResumePublicUrl(filePath: string): Promise<string | null> {
-  // Returns public URL if public access is enabled, otherwise returns a signed URL
-  const { data } = supabase.storage.from('resumes').getPublicUrl(filePath);
-  if (data && 'publicUrl' in data && data.publicUrl) return data.publicUrl;
-
-  const { data: signedData, error: signedErr } = await supabase.storage.from('resumes').createSignedUrl(filePath, 60 * 60);
-  if (signedErr) {
-    console.error('Failed to create signed URL:', signedErr);
-    return null;
-  }
-  return signedData?.signedUrl || null;
+  // Use our custom getStoragePublicUrl for self-hosted Supabase
+  return getStoragePublicUrl('resumes', filePath);
 }
 
 export async function getActiveResume(domain: string): Promise<Resume | null> {

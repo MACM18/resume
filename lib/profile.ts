@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from './supabase';
+import { supabase, getStoragePublicUrl } from './supabase';
 import { HomePageData, AboutPageData, Profile } from '@/types/portfolio';
 import { normalizeDomain } from './utils';
 
@@ -162,6 +162,8 @@ export async function updateCurrentUserProfile(profileData: Partial<Profile>) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, user_id: _userId, ...updateData } = profileData;
 
+    console.log('Updating profile with data:', JSON.stringify(updateData, null, 2));
+
     const { data, error } = await supabase
         .from('profiles')
         .update(updateData)
@@ -173,6 +175,8 @@ export async function updateCurrentUserProfile(profileData: Partial<Profile>) {
         console.error("Error updating profile:", error);
         throw error;
     }
+    
+    console.log('Profile updated successfully:', data?.avatar_url || data?.background_image_url || data?.favicon_url);
     return data;
 }
 
@@ -195,11 +199,10 @@ export async function uploadProfileImage(file: File, userId: string): Promise<st
     throw uploadError;
   }
 
-  const { data } = supabase.storage
-    .from('profile-images')
-    .getPublicUrl(filePath);
+  const publicUrl = getStoragePublicUrl('profile-images', filePath);
+  console.log('Generated public URL for profile image:', publicUrl);
 
-  return data.publicUrl;
+  return publicUrl;
 }
 
 export async function getProfileImages(userId: string): Promise<string[]> {
@@ -215,7 +218,7 @@ export async function getProfileImages(userId: string): Promise<string[]> {
     throw error;
   }
 
-  return data.map(file => supabase.storage.from('profile-images').getPublicUrl(`${userId}/${file.name}`).data.publicUrl);
+  return data.map(file => getStoragePublicUrl('profile-images', `${userId}/${file.name}`));
 }
 
 export async function deleteProfileImage(userId: string, imageUrl: string): Promise<boolean> {
@@ -253,11 +256,10 @@ export async function uploadBackgroundImage(file: File, userId: string): Promise
     throw uploadError;
   }
 
-  const { data } = supabase.storage
-    .from('background-images')
-    .getPublicUrl(filePath);
+  const publicUrl = getStoragePublicUrl('background-images', filePath);
+  console.log('Generated public URL for background image:', publicUrl);
 
-  return data.publicUrl;
+  return publicUrl;
 }
 
 export async function deleteBackgroundImage(userId: string, imageUrl: string): Promise<boolean> {
@@ -296,11 +298,10 @@ export async function uploadFavicon(file: File, userId: string): Promise<string>
     throw uploadError;
   }
 
-  const { data } = supabase.storage
-    .from('favicons')
-    .getPublicUrl(filePath);
+  const publicUrl = getStoragePublicUrl('favicons', filePath);
+  console.log('Generated public URL for favicon:', publicUrl);
 
-  return data.publicUrl;
+  return publicUrl;
 }
 
 export async function deleteFavicon(userId: string, imageUrl: string): Promise<boolean> {

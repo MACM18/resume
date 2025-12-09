@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from './supabase';
+import { supabase, getStoragePublicUrl } from './supabase';
 import { Project } from '@/types/portfolio';
 import { normalizeDomain } from './utils';
 
@@ -22,11 +22,10 @@ export async function uploadProjectImage(file: File): Promise<string> {
     throw uploadError;
   }
 
-  const { data } = supabase.storage
-    .from('project-images')
-    .getPublicUrl(filePath);
+  const publicUrl = getStoragePublicUrl('project-images', filePath);
+  console.log('Generated public URL for project image:', publicUrl);
 
-  return data.publicUrl;
+  return publicUrl;
 }
 
 export async function deleteProjectImage(userId: string, imageUrl: string): Promise<boolean> {
