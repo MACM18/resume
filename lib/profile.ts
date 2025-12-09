@@ -114,6 +114,8 @@ export async function ensureUserProfile(): Promise<Profile | null> {
 }
 
 export async function getProfileData(domain: string): Promise<ProfileData | null> {
+  console.log('getProfileData called with domain:', domain);
+  
   const { data, error } = await supabase
     .from('profiles')
     .select('full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url, contact_numbers')
@@ -125,6 +127,7 @@ export async function getProfileData(domain: string): Promise<ProfileData | null
     return null;
   }
   
+  console.log('Profile data found:', data ? 'yes' : 'no');
   return data;
 }
 
