@@ -29,7 +29,7 @@ export const AuthButton = () => {
     router.refresh();
   };
 
-  const isSuperAdmin = profile?.domain === "www.macm.dev";
+  const isSuperAdmin = profile?.domain === "macm.dev";
 
   return (
     <motion.div
