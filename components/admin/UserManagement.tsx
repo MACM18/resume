@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2, KeyRound } from "lucide-react";
@@ -24,9 +23,12 @@ interface User {
 }
 
 async function getAllUsers(): Promise<User[]> {
-  const { data, error } = await supabase.functions.invoke("get-all-users");
-  if (error) throw error;
-  return data;
+  const res = await fetch("/api/get-all-users");
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Failed to fetch users");
+  }
+  return res.json();
 }
 
 export function UserManagement() {
@@ -41,13 +43,15 @@ export function UserManagement() {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.functions.invoke(
-        "reset-password-for-user",
-        {
-          body: { email },
-        }
-      );
-      if (error) throw error;
+      const res = await fetch("/api/reset-password-for-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to send reset link");
+      }
     },
     onSuccess: (_, email) => {
       toast.success(`Password reset link sent to ${email}`);

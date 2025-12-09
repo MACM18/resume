@@ -27,7 +27,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { GlassCard } from "./GlassCard";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
-import { supabase } from "@/lib/supabase";
 import { toast } from "./ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -64,10 +63,15 @@ export function ContactButton() {
       if (!recipientEmail) {
         throw new Error("Recipient email is not configured.");
       }
-      const { error } = await supabase.functions.invoke("contact", {
-        body: { ...data, recipientEmail },
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, recipientEmail }),
       });
-      if (error) throw error;
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to send message");
+      }
     },
     onSuccess: () => {
       toast.success("Message sent successfully!");

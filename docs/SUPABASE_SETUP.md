@@ -160,11 +160,31 @@ Use these common policies on owner-scoped tables:
   Public-read tables (`profiles`, `projects`, `work_experiences`):
 - `create policy "Public read by domain" on <table> for select using (domain is not null and visible conditions as applicable);`
 
-## Edge Functions
+## API Routes (Next.js Backend)
 
-- `generate-features`: Invoked from `components/admin/ProjectForm.tsx` to analyze project descriptions and propose features. Implement as a Deno function under Supabase Edge Functions. It should accept `{ long_description: string }` and return a JSON array of suggested feature strings.
+Instead of Supabase Edge Functions, this project uses **Next.js API routes** under `app/api/*` for backend logic. This simplifies deployment and keeps everything in one codebase.
 
-Optional (if implemented earlier): a function to generate resume PDFs using provided profile + work history.
+### AI Generation (via Groq)
+
+- `POST /api/generate-features` — Extract key features from a project description.
+- `POST /api/generate-about-card-description` — Generate an about card description from user story.
+- `POST /api/generate-resume-summary` — Generate a professional summary for resumes.
+
+These routes use the [Groq SDK](https://console.groq.com/) with the `llama-3.3-70b-versatile` model. Set `GROQ_API_KEY` in your environment.
+
+### Email (via Resend)
+
+- `POST /api/contact` — Send contact form emails.
+
+Uses [Resend](https://resend.com/) for transactional email. Set `RESEND_API_KEY` and optionally `RESEND_FROM_EMAIL`.
+
+### User Management (Supabase Admin)
+
+- `POST /api/invite-user` — Invite a new user by email.
+- `GET /api/get-all-users` — List all users with their domains.
+- `POST /api/reset-password-for-user` — Send password reset email.
+
+These routes use the Supabase Admin SDK with `SUPABASE_SERVICE_ROLE_KEY`. Keep this key secret—never expose to client.
 
 ## Image Domains
 
@@ -228,3 +248,225 @@ psql "$SUPABASE_DB_URL" -c "create unique index if not exists uniq_current_work_
 ```
 
 If you want, I can replace `lib/supabase.ts` with env-based config and add SQL files to generate the full schema and RLS in one go.
+
+## Postgres SQL: Full Provisioning
+
+Run the following SQL in the Supabase SQL editor (or `psql`). It creates tables, constraints, RLS policies, and helpful indexes. Adjust types if you prefer `jsonb[]` vs `text[]` for arrays.
+
+```sql
+-- Enable UUID extension (if not already)
+create extension if not exists "uuid-ossp";
+
+-- =====================================
+-- Tables
+-- =====================================
+
+-- 1) profiles
+create table if not exists public.profiles (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null,
+  domain text unique,
+  theme jsonb,
+  avatar_url text,
+  background_image_url text,
+  favicon_url text,
+  contact_numbers jsonb,
+  active_resume_role text,
+  home_page_data jsonb,
+  about_page_data jsonb,
+  social_links jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- 2) projects
+create table if not exists public.projects (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null,
+  domain text,
+  title text not null,
+  short_description text,
+  long_description text,
+  image_url text,
+  published boolean not null default false,
+  featured boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- 3) uploaded_resumes
+create table if not exists public.uploaded_resumes (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null,
+  file_url text not null,
+  file_name text not null,
+  file_size int,
+  created_at timestamptz not null default now()
+);
+
+-- 4) resumes
+create table if not exists public.resumes (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null,
+  domain text,
+  role_title text,
+  summary text,
+  skills jsonb,
+  uploaded_resume_id uuid references public.uploaded_resumes(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- 5) work_experiences
+create table if not exists public.work_experiences (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null,
+  domain text,
+  company text not null,
+  title text not null,
+  location text,
+  start_month date not null,
+  end_month date,
+  is_current boolean not null default false,
+  visible boolean not null default true,
+  highlights jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- =====================================
+-- Indexes & Constraints
+-- =====================================
+create unique index if not exists uniq_current_work_per_domain
+  on public.work_experiences(domain) where is_current;
+
+-- Optional performance indexes
+create index if not exists idx_projects_domain_published on public.projects(domain, published);
+create index if not exists idx_work_domain_visible on public.work_experiences(domain, visible);
+create index if not exists idx_resumes_domain on public.resumes(domain);
+
+-- =====================================
+-- Row Level Security (RLS)
+-- =====================================
+alter table public.profiles enable row level security;
+alter table public.projects enable row level security;
+alter table public.resumes enable row level security;
+alter table public.uploaded_resumes enable row level security;
+alter table public.work_experiences enable row level security;
+
+-- Owner policies (CRUD) — adjust per table if needed
+-- NOTE: PostgreSQL does not support "IF NOT EXISTS" for policies.
+-- Use DROP IF EXISTS followed by CREATE to ensure idempotency.
+drop policy if exists "profiles_owner_read" on public.profiles;
+create policy "profiles_owner_read" on public.profiles
+  for select using (auth.uid() = user_id);
+drop policy if exists "profiles_owner_write" on public.profiles;
+create policy "profiles_owner_write" on public.profiles
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "projects_owner_read" on public.projects;
+create policy "projects_owner_read" on public.projects
+  for select using (auth.uid() = user_id);
+drop policy if exists "projects_owner_write" on public.projects;
+create policy "projects_owner_write" on public.projects
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "resumes_owner_read" on public.resumes;
+create policy "resumes_owner_read" on public.resumes
+  for select using (auth.uid() = user_id);
+drop policy if exists "resumes_owner_write" on public.resumes;
+create policy "resumes_owner_write" on public.resumes
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "uploaded_resumes_owner_read" on public.uploaded_resumes;
+create policy "uploaded_resumes_owner_read" on public.uploaded_resumes
+  for select using (auth.uid() = user_id);
+drop policy if exists "uploaded_resumes_owner_write" on public.uploaded_resumes;
+create policy "uploaded_resumes_owner_write" on public.uploaded_resumes
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "work_owner_read" on public.work_experiences;
+create policy "work_owner_read" on public.work_experiences
+  for select using (auth.uid() = user_id);
+drop policy if exists "work_owner_write" on public.work_experiences;
+create policy "work_owner_write" on public.work_experiences
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Public read by domain (only for public pages)
+drop policy if exists "profiles_public_read" on public.profiles;
+create policy "profiles_public_read" on public.profiles
+  for select using (domain is not null);
+
+drop policy if exists "projects_public_read" on public.projects;
+create policy "projects_public_read" on public.projects
+  for select using (published = true);
+
+drop policy if exists "work_public_read" on public.work_experiences;
+create policy "work_public_read" on public.work_experiences
+  for select using (visible = true);
+
+-- Optional: keep resumes private; app resolves public/signed URL via storage
+-- If you want public resume metadata by domain, you could add:
+-- create policy if not exists "resumes_public_read" on public.resumes
+--   for select using (true);
+
+-- =====================================
+-- Triggers (optional: keep updated_at fresh)
+-- =====================================
+create or replace function public.touch_updated_at()
+returns trigger as $$
+begin
+  new.updated_at := now();
+  return new;
+end; $$ language plpgsql;
+
+do $$ begin
+  perform 1 from pg_trigger where tgname = 'profiles_touch_updated_at';
+  if not found then
+    create trigger profiles_touch_updated_at before update on public.profiles
+      for each row execute function public.touch_updated_at();
+  end if;
+end $$;
+
+do $$ begin
+  perform 1 from pg_trigger where tgname = 'projects_touch_updated_at';
+  if not found then
+    create trigger projects_touch_updated_at before update on public.projects
+      for each row execute function public.touch_updated_at();
+  end if;
+end $$;
+
+do $$ begin
+  perform 1 from pg_trigger where tgname = 'resumes_touch_updated_at';
+  if not found then
+    create trigger resumes_touch_updated_at before update on public.resumes
+      for each row execute function public.touch_updated_at();
+  end if;
+end $$;
+
+do $$ begin
+  perform 1 from pg_trigger where tgname = 'work_touch_updated_at';
+  if not found then
+    create trigger work_touch_updated_at before update on public.work_experiences
+      for each row execute function public.touch_updated_at();
+  end if;
+end $$;
+```
+
+### Storage Buckets via CLI
+
+```bash
+supabase storage create-bucket profile-images --public
+supabase storage create-bucket background-images --public
+supabase storage create-bucket project-images --public
+supabase storage create-bucket favicons --public
+supabase storage create-bucket resumes --public
+```
+
+### psql Command Example
+
+```bash
+psql "$SUPABASE_DB_URL" -f ./docs/sql/provision.sql
+```
+
+If you’d like, I can also generate `docs/sql/provision.sql` with these commands so you can run it in one go.

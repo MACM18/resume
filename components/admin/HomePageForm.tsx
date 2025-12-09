@@ -22,7 +22,6 @@ import { Loader2, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPicker } from "./IconPicker";
 import { Separator } from "@/components/ui/separator";
-import { useSupabase } from "../providers/AuthProvider";
 import { DeleteButton } from "../DeleteButton";
 
 const homePageSchema = z.object({
@@ -76,7 +75,6 @@ type HomePageFormValues = z.infer<typeof homePageSchema>;
 
 export function HomePageForm() {
   const queryClient = useQueryClient();
-  const { supabase } = useSupabase(); // Use supabase client
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["currentUserProfile"],
@@ -132,13 +130,16 @@ export function HomePageForm() {
 
   const generateAboutCardDescriptionMutation = useMutation({
     mutationFn: async (story: string[]) => {
-      const { data, error } = await supabase.functions.invoke(
-        "generate-about-card-description",
-        {
-          body: { about_story: story },
-        }
-      );
-      if (error) throw error;
+      const res = await fetch("/api/generate-about-card-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ about_story: story }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to generate description");
+      }
+      const data = await res.json();
       return data.about_card_description as string;
     },
     onSuccess: (generatedDescription) => {

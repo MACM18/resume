@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
-import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 
 const invitationSchema = z.object({
@@ -34,10 +33,15 @@ export function UserInvitationForm() {
 
   const mutation = useMutation({
     mutationFn: async (data: InvitationFormValues) => {
-      const { error } = await supabase.functions.invoke("invite-user", {
-        body: { email: data.email },
+      const res = await fetch("/api/invite-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
       });
-      if (error) throw error;
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to invite user");
+      }
     },
     onSuccess: (_, variables) => {
       toast.success(`Invitation sent to ${variables.email}`);

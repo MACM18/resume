@@ -17,7 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addProject, updateProject, uploadProjectImage, deleteProjectImage } from "@/lib/projects";
+import {
+  addProject,
+  updateProject,
+  uploadProjectImage,
+  deleteProjectImage,
+} from "@/lib/projects";
 import { Project } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
 import { useState } from "react";
@@ -76,7 +81,7 @@ interface ProjectFormProps {
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const queryClient = useQueryClient();
-  const { session, supabase } = useSupabase();
+  const { session } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProjectFormValues>({
@@ -104,8 +109,10 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      toast.error("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error(
+        "Invalid file type. Please upload a JPG, PNG, or WEBP image."
+      );
       return;
     }
 
@@ -137,14 +144,22 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
 
   const generateFeaturesMutation = useMutation({
     mutationFn: async (description: string) => {
-      const { data, error } = await supabase.functions.invoke("generate-features", {
-        body: { long_description: description },
+      const res = await fetch("/api/generate-features", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ long_description: description }),
       });
-      if (error) throw error;
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to generate features");
+      }
+      const data = await res.json();
       return data.key_features as string[];
     },
     onSuccess: (features) => {
-      form.setValue("key_features", features.join("\n"), { shouldValidate: true });
+      form.setValue("key_features", features.join("\n"), {
+        shouldValidate: true,
+      });
       toast.success("Key features generated successfully!");
     },
     onError: (error: unknown) => {
@@ -161,7 +176,12 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
       const processedData = {
         ...data,
         tech: data.tech.split(",").map((t) => t.trim()),
-        key_features: data.key_features ? data.key_features.split("\n").map((f) => f.trim()).filter(f => f.length > 0) : [],
+        key_features: data.key_features
+          ? data.key_features
+              .split("\n")
+              .map((f) => f.trim())
+              .filter((f) => f.length > 0)
+          : [],
       };
       if (project) {
         return updateProject(project.id, processedData);
@@ -253,17 +273,19 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                 List each key feature on a new line.
               </FormDescription>
               <Button
-                type="button"
-                variant="outline"
-                size="sm"
+                type='button'
+                variant='outline'
+                size='sm'
                 onClick={() => generateFeaturesMutation.mutate(longDescription)}
-                disabled={generateFeaturesMutation.isPending || !longDescription}
-                className="mt-2"
+                disabled={
+                  generateFeaturesMutation.isPending || !longDescription
+                }
+                className='mt-2'
               >
                 {generateFeaturesMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 ) : (
-                  <Sparkles className="mr-2" size={16} />
+                  <Sparkles className='mr-2' size={16} />
                 )}
                 Generate from Description
               </Button>
@@ -277,53 +299,60 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
           render={() => (
             <FormItem>
               <FormLabel>Project Image</FormLabel>
-              <div className="flex items-center gap-4">
-                <Button asChild variant="outline">
-                  <label htmlFor="image-upload" className="cursor-pointer">
+              <div className='flex items-center gap-4'>
+                <Button asChild variant='outline'>
+                  <label htmlFor='image-upload' className='cursor-pointer'>
                     {isUploading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     ) : (
-                      <FileUp className="mr-2 h-4 w-4" />
+                      <FileUp className='mr-2 h-4 w-4' />
                     )}
                     {isUploading ? "Uploading..." : "Upload Image"}
                   </label>
                 </Button>
                 <input
-                  id="image-upload"
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.webp"
-                  className="hidden"
+                  id='image-upload'
+                  type='file'
+                  accept='.jpg,.jpeg,.png,.webp'
+                  className='hidden'
                   onChange={handleImageUpload}
                   disabled={isUploading}
                 />
                 {imageUrl && (
-                  <div className="flex items-center gap-2 text-sm text-green-400">
+                  <div className='flex items-center gap-2 text-sm text-green-400'>
                     <CheckCircle size={16} />
                     <span>Image Linked</span>
                   </div>
                 )}
               </div>
               {imageUrl && (
-                <div className="mt-4 space-y-2">
-                  <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-glass-border">
-                    <Image src={imageUrl} alt="Project preview" width={400} height={225} className="object-cover w-full h-full" />
+                <div className='mt-4 space-y-2'>
+                  <div className='aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-glass-border'>
+                    <Image
+                      src={imageUrl}
+                      alt='Project preview'
+                      width={400}
+                      height={225}
+                      className='object-cover w-full h-full'
+                    />
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="w-full max-w-sm"
+                        type='button'
+                        variant='destructive'
+                        size='sm'
+                        className='w-full max-w-sm'
                       >
-                        <Trash className="mr-2" size={16} /> Remove Image
+                        <Trash className='mr-2' size={16} /> Remove Image
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action will permanently delete this image from your storage.
+                          This action will permanently delete this image from
+                          your storage.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

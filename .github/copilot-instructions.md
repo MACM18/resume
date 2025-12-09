@@ -11,9 +11,10 @@ Use these project-specific conventions to be productive immediately. Keep change
 ## Data layer and external services
 
 - Supabase client: `lib/supabase.ts` (anon key, browser-safe). All client/server calls use this client; server helpers live in `lib/*.server.ts` (e.g., `lib/profile.server.ts`). No service-role usage in app code.
+- Supabase Admin client: `lib/supabase-admin.ts` (service role, server-only). Used by Next.js API routes for user management.
 - Storage buckets used: `profile-images`, `background-images`, `project-images`, `favicons`, `resumes`.
-- Core tables: `profiles` (domain, theme, avatar/background/favicon URLs, contact_numbers, active_resume_role, page data), `projects`, `resumes`, `uploaded_resumes`.
-- Edge Functions: Example invocation via `supabase.functions.invoke("generate-features", { body: { long_description } })` in `components/admin/ProjectForm.tsx`.
+- Core tables: `profiles` (domain, theme, avatar/background/favicon URLs, contact_numbers, active_resume_role, page data), `projects`, `resumes`, `uploaded_resumes`, `work_experiences`.
+- API Routes: Backend logic lives in `app/api/*` instead of Supabase Edge Functions. AI features use Groq (`lib/groq.ts`), email uses Resend.
 
 ## State, fetching, and mutations
 

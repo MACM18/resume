@@ -85,7 +85,7 @@ interface ResumeFormProps {
 
 export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   const queryClient = useQueryClient();
-  const { session, supabase } = useSupabase();
+  const { session } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -149,28 +149,31 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
         );
       }
       const currentResumeData = form.getValues(); // Get current form values for resume
-      const { data, error } = await supabase.functions.invoke(
-        "generate-resume-summary",
-        {
-          body: {
-            resume: {
-              ...currentResumeData,
-              skills: currentResumeData.skills.split(",").map((s) => s.trim()),
-              experience: currentResumeData.experience.map((exp) => ({
-                ...exp,
-                description: exp.description.split("\n"),
-              })),
-            },
-            profile: {
-              full_name: profile.full_name,
-              tagline: profile.tagline,
-              about_page_data: profile.about_page_data,
-            },
-            projects: projects,
+      const res = await fetch("/api/generate-resume-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resume: {
+            ...currentResumeData,
+            skills: currentResumeData.skills.split(",").map((s) => s.trim()),
+            experience: currentResumeData.experience.map((exp) => ({
+              ...exp,
+              description: exp.description.split("\n"),
+            })),
           },
-        }
-      );
-      if (error) throw error;
+          profile: {
+            full_name: profile.full_name,
+            tagline: profile.tagline,
+            about_page_data: profile.about_page_data,
+          },
+          projects: projects,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to generate summary");
+      }
+      const data = await res.json();
       return data.summary as string;
     },
     onSuccess: (generatedSummary) => {
