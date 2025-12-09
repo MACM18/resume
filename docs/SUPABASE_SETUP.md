@@ -39,11 +39,11 @@ Create these tables. Use UUIDs for `id` and `user_id` where applicable.
 
 ### 1. `profiles`
 
-Represents a public profile per domain.
+Represents a public profile per domain. Each authenticated user has exactly one profile.
 
-- `id` uuid primary key (same as auth `user.id` for owners)
-- `user_id` uuid (owner)
-- `domain` text unique
+- `id` uuid primary key (auto-generated)
+- `user_id` uuid unique not null (references auth.users.id - the owner)
+- `domain` text unique (nullable until claimed)
 - `full_name` text
 - `tagline` text
 - `theme` jsonb (stores CSS variables/colors)
@@ -63,6 +63,7 @@ RLS:
 - Enable RLS.
 - Policy: owners (`auth.uid() = user_id`) can `select`, `insert`, `update`, `delete`.
 - Policy: public can `select` WHERE `domain` IS NOT NULL (for public pages).
+- Unique index on `user_id` (one profile per user).
 - Unique index on `domain`.
 
 ### 2. `projects`
@@ -306,9 +307,11 @@ create extension if not exists "uuid-ossp";
 -- =====================================
 
 -- 1) profiles
+-- user_id is the auth user's id (foreign key to auth.users)
+-- id is auto-generated UUID
 create table if not exists public.profiles (
   id uuid primary key default uuid_generate_v4(),
-  user_id uuid not null,
+  user_id uuid unique not null,  -- One profile per auth user
   domain text unique,
   full_name text,
   tagline text,
@@ -399,6 +402,9 @@ create table if not exists public.work_experiences (
 create unique index if not exists uniq_current_work_per_user
   on public.work_experiences(user_id) where is_current;
 
+-- Unique index on profiles.user_id (one profile per auth user)
+create unique index if not exists idx_profiles_user_id on public.profiles(user_id);
+
 -- Optional performance indexes
 create index if not exists idx_projects_user_published on public.projects(user_id, published);
 create index if not exists idx_work_user_visible on public.work_experiences(user_id, visible);
@@ -413,9 +419,12 @@ alter table public.resumes enable row level security;
 alter table public.uploaded_resumes enable row level security;
 alter table public.work_experiences enable row level security;
 
--- Owner policies (CRUD) — adjust per table if needed
--- NOTE: PostgreSQL does not support "IF NOT EXISTS" for policies.
+-- Owner policies (CRUD)
+-- ALL tables now consistently use user_id = auth.uid()
+-- PostgreSQL does not support "IF NOT EXISTS" for policies.
 -- Use DROP IF EXISTS followed by CREATE to ensure idempotency.
+
+-- PROFILES: use user_id
 drop policy if exists "profiles_owner_read" on public.profiles;
 create policy "profiles_owner_read" on public.profiles
   for select using (auth.uid() = user_id);
@@ -423,6 +432,7 @@ drop policy if exists "profiles_owner_write" on public.profiles;
 create policy "profiles_owner_write" on public.profiles
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+-- PROJECTS: use user_id
 drop policy if exists "projects_owner_read" on public.projects;
 create policy "projects_owner_read" on public.projects
   for select using (auth.uid() = user_id);
@@ -430,6 +440,7 @@ drop policy if exists "projects_owner_write" on public.projects;
 create policy "projects_owner_write" on public.projects
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+-- RESUMES: use user_id
 drop policy if exists "resumes_owner_read" on public.resumes;
 create policy "resumes_owner_read" on public.resumes
   for select using (auth.uid() = user_id);
@@ -437,6 +448,7 @@ drop policy if exists "resumes_owner_write" on public.resumes;
 create policy "resumes_owner_write" on public.resumes
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+-- UPLOADED_RESUMES: use user_id
 drop policy if exists "uploaded_resumes_owner_read" on public.uploaded_resumes;
 create policy "uploaded_resumes_owner_read" on public.uploaded_resumes
   for select using (auth.uid() = user_id);
@@ -444,6 +456,7 @@ drop policy if exists "uploaded_resumes_owner_write" on public.uploaded_resumes;
 create policy "uploaded_resumes_owner_write" on public.uploaded_resumes
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+-- WORK_EXPERIENCES: use user_id
 drop policy if exists "work_owner_read" on public.work_experiences;
 create policy "work_owner_read" on public.work_experiences
   for select using (auth.uid() = user_id);

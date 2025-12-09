@@ -123,6 +123,7 @@ export type Theme = Record<string, string>;
 
 export interface Profile {
   id: string;
+  user_id: string; // Auth user id - used for RLS policies
   full_name: string;
   avatar_url: string | null;
   tagline: string;

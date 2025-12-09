@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { ensureUserProfile } from "@/lib/profile";
 
 type SupabaseContextType = {
   supabase: SupabaseClient;
@@ -23,6 +24,12 @@ export default function AuthProvider({
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
+      
+      // Ensure profile exists for authenticated users
+      if (session) {
+        await ensureUserProfile();
+      }
+      
       setLoading(false);
     };
 
@@ -30,8 +37,13 @@ export default function AuthProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
+      
+      // Ensure profile exists when user logs in
+      if (session && (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED')) {
+        await ensureUserProfile();
+      }
     });
 
     return () => subscription.unsubscribe();

@@ -80,10 +80,11 @@ const SignupPage = () => {
       }
 
       if (data.user) {
-        // Create profile record for the new user
+        // Profile will be auto-created by AuthProvider when user logs in
+        // We can optionally create it here too for immediate access
         const { error: profileError } = await supabase.from("profiles").insert([
           {
-            id: data.user.id,
+            user_id: data.user.id, // Use user_id, not id
             full_name: formData.fullName,
             tagline: "Welcome to my portfolio",
             home_page_data: {
@@ -123,7 +124,7 @@ const SignupPage = () => {
 
         if (profileError) {
           console.error("Error creating profile:", profileError);
-          // Don't fail signup if profile creation fails - they can create it later
+          // Don't fail signup - AuthProvider will create profile on login
         }
 
         toast.success(

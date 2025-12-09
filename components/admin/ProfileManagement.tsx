@@ -30,7 +30,7 @@ export function ProfileManagement() {
       const { data } = await supabase
         .from("profiles")
         .select("domain")
-        .eq("id", session.user.id)
+        .eq("user_id", session.user.id)
         .single();
       return data;
     },
@@ -46,7 +46,7 @@ export function ProfileManagement() {
         .from("profiles")
         .select("id")
         .eq("domain", domain)
-        .not("id", "eq", session.user.id);
+        .not("user_id", "eq", session.user.id);
 
       if (checkError) {
         throw checkError;
@@ -60,7 +60,7 @@ export function ProfileManagement() {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ domain })
-        .eq("id", session.user.id);
+        .eq("user_id", session.user.id);
 
       if (updateError) {
         throw updateError;

@@ -51,7 +51,7 @@ export function ClaimDomainForm() {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ domain: data.domain })
-        .eq("id", session.user.id);
+        .eq("user_id", session.user.id);
 
       if (updateError) throw updateError;
     },

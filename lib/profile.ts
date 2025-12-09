@@ -9,8 +9,8 @@ interface ProfileData {
   home_page_data: HomePageData;
   about_page_data: AboutPageData;
   avatar_url: string | null;
-  background_image_url: string | null; // Include background image URL
-  favicon_url?: string | null; // Optional favicon URL
+  background_image_url: string | null;
+  favicon_url?: string | null;
   contact_numbers?: {
     id: string;
     number: string;
@@ -20,6 +20,99 @@ interface ProfileData {
   }[];
 }
 
+/**
+ * Default profile data for new users
+ */
+function getDefaultProfileData(email: string, fullName: string = "New User") {
+  return {
+    full_name: fullName,
+    tagline: "Welcome to my portfolio",
+    home_page_data: {
+      name: fullName,
+      tagline: "Welcome to my portfolio",
+      socialLinks: [],
+      experienceHighlights: [],
+      technicalExpertise: [],
+      achievements: [],
+      callToAction: {
+        title: "Let's Connect",
+        description: "I'm always open to discussing new opportunities.",
+        email: email,
+      },
+    },
+    about_page_data: {
+      title: "About Me",
+      subtitle: "My Journey",
+      story: ["Tell your story here..."],
+      skills: [],
+      callToAction: {
+        title: "Get in Touch",
+        description: "Let's work together!",
+        email: email,
+      },
+    },
+    theme: {
+      primary: "221 83% 53%",
+      "primary-glow": "221 83% 63%",
+      "primary-muted": "221 83% 23%",
+      "primary-foreground": "0 0% 100%",
+      accent: "280 80% 50%",
+      "accent-glow": "280 80% 60%",
+    },
+  };
+}
+
+/**
+ * Ensures authenticated user has a profile record.
+ * Creates one if it doesn't exist.
+ * Call this after login/signup or in AuthProvider.
+ */
+export async function ensureUserProfile(): Promise<Profile | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return null;
+
+  const userId = session.user.id;
+  const email = session.user.email || "";
+  const fullName = session.user.user_metadata?.full_name || "New User";
+
+  // Check if profile exists
+  const { data: existingProfile, error: fetchError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  // Profile exists, return it
+  if (existingProfile) {
+    return existingProfile;
+  }
+
+  // PGRST116 means no rows found - this is expected for new users
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error("Error checking for existing profile:", fetchError);
+    return null;
+  }
+
+  // Create new profile
+  const defaultData = getDefaultProfileData(email, fullName);
+  const { data: newProfile, error: insertError } = await supabase
+    .from('profiles')
+    .insert([{
+      user_id: userId,
+      ...defaultData,
+    }])
+    .select()
+    .single();
+
+  if (insertError) {
+    console.error("Error creating profile:", insertError);
+    return null;
+  }
+
+  console.log("Created new profile for user:", userId);
+  return newProfile;
+}
+
 export async function getProfileData(domain: string): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from('profiles')
@@ -27,7 +120,7 @@ export async function getProfileData(domain: string): Promise<ProfileData | null
     .eq('domain', domain)
     .single();
 
-  if (error) { // Log all errors, not just non-PGRST116
+  if (error) {
     console.error('Error fetching profile data for domain:', domain, 'Error details:', error);
     return null;
   }
@@ -42,10 +135,14 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', session.user.id)
+    .eq('user_id', session.user.id)
     .single();
   
   if (error) {
+    // If no profile found, try to create one
+    if (error.code === 'PGRST116') {
+      return ensureUserProfile();
+    }
     console.error("Error fetching current user profile:", error);
     return null;
   }
@@ -56,10 +153,14 @@ export async function updateCurrentUserProfile(profileData: Partial<Profile>) {
     const { data: { session } = { session: null } } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
 
+    // Remove id and user_id from update payload (they shouldn't be changed)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _id, user_id: _userId, ...updateData } = profileData;
+
     const { data, error } = await supabase
         .from('profiles')
-        .update(profileData)
-        .eq('id', session.user.id)
+        .update(updateData)
+        .eq('user_id', session.user.id)
         .select()
         .single();
 
