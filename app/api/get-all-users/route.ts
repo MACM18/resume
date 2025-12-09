@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
+// Prevent static generation - this route needs runtime env vars
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // Get all users from auth

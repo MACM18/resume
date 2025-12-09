@@ -44,15 +44,17 @@ Represents a public profile per domain.
 - `id` uuid primary key (same as auth `user.id` for owners)
 - `user_id` uuid (owner)
 - `domain` text unique
+- `full_name` text
+- `tagline` text
 - `theme` jsonb (stores CSS variables/colors)
 - `avatar_url` text
 - `background_image_url` text
 - `favicon_url` text
-- `contact_numbers` jsonb[] or text[] (per your migration)
+- `contact_numbers` jsonb (array of contact number objects)
 - `active_resume_role` text
-- `home_page_data` jsonb (title, highlights)
-- `about_page_data` jsonb (bio, icon)
-- `social_links` jsonb[] (label, url)
+- `home_page_data` jsonb (socialLinks, experienceHighlights, etc.)
+- `about_page_data` jsonb (story, skills, callToAction)
+- `social_links` jsonb
 - `created_at` timestamptz default now()
 - `updated_at` timestamptz default now()
 
@@ -70,10 +72,14 @@ Portfolio projects.
 - `id` uuid primary key
 - `user_id` uuid
 - `domain` text (to scope public view)
-- `title` text
-- `short_description` text
+- `title` text not null
+- `description` text (short description)
 - `long_description` text
-- `image_url` text
+- `image` text (URL)
+- `tech` jsonb (array of tech strings)
+- `demo_url` text
+- `github_url` text
+- `key_features` jsonb (array of feature strings)
 - `published` boolean default false
 - `featured` boolean default false
 - `created_at` timestamptz default now()
@@ -92,9 +98,17 @@ Logical resumes (metadata) that point to uploaded PDFs.
 - `id` uuid primary key
 - `user_id` uuid
 - `domain` text
-- `role_title` text
+- `role` text not null (role identifier)
+- `title` text (display title)
 - `summary` text
-- `skills` jsonb[]
+- `skills` jsonb (array of skill strings)
+- `experience` jsonb (array of experience objects: company, position, duration, description)
+- `education` jsonb (array of education objects: degree, school, year)
+- `certifications` jsonb (array of cert objects: name, issuer, date, url)
+- `project_ids` jsonb (array of project UUIDs)
+- `resume_url` text
+- `pdf_source` text default 'uploaded' ('uploaded' | 'generated')
+- `location` text
 - `uploaded_resume_id` uuid nullable (FK to `uploaded_resumes.id`)
 - `created_at` timestamptz default now()
 - `updated_at` timestamptz default now()
@@ -111,8 +125,9 @@ Uploaded PDF files metadata.
 
 - `id` uuid primary key
 - `user_id` uuid
-- `file_url` text (public or signed URL target)
-- `file_name` text
+- `file_path` text not null (storage path)
+- `public_url` text (public or signed URL)
+- `original_filename` text not null
 - `file_size` int
 - `created_at` timestamptz default now()
 
@@ -124,26 +139,26 @@ RLS:
 
 ### 5. `work_experiences`
 
-Work history entries with month precision.
+Work history entries.
 
 - `id` uuid primary key
 - `user_id` uuid
 - `domain` text
-- `company` text
-- `title` text
+- `company` text not null
+- `position` text not null
 - `location` text
-- `start_month` date (use first of month)
-- `end_month` date nullable
+- `start_date` date not null
+- `end_date` date nullable (null when current)
 - `is_current` boolean default false
 - `visible` boolean default true
-- `highlights` text[] or jsonb[]
+- `description` jsonb (array of bullet point strings)
 - `created_at` timestamptz default now()
 - `updated_at` timestamptz default now()
 
 Indexes & Constraints:
 
-- Partial unique index to ensure only one `is_current = true` per `domain`:
-  - `create unique index uniq_current_work_per_domain on work_experiences(domain) where is_current;`
+- Partial unique index to ensure only one `is_current = true` per `user_id`:
+  - `create unique index uniq_current_work_per_user on work_experiences(user_id) where is_current;`
 
 RLS:
 
@@ -171,6 +186,35 @@ Instead of Supabase Edge Functions, this project uses **Next.js API routes** und
 - `POST /api/generate-resume-summary` — Generate a professional summary for resumes.
 
 These routes use the [Groq SDK](https://console.groq.com/) with the `llama-3.3-70b-versatile` model. Set `GROQ_API_KEY` in your environment.
+
+### PDF Generation
+
+- `POST /api/generate-resume-pdf` — Generate a professionally styled PDF from resume/profile data.
+
+Uses [@react-pdf/renderer](https://react-pdf.org/) to generate A4-sized PDFs with:
+
+- Header with name, title, contact info
+- Professional summary section
+- Work experience (from work_experiences table or inline resume data)
+- Skills, education, certifications
+
+Request body:
+
+```json
+{
+  "resume": {
+    /* Resume object */
+  },
+  "profile": {
+    /* Profile object */
+  },
+  "workExperiences": [
+    /* Optional WorkExperience[] */
+  ]
+}
+```
+
+Returns: PDF binary with `Content-Type: application/pdf`
 
 ### Email (via Resend)
 
@@ -243,8 +287,8 @@ supabase storage create-bucket project-images --public
 supabase storage create-bucket favicons --public
 supabase storage create-bucket resumes --public
 
-# Index for current work
-psql "$SUPABASE_DB_URL" -c "create unique index if not exists uniq_current_work_per_domain on work_experiences(domain) where is_current;"
+# Index for current work (per user)
+psql "$SUPABASE_DB_URL" -c "create unique index if not exists uniq_current_work_per_user on work_experiences(user_id) where is_current;"
 ```
 
 If you want, I can replace `lib/supabase.ts` with env-based config and add SQL files to generate the full schema and RLS in one go.
@@ -266,6 +310,8 @@ create table if not exists public.profiles (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null,
   domain text unique,
+  full_name text,
+  tagline text,
   theme jsonb,
   avatar_url text,
   background_image_url text,
@@ -285,9 +331,13 @@ create table if not exists public.projects (
   user_id uuid not null,
   domain text,
   title text not null,
-  short_description text,
+  description text,
   long_description text,
-  image_url text,
+  image text,
+  tech jsonb,
+  demo_url text,
+  github_url text,
+  key_features jsonb,
   published boolean not null default false,
   featured boolean not null default false,
   created_at timestamptz not null default now(),
@@ -298,8 +348,9 @@ create table if not exists public.projects (
 create table if not exists public.uploaded_resumes (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null,
-  file_url text not null,
-  file_name text not null,
+  file_path text not null,
+  public_url text,
+  original_filename text not null,
   file_size int,
   created_at timestamptz not null default now()
 );
@@ -309,9 +360,17 @@ create table if not exists public.resumes (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null,
   domain text,
-  role_title text,
+  role text not null,
+  title text,
   summary text,
   skills jsonb,
+  experience jsonb,
+  education jsonb,
+  certifications jsonb,
+  project_ids jsonb,
+  resume_url text,
+  pdf_source text default 'uploaded',
+  location text,
   uploaded_resume_id uuid references public.uploaded_resumes(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -323,13 +382,13 @@ create table if not exists public.work_experiences (
   user_id uuid not null,
   domain text,
   company text not null,
-  title text not null,
+  position text not null,
   location text,
-  start_month date not null,
-  end_month date,
+  start_date date not null,
+  end_date date,
   is_current boolean not null default false,
   visible boolean not null default true,
-  highlights jsonb,
+  description jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -337,13 +396,13 @@ create table if not exists public.work_experiences (
 -- =====================================
 -- Indexes & Constraints
 -- =====================================
-create unique index if not exists uniq_current_work_per_domain
-  on public.work_experiences(domain) where is_current;
+create unique index if not exists uniq_current_work_per_user
+  on public.work_experiences(user_id) where is_current;
 
 -- Optional performance indexes
-create index if not exists idx_projects_domain_published on public.projects(domain, published);
-create index if not exists idx_work_domain_visible on public.work_experiences(domain, visible);
-create index if not exists idx_resumes_domain on public.resumes(domain);
+create index if not exists idx_projects_user_published on public.projects(user_id, published);
+create index if not exists idx_work_user_visible on public.work_experiences(user_id, visible);
+create index if not exists idx_resumes_user on public.resumes(user_id);
 
 -- =====================================
 -- Row Level Security (RLS)
