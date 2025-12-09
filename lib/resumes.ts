@@ -89,6 +89,13 @@ export async function deleteUploadedResume(id: string): Promise<boolean> {
 // ========== EXISTING FUNCTIONS (updated) ==========
 
 export async function uploadResumePdf(file: File, userId: string, role: string): Promise<UploadedResume | null> {
+  // Verify user is authenticated before uploading
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    console.error('User must be logged in to upload a resume.');
+    return null;
+  }
+
   // ensure filename is safe
   const safeRole = role ? role.replace(/[^a-zA-Z0-9-_]/g, '-') : 'resume';
   const filePath = `${userId}/${safeRole}-${Date.now()}.pdf`;

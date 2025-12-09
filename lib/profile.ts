@@ -177,6 +177,12 @@ export async function updateCurrentUserProfile(profileData: Partial<Profile>) {
 }
 
 export async function uploadProfileImage(file: File, userId: string): Promise<string> {
+  // Verify user is authenticated before uploading
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('You must be logged in to upload an image.');
+  }
+
   const fileExt = file.name.split('.').pop();
   const filePath = `${userId}/${Date.now()}.${fileExt}`; // Store in user-specific folder
 
@@ -229,6 +235,12 @@ export async function deleteProfileImage(userId: string, imageUrl: string): Prom
 }
 
 export async function uploadBackgroundImage(file: File, userId: string): Promise<string> {
+  // Verify user is authenticated before uploading
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('You must be logged in to upload an image.');
+  }
+
   const fileExt = file.name.split('.').pop();
   const filePath = `${userId}/background-${Date.now()}.${fileExt}`; // Store in user-specific folder
 
@@ -265,6 +277,12 @@ export async function deleteBackgroundImage(userId: string, imageUrl: string): P
 }
 
 export async function uploadFavicon(file: File, userId: string): Promise<string> {
+  // Verify user is authenticated before uploading
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('You must be logged in to upload a favicon.');
+  }
+
   const fileExt = file.name.split('.').pop();
   // Preserve .ico extension if provided
   const filePath = `${userId}/favicon-${Date.now()}.${fileExt}`;
