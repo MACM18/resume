@@ -31,9 +31,8 @@ export function ProfileManagement() {
       const { data } = await supabase
         .from("profiles")
         .select("domain")
-        .eq("user_id", session.user.id)
-        .single();
-      return data;
+        .eq("user_id", session.user.id);
+      return data && data.length > 0 ? data[0] : null;
     },
     enabled: !!session,
   });

@@ -46,12 +46,12 @@ export async function deleteProjectImage(userId: string, imageUrl: string): Prom
 
 async function getUserIdByDomain(domain: string): Promise<string | null> {
   const normalizedDomain = normalizeDomain(domain);
-  const { data, error } = await supabase.from('profiles').select('user_id').eq('domain', normalizedDomain).single();
-  if (error || !data) {
+  const { data, error } = await supabase.from('profiles').select('user_id').eq('domain', normalizedDomain);
+  if (error || !data || data.length === 0) {
     console.error('Error fetching user by domain:', error?.message);
     return null;
   }
-  return data.user_id;
+  return (data[0] as { user_id: string }).user_id;
 }
 
 export async function getProjects(domain: string): Promise<Project[]> {
@@ -88,12 +88,12 @@ export async function getProjectById(id: string, domain: string): Promise<Projec
     const userId = await getUserIdByDomain(domain);
     if (!userId) return null;
 
-    const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('user_id', userId).eq('published', true).single();
+    const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('user_id', userId).eq('published', true);
     if (error) {
         console.error('Error fetching project by id:', error);
         return null;
     }
-    return data;
+    return (data && data.length > 0 ? (data[0] as Project) : null);
 }
 
 export async function getFeaturedProjects(domain: string): Promise<Project[]> {
@@ -124,13 +124,13 @@ export async function addProject(project: Omit<Project, 'id' | 'created_at' | 'u
     .from('projects')
     .insert([projectData])
     .select()
-    .single();
+    ;
 
   if (error) {
     console.error('Error adding project:', error);
     throw error; // Throw the error to trigger onError in useMutation
   }
-  return data;
+  return (data && data.length > 0 ? (data[0] as Project) : null);
 }
 
 export async function updateProject(id: string, project: Partial<Project>): Promise<Project | null> {
@@ -139,13 +139,13 @@ export async function updateProject(id: string, project: Partial<Project>): Prom
     .update(project)
     .eq('id', id)
     .select()
-    .single();
+    ;
 
   if (error) {
     console.error('Error updating project:', error);
     throw error; // Throw the error to trigger onError in useMutation
   }
-  return data;
+  return (data && data.length > 0 ? (data[0] as Project) : null);
 }
 
 export async function deleteProject(id: string): Promise<boolean> {

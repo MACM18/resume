@@ -22,13 +22,13 @@ export async function createUploadedResume(
       file_size: file.size
     }])
     .select()
-    .single();
+    ;
 
   if (error) {
     console.error('Error creating uploaded resume record:', error);
     return null;
   }
-  return data;
+  return (data && data.length > 0 ? (data[0] as UploadedResume) : null);
 }
 
 export async function getUploadedResumesForCurrentUser(): Promise<UploadedResume[]> {
@@ -50,11 +50,11 @@ export async function getUploadedResumesForCurrentUser(): Promise<UploadedResume
 
 export async function deleteUploadedResume(id: string): Promise<boolean> {
   // First get the file_path to delete from storage
-  const { data: uploadedResume, error: fetchError } = await supabase
+  const { data: uploadedResumes, error: fetchError } = await supabase
     .from('uploaded_resumes')
     .select('file_path')
     .eq('id', id)
-    .single();
+    ;
 
   if (fetchError) {
     console.error('Error fetching uploaded resume for deletion:', fetchError);
@@ -62,10 +62,11 @@ export async function deleteUploadedResume(id: string): Promise<boolean> {
   }
 
   // Delete from storage
-  if (uploadedResume?.file_path) {
+  const filePathToDelete = uploadedResumes && uploadedResumes.length > 0 ? (uploadedResumes[0] as { file_path: string }).file_path : null;
+  if (filePathToDelete) {
     const { error: storageError } = await supabase.storage
       .from('resumes')
-      .remove([uploadedResume.file_path]);
+      .remove([filePathToDelete]);
     
     if (storageError) {
       console.error('Error deleting file from storage:', storageError);
@@ -137,30 +138,30 @@ export async function getResumePublicUrl(filePath: string): Promise<string | nul
 
 export async function getActiveResume(domain: string): Promise<Resume | null> {
   const normalizedDomain = normalizeDomain(domain);
-  const { data: profile, error: profileError } = await supabase
+  const { data: profiles, error: profileError } = await supabase
     .from('profiles')
     .select('user_id, active_resume_role')
     .eq('domain', normalizedDomain)
-    .single();
-
+    ;
+  const profile = profiles && profiles.length > 0 ? (profiles[0] as { user_id: string; active_resume_role: string | null }) : null;
   if (profileError || !profile || !profile.active_resume_role) {
     console.error('Error fetching profile or no active resume set:', profileError?.message);
     return null;
   }
 
-  const { data: resume, error: resumeError } = await supabase
+  const { data: resumes, error: resumeError } = await supabase
     .from('resumes')
     .select('*')
     .eq('user_id', profile.user_id)
     .eq('role', profile.active_resume_role)
-    .single();
+    ;
 
   if (resumeError) {
     console.error('Error fetching active resume:', resumeError.message);
     return null;
   }
 
-  return resume;
+  return (resumes && resumes.length > 0 ? (resumes[0] as Resume) : null);
 }
 
 
@@ -180,21 +181,21 @@ export async function addResume(resume: Omit<Resume, 'id' | 'user_id' | 'created
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const { data, error } = await supabase.from('resumes').insert([{ ...resume, user_id: session.user.id }]).select().single();
+  const { data, error } = await supabase.from('resumes').insert([{ ...resume, user_id: session.user.id }]).select();
   if (error) {
     console.error("Error adding resume:", error);
     return null;
   }
-  return data;
+  return (data && data.length > 0 ? (data[0] as Resume) : null);
 }
 
 export async function updateResume(id: string, resume: Partial<Resume>): Promise<Resume | null> {
-  const { data, error } = await supabase.from('resumes').update(resume).eq('id', id).select().single();
+  const { data, error } = await supabase.from('resumes').update(resume).eq('id', id).select();
   if (error) {
     console.error("Error updating resume:", error);
     return null;
   }
-  return data;
+  return (data && data.length > 0 ? (data[0] as Resume) : null);
 }
 
 export async function deleteResume(id: string): Promise<boolean> {

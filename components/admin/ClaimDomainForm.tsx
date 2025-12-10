@@ -46,11 +46,11 @@ export function ClaimDomainForm() {
       const { data: existing, error: checkError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("domain", normalizedDomain)
-        .single();
+        .eq("domain", normalizedDomain);
 
-      if (checkError && checkError.code !== "PGRST116") throw checkError;
-      if (existing) throw new Error("This domain is already taken.");
+      if (checkError) throw checkError;
+      if (existing && existing.length > 0)
+        throw new Error("This domain is already taken.");
 
       const { error: updateError } = await supabase
         .from("profiles")

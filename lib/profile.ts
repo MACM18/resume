@@ -119,18 +119,16 @@ export async function getProfileData(domain: string): Promise<ProfileData | null
   const { data, error } = await supabase
     .from('profiles')
     .select('full_name, tagline, home_page_data, about_page_data, avatar_url, background_image_url, contact_numbers')
-    .eq('domain', normalizedDomain)
-    .single();
+    .eq('domain', normalizedDomain);
 
   if (error) {
-    // PGRST116 means no rows found - this is expected for unclaimed domains
-    if (error.code !== 'PGRST116') {
-      console.error('Error fetching profile data for domain:', normalizedDomain, error);
-    }
+    console.error('Error fetching profile data for domain:', normalizedDomain, error);
     return null;
   }
-  
-  return data;
+  if (!data || data.length === 0) {
+    return null;
+  }
+  return data[0] as ProfileData;
 }
 
 export async function getCurrentUserProfile(): Promise<Profile | null> {
