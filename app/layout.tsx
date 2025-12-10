@@ -11,14 +11,16 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
 import { getProfileDataServer } from "@/lib/profile.server";
+import { getEffectiveDomain } from "@/lib/utils";
 import { generateHomeMetadata } from "@/lib/seo";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
-  const profileData = host ? await getProfileDataServer(host) : null;
-  return generateHomeMetadata(profileData, host);
+  const domain = getEffectiveDomain(host);
+  const profileData = domain ? await getProfileDataServer(domain) : null;
+  return generateHomeMetadata(profileData, domain || "");
 }
 
 export default async function RootLayout({
@@ -29,7 +31,8 @@ export default async function RootLayout({
   // Server-side: determine hostname and fetch profile data to get favicon_url
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
-  const profileData = host ? await getProfileDataServer(host) : null;
+  const domain = getEffectiveDomain(host);
+  const profileData = domain ? await getProfileDataServer(domain) : null;
   const faviconUrl = profileData?.favicon_url ?? null;
 
   return (
