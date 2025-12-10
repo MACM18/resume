@@ -13,7 +13,7 @@ import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { getProjects } from "@/lib/projects"; // Import getProjects
 import { getCurrentWork } from "@/lib/work-experiences";
 import Image from "next/image";
-import { formatDateRange } from "@/lib/utils";
+import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
 import { generateStructuredData } from "@/lib/seo";
 import { HomePageData } from "@/types/portfolio";
 
@@ -45,21 +45,33 @@ export default function Page() {
 
   const { data: profileData, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profileData", hostname],
-    queryFn: () => getProfileData(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve(null);
+      return getProfileData(domain);
+    },
     enabled: !!hostname,
   });
 
   const { data: allPublishedProjects, isLoading: isLoadingProjects } = useQuery(
     {
       queryKey: ["projects", hostname],
-      queryFn: () => getProjects(hostname), // This fetches all published projects
+      queryFn: () => {
+        const domain = getEffectiveDomain(hostname);
+        if (!domain) return Promise.resolve([]);
+        return getProjects(domain);
+      }, // This fetches all published projects
       enabled: !!hostname && !!profileData,
     }
   );
 
   const { data: currentWork } = useQuery({
     queryKey: ["current-work", hostname],
-    queryFn: () => getCurrentWork(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve(undefined);
+      return getCurrentWork(domain);
+    },
     enabled: !!hostname && !!profileData,
   });
 

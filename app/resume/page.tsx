@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
-import { formatDateRange } from "@/lib/utils";
+import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
 
 const ResumePageSkeleton = () => (
   <div className='min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto'>
@@ -53,25 +53,41 @@ const Resume = () => {
 
   const { data: profileData, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profileData", hostname],
-    queryFn: () => getProfileData(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve(null);
+      return getProfileData(domain);
+    },
     enabled: !!hostname,
   });
 
   const { data: resume, isLoading: isLoadingResume } = useQuery({
     queryKey: ["activeResume", hostname],
-    queryFn: () => getActiveResume(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve(null);
+      return getActiveResume(domain);
+    },
     enabled: !!hostname && !!profileData,
   });
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
     queryKey: ["projects", hostname],
-    queryFn: () => getProjects(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve([] as Project[]);
+      return getProjects(domain);
+    },
     enabled: !!hostname && !!profileData,
   });
 
   const { data: workHistory = [], isLoading: isLoadingWork } = useQuery({
     queryKey: ["work-experiences", hostname],
-    queryFn: () => getVisibleWorkExperiences(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve([]);
+      return getVisibleWorkExperiences(domain);
+    },
     enabled: !!hostname && !!profileData,
   });
 

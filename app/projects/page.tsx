@@ -10,6 +10,7 @@ import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { getEffectiveDomain } from "@/lib/utils";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 
 const Projects = () => {
@@ -21,13 +22,21 @@ const Projects = () => {
 
   const { data: profileData, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profileData", hostname],
-    queryFn: () => getProfileData(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve(null);
+      return getProfileData(domain);
+    },
     enabled: !!hostname,
   });
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects", hostname],
-    queryFn: () => getProjects(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve([]);
+      return getProjects(domain);
+    },
     enabled: !!hostname && !!profileData,
   });
 

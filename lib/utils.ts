@@ -57,3 +57,17 @@ export function normalizeDomain(domain: string): string {
   
   return normalized;
 }
+
+/**
+ * Get the effective domain used for data lookups.
+ * - Normalizes hostname
+ * - If hostname resolves to 'localhost', use a fallback domain from env
+ *   (NEXT_PUBLIC_FALLBACK_DOMAIN) when available.
+ */
+export function getEffectiveDomain(hostname?: string): string | null {
+  const normalized = normalizeDomain(hostname || "");
+  if (!normalized || normalized === 'localhost') {
+    return null;
+  }
+  return normalized;
+}

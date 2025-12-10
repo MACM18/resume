@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import Image from "next/image";
+import { getEffectiveDomain } from "@/lib/utils";
 
 const iconMap = {
   Code,
@@ -42,7 +43,11 @@ const About = () => {
 
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["profileData", hostname],
-    queryFn: () => getProfileData(hostname),
+    queryFn: () => {
+      const domain = getEffectiveDomain(hostname);
+      if (!domain) return Promise.resolve(null);
+      return getProfileData(domain);
+    },
     enabled: !!hostname,
   });
 
