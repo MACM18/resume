@@ -18,7 +18,6 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getSession = async () => {
@@ -31,8 +30,6 @@ export default function AuthProvider({
       if (session) {
         await ensureUserProfile();
       }
-
-      setLoading(false);
     };
 
     getSession();
@@ -53,7 +50,7 @@ export default function AuthProvider({
 
   return (
     <SupabaseContext.Provider value={{ supabase, session }}>
-      {!loading ? children : null}
+      {children}
     </SupabaseContext.Provider>
   );
 }
