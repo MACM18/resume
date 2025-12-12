@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { motion } from "framer-motion";
@@ -11,11 +11,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 
 const SignupPage = () => {
-  const { session } = useSupabase();
+  const { session, status } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,10 +26,10 @@ const SignupPage = () => {
   });
 
   useEffect(() => {
-    if (session) {
+    if (status === "authenticated" && session) {
       router.push("/");
     }
-  }, [session, router]);
+  }, [session, status, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -62,83 +62,60 @@ const SignupPage = () => {
     }
 
     try {
-      // Sign up the user
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          },
+      // Create the user via API
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+        }),
       });
 
-      if (error) {
-        toast.error(error.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || "Failed to create account");
         setIsLoading(false);
         return;
       }
 
-      if (data.user) {
-        // Profile will be auto-created by AuthProvider when user logs in
-        // We can optionally create it here too for immediate access
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            user_id: data.user.id, // Use user_id, not id
-            full_name: formData.fullName,
-            tagline: "Welcome to my portfolio",
-            home_page_data: {
-              name: formData.fullName,
-              tagline: "Welcome to my portfolio",
-              socialLinks: [],
-              experienceHighlights: [],
-              technicalExpertise: [],
-              achievements: [],
-              callToAction: {
-                title: "Let's Connect",
-                description: "I'm always open to discussing new opportunities.",
-                email: formData.email,
-              },
-            },
-            about_page_data: {
-              title: "About Me",
-              subtitle: "My Journey",
-              story: ["Tell your story here..."],
-              skills: [],
-              callToAction: {
-                title: "Get in Touch",
-                description: "Let's work together!",
-                email: formData.email,
-              },
-            },
-            theme: {
-              primary: "221 83% 53%",
-              "primary-glow": "221 83% 63%",
-              "primary-muted": "221 83% 23%",
-              "primary-foreground": "0 0% 100%",
-              accent: "280 80% 50%",
-              "accent-glow": "280 80% 60%",
-            },
-          },
-        ]);
+      toast.success("Account created! Signing you in...");
 
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-          // Don't fail signup - AuthProvider will create profile on login
-        }
+      // Auto sign in after signup
+      const signInResult = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
 
-        toast.success(
-          "Account created! Please check your email to confirm your account."
+      if (signInResult?.error) {
+        toast.error(
+          "Account created but failed to sign in. Please log in manually."
         );
         router.push("/login");
+      } else {
+        router.push("/admin");
+        router.refresh();
       }
     } catch (error) {
       console.error("Signup error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (status === "loading") {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <Loader2 className='h-8 w-8 animate-spin text-primary' />
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen flex items-center justify-center pt-24 pb-32 px-6'>
@@ -149,13 +126,9 @@ const SignupPage = () => {
         className='w-full max-w-md'
       >
         <GlassCard className='p-8'>
-          <h2 className='text-3xl font-bold text-center mb-2 bg-gradient-primary bg-clip-text text-transparent'>
+          <h2 className='text-3xl font-bold text-center mb-6 bg-gradient-primary bg-clip-text text-transparent'>
             Create Account
           </h2>
-          <p className='text-center text-muted-foreground mb-6'>
-            Join us and build your portfolio
-          </p>
-
           <form onSubmit={handleSubmit} className='space-y-4'>
             <div className='space-y-2'>
               <Label htmlFor='fullName'>Full Name</Label>
@@ -167,10 +140,9 @@ const SignupPage = () => {
                 value={formData.fullName}
                 onChange={handleChange}
                 required
-                className='bg-background-secondary border-glass-border focus:border-primary'
+                disabled={isLoading}
               />
             </div>
-
             <div className='space-y-2'>
               <Label htmlFor='email'>Email</Label>
               <Input
@@ -181,10 +153,9 @@ const SignupPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className='bg-background-secondary border-glass-border focus:border-primary'
+                disabled={isLoading}
               />
             </div>
-
             <div className='space-y-2'>
               <Label htmlFor='password'>Password</Label>
               <Input
@@ -195,11 +166,9 @@ const SignupPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                minLength={6}
-                className='bg-background-secondary border-glass-border focus:border-primary'
+                disabled={isLoading}
               />
             </div>
-
             <div className='space-y-2'>
               <Label htmlFor='confirmPassword'>Confirm Password</Label>
               <Input
@@ -210,11 +179,9 @@ const SignupPage = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                minLength={6}
-                className='bg-background-secondary border-glass-border focus:border-primary'
+                disabled={isLoading}
               />
             </div>
-
             <Button type='submit' className='w-full' disabled={isLoading}>
               {isLoading ? (
                 <>
@@ -226,7 +193,6 @@ const SignupPage = () => {
               )}
             </Button>
           </form>
-
           <div className='mt-6 text-center'>
             <p className='text-muted-foreground'>
               Already have an account?{" "}

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSupabase } from "@/components/providers/AuthProvider";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Link as LinkIcon } from "lucide-react";
@@ -12,9 +11,10 @@ import { ProfileImageManager } from "./ProfileImageManager";
 import { BackgroundManager } from "./BackgroundManager"; // Import the new component
 import { FaviconManager } from "./FaviconManager";
 import { normalizeDomain } from "@/lib/utils";
+import { getCurrentUserProfile } from "@/lib/profile";
 
 export function ProfileManagement() {
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const queryClient = useQueryClient();
   const [hostname, setHostname] = useState("");
 
@@ -25,14 +25,11 @@ export function ProfileManagement() {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ["profile", session?.user.id],
+    queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
-      if (!session?.user.id) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("domain")
-        .eq("user_id", session.user.id);
-      return data && data.length > 0 ? data[0] : null;
+      if (!session?.user?.id) return null;
+      const profile = await getCurrentUserProfile();
+      return profile;
     },
     enabled: !!session,
   });
@@ -44,35 +41,33 @@ export function ProfileManagement() {
       // Normalize domain for consistent storage and lookup
       const normalizedDomain = normalizeDomain(domain);
 
-      // More robust check for existing domain
-      const { data: existingProfiles, error: checkError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("domain", normalizedDomain)
-        .not("user_id", "eq", session.user.id);
-
-      if (checkError) {
-        throw checkError;
+      // Check if domain is already taken via API
+      const checkResponse = await fetch(
+        `/api/profile/by-domain?domain=${encodeURIComponent(normalizedDomain)}`
+      );
+      if (checkResponse.ok) {
+        const existing = await checkResponse.json();
+        if (existing && existing.id && existing.user_id !== session.user?.id) {
+          throw new Error("This domain is already claimed by another user.");
+        }
       }
 
-      if (existingProfiles && existingProfiles.length > 0) {
-        throw new Error("This domain is already claimed by another user.");
-      }
+      // Update profile with new domain via API
+      const updateResponse = await fetch("/api/profile/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: normalizedDomain }),
+      });
 
-      // If not taken, proceed with the update
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ domain: normalizedDomain })
-        .eq("user_id", session.user.id);
-
-      if (updateError) {
-        throw updateError;
+      if (!updateResponse.ok) {
+        const error = await updateResponse.json();
+        throw new Error(error.error || "Failed to claim domain");
       }
     },
     onSuccess: () => {
       toast.success(`Domain ${hostname} claimed successfully!`);
       queryClient.invalidateQueries({
-        queryKey: ["profile", session?.user.id],
+        queryKey: ["profile", session?.user?.id],
       });
       queryClient.invalidateQueries({ queryKey: ["profileData", hostname] });
     },

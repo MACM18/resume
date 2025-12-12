@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { Theme } from "@/types/portfolio";
 import { getEffectiveDomain } from "@/lib/utils";
 
@@ -43,11 +42,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (!normalizedDomain) {
         return { theme: {}, background_image_url: null };
       }
-      const { data } = await supabase
-        .from("profiles")
-        .select("theme, background_image_url")
-        .eq("domain", normalizedDomain)
-        .single();
+
+      const response = await fetch(
+        `/api/profile/theme?domain=${encodeURIComponent(normalizedDomain)}`
+      );
+      if (!response.ok) {
+        return { theme: {}, background_image_url: null };
+      }
+
+      const data = await response.json();
       return {
         theme: data?.theme || {},
         background_image_url: data?.background_image_url || null,

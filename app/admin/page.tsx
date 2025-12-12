@@ -1,6 +1,6 @@
 "use client";
 
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
@@ -34,7 +34,7 @@ const ADMIN_ITEMS = [
 ] as const;
 
 export default function AdminPage() {
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

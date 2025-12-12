@@ -1,64 +1,53 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Session, SupabaseClient } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { SessionProvider, useSession } from "next-auth/react";
+import React, { createContext, useContext, useEffect } from "react";
+import { Session } from "next-auth";
 import { ensureUserProfile } from "@/lib/profile";
 
-type SupabaseContextType = {
-  supabase: SupabaseClient;
+type AuthContextType = {
   session: Session | null;
+  status: "loading" | "authenticated" | "unauthenticated";
 };
 
-const SupabaseContext = createContext<SupabaseContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
+
+function AuthContextProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    // Ensure profile exists for authenticated users
+    if (status === "authenticated" && session) {
+      ensureUserProfile();
+    }
+  }, [session, status]);
+
+  return (
+    <AuthContext.Provider value={{ session, status }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
 export default function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
-
-      // Ensure profile exists for authenticated users
-      if (session) {
-        await ensureUserProfile();
-      }
-    };
-
-    getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-
-      // Ensure profile exists when user logs in
-      if (session && (_event === "SIGNED_IN" || _event === "TOKEN_REFRESHED")) {
-        await ensureUserProfile();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   return (
-    <SupabaseContext.Provider value={{ supabase, session }}>
-      {children}
-    </SupabaseContext.Provider>
+    <SessionProvider>
+      <AuthContextProvider>{children}</AuthContextProvider>
+    </SessionProvider>
   );
 }
 
-export const useSupabase = () => {
-  const context = useContext(SupabaseContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   if (context === null) {
-    throw new Error("useSupabase must be used within an AuthProvider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
+
+// Backwards compatibility alias - will be removed in future
+export const useSupabase = useAuth;

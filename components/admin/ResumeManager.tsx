@@ -8,7 +8,7 @@ import {
   uploadResumePdf,
   deleteUploadedResume,
 } from "@/lib/resumes";
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Loader2, Trash } from "lucide-react";
 import {
   Dialog,
@@ -25,7 +25,7 @@ import { toast } from "@/components/ui/sonner";
 
 export function ResumeManager() {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState<{

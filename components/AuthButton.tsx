@@ -1,6 +1,7 @@
 "use client";
 
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { signOut } from "next-auth/react";
 import { Wrench, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getCurrentUserProfile } from "@/lib/profile";
 
 export const AuthButton = () => {
-  const { session, supabase } = useSupabase();
+  const { session } = useAuth();
   const router = useRouter();
 
   const { data: profile } = useQuery({
@@ -25,7 +26,7 @@ export const AuthButton = () => {
   });
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut({ redirect: false });
     router.refresh();
   };
 

@@ -1,15 +1,15 @@
 import type { NextConfig } from "next";
 
-// For self-hosted Supabase, extract hostname from env var
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-let supabaseHostname = "";
+// For S3-compatible storage (MinIO, AWS S3, etc.), extract hostname from env var
+const storageUrl = process.env.STORAGE_PUBLIC_URL || process.env.STORAGE_ENDPOINT || "";
+let storageHostname = "";
 try {
-  if (supabaseUrl) {
-    supabaseHostname = new URL(supabaseUrl).hostname;
+  if (storageUrl) {
+    storageHostname = new URL(storageUrl).hostname;
   }
 } catch {
   // Fallback if URL parsing fails
-  supabaseHostname = supabaseUrl.replace(/^https?:\/\//, "").split("/")[0];
+  storageHostname = storageUrl.replace(/^https?:\/\//, "").split("/")[0];
 }
 
 const nextConfig: NextConfig = {
@@ -21,23 +21,23 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "**",
       },
-      // Dynamic Supabase hostname from env (supports self-hosted)
-      ...(supabaseHostname
+      // Dynamic storage hostname from env (supports S3, MinIO, etc.)
+      ...(storageHostname
         ? [
             {
               protocol: "https" as const,
-              hostname: supabaseHostname,
+              hostname: storageHostname,
               port: "",
               pathname: "**",
             },
           ]
         : []),
       // Also support HTTP for local development
-      ...(supabaseHostname
+      ...(storageHostname
         ? [
             {
               protocol: "http" as const,
-              hostname: supabaseHostname,
+              hostname: storageHostname,
               port: "",
               pathname: "**",
             },
