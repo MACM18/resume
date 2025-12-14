@@ -18,9 +18,11 @@ import { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
+  const protocol = hdr.get("x-forwarded-proto") ?? "https";
+  const origin = `${protocol}://${host}`;
   const domain = getEffectiveDomain(host);
   const profileData = domain ? await getProfileDataServer(domain) : null;
-  return generateHomeMetadata(profileData, domain || "");
+  return generateHomeMetadata(profileData, domain || "", origin);
 }
 
 export default async function RootLayout({
