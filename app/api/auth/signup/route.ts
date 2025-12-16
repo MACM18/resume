@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import { getDefaultProfileData } from "@/lib/profile";
+import { getDefaultProfileData } from "@/lib/profile.server";
 
 export const dynamic = "force-dynamic";
 

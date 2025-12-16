@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { hashPassword } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getDefaultProfileData } from '@/lib/profile';
+import { getDefaultProfileData } from '@/lib/profile.server';
 
 export const dynamic = 'force-dynamic';
 

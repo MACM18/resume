@@ -121,3 +121,45 @@ export async function getThemeDataServer(domain?: string) {
     return null;
   }
 }
+
+/**
+ * Default profile data for new users (server-safe version)
+ */
+export function getDefaultProfileData(email: string, fullName: string = "New User") {
+  return {
+    fullName,
+    tagline: "Welcome to my portfolio",
+    homePageData: {
+      name: fullName,
+      tagline: "Welcome to my portfolio",
+      socialLinks: [],
+      experienceHighlights: [],
+      technicalExpertise: [],
+      achievements: [],
+      callToAction: {
+        title: "Let's Connect",
+        description: "I'm always open to discussing new opportunities.",
+        email: email,
+      },
+    } as HomePageData,
+    aboutPageData: {
+      title: "About Me",
+      subtitle: "My Journey",
+      story: ["Tell your story here..."],
+      skills: [],
+      callToAction: {
+        title: "Get in Touch",
+        description: "Let's work together!",
+        email: email,
+      },
+    } as AboutPageData,
+    theme: {
+      primary: "221 83% 53%",
+      "primary-glow": "221 83% 63%",
+      "primary-muted": "221 83% 23%",
+      "primary-foreground": "0 0% 100%",
+      accent: "280 80% 50%",
+      "accent-glow": "280 80% 60%",
+    } as Theme,
+  };
+}
