@@ -1,6 +1,6 @@
 "use client";
 
-import { uploadFile, deleteFile, listFiles, getPublicUrl } from "./storage";
+// Storage operations are performed on the server via API endpoints.
 import { HomePageData, AboutPageData, Profile, Theme } from "@/types/portfolio";
 import { normalizeDomain } from "./utils";
 
@@ -144,28 +144,36 @@ export async function updateCurrentUserProfile(profileData: Partial<Profile>): P
 /**
  * Upload a profile image
  */
-export async function uploadProfileImage(file: File, userId: string): Promise<string> {
-  const fileExt = file.name.split(".").pop();
-  const filePath = `${userId}/${Date.now()}.${fileExt}`;
+export async function uploadProfileImage(file: File): Promise<string> {
+  // Upload via server endpoint to avoid exposing SDK/credentials to client
+  const form = new FormData();
+  form.append("file", file);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const result = await uploadFile("profile-images", filePath, buffer, file.type);
+  const res = await fetch("/api/profile/images", {
+    method: "POST",
+    body: form,
+  });
 
-  console.log("Generated public URL for profile image:", result.publicUrl);
-  return result.publicUrl;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to upload image");
+  }
+
+  const data = await res.json();
+  return data.publicUrl;
 }
 
 /**
  * Get all profile images for a user
  */
-export async function getProfileImages(userId: string): Promise<string[]> {
+export async function getProfileImages(): Promise<string[]> {
   try {
-    const files = await listFiles("profile-images", userId);
-    // Return only first 10 images
-    return files.slice(0, 10).map((filePath) => {
-      const relativePath = filePath.replace("profile-images/", "");
-      return getPublicUrl("profile-images", relativePath);
-    });
+    const res = await fetch(`/api/profile/images`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to fetch images");
+    }
+    return res.json();
   } catch (error) {
     console.error("Error listing profile images:", error);
     throw error;
@@ -175,13 +183,20 @@ export async function getProfileImages(userId: string): Promise<string[]> {
 /**
  * Delete a profile image
  */
-export async function deleteProfileImage(userId: string, imageUrl: string): Promise<boolean> {
-  const pathSegments = imageUrl.split("/");
-  const fileName = pathSegments[pathSegments.length - 1];
-  const filePath = `${userId}/${fileName}`;
+export async function deleteProfileImage(imageUrl: string): Promise<boolean> {
 
   try {
-    await deleteFile("profile-images", filePath);
+    const res = await fetch(`/api/profile/images`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to delete image");
+    }
+
     return true;
   } catch (error) {
     console.error("Error deleting profile image:", error);
@@ -192,27 +207,37 @@ export async function deleteProfileImage(userId: string, imageUrl: string): Prom
 /**
  * Upload a background image
  */
-export async function uploadBackgroundImage(file: File, userId: string): Promise<string> {
-  const fileExt = file.name.split(".").pop();
-  const filePath = `${userId}/background-${Date.now()}.${fileExt}`;
+export async function uploadBackgroundImage(file: File): Promise<string> {
+  // Upload via server endpoint
+  const form = new FormData();
+  form.append("file", file);
+  form.append("bucket", "background-images");
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const result = await uploadFile("background-images", filePath, buffer, file.type);
-
-  console.log("Generated public URL for background image:", result.publicUrl);
-  return result.publicUrl;
+  const res = await fetch("/api/profile/images", { method: "POST", body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to upload background image");
+  }
+  const data = await res.json();
+  return data.publicUrl;
 }
 
 /**
  * Delete a background image
  */
-export async function deleteBackgroundImage(userId: string, imageUrl: string): Promise<boolean> {
-  const pathSegments = imageUrl.split("/");
-  const fileName = pathSegments[pathSegments.length - 1];
-  const filePath = `${userId}/${fileName}`;
-
+export async function deleteBackgroundImage(imageUrl: string): Promise<boolean> {
   try {
-    await deleteFile("background-images", filePath);
+    const res = await fetch(`/api/profile/images`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl, bucket: "background-images" }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to delete background image");
+    }
+
     return true;
   } catch (error) {
     console.error("Error deleting background image:", error);
@@ -223,27 +248,36 @@ export async function deleteBackgroundImage(userId: string, imageUrl: string): P
 /**
  * Upload a favicon
  */
-export async function uploadFavicon(file: File, userId: string): Promise<string> {
-  const fileExt = file.name.split(".").pop();
-  const filePath = `${userId}/favicon-${Date.now()}.${fileExt}`;
+export async function uploadFavicon(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("bucket", "favicons");
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const result = await uploadFile("favicons", filePath, buffer, file.type);
-
-  console.log("Generated public URL for favicon:", result.publicUrl);
-  return result.publicUrl;
+  const res = await fetch("/api/profile/images", { method: "POST", body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to upload favicon");
+  }
+  const data = await res.json();
+  return data.publicUrl;
 }
 
 /**
  * Delete a favicon
  */
-export async function deleteFavicon(userId: string, imageUrl: string): Promise<boolean> {
-  const pathSegments = imageUrl.split("/");
-  const fileName = pathSegments[pathSegments.length - 1];
-  const filePath = `${userId}/${fileName}`;
-
+export async function deleteFavicon(imageUrl: string): Promise<boolean> {
   try {
-    await deleteFile("favicons", filePath);
+    const res = await fetch(`/api/profile/images`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl, bucket: "favicons" }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to delete favicon");
+    }
+
     return true;
   } catch (error) {
     console.error("Error deleting favicon:", error);

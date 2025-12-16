@@ -11,8 +11,11 @@ const s3Client = new S3Client({
   region: process.env.STORAGE_REGION || "us-east-1",
   endpoint: process.env.STORAGE_ENDPOINT, // e.g., http://localhost:9000 for MinIO
   credentials: {
-    accessKeyId: process.env.STORAGE_ACCESS_KEY || "",
-    secretAccessKey: process.env.STORAGE_SECRET_KEY || "",
+    // Support multiple common env var names for portability
+    accessKeyId:
+      process.env.STORAGE_ACCESS_KEY || process.env.STORAGE_ACCESS_KEY_ID || "",
+    secretAccessKey:
+      process.env.STORAGE_SECRET_KEY || process.env.STORAGE_SECRET_ACCESS_KEY || "",
   },
   forcePathStyle: true, // Required for MinIO
 });

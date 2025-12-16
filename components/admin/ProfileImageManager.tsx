@@ -51,8 +51,8 @@ export function ProfileImageManager() {
     isLoading: isLoadingImages,
     refetch: refetchImages,
   } = useQuery({
-    queryKey: ["profileImages", session?.user.id],
-    queryFn: () => getProfileImages(session!.user.id),
+      queryKey: ["profileImages", session?.user.id],
+      queryFn: () => getProfileImages(),
     enabled: !!session?.user.id,
   });
 
@@ -80,7 +80,7 @@ export function ProfileImageManager() {
       if (profile?.avatar_url === imageUrl) {
         await updateCurrentUserProfile({ avatar_url: null });
       }
-      return deleteProfileImage(session.user.id, imageUrl);
+      return deleteProfileImage(imageUrl);
     },
     onSuccess: () => {
       toast.success("Image deleted successfully!");
@@ -117,7 +117,7 @@ export function ProfileImageManager() {
 
     setIsUploading(true);
     try {
-      const publicUrl = await uploadProfileImage(file, session.user.id);
+      const publicUrl = await uploadProfileImage(file);
       toast.success("Image uploaded successfully!");
       refetchImages(); // Re-fetch images to show the new one
       // Optionally set the newly uploaded image as the avatar
@@ -147,7 +147,7 @@ export function ProfileImageManager() {
       {/* Current Profile Picture */}
       {profile?.avatar_url && (
         <div className='flex items-center gap-4 p-4 border rounded-lg bg-glass-bg/10'>
-          <div className='relative w-24 h-24 rounded-full overflow-hidden border border-primary/50 flex-shrink-0'>
+          <div className='relative w-24 h-24 rounded-full overflow-hidden border border-primary/50 shrink-0'>
             <Image
               src={profile.avatar_url}
               alt='Current Profile'

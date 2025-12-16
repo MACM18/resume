@@ -51,7 +51,7 @@ export function BackgroundManager() {
       if (profile?.background_image_url === imageUrl) {
         await updateCurrentUserProfile({ background_image_url: null });
       }
-      return deleteBackgroundImage(session.user.id, imageUrl);
+      return deleteBackgroundImage(imageUrl);
     },
     onSuccess: () => {
       toast.success("Background image deleted successfully!");
@@ -83,7 +83,7 @@ export function BackgroundManager() {
 
     setIsUploading(true);
     try {
-      const publicUrl = await uploadBackgroundImage(file, session.user.id);
+      const publicUrl = await uploadBackgroundImage(file);
       toast.success("Image uploaded successfully!");
       // Set the newly uploaded image as the background
       updateProfileMutation.mutate(publicUrl);
@@ -111,7 +111,7 @@ export function BackgroundManager() {
       {/* Current Background Image */}
       {profile?.background_image_url && (
         <div className='flex flex-col sm:flex-row items-center gap-4 p-4 border rounded-lg bg-glass-bg/10'>
-          <div className='relative w-32 h-20 rounded-md overflow-hidden border border-primary/50 flex-shrink-0'>
+          <div className='relative w-32 h-20 rounded-md overflow-hidden border border-primary/50 shrink-0'>
             <Image
               src={profile.background_image_url}
               alt='Current Background'
