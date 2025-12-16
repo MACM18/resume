@@ -51,8 +51,8 @@ export function ProfileImageManager() {
     isLoading: isLoadingImages,
     refetch: refetchImages,
   } = useQuery({
-      queryKey: ["profileImages", session?.user.id],
-      queryFn: () => getProfileImages(),
+    queryKey: ["profileImages", session?.user.id],
+    queryFn: () => getProfileImages(),
     enabled: !!session?.user.id,
   });
 
