@@ -41,7 +41,10 @@ export default function WelcomePage() {
   const email = searchParams.get("email") ?? "";
   const token = searchParams.get("token") ?? "";
 
-  const isValidLink = useMemo(() => Boolean(email) && Boolean(token), [email, token]);
+  const isValidLink = useMemo(
+    () => Boolean(email) && Boolean(token),
+    [email, token]
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -77,13 +80,13 @@ export default function WelcomePage() {
 
   if (!isValidLink) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <GlassCard className="p-8 text-center max-w-md w-full">
-          <h1 className="text-2xl font-bold mb-3">Invalid invitation link</h1>
-          <p className="text-foreground/70">
+      <div className='min-h-screen flex items-center justify-center px-6'>
+        <GlassCard className='p-8 text-center max-w-md w-full'>
+          <h1 className='text-2xl font-bold mb-3'>Invalid invitation link</h1>
+          <p className='text-foreground/70'>
             The invitation link is missing information or has expired.
           </p>
-          <Button className="mt-6" onClick={() => router.push("/login")}>
+          <Button className='mt-6' onClick={() => router.push("/login")}>
             Go to Login
           </Button>
         </GlassCard>
@@ -92,26 +95,26 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-24 pb-32 px-6">
+    <div className='min-h-screen flex items-center justify-center pt-24 pb-32 px-6'>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
+        className='w-full max-w-md'
       >
-        <GlassCard className="p-8">
-          <div className="flex justify-center mb-4">
-            <PartyPopper className="h-12 w-12 text-primary" />
+        <GlassCard className='p-8'>
+          <div className='flex justify-center mb-4'>
+            <PartyPopper className='h-12 w-12 text-primary' />
           </div>
-          <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className='text-3xl font-bold text-center mb-2 bg-gradient-primary bg-clip-text text-transparent'>
             Welcome!
           </h2>
-          <p className="text-center text-foreground/70 mb-6">
+          <p className='text-center text-foreground/70 mb-6'>
             Set your password to activate your portfolio account.
           </p>
 
           {linkError && (
-            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm">
+            <div className='mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm'>
               {linkError}
             </div>
           )}
@@ -119,16 +122,20 @@ export default function WelcomePage() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit((data) => mutate(data))}
-              className="space-y-4"
+              className='space-y-4'
             >
               <FormField
                 control={form.control}
-                name="newPassword"
+                name='newPassword'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type='password'
+                        placeholder='••••••••'
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -137,20 +144,28 @@ export default function WelcomePage() {
 
               <FormField
                 control={form.control}
-                name="confirmPassword"
+                name='confirmPassword'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type='password'
+                        placeholder='••••••••'
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" disabled={isPending} className="w-full">
-                {isPending ? <Loader2 className="animate-spin" /> : "Create Account"}
+              <Button type='submit' disabled={isPending} className='w-full'>
+                {isPending ? (
+                  <Loader2 className='animate-spin' />
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
           </Form>
