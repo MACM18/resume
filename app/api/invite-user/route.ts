@@ -4,6 +4,8 @@ import { hashPassword } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getDefaultProfileData } from '@/lib/profile.server';
+import crypto from 'crypto';
+import { getResend, getResendFromEmail } from '@/lib/resend.server';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +22,10 @@ export async function POST(request: NextRequest) {
       select: { domain: true }
     });
 
-    if (currentUserProfile?.domain !== 'macm.dev') {
+    const isSuperAdmin =
+      currentUserProfile?.domain === 'macm.dev' ||
+      currentUserProfile?.domain === 'www.macm.dev';
+    if (!isSuperAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -63,10 +68,38 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // TODO: Send email with password reset link
-    // For now, just return success - admin can trigger password reset
+    // Create a password-setup token (store only a hash)
+    const token = crypto.randomBytes(32).toString('base64url');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-    return NextResponse.json({ success: true });
+    await db.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      },
+    });
+
+    // Build the welcome/setup URL
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'localhost:3000';
+    const proto = request.headers.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
+    const origin = `${proto}://${host}`;
+    const setupUrl = `${origin}/welcome?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+
+    // Send the welcome email
+    const resend = getResend();
+    await resend.emails.send({
+      from: getResendFromEmail(),
+      to: email,
+      subject: 'Welcome! Set up your portfolio account',
+      text:
+        `You've been invited to create your portfolio.\n\n` +
+        `Click the link below to set your password and get started (valid for 7 days):\n${setupUrl}\n\n` +
+        `If you didn't expect this invitation, you can ignore this email.`,
+    });
+
+    return NextResponse.json({ success: true, message: 'Invitation sent' });
   } catch (error) {
     console.error('invite-user error:', error);
     return NextResponse.json(
