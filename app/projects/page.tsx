@@ -115,7 +115,7 @@ const Projects = () => {
                           height: "100%",
                         }}
                       />
-                      <div className='absolute inset-0 bg-gradient-to-t from-glass-bg/80 to-transparent' />
+                      <div className='absolute inset-0 bg-linear-to-t from-glass-bg/80 to-transparent' />
                     </div>
                     <div className='p-6'>
                       <h3 className='text-2xl font-bold mb-3 text-primary group-hover:text-primary-glow transition-colors duration-300'>

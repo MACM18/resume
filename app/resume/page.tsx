@@ -332,7 +332,7 @@ const Resume = () => {
                           <ul className='space-y-2 text-foreground/80'>
                             {exp.description?.map((item, i) => (
                               <li key={i} className='flex items-start'>
-                                <span className='w-2 h-2 bg-secondary rounded-full mt-2 mr-3 flex-shrink-0' />
+                                <span className='w-2 h-2 bg-secondary rounded-full mt-2 mr-3 shrink-0' />
                                 {item}
                               </li>
                             ))}

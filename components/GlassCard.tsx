@@ -21,7 +21,7 @@ export function GlassCard({
         "relative bg-glass-bg/15 backdrop-blur-glass border border-glass-border/40",
         "rounded-glass shadow-glass",
         "before:absolute before:inset-0 before:rounded-glass before:bg-gradient-glass before:opacity-60",
-        "after:absolute after:inset-[1px] after:rounded-glass after:bg-gradient-to-br after:from-white/5 after:to-transparent after:opacity-50",
+        "after:absolute after:inset-px after:rounded-glass after:bg-linear-to-br after:from-white/5 after:to-transparent after:opacity-50",
         hover &&
           "transition-all duration-300 hover:shadow-hover hover:scale-105 hover:border-primary/40 hover:bg-glass-bg/20",
         float && "animate-float",
