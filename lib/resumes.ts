@@ -1,6 +1,6 @@
 "use client";
 
-import { uploadFile, getPublicUrl } from "./storage";
+import { getPublicUrl } from "./storage";
 import { Resume, UploadedResume } from "@/types/portfolio";
 import { normalizeDomain } from "./utils";
 
@@ -79,22 +79,21 @@ export async function uploadResumePdf(
 ): Promise<UploadedResume | null> {
   // Ensure filename is safe
   const safeRole = role ? role.replace(/[^a-zA-Z0-9-_]/g, "-") : "resume";
-  const filePath = `${userId}/${safeRole}-${Date.now()}.pdf`;
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await uploadFile("resumes", filePath, buffer, "application/pdf");
+    const form = new FormData();
+    form.append("file", file);
+    form.append("role", role);
 
-    console.log("Generated public URL for resume:", result.publicUrl);
+    const res = await fetch("/api/resumes/upload", { method: "POST", body: form });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Error uploading resume PDF:", err);
+      return null;
+    }
 
-    // Create database record
-    const uploadedResume = await createUploadedResume(
-      file,
-      userId,
-      filePath,
-      result.publicUrl
-    );
-    return uploadedResume;
+    const uploaded = await res.json();
+    return uploaded as UploadedResume;
   } catch (error) {
     console.error("Error uploading resume PDF:", error);
     return null;
