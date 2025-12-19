@@ -37,7 +37,7 @@ export const AuthButton = () => {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: 1 }}
-      className='fixed top-6 left-6 z-50'
+      className='fixed top-6 left-6 z-30'
     >
       <GlassCard className='p-1 rounded-full'>
         <div className='flex items-center gap-1'>

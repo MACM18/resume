@@ -101,7 +101,7 @@ export function ContactButton() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 1.5 }}
-        className='fixed bottom-30 right-6 md:bottom-6 z-50'
+        className='fixed bottom-30 right-6 md:bottom-6 z-30'
       >
         <Tooltip>
           <TooltipTrigger asChild>

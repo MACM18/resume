@@ -79,7 +79,7 @@ export default function AdminPage() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)] gap-6 items-stretch'>
-          <div className='hidden md:block sticky top-24 self-start z-20'>
+          <div className='hidden md:block sticky top-24 self-start z-50'>
             <AdminNav
               items={ADMIN_ITEMS.map((i) => ({
                 value: i.value,

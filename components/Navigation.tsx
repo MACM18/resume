@@ -136,7 +136,7 @@ export function Navigation() {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className='fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 md:hidden'
+        className='fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 md:hidden'
       >
         <GlassCard className='px-4 py-3'>
           <div className='flex items-center space-x-6'>
