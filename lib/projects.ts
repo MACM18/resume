@@ -1,29 +1,28 @@
 "use client";
 
-import { uploadFile, deleteFile } from "./storage";
+import { deleteFile } from "./storage";
 import { Project } from "@/types/portfolio";
 import { normalizeDomain } from "./utils";
 
 /**
- * Upload a project image
+ * Upload a project image (optimized server-side)
  */
 export async function uploadProjectImage(file: File): Promise<string> {
-  // Get current user session from the server
-  const response = await fetch("/api/auth/session");
-  const session = await response.json();
-  
-  if (!session?.user?.id) {
-    throw new Error("You must be logged in to upload an image.");
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("/api/projects/upload-image", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to upload project image");
   }
 
-  const fileExt = file.name.split(".").pop();
-  const filePath = `${session.user.id}/${Date.now()}.${fileExt}`;
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const result = await uploadFile("project-images", filePath, buffer, file.type);
-
-  console.log("Generated public URL for project image:", result.publicUrl);
-  return result.publicUrl;
+  const data = await res.json();
+  return data.publicUrl;
 }
 
 /**

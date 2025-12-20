@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { listFiles, uploadFile, deleteFile, getPublicUrl } from "@/lib/storage";
+import { optimizeImage, getImageDimensions } from "@/lib/image-optimization";
 
 export const dynamic = "force-dynamic";
 
@@ -56,18 +57,36 @@ export async function POST(request: NextRequest) {
 
     // Validate content type
     const contentType = file.type || "application/octet-stream";
-    if (!["image/jpeg", "image/png", "image/webp"].includes(contentType)) {
-      return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
+    if (!["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(contentType)) {
+      return NextResponse.json({ error: "Invalid file type. Please upload JPEG, PNG, or WebP." }, { status: 400 });
     }
 
     const userId = session.user.id;
-    const ext = (file.type.split("/").pop() || "jpg").replace(/[^a-z0-9]/gi, "");
+    const arrayBuffer = await file.arrayBuffer();
+    const originalBuffer = Buffer.from(arrayBuffer);
+
+    // Determine image type from bucket
+    let imageType = "profile";
+    if (bucket.includes("background")) imageType = "background";
+    else if (bucket.includes("project")) imageType = "project";
+    else if (bucket.includes("favicon")) imageType = "favicon";
+
+    const dimensions = getImageDimensions(imageType);
+
+    // Optimize image (resize + convert to WebP)
+    const { buffer: optimizedBuffer, contentType: optimizedType, ext } = await optimizeImage(
+      originalBuffer,
+      {
+        maxWidth: dimensions.maxWidth,
+        maxHeight: dimensions.maxHeight,
+        quality: 85,
+        format: "webp",
+      }
+    );
+
     const filePath = `${userId}/${Date.now()}.${ext}`;
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    await uploadFile(bucket, filePath, buffer, contentType);
+    await uploadFile(bucket, filePath, optimizedBuffer, optimizedType);
 
     const publicUrl = getPublicUrl(bucket, `${userId}/${filePath.split("/").pop()}`);
 

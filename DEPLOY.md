@@ -166,4 +166,26 @@ npx prisma generate
 
 ---
 
+## Image optimization 🖼️
+
+All uploaded images are automatically optimized for web performance:
+
+- **Format conversion**: Converted to WebP (modern, efficient format with ~30% smaller file sizes)
+- **Automatic resizing**: Images are resized to appropriate dimensions based on type:
+  - Profile images (avatars): 800×800px max
+  - Background images: 1920×1080px max
+  - Project thumbnails: 1200×800px max
+  - Favicons: 512×512px max
+- **Quality**: 85% quality setting (good balance between size and visual quality)
+- **Caching**: Images cached for 1 year via Next.js image optimization
+
+**API endpoints with built-in optimization:**
+
+- `POST /api/profile/images` — profile, background, and favicon uploads
+- `POST /api/projects/upload-image` — project image uploads
+
+All optimization happens server-side using the `sharp` library. No client-side work needed.
+
+---
+
 If you want, I can add a deploy script or GitHub Actions workflow that applies migrations during your deploys and fail-safe checks for missing env vars. Want me to scaffold that next? 🔧
