@@ -62,7 +62,7 @@ const Projects = () => {
   const otherProjects = projects?.filter((p) => !p.featured) || [];
 
   return (
-    <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
+    <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
       <div className='max-w-6xl mx-auto'>
         {/* Header */}
         <motion.div
@@ -105,7 +105,7 @@ const Projects = () => {
                       <Image
                         src={project.image || "/placeholder.svg"}
                         alt={project.title}
-                        className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+                        className='w-full h-full object-cover transition-all duration-700 group-hover:brightness-110'
                         width={800}
                         height={450}
                         priority={index === 0}

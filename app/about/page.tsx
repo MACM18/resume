@@ -78,7 +78,7 @@ const About = () => {
   const avatarUrl = profileData.avatar_url;
 
   return (
-    <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
+    <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
       <div className='max-w-4xl mx-auto'>
         {/* Header */}
         <motion.div

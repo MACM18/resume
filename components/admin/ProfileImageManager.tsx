@@ -221,7 +221,7 @@ export function ProfileImageManager() {
                   alt='Uploaded Profile Image'
                   layout='fill'
                   objectFit='cover'
-                  className='transition-transform duration-300 group-hover:scale-105'
+                  className='transition-all duration-500 group-hover:brightness-110'
                 />
                 <div className='absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
                   <Button

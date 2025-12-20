@@ -188,4 +188,34 @@ All optimization happens server-side using the `sharp` library. No client-side w
 
 ---
 
+## Frontend redesign & performance 🎨
+
+The front-end has been redesigned for elegance, speed, and visual clarity:
+
+**Design improvements:**
+
+- **Removed scale hover effects** — Cards now use subtle elevation (`whileHover={{ y: -4 }}`) and border glow instead of jarring scale transforms
+- **Cleaner spacing** — Consistent padding (pt-20/pt-32/pb-20) across all pages for better flow
+- **Elegant hover states** — Images use `brightness-110` transition instead of scale; borders transition to `primary/60`
+- **Simplified hero sections** — Reduced font sizes (5xl→7xl) and spacing for better readability
+- **Streamlined navigation cards** — Quick-access cards are now unified with consistent styling
+- **Better visual hierarchy** — Removed repetitive sections, consolidated CTAs
+
+**Technical changes:**
+
+- `GlassCard` component: hover duration increased to 500ms with smooth `y: -4` lift
+- Social icons: border glow on hover (`border-primary/60`) instead of scale
+- Project/profile images: `brightness-110` transition replaces `scale-110`
+- All pages: unified spacing (20/32 top, 20 bottom)
+
+**Performance gains:**
+
+- Fewer DOM reflows (no scale transforms triggering layout recalculation)
+- Smoother 60fps animations with GPU-accelerated transforms only
+- Reduced cumulative layout shift (CLS) scores
+
+All changes are production-ready and backward-compatible with existing content.
+
+---
+
 If you want, I can add a deploy script or GitHub Actions workflow that applies migrations during your deploys and fail-safe checks for missing env vars. Want me to scaffold that next? 🔧

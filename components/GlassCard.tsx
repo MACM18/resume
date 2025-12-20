@@ -23,13 +23,14 @@ export function GlassCard({
         "before:absolute before:inset-0 before:rounded-glass before:bg-gradient-glass before:opacity-60",
         "after:absolute after:inset-px after:rounded-glass after:bg-linear-to-br after:from-white/5 after:to-transparent after:opacity-50",
         hover &&
-          "transition-all duration-300 hover:shadow-hover hover:scale-105 hover:border-primary/40 hover:bg-glass-bg/20",
+          "transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-primary/60 hover:bg-glass-bg/25 hover:backdrop-blur-md",
         float && "animate-float",
         className
       )}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      whileHover={hover ? { y: -4 } : undefined}
     >
       <div className='relative z-10'>{children}</div>
     </motion.div>
