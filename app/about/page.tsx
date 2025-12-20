@@ -127,16 +127,20 @@ const About = () => {
               variant='gradient'
               className='p-8 relative overflow-hidden'
             >
-              <div className='absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-accent' />
-              <h2 className='text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                My Story
-              </h2>
-              <div className='space-y-4 text-foreground/80 leading-relaxed'>
-                {aboutPageData.story.map((paragraph, index) => (
-                  <p key={index} className='text-base leading-loose'>
-                    {paragraph}
-                  </p>
-                ))}
+              {/* Inset gradient bar to avoid overlapping content */}
+              <div className='absolute left-4 top-6 bottom-6 w-1 rounded-l-2xl bg-gradient-to-b from-primary via-secondary to-accent' />
+
+              <div className='relative z-10 pl-6 md:pl-8'>
+                <h2 className='text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+                  My Story
+                </h2>
+                <div className='space-y-4 text-foreground/80 leading-relaxed'>
+                  {aboutPageData.story.map((paragraph, index) => (
+                    <p key={index} className='text-base leading-loose'>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
             </GlassCard>
           </motion.div>
