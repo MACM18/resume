@@ -268,11 +268,18 @@ const Resume = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <GlassCard variant='gradient' className='p-8 relative overflow-hidden'>
+            <GlassCard
+              variant='gradient'
+              className='p-8 relative overflow-hidden'
+            >
               <div className='absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent' />
               <div className='text-center mb-6'>
-                <h2 className='text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>{fullName}</h2>
-                <h3 className='text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4'>{resume.title}</h3>
+                <h2 className='text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>
+                  {fullName}
+                </h2>
+                <h3 className='text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4'>
+                  {resume.title}
+                </h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
                   <div className='flex items-center gap-2'>
                     <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
@@ -335,7 +342,9 @@ const Resume = () => {
                               )}
                             </div>
                           </div>
-                          <p className='bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-medium mb-1'>{exp.company}</p>
+                          <p className='bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-medium mb-1'>
+                            {exp.company}
+                          </p>
                           {exp.location && (
                             <p className='text-foreground/60 text-sm mb-3'>
                               {exp.location}
@@ -392,7 +401,10 @@ const Resume = () => {
                                 rel='noopener noreferrer'
                                 className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center hover:from-primary/30 hover:to-primary/20 transition-all'
                               >
-                                <ExternalLink size={14} className='text-primary' />
+                                <ExternalLink
+                                  size={14}
+                                  className='text-primary'
+                                />
                               </a>
                             )}
                           </div>
@@ -430,7 +442,9 @@ const Resume = () => {
                     <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center'>
                       <div className='w-4 h-4 rounded bg-gradient-to-br from-accent to-accent/80' />
                     </div>
-                    <h3 className='text-xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent'>Skills</h3>
+                    <h3 className='text-xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent'>
+                      Skills
+                    </h3>
                   </div>
                   <div className='flex flex-wrap gap-2'>
                     {resume.skills.map((skill) => (
@@ -462,8 +476,13 @@ const Resume = () => {
                   </div>
                   <div className='space-y-4'>
                     {resume.education.map((edu, index) => (
-                      <div key={index} className='border-l-2 border-secondary/30 pl-4'>
-                        <h4 className='font-semibold text-foreground'>{edu.degree}</h4>
+                      <div
+                        key={index}
+                        className='border-l-2 border-secondary/30 pl-4'
+                      >
+                        <h4 className='font-semibold text-foreground'>
+                          {edu.degree}
+                        </h4>
                         <p className='text-foreground/70'>{edu.school}</p>
                         <p className='text-foreground/60 text-sm'>{edu.year}</p>
                       </div>
@@ -490,11 +509,16 @@ const Resume = () => {
                     </div>
                     <div className='space-y-4'>
                       {resume.certifications.map((cert, index) => (
-                        <div key={index} className='border-l-2 border-primary/30 pl-4'>
+                        <div
+                          key={index}
+                          className='border-l-2 border-primary/30 pl-4'
+                        >
                           <h4 className='font-semibold flex items-center text-foreground'>
                             {cert.name}
                           </h4>
-                          <p className='text-foreground/70 text-sm'>{cert.issuer}</p>
+                          <p className='text-foreground/70 text-sm'>
+                            {cert.issuer}
+                          </p>
                           <div className='flex items-center justify-between text-foreground/60 text-sm mt-1'>
                             <div className='flex items-center gap-1'>
                               <Calendar size={12} />

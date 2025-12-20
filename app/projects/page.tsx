@@ -92,7 +92,11 @@ const Projects = () => {
             >
               <div className='flex items-center gap-3'>
                 <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
-                  <Star className='text-primary' size={20} fill='currentColor' />
+                  <Star
+                    className='text-primary'
+                    size={20}
+                    fill='currentColor'
+                  />
                 </div>
                 <h2 className='text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
                   Featured Projects
@@ -107,7 +111,11 @@ const Projects = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 + index * 0.2 }}
                 >
-                  <GlassCard variant='gradient' className='overflow-hidden group' hover>
+                  <GlassCard
+                    variant='gradient'
+                    className='overflow-hidden group'
+                    hover
+                  >
                     <div className='aspect-video bg-glass-bg/20 relative overflow-hidden'>
                       <Image
                         src={project.image || "/placeholder.svg"}
@@ -125,7 +133,9 @@ const Projects = () => {
                       <div className='absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent' />
                       <div className='absolute top-4 left-4 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm flex items-center gap-2'>
                         <span className='w-1.5 h-1.5 rounded-full bg-white animate-pulse' />
-                        <span className='text-xs font-semibold text-white'>Featured</span>
+                        <span className='text-xs font-semibold text-white'>
+                          Featured
+                        </span>
                       </div>
                     </div>
                     <div className='p-6'>
@@ -146,13 +156,22 @@ const Projects = () => {
                         ))}
                       </div>
                       <div className='flex space-x-3'>
-                        <Button asChild size='sm' className='flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80'>
+                        <Button
+                          asChild
+                          size='sm'
+                          className='flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80'
+                        >
                           <Link href={`/projects/${project.id}`}>
                             View Details
                           </Link>
                         </Button>
                         {project.demo_url && (
-                          <Button asChild variant='outline' size='sm' className='border-secondary/50 hover:border-secondary'>
+                          <Button
+                            asChild
+                            variant='outline'
+                            size='sm'
+                            className='border-secondary/50 hover:border-secondary'
+                          >
                             <a
                               href={project.demo_url}
                               target='_blank'
@@ -163,7 +182,12 @@ const Projects = () => {
                           </Button>
                         )}
                         {project.github_url && (
-                          <Button asChild variant='outline' size='sm' className='border-secondary/50 hover:border-secondary'>
+                          <Button
+                            asChild
+                            variant='outline'
+                            size='sm'
+                            className='border-secondary/50 hover:border-secondary'
+                          >
                             <a
                               href={project.github_url}
                               target='_blank'
@@ -201,7 +225,11 @@ const Projects = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
                 >
-                  <GlassCard variant='gradient' className='p-6 h-full group' hover>
+                  <GlassCard
+                    variant='gradient'
+                    className='p-6 h-full group'
+                    hover
+                  >
                     <h3 className='text-xl font-bold mb-3 text-foreground group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300'>
                       {project.title}
                     </h3>

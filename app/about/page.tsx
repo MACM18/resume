@@ -123,12 +123,19 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <GlassCard variant='gradient' className='p-8 relative overflow-hidden'>
+            <GlassCard
+              variant='gradient'
+              className='p-8 relative overflow-hidden'
+            >
               <div className='absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-accent' />
-              <h2 className='text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>My Story</h2>
+              <h2 className='text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+                My Story
+              </h2>
               <div className='space-y-4 text-foreground/80 leading-relaxed'>
                 {aboutPageData.story.map((paragraph, index) => (
-                  <p key={index} className='text-base leading-loose'>{paragraph}</p>
+                  <p key={index} className='text-base leading-loose'>
+                    {paragraph}
+                  </p>
                 ))}
               </div>
             </GlassCard>
@@ -156,10 +163,17 @@ const About = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
                   >
-                    <GlassCard variant='gradient' className='p-6 group relative overflow-hidden' hover>
+                    <GlassCard
+                      variant='gradient'
+                      className='p-6 group relative overflow-hidden'
+                      hover
+                    >
                       <div className='flex items-center mb-6'>
                         <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mr-4'>
-                          <Icon className='text-primary group-hover:scale-110 transition-transform' size={24} />
+                          <Icon
+                            className='text-primary group-hover:scale-110 transition-transform'
+                            size={24}
+                          />
                         </div>
                         <h3 className='text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
                           {skillGroup.category}
