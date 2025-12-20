@@ -160,7 +160,7 @@ export default function Page() {
                 asChild
                 variant='outline'
                 size='lg'
-                className='border-glass-border/50 hover:border-primary/60 backdrop-blur-sm hover:bg-glass-bg/10'
+                className='border-glass-border/50 hover:border-primary/60 backdrop-blur-sm hover:bg-primary/10 hover:text-primary'
               >
                 <Link href={`/resume`}>Download Resume</Link>
               </Button>
@@ -181,7 +181,7 @@ export default function Page() {
                   {/* Gradient accent bar */}
                   <div className='absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-secondary to-accent rounded-l-2xl' />
 
-                  <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-6 pl-6'>
+                  <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-6 pl-8'>
                     <div className='flex-1'>
                       <h3 className='text-2xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent'>
                         {currentWork.position}
@@ -418,11 +418,6 @@ export default function Page() {
                     className='p-6 text-center group'
                     hover
                   >
-                    <div className='mb-6 flex justify-center'>
-                      <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center'>
-                        <div className='w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-secondary' />
-                      </div>
-                    </div>
                     <h3 className='text-xl font-semibold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
                       {category.name}
                     </h3>
@@ -452,11 +447,10 @@ export default function Page() {
                 hover
               >
                 <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/50' />
-                <div className='mb-4 flex items-center gap-3'>
-                  <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
-                    <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-primary to-primary/80' />
-                  </div>
-                  <h3 className='text-2xl font-bold text-primary'>About Me</h3>
+                <div className='mt-6'>
+                  <h3 className='text-2xl font-bold text-primary mb-4'>
+                    About Me
+                  </h3>
                 </div>
                 <p className='text-foreground/70 mb-6 leading-relaxed'>
                   {homePageData.about_card_description ||
@@ -485,11 +479,8 @@ export default function Page() {
                 hover
               >
                 <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary/50' />
-                <div className='mb-4 flex items-center gap-3'>
-                  <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
-                    <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-secondary to-secondary/80' />
-                  </div>
-                  <h3 className='text-2xl font-bold text-secondary'>
+                <div className='mt-6'>
+                  <h3 className='text-2xl font-bold text-secondary mb-4'>
                     Projects
                   </h3>
                 </div>
@@ -520,11 +511,10 @@ export default function Page() {
                 hover
               >
                 <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent to-accent/50' />
-                <div className='mb-4 flex items-center gap-3'>
-                  <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center'>
-                    <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-accent to-accent/80' />
-                  </div>
-                  <h3 className='text-2xl font-bold text-accent'>Experience</h3>
+                <div className='mt-6'>
+                  <h3 className='text-2xl font-bold text-accent mb-4'>
+                    Experience
+                  </h3>
                 </div>
                 <p className='text-foreground/70 mb-6 leading-relaxed'>
                   Professional background and skills across multiple disciplines
@@ -571,12 +561,8 @@ export default function Page() {
                       className='p-8 text-center group'
                       hover
                     >
-                      <div className='mb-4 flex justify-center'>
-                        <div className='w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center'>
-                          <div className='text-4xl font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent'>
-                            {achievement.metric}
-                          </div>
-                        </div>
+                      <div className='text-5xl font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-4'>
+                        {achievement.metric}
                       </div>
                       <div className='text-sm text-foreground/60 mb-4 uppercase tracking-wide'>
                         {achievement.label}
@@ -605,30 +591,32 @@ export default function Page() {
               className='p-12 relative overflow-hidden'
             >
               <div className='absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent' />
-              <h2 className='text-4xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
-                {homePageData.callToAction.title}
-              </h2>
-              <p className='text-xl text-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed'>
-                {homePageData.callToAction.description}
-              </p>
-              <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-                <Button
-                  asChild
-                  size='lg'
-                  className='bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
-                >
-                  <a href={`mailto:${homePageData.callToAction.email}`}>
-                    Start a Project
-                  </a>
-                </Button>
-                <Button
-                  asChild
-                  variant='outline'
-                  size='lg'
-                  className='border-2 border-secondary/50 hover:border-secondary text-secondary hover:text-secondary-glow hover:bg-secondary/10'
-                >
-                  <Link href={`/about`}>Learn More About Me</Link>
-                </Button>
+              <div className='mt-6'>
+                <h2 className='text-4xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
+                  {homePageData.callToAction.title}
+                </h2>
+                <p className='text-xl text-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed'>
+                  {homePageData.callToAction.description}
+                </p>
+                <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+                  <Button
+                    asChild
+                    size='lg'
+                    className='bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
+                  >
+                    <a href={`mailto:${homePageData.callToAction.email}`}>
+                      Start a Project
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant='outline'
+                    size='lg'
+                    className='border-2 border-secondary/50 hover:border-secondary text-secondary hover:text-secondary-glow hover:bg-secondary/10'
+                  >
+                    <Link href={`/about`}>Learn More About Me</Link>
+                  </Button>
+                </div>
               </div>
             </GlassCard>
           </AnimatedSection>

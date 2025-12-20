@@ -169,12 +169,10 @@ const About = () => {
                       hover
                     >
                       <div className='flex items-center mb-6'>
-                        <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mr-4'>
-                          <Icon
-                            className='text-primary group-hover:scale-110 transition-transform'
-                            size={24}
-                          />
-                        </div>
+                        <Icon
+                          className='text-primary group-hover:scale-110 transition-transform mr-4'
+                          size={24}
+                        />
                         <h3 className='text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
                           {skillGroup.category}
                         </h3>

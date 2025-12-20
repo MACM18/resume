@@ -273,7 +273,7 @@ const Resume = () => {
               className='p-8 relative overflow-hidden'
             >
               <div className='absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent' />
-              <div className='text-center mb-6'>
+              <div className='text-center mb-6 mt-6'>
                 <h2 className='text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>
                   {fullName}
                 </h2>
@@ -282,16 +282,12 @@ const Resume = () => {
                 </h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
                   <div className='flex items-center gap-2'>
-                    <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
-                      <Mail size={14} className='text-primary' />
-                    </div>
+                    <Mail size={16} className='text-primary' />
                     {contactEmail}
                   </div>
                   {resume.location && (
                     <div className='flex items-center gap-2'>
-                      <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
-                        <MapPin size={14} className='text-secondary' />
-                      </div>
+                      <MapPin size={16} className='text-secondary' />
                       {resume.location}
                     </div>
                   )}
@@ -314,14 +310,9 @@ const Resume = () => {
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
                   <GlassCard variant='gradient' className='p-8'>
-                    <div className='mb-6 flex items-center gap-3'>
-                      <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
-                        <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-primary to-primary/80' />
-                      </div>
-                      <h3 className='text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                        Professional Experience
-                      </h3>
-                    </div>
+                    <h3 className='text-2xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+                      Professional Experience
+                    </h3>
                     <div className='space-y-6'>
                       {workHistory.map((exp) => (
                         <div
@@ -372,14 +363,9 @@ const Resume = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
                 <GlassCard variant='gradient' className='p-8'>
-                  <div className='mb-6 flex items-center gap-3'>
-                    <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
-                      <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-secondary to-secondary/80' />
-                    </div>
-                    <h3 className='text-2xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
-                      Featured Projects
-                    </h3>
-                  </div>
+                  <h3 className='text-2xl font-bold mb-6 bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
+                    Featured Projects
+                  </h3>
                   <div className='space-y-4'>
                     {resume.project_ids.map((projectId) => {
                       const project = projects?.find((p) => p.id === projectId);
@@ -399,12 +385,9 @@ const Resume = () => {
                                 href={project.demo_url}
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center hover:from-primary/30 hover:to-primary/20 transition-all'
+                                className='text-primary hover:text-primary-glow transition-colors'
                               >
-                                <ExternalLink
-                                  size={14}
-                                  className='text-primary'
-                                />
+                                <ExternalLink size={16} />
                               </a>
                             )}
                           </div>
@@ -438,14 +421,9 @@ const Resume = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <GlassCard variant='gradient' className='p-6'>
-                  <div className='mb-4 flex items-center gap-3'>
-                    <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center'>
-                      <div className='w-4 h-4 rounded bg-gradient-to-br from-accent to-accent/80' />
-                    </div>
-                    <h3 className='text-xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent'>
-                      Skills
-                    </h3>
-                  </div>
+                  <h3 className='text-xl font-bold mb-4 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent'>
+                    Skills
+                  </h3>
                   <div className='flex flex-wrap gap-2'>
                     {resume.skills.map((skill) => (
                       <span
@@ -466,14 +444,9 @@ const Resume = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
                 <GlassCard variant='gradient' className='p-6'>
-                  <div className='mb-4 flex items-center gap-3'>
-                    <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
-                      <div className='w-4 h-4 rounded bg-gradient-to-br from-secondary to-secondary/80' />
-                    </div>
-                    <h3 className='text-xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
-                      Education
-                    </h3>
-                  </div>
+                  <h3 className='text-xl font-bold mb-4 bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
+                    Education
+                  </h3>
                   <div className='space-y-4'>
                     {resume.education.map((edu, index) => (
                       <div
@@ -499,14 +472,10 @@ const Resume = () => {
                   transition={{ duration: 0.6, delay: 0.8 }}
                 >
                   <GlassCard variant='gradient' className='p-6'>
-                    <div className='mb-4 flex items-center gap-3'>
-                      <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
-                        <Award size={16} className='text-primary' />
-                      </div>
-                      <h3 className='text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                        Certifications
-                      </h3>
-                    </div>
+                    <h3 className='text-xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent flex items-center gap-2'>
+                      <Award size={20} className='text-primary' />
+                      Certifications
+                    </h3>
                     <div className='space-y-4'>
                       {resume.certifications.map((cert, index) => (
                         <div

@@ -88,20 +88,12 @@ const Projects = () => {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className='mb-8 flex items-center'
+              className='mb-8 flex items-center gap-3'
             >
-              <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
-                  <Star
-                    className='text-primary'
-                    size={20}
-                    fill='currentColor'
-                  />
-                </div>
-                <h2 className='text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                  Featured Projects
-                </h2>
-              </div>
+              <Star className='text-primary' size={24} fill='currentColor' />
+              <h2 className='text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+                Featured Projects
+              </h2>
             </motion.div>
             <div className='grid lg:grid-cols-2 gap-8'>
               {featuredProjects.map((project, index) => (

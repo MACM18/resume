@@ -18,10 +18,10 @@ export function GlassCard({
   variant = "default",
 }: GlassCardProps) {
   const variantStyles = {
-    default: "bg-glass-bg/10 backdrop-blur-xl border-glass-border/30",
+    default: "bg-glass-bg/10 backdrop-blur-md border-glass-border/30",
     gradient:
-      "bg-gradient-to-br from-glass-bg/15 via-glass-bg/5 to-transparent backdrop-blur-2xl border-glass-border/40",
-    minimal: "bg-glass-bg/5 backdrop-blur-lg border-glass-border/20",
+      "bg-gradient-to-br from-glass-bg/15 via-glass-bg/5 to-transparent backdrop-blur-md border-glass-border/40",
+    minimal: "bg-glass-bg/5 backdrop-blur-sm border-glass-border/20",
   };
 
   return (
