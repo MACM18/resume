@@ -92,21 +92,26 @@ const About = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className='relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-2 border-primary shadow-lg'
+              className='relative w-40 h-40 mx-auto mb-8'
             >
-              <Image
-                src={avatarUrl}
-                alt='Profile Picture'
-                layout='fill'
-                objectFit='cover'
-                className='object-cover'
-              />
+              <div className='absolute inset-0 rounded-full bg-gradient-to-br from-primary via-secondary to-accent p-[3px] animate-pulse'>
+                <div className='relative w-full h-full rounded-full overflow-hidden bg-background'>
+                  <Image
+                    src={avatarUrl}
+                    alt='Profile Picture'
+                    layout='fill'
+                    objectFit='cover'
+                    className='object-cover'
+                  />
+                </div>
+              </div>
+              <div className='absolute -inset-4 rounded-full bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 blur-2xl -z-10' />
             </motion.div>
           )}
-          <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+          <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
             {aboutPageData.title}
           </h1>
-          <p className='text-xl text-foreground/80 max-w-2xl mx-auto'>
+          <p className='text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed'>
             {aboutPageData.subtitle}
           </p>
         </motion.div>
@@ -118,11 +123,12 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <GlassCard className='p-8'>
-              <h2 className='text-3xl font-bold mb-6 text-primary'>My Story</h2>
+            <GlassCard variant='gradient' className='p-8 relative overflow-hidden'>
+              <div className='absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-accent' />
+              <h2 className='text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>My Story</h2>
               <div className='space-y-4 text-foreground/80 leading-relaxed'>
                 {aboutPageData.story.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
+                  <p key={index} className='text-base leading-loose'>{paragraph}</p>
                 ))}
               </div>
             </GlassCard>
@@ -134,9 +140,12 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <h2 className='text-3xl font-bold mb-8 text-center text-secondary'>
-              Skills & Expertise
-            </h2>
+            <div className='text-center mb-8'>
+              <h2 className='text-4xl font-bold bg-gradient-to-r from-secondary via-accent to-primary bg-clip-text text-transparent inline-block'>
+                Skills & Expertise
+              </h2>
+              <div className='w-24 h-1 bg-gradient-to-r from-secondary via-accent to-primary rounded-full mx-auto mt-3' />
+            </div>
             <div className='grid md:grid-cols-2 gap-6'>
               {aboutPageData.skills.map((skillGroup, index) => {
                 const Icon = iconMap[skillGroup.icon as keyof typeof iconMap];
@@ -147,10 +156,12 @@ const About = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
                   >
-                    <GlassCard className='p-6' hover>
-                      <div className='flex items-center mb-4'>
-                        <Icon className='text-primary mr-3' size={24} />
-                        <h3 className='text-xl font-semibold'>
+                    <GlassCard variant='gradient' className='p-6 group relative overflow-hidden' hover>
+                      <div className='flex items-center mb-6'>
+                        <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mr-4'>
+                          <Icon className='text-primary group-hover:scale-110 transition-transform' size={24} />
+                        </div>
+                        <h3 className='text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
                           {skillGroup.category}
                         </h3>
                       </div>
@@ -158,7 +169,7 @@ const About = () => {
                         {skillGroup.items.map((skill) => (
                           <span
                             key={skill}
-                            className='px-3 py-1 text-sm rounded-full bg-glass-bg/20 border border-glass-border/30 text-foreground/80'
+                            className='px-3 py-1.5 text-sm rounded-full bg-gradient-to-r from-glass-bg/30 to-glass-bg/20 border border-glass-border/30 text-foreground/80 hover:text-foreground hover:border-primary/50 transition-all'
                           >
                             {skill}
                           </span>

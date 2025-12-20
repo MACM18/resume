@@ -231,15 +231,16 @@ const Resume = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className='text-center mb-12'
+          className='text-center mb-12 relative'
         >
-          <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+          <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 blur-3xl -z-10' />
+          <h1 className='text-5xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
             Resume
           </h1>
           <Button
             onClick={handleDownload}
             size='lg'
-            className='bg-primary hover:bg-primary/90'
+            className='bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-lg shadow-primary/20'
             disabled={
               generatePdfMutation.isPending ||
               isDownloadingUploaded ||
@@ -267,24 +268,29 @@ const Resume = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <GlassCard className='p-8'>
+            <GlassCard variant='gradient' className='p-8 relative overflow-hidden'>
+              <div className='absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent' />
               <div className='text-center mb-6'>
-                <h2 className='text-4xl font-bold mb-2'>{fullName}</h2>
-                <h3 className='text-2xl text-primary mb-4'>{resume.title}</h3>
+                <h2 className='text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>{fullName}</h2>
+                <h3 className='text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4'>{resume.title}</h3>
                 <div className='flex flex-wrap justify-center gap-4 text-foreground/70'>
-                  <div className='flex items-center'>
-                    <Mail size={16} className='mr-2' />
+                  <div className='flex items-center gap-2'>
+                    <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
+                      <Mail size={14} className='text-primary' />
+                    </div>
                     {contactEmail}
                   </div>
                   {resume.location && (
-                    <div className='flex items-center'>
-                      <MapPin size={16} className='mr-2' />
+                    <div className='flex items-center gap-2'>
+                      <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
+                        <MapPin size={14} className='text-secondary' />
+                      </div>
                       {resume.location}
                     </div>
                   )}
                 </div>
               </div>
-              <p className='text-foreground/80 text-center max-w-3xl mx-auto leading-relaxed'>
+              <p className='text-foreground/80 text-center max-w-3xl mx-auto leading-loose'>
                 {resume.summary}
               </p>
             </GlassCard>
@@ -300,22 +306,28 @@ const Resume = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                  <GlassCard className='p-8'>
-                    <h3 className='text-2xl font-bold mb-6 text-primary'>
-                      Professional Experience
-                    </h3>
+                  <GlassCard variant='gradient' className='p-8'>
+                    <div className='mb-6 flex items-center gap-3'>
+                      <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
+                        <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-primary to-primary/80' />
+                      </div>
+                      <h3 className='text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+                        Professional Experience
+                      </h3>
+                    </div>
                     <div className='space-y-6'>
                       {workHistory.map((exp) => (
                         <div
                           key={exp.id}
-                          className='border-l-2 border-primary/30 pl-6'
+                          className='border-l-2 border-gradient-to-b from-primary to-secondary pl-6 relative'
                         >
+                          <div className='absolute -left-2 top-0 w-4 h-4 rounded-full bg-gradient-to-br from-primary to-secondary' />
                           <div className='flex flex-wrap items-center justify-between mb-2'>
                             <h4 className='text-xl font-semibold'>
                               {exp.position}
                             </h4>
-                            <div className='flex items-center text-foreground/60'>
-                              <Calendar size={16} className='mr-1' />
+                            <div className='flex items-center gap-1.5 text-foreground/60 text-sm'>
+                              <Calendar size={14} />
                               {formatDateRange(
                                 exp.start_date,
                                 exp.end_date || undefined,
@@ -323,17 +335,17 @@ const Resume = () => {
                               )}
                             </div>
                           </div>
-                          <p className='text-primary mb-1'>{exp.company}</p>
+                          <p className='bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-medium mb-1'>{exp.company}</p>
                           {exp.location && (
-                            <p className='text-foreground/60 text-sm mb-2'>
+                            <p className='text-foreground/60 text-sm mb-3'>
                               {exp.location}
                             </p>
                           )}
                           <ul className='space-y-2 text-foreground/80'>
                             {exp.description?.map((item, i) => (
                               <li key={i} className='flex items-start'>
-                                <span className='w-2 h-2 bg-secondary rounded-full mt-2 mr-3 shrink-0' />
-                                {item}
+                                <span className='w-1.5 h-1.5 bg-gradient-to-br from-secondary to-accent rounded-full mt-2.5 mr-3 shrink-0' />
+                                <span className='leading-relaxed'>{item}</span>
                               </li>
                             ))}
                           </ul>
@@ -350,10 +362,15 @@ const Resume = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <GlassCard className='p-8'>
-                  <h3 className='text-2xl font-bold mb-6 text-secondary'>
-                    Featured Projects
-                  </h3>
+                <GlassCard variant='gradient' className='p-8'>
+                  <div className='mb-6 flex items-center gap-3'>
+                    <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
+                      <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-secondary to-secondary/80' />
+                    </div>
+                    <h3 className='text-2xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
+                      Featured Projects
+                    </h3>
+                  </div>
                   <div className='space-y-4'>
                     {resume.project_ids.map((projectId) => {
                       const project = projects?.find((p) => p.id === projectId);
@@ -362,10 +379,10 @@ const Resume = () => {
                       return (
                         <div
                           key={projectId}
-                          className='border border-glass-border/20 rounded-lg p-4'
+                          className='border border-glass-border/30 rounded-xl p-5 hover:border-primary/50 transition-all bg-gradient-to-br from-glass-bg/10 to-transparent'
                         >
-                          <div className='flex items-center justify-between mb-2'>
-                            <h4 className='text-lg font-semibold'>
+                          <div className='flex items-center justify-between mb-3'>
+                            <h4 className='text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>
                               {project.title}
                             </h4>
                             {project.demo_url && (
@@ -373,20 +390,20 @@ const Resume = () => {
                                 href={project.demo_url}
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                className='text-primary hover:text-primary-glow'
+                                className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center hover:from-primary/30 hover:to-primary/20 transition-all'
                               >
-                                <ExternalLink size={16} />
+                                <ExternalLink size={14} className='text-primary' />
                               </a>
                             )}
                           </div>
-                          <p className='text-foreground/70 text-sm mb-3'>
+                          <p className='text-foreground/70 text-sm mb-4 leading-relaxed'>
                             {project.description}
                           </p>
                           <div className='flex flex-wrap gap-2'>
                             {project.tech.slice(0, 4).map((tech) => (
                               <span
                                 key={tech}
-                                className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'
+                                className='px-2.5 py-1 text-xs rounded-full bg-gradient-to-r from-glass-bg/30 to-glass-bg/20 border border-glass-border/30 text-foreground/70'
                               >
                                 {tech}
                               </span>
@@ -408,13 +425,18 @@ const Resume = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <GlassCard className='p-6'>
-                  <h3 className='text-xl font-bold mb-4 text-accent'>Skills</h3>
+                <GlassCard variant='gradient' className='p-6'>
+                  <div className='mb-4 flex items-center gap-3'>
+                    <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center'>
+                      <div className='w-4 h-4 rounded bg-gradient-to-br from-accent to-accent/80' />
+                    </div>
+                    <h3 className='text-xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent'>Skills</h3>
+                  </div>
                   <div className='flex flex-wrap gap-2'>
                     {resume.skills.map((skill) => (
                       <span
                         key={skill}
-                        className='px-3 py-2 text-sm rounded-full bg-glass-bg/20 border border-glass-border/30 text-foreground/80'
+                        className='px-3 py-2 text-sm rounded-full bg-gradient-to-r from-glass-bg/30 to-glass-bg/20 border border-glass-border/30 text-foreground/80 hover:border-accent/50 transition-all'
                       >
                         {skill}
                       </span>
@@ -429,14 +451,19 @@ const Resume = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <GlassCard className='p-6'>
-                  <h3 className='text-xl font-bold mb-4 text-secondary'>
-                    Education
-                  </h3>
+                <GlassCard variant='gradient' className='p-6'>
+                  <div className='mb-4 flex items-center gap-3'>
+                    <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
+                      <div className='w-4 h-4 rounded bg-gradient-to-br from-secondary to-secondary/80' />
+                    </div>
+                    <h3 className='text-xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
+                      Education
+                    </h3>
+                  </div>
                   <div className='space-y-4'>
                     {resume.education.map((edu, index) => (
-                      <div key={index}>
-                        <h4 className='font-semibold'>{edu.degree}</h4>
+                      <div key={index} className='border-l-2 border-secondary/30 pl-4'>
+                        <h4 className='font-semibold text-foreground'>{edu.degree}</h4>
                         <p className='text-foreground/70'>{edu.school}</p>
                         <p className='text-foreground/60 text-sm'>{edu.year}</p>
                       </div>
@@ -452,29 +479,35 @@ const Resume = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
                 >
-                  <GlassCard className='p-6'>
-                    <h3 className='text-xl font-bold mb-4 text-primary'>
-                      Certifications
-                    </h3>
+                  <GlassCard variant='gradient' className='p-6'>
+                    <div className='mb-4 flex items-center gap-3'>
+                      <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
+                        <Award size={16} className='text-primary' />
+                      </div>
+                      <h3 className='text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+                        Certifications
+                      </h3>
+                    </div>
                     <div className='space-y-4'>
                       {resume.certifications.map((cert, index) => (
-                        <div key={index}>
-                          <h4 className='font-semibold flex items-center'>
-                            <Award size={16} className='mr-2 text-primary' />
+                        <div key={index} className='border-l-2 border-primary/30 pl-4'>
+                          <h4 className='font-semibold flex items-center text-foreground'>
                             {cert.name}
                           </h4>
-                          <p className='text-foreground/70'>{cert.issuer}</p>
-                          <div className='flex items-center text-foreground/60 text-sm'>
-                            <Calendar size={14} className='mr-1' />
-                            {cert.date}
+                          <p className='text-foreground/70 text-sm'>{cert.issuer}</p>
+                          <div className='flex items-center justify-between text-foreground/60 text-sm mt-1'>
+                            <div className='flex items-center gap-1'>
+                              <Calendar size={12} />
+                              {cert.date}
+                            </div>
                             {cert.url && (
                               <a
                                 href={cert.url}
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                className='ml-auto text-primary hover:text-primary-glow flex items-center'
+                                className='text-primary hover:text-primary-glow flex items-center gap-1'
                               >
-                                View <ExternalLink size={14} className='ml-1' />
+                                View <ExternalLink size={12} />
                               </a>
                             )}
                           </div>

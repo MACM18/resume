@@ -128,12 +128,16 @@ export default function Page() {
       <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
         <div className='max-w-6xl mx-auto'>
           {/* Hero Section */}
-          <div className='text-center mb-16'>
+          <div className='text-center mb-24'>
             <AnimatedSection direction='up' delay={0.2}>
-              <h1 className='text-5xl sm:text-6xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight'>
-                {homePageData.name}
-              </h1>
-              <p className='text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto'>
+              {/* Gradient ring accent */}
+              <div className='relative inline-block mb-8'>
+                <div className='absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent blur-3xl opacity-20 animate-pulse' />
+                <h1 className='relative text-5xl sm:text-6xl md:text-7xl font-bold bg-gradient-to-br from-foreground via-primary to-secondary bg-clip-text text-transparent leading-tight'>
+                  {homePageData.name}
+                </h1>
+              </div>
+              <p className='text-lg md:text-xl text-foreground/70 mb-10 max-w-2xl mx-auto leading-relaxed'>
                 {homePageData.tagline}
               </p>
             </AnimatedSection>
@@ -146,7 +150,7 @@ export default function Page() {
               <Button
                 asChild
                 size='lg'
-                className='bg-primary hover:bg-primary/90 text-primary-foreground'
+                className='bg-gradient-to-r from-primary to-primary-glow hover:shadow-[0_0_30px_rgba(var(--primary)/0.3)] transition-all duration-500'
               >
                 <Link href={`/projects`}>
                   View Projects <ArrowRight className='ml-2' size={20} />
@@ -156,7 +160,7 @@ export default function Page() {
                 asChild
                 variant='outline'
                 size='lg'
-                className='border-glass-border/50 hover:border-primary/50'
+                className='border-glass-border/50 hover:border-primary/60 backdrop-blur-sm hover:bg-glass-bg/10'
               >
                 <Link href={`/resume`}>Download Resume</Link>
               </Button>
@@ -165,39 +169,65 @@ export default function Page() {
 
           {/* Current Role (if any) */}
           {currentWork && (
-            <div className='mb-16'>
-              <AnimatedSection direction='up' className='text-center mb-8'>
-                <h2 className='text-3xl font-bold text-primary'>
-                  Current Role
-                </h2>
+            <div className='mb-20'>
+              <AnimatedSection direction='up' className='text-center mb-12'>
+                <div className='inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4'>
+                  <span className='w-2 h-2 rounded-full bg-primary animate-pulse' />
+                  Currently Working
+                </div>
               </AnimatedSection>
-              <div className='max-w-3xl mx-auto'>
-                <GlassCard className='p-6'>
-                  <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-2'>
-                    <div>
-                      <div className='text-xl font-semibold'>
+              <div className='max-w-4xl mx-auto'>
+                <GlassCard variant='gradient' className='p-8 overflow-visible'>
+                  {/* Gradient accent bar */}
+                  <div className='absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-secondary to-accent rounded-l-2xl' />
+                  
+                  <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-6 pl-6'>
+                    <div className='flex-1'>
+                      <h3 className='text-2xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent'>
                         {currentWork.position}
+                      </h3>
+                      <div className='flex items-center gap-2 text-foreground/60 mb-4'>
+                        <span className='font-medium'>{currentWork.company}</span>
+                        {currentWork.location && (
+                          <>
+                            <span className='text-foreground/30'>•</span>
+                            <span>{currentWork.location}</span>
+                          </>
+                        )}
                       </div>
-                      <div className='text-foreground/70'>
-                        {currentWork.company}
-                        {currentWork.location
-                          ? ` • ${currentWork.location}`
-                          : ""}
-                      </div>
+                      {currentWork.description?.length ? (
+                        <ul className='space-y-2 text-sm text-foreground/70'>
+                          {currentWork.description.slice(0, 3).map((d, i) => (
+                            <li key={i} className='flex items-start gap-2'>
+                              <span className='text-primary mt-1'>▸</span>
+                              <span>{d}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
-                    <div className='text-sm text-foreground/60'>
-                      {formatDateRange(
-                        currentWork.start_date,
-                        currentWork.end_date || undefined,
-                        currentWork.is_current
-                      )}
+                    <div className='flex flex-col items-end gap-3'>
+                      <div className='text-sm text-foreground/60 whitespace-nowrap'>
+                        {formatDateRange(
+                          currentWork.start_date,
+                          currentWork.end_date || undefined,
+                          currentWork.is_current
+                        )}
+                      </div>
+                      <Button
+                        asChild
+                        variant='ghost'
+                        size='sm'
+                        className='text-primary hover:text-primary-glow'
+                      >
+                        <Link href='/resume'>View full resume</Link>
+                      </Button>
                     </div>
                   </div>
-                  {currentWork.description?.length ? (
-                    <ul className='mt-4 space-y-1 text-sm text-foreground/80 list-disc pl-5'>
-                      {currentWork.description.slice(0, 3).map((d, i) => (
-                        <li key={i}>{d}</li>
-                      ))}
+                </GlassCard>
+              </div>
+            </div>
+          )}
                     </ul>
                   ) : null}
                   <div className='mt-4 text-right'>
@@ -265,69 +295,102 @@ export default function Page() {
 
           {/* Dynamic Featured Work Preview */}
           {featuredProject && (
-            <section className='mb-16'>
+            <section className='mb-20'>
               <AnimatedSection direction='up' className='text-center mb-12'>
-                <h2 className='text-3xl font-bold text-accent'>
+                <h2 className='text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent'>
                   Featured Work
                 </h2>
+                <p className='text-foreground/60 mt-2'>Showcasing my best project</p>
               </AnimatedSection>
 
-              <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-                {/* Featured Project (Left, twice the size) */}
-                <AnimatedSection
-                  direction='left'
-                  delay={0.2}
-                  className='lg:col-span-2'
-                >
-                  <GlassCard className='overflow-hidden group h-full' hover>
-                    <div className='aspect-video bg-glass-bg/20 relative overflow-hidden'>
+              <AnimatedSection direction='up' delay={0.2}>
+                <GlassCard variant='gradient' className='overflow-hidden group'>
+                  <div className='grid md:grid-cols-5 gap-0'>
+                    {/* Image Section */}
+                    <div className='md:col-span-3 aspect-video md:aspect-auto relative overflow-hidden'>
                       <Image
                         src={featuredProject.image || "/placeholder.svg"}
                         alt={featuredProject.title}
-                        className='w-full h-full object-cover transition-all duration-700 group-hover:brightness-110'
+                        className='w-full h-full object-cover transition-all duration-700 group-hover:brightness-110 group-hover:scale-105'
                         width={800}
-                        height={450}
+                        height={600}
                         priority
-                        style={{
-                          objectFit: "cover",
-                          width: "100%",
-                          height: "100%",
-                        }}
+                        style={{ objectFit: "cover" }}
                       />
-                      <div className='absolute inset-0 bg-linear-to-t from-glass-bg/80 to-transparent' />
+                      {/* Gradient overlay */}
+                      <div className='absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-background via-background/50 to-transparent opacity-90' />
+                      
+                      {/* Featured badge */}
+                      <div className='absolute top-4 left-4 px-3 py-1 rounded-full bg-primary/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold flex items-center gap-1'>
+                        <span className='w-1.5 h-1.5 rounded-full bg-white animate-pulse' />
+                        Featured
+                      </div>
                     </div>
-                    <div className='p-6'>
-                      <h3 className='text-2xl font-bold mb-3 text-primary group-hover:text-primary-glow transition-colors duration-300'>
+                    
+                    {/* Content Section */}
+                    <div className='md:col-span-2 p-8 flex flex-col justify-center'>
+                      <h3 className='text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-br from-foreground via-primary to-primary/70 bg-clip-text text-transparent'>
                         {featuredProject.title}
                       </h3>
-                      <p className='text-foreground/80 mb-4'>
+                      <p className='text-foreground/70 mb-6 leading-relaxed'>
                         {featuredProject.description}
                       </p>
+                      
+                      {/* Tech stack */}
                       <div className='flex flex-wrap gap-2 mb-6'>
-                        {featuredProject.tech.map((tech) => (
+                        {featuredProject.tech.slice(0, 5).map((tech) => (
                           <span
                             key={tech}
-                            className='px-3 py-1 text-sm rounded-full bg-primary/10 border border-primary/20 text-primary'
+                            className='px-3 py-1 text-xs font-medium rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-foreground/80 hover:border-primary/40 transition-colors'
                           >
                             {tech}
                           </span>
                         ))}
+                        {featuredProject.tech.length > 5 && (
+                          <span className='px-3 py-1 text-xs font-medium rounded-lg bg-glass-bg/20 text-foreground/60'>
+                            +{featuredProject.tech.length - 5}
+                          </span>
+                        )}
                       </div>
-                      <div className='flex space-x-3'>
-                        <Button asChild size='sm' className='flex-1'>
+                      
+                      {/* Action buttons */}
+                      <div className='flex gap-3'>
+                        <Button asChild className='flex-1 bg-gradient-to-r from-primary to-primary-glow hover:shadow-lg'>
                           <Link href={`/projects/${featuredProject.id}`}>
-                            View Details
+                            View Project
                           </Link>
                         </Button>
-                        {featuredProject.demo_url && (
-                          <Button asChild variant='outline' size='sm'>
-                            <a
-                              href={featuredProject.demo_url}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                            >
-                              <ExternalLink size={16} />
-                            </a>
+                        <div className='flex gap-2'>
+                          {featuredProject.demo_url && (
+                            <Button asChild variant='outline' size='icon' className='border-primary/30 hover:border-primary/60'>
+                              <a
+                                href={featuredProject.demo_url}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                aria-label='View demo'
+                              >
+                                <ExternalLink size={18} />
+                              </a>
+                            </Button>
+                          )}
+                          {featuredProject.github_url && (
+                            <Button asChild variant='outline' size='icon' className='border-primary/30 hover:border-primary/60'>
+                              <a
+                                href={featuredProject.github_url}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                aria-label='View source'
+                              >
+                                <Github size={18} />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </GlassCard>
+              </AnimatedSection>
                           </Button>
                         )}
                         {featuredProject.github_url && (
@@ -401,9 +464,12 @@ export default function Page() {
           {/* Technical Expertise */}
           <div className='mb-16'>
             <AnimatedSection direction='up' className='text-center mb-12'>
-              <h2 className='text-3xl font-bold text-primary'>
-                Technical Expertise
-              </h2>
+              <div className='inline-block relative'>
+                <h2 className='text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
+                  Technical Expertise
+                </h2>
+                <div className='absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 rounded-full' />
+              </div>
             </AnimatedSection>
 
             <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
@@ -413,13 +479,19 @@ export default function Page() {
                   direction='up'
                   delay={0.2 + index * 0.1}
                 >
-                  <GlassCard className='p-6 text-center' hover>
-                    <h3 className='text-xl font-semibold mb-4'>
+                  <GlassCard variant='gradient' className='p-6 text-center group' hover>
+                    <div className='mb-6 flex justify-center'>
+                      <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center'>
+                        <div className='w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-secondary' />
+                      </div>
+                    </div>
+                    <h3 className='text-xl font-semibold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
                       {category.name}
                     </h3>
-                    <div className='space-y-2'>
+                    <div className='space-y-3'>
                       {category.skills.map((skill) => (
-                        <div key={skill} className='text-sm text-foreground/70'>
+                        <div key={skill} className='flex items-center justify-center gap-2 text-sm text-foreground/80 group-hover:text-foreground transition-colors'>
+                          <span className='w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary' />
                           {skill}
                         </div>
                       ))}
@@ -433,62 +505,80 @@ export default function Page() {
           {/* Quick Access Cards */}
           <div className='grid md:grid-cols-3 gap-8 mb-16'>
             <AnimatedSection direction='left' delay={0.2}>
-              <GlassCard className='p-8 h-full' hover>
-                <h3 className='text-2xl font-bold mb-4 text-primary'>
-                  About Me
-                </h3>
-                <p className='text-foreground/70 mb-6'>
+              <GlassCard variant='gradient' className='p-8 h-full group relative overflow-hidden' hover>
+                <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/50' />
+                <div className='mb-4 flex items-center gap-3'>
+                  <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
+                    <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-primary to-primary/80' />
+                  </div>
+                  <h3 className='text-2xl font-bold text-primary'>
+                    About Me
+                  </h3>
+                </div>
+                <p className='text-foreground/70 mb-6 leading-relaxed'>
                   {homePageData.about_card_description ||
                     "Passionate developer with 5+ years of experience creating modern web applications."}
                 </p>
                 <Button
                   asChild
                   variant='ghost'
-                  className='text-primary hover:text-primary-glow'
+                  className='group-hover:gap-3 transition-all text-primary hover:text-primary-glow'
                 >
                   <Link href={`/about`}>
-                    Learn More <ArrowRight className='ml-2' size={16} />
+                    Learn More <ArrowRight className='ml-2 transition-transform group-hover:translate-x-1' size={16} />
                   </Link>
                 </Button>
               </GlassCard>
             </AnimatedSection>
 
             <AnimatedSection direction='up' delay={0.3}>
-              <GlassCard className='p-8 h-full' hover>
-                <h3 className='text-2xl font-bold mb-4 text-secondary'>
-                  Projects
-                </h3>
-                <p className='text-foreground/70 mb-6'>
+              <GlassCard variant='gradient' className='p-8 h-full group relative overflow-hidden' hover>
+                <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary/50' />
+                <div className='mb-4 flex items-center gap-3'>
+                  <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
+                    <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-secondary to-secondary/80' />
+                  </div>
+                  <h3 className='text-2xl font-bold text-secondary'>
+                    Projects
+                  </h3>
+                </div>
+                <p className='text-foreground/70 mb-6 leading-relaxed'>
                   Explore my latest work featuring modern technologies and
                   innovative solutions
                 </p>
                 <Button
                   asChild
                   variant='ghost'
-                  className='text-secondary hover:text-secondary-glow'
+                  className='group-hover:gap-3 transition-all text-secondary hover:text-secondary-glow'
                 >
                   <Link href={`/projects`}>
-                    View Portfolio <ArrowRight className='ml-2' size={16} />
+                    View Portfolio <ArrowRight className='ml-2 transition-transform group-hover:translate-x-1' size={16} />
                   </Link>
                 </Button>
               </GlassCard>
             </AnimatedSection>
 
             <AnimatedSection direction='right' delay={0.4}>
-              <GlassCard className='p-8 h-full' hover>
-                <h3 className='text-2xl font-bold mb-4 text-accent'>
-                  Experience
-                </h3>
-                <p className='text-foreground/70 mb-6'>
+              <GlassCard variant='gradient' className='p-8 h-full group relative overflow-hidden' hover>
+                <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent to-accent/50' />
+                <div className='mb-4 flex items-center gap-3'>
+                  <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center'>
+                    <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-accent to-accent/80' />
+                  </div>
+                  <h3 className='text-2xl font-bold text-accent'>
+                    Experience
+                  </h3>
+                </div>
+                <p className='text-foreground/70 mb-6 leading-relaxed'>
                   Professional background and skills across multiple disciplines
                 </p>
                 <Button
                   asChild
                   variant='ghost'
-                  className='text-accent hover:text-accent-foreground'
+                  className='group-hover:gap-3 transition-all text-accent hover:text-accent-foreground'
                 >
                   <Link href={`/resume`}>
-                    View Resume <ArrowRight className='ml-2' size={16} />
+                    View Resume <ArrowRight className='ml-2 transition-transform group-hover:translate-x-1' size={16} />
                   </Link>
                 </Button>
               </GlassCard>
@@ -499,9 +589,12 @@ export default function Page() {
           {homePageData.achievements.length > 0 && (
             <div className='mb-16'>
               <AnimatedSection direction='up' className='text-center mb-12'>
-                <h2 className='text-3xl font-bold text-secondary'>
-                  Achievements & Recognition
-                </h2>
+                <div className='inline-block relative'>
+                  <h2 className='text-4xl font-bold bg-gradient-to-r from-secondary via-accent to-primary bg-clip-text text-transparent'>
+                    Achievements & Recognition
+                  </h2>
+                  <div className='absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-secondary/20 via-accent/20 to-primary/20 rounded-full' />
+                </div>
               </AnimatedSection>
 
               <div className='grid md:grid-cols-3 gap-6'>
@@ -512,17 +605,21 @@ export default function Page() {
                     delay={0.2 + index * 0.1}
                     initialScale={0.9}
                   >
-                    <GlassCard className='p-6 text-center' hover>
-                      <div className='text-3xl font-bold text-primary mb-2'>
-                        {achievement.metric}
+                    <GlassCard variant='gradient' className='p-8 text-center group' hover>
+                      <div className='mb-4 flex justify-center'>
+                        <div className='w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center'>
+                          <div className='text-4xl font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent'>
+                            {achievement.metric}
+                          </div>
+                        </div>
                       </div>
-                      <div className='text-sm text-foreground/60 mb-3'>
+                      <div className='text-sm text-foreground/60 mb-4 uppercase tracking-wide'>
                         {achievement.label}
                       </div>
-                      <h3 className='text-lg font-semibold mb-2'>
+                      <h3 className='text-lg font-semibold mb-3 text-foreground'>
                         {achievement.title}
                       </h3>
-                      <p className='text-foreground/70 text-sm'>
+                      <p className='text-foreground/70 text-sm leading-relaxed'>
                         {achievement.description}
                       </p>
                     </GlassCard>
@@ -538,18 +635,19 @@ export default function Page() {
             delay={0.2}
             className='text-center mb-16'
           >
-            <GlassCard className='p-12'>
-              <h2 className='text-3xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+            <GlassCard variant='gradient' className='p-12 relative overflow-hidden'>
+              <div className='absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent' />
+              <h2 className='text-4xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
                 {homePageData.callToAction.title}
               </h2>
-              <p className='text-xl text-foreground/80 mb-8 max-w-2xl mx-auto'>
+              <p className='text-xl text-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed'>
                 {homePageData.callToAction.description}
               </p>
               <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                 <Button
                   asChild
                   size='lg'
-                  className='bg-primary hover:bg-primary/90 text-primary-foreground'
+                  className='bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
                 >
                   <a href={`mailto:${homePageData.callToAction.email}`}>
                     Start a Project
@@ -559,7 +657,7 @@ export default function Page() {
                   asChild
                   variant='outline'
                   size='lg'
-                  className='border-secondary/50 hover:border-secondary text-secondary hover:text-secondary-glow'
+                  className='border-2 border-secondary/50 hover:border-secondary text-secondary hover:text-secondary-glow hover:bg-secondary/10'
                 >
                   <Link href={`/about`}>Learn More About Me</Link>
                 </Button>
