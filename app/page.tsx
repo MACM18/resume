@@ -180,14 +180,16 @@ export default function Page() {
                 <GlassCard variant='gradient' className='p-8 overflow-visible'>
                   {/* Gradient accent bar */}
                   <div className='absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-secondary to-accent rounded-l-2xl' />
-                  
+
                   <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-6 pl-6'>
                     <div className='flex-1'>
                       <h3 className='text-2xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent'>
                         {currentWork.position}
                       </h3>
                       <div className='flex items-center gap-2 text-foreground/60 mb-4'>
-                        <span className='font-medium'>{currentWork.company}</span>
+                        <span className='font-medium'>
+                          {currentWork.company}
+                        </span>
                         {currentWork.location && (
                           <>
                             <span className='text-foreground/30'>•</span>
@@ -223,22 +225,6 @@ export default function Page() {
                         <Link href='/resume'>View full resume</Link>
                       </Button>
                     </div>
-                  </div>
-                </GlassCard>
-              </div>
-            </div>
-          )}
-                    </ul>
-                  ) : null}
-                  <div className='mt-4 text-right'>
-                    <Button
-                      asChild
-                      variant='ghost'
-                      size='sm'
-                      className='text-primary hover:text-primary-glow'
-                    >
-                      <Link href='/resume'>View full resume</Link>
-                    </Button>
                   </div>
                 </GlassCard>
               </div>
@@ -300,7 +286,9 @@ export default function Page() {
                 <h2 className='text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent'>
                   Featured Work
                 </h2>
-                <p className='text-foreground/60 mt-2'>Showcasing my best project</p>
+                <p className='text-foreground/60 mt-2'>
+                  Showcasing my best project
+                </p>
               </AnimatedSection>
 
               <AnimatedSection direction='up' delay={0.2}>
@@ -319,14 +307,14 @@ export default function Page() {
                       />
                       {/* Gradient overlay */}
                       <div className='absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-background via-background/50 to-transparent opacity-90' />
-                      
+
                       {/* Featured badge */}
                       <div className='absolute top-4 left-4 px-3 py-1 rounded-full bg-primary/90 backdrop-blur-sm text-primary-foreground text-xs font-semibold flex items-center gap-1'>
                         <span className='w-1.5 h-1.5 rounded-full bg-white animate-pulse' />
                         Featured
                       </div>
                     </div>
-                    
+
                     {/* Content Section */}
                     <div className='md:col-span-2 p-8 flex flex-col justify-center'>
                       <h3 className='text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-br from-foreground via-primary to-primary/70 bg-clip-text text-transparent'>
@@ -335,7 +323,7 @@ export default function Page() {
                       <p className='text-foreground/70 mb-6 leading-relaxed'>
                         {featuredProject.description}
                       </p>
-                      
+
                       {/* Tech stack */}
                       <div className='flex flex-wrap gap-2 mb-6'>
                         {featuredProject.tech.slice(0, 5).map((tech) => (
@@ -352,17 +340,25 @@ export default function Page() {
                           </span>
                         )}
                       </div>
-                      
+
                       {/* Action buttons */}
                       <div className='flex gap-3'>
-                        <Button asChild className='flex-1 bg-gradient-to-r from-primary to-primary-glow hover:shadow-lg'>
+                        <Button
+                          asChild
+                          className='flex-1 bg-gradient-to-r from-primary to-primary-glow hover:shadow-lg'
+                        >
                           <Link href={`/projects/${featuredProject.id}`}>
                             View Project
                           </Link>
                         </Button>
                         <div className='flex gap-2'>
                           {featuredProject.demo_url && (
-                            <Button asChild variant='outline' size='icon' className='border-primary/30 hover:border-primary/60'>
+                            <Button
+                              asChild
+                              variant='outline'
+                              size='icon'
+                              className='border-primary/30 hover:border-primary/60'
+                            >
                               <a
                                 href={featuredProject.demo_url}
                                 target='_blank'
@@ -374,7 +370,12 @@ export default function Page() {
                             </Button>
                           )}
                           {featuredProject.github_url && (
-                            <Button asChild variant='outline' size='icon' className='border-primary/30 hover:border-primary/60'>
+                            <Button
+                              asChild
+                              variant='outline'
+                              size='icon'
+                              className='border-primary/30 hover:border-primary/60'
+                            >
                               <a
                                 href={featuredProject.github_url}
                                 target='_blank'
@@ -391,73 +392,6 @@ export default function Page() {
                   </div>
                 </GlassCard>
               </AnimatedSection>
-                          </Button>
-                        )}
-                        {featuredProject.github_url && (
-                          <Button asChild variant='outline' size='sm'>
-                            <a
-                              href={featuredProject.github_url}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                            >
-                              <Github size={16} />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </GlassCard>
-                </AnimatedSection>
-
-                {/* Other Projects (Right, stacked) */}
-                {otherProjectsForDisplay &&
-                  otherProjectsForDisplay.length > 0 && (
-                    <div className='lg:col-span-1 flex flex-col gap-6'>
-                      {otherProjectsForDisplay.map((project, index) => (
-                        <AnimatedSection
-                          key={project.id}
-                          direction='right'
-                          delay={0.3 + index * 0.1}
-                          className='flex-1'
-                        >
-                          <GlassCard className='p-6 h-full group' hover>
-                            <h3 className='text-xl font-bold mb-3 text-foreground group-hover:text-secondary transition-colors duration-300'>
-                              {project.title}
-                            </h3>
-                            <p className='text-foreground/70 mb-4 text-sm'>
-                              {project.description}
-                            </p>
-                            <div className='flex flex-wrap gap-1 mb-4'>
-                              {project.tech.slice(0, 3).map((tech) => (
-                                <span
-                                  key={tech}
-                                  className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'
-                                >
-                                  {tech}
-                                </span>
-                              ))}
-                              {project.tech.length > 3 && (
-                                <span className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'>
-                                  +{project.tech.length - 3} more
-                                </span>
-                              )}
-                            </div>
-                            <Button
-                              asChild
-                              size='sm'
-                              variant='ghost'
-                              className='w-full'
-                            >
-                              <Link href={`/projects/${project.id}`}>
-                                View Project
-                              </Link>
-                            </Button>
-                          </GlassCard>
-                        </AnimatedSection>
-                      ))}
-                    </div>
-                  )}
-              </div>
             </section>
           )}
 
@@ -479,7 +413,11 @@ export default function Page() {
                   direction='up'
                   delay={0.2 + index * 0.1}
                 >
-                  <GlassCard variant='gradient' className='p-6 text-center group' hover>
+                  <GlassCard
+                    variant='gradient'
+                    className='p-6 text-center group'
+                    hover
+                  >
                     <div className='mb-6 flex justify-center'>
                       <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center'>
                         <div className='w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-secondary' />
@@ -490,7 +428,10 @@ export default function Page() {
                     </h3>
                     <div className='space-y-3'>
                       {category.skills.map((skill) => (
-                        <div key={skill} className='flex items-center justify-center gap-2 text-sm text-foreground/80 group-hover:text-foreground transition-colors'>
+                        <div
+                          key={skill}
+                          className='flex items-center justify-center gap-2 text-sm text-foreground/80 group-hover:text-foreground transition-colors'
+                        >
                           <span className='w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary' />
                           {skill}
                         </div>
@@ -505,15 +446,17 @@ export default function Page() {
           {/* Quick Access Cards */}
           <div className='grid md:grid-cols-3 gap-8 mb-16'>
             <AnimatedSection direction='left' delay={0.2}>
-              <GlassCard variant='gradient' className='p-8 h-full group relative overflow-hidden' hover>
+              <GlassCard
+                variant='gradient'
+                className='p-8 h-full group relative overflow-hidden'
+                hover
+              >
                 <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/50' />
                 <div className='mb-4 flex items-center gap-3'>
                   <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center'>
                     <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-primary to-primary/80' />
                   </div>
-                  <h3 className='text-2xl font-bold text-primary'>
-                    About Me
-                  </h3>
+                  <h3 className='text-2xl font-bold text-primary'>About Me</h3>
                 </div>
                 <p className='text-foreground/70 mb-6 leading-relaxed'>
                   {homePageData.about_card_description ||
@@ -525,14 +468,22 @@ export default function Page() {
                   className='group-hover:gap-3 transition-all text-primary hover:text-primary-glow'
                 >
                   <Link href={`/about`}>
-                    Learn More <ArrowRight className='ml-2 transition-transform group-hover:translate-x-1' size={16} />
+                    Learn More{" "}
+                    <ArrowRight
+                      className='ml-2 transition-transform group-hover:translate-x-1'
+                      size={16}
+                    />
                   </Link>
                 </Button>
               </GlassCard>
             </AnimatedSection>
 
             <AnimatedSection direction='up' delay={0.3}>
-              <GlassCard variant='gradient' className='p-8 h-full group relative overflow-hidden' hover>
+              <GlassCard
+                variant='gradient'
+                className='p-8 h-full group relative overflow-hidden'
+                hover
+              >
                 <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary/50' />
                 <div className='mb-4 flex items-center gap-3'>
                   <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center'>
@@ -552,22 +503,28 @@ export default function Page() {
                   className='group-hover:gap-3 transition-all text-secondary hover:text-secondary-glow'
                 >
                   <Link href={`/projects`}>
-                    View Portfolio <ArrowRight className='ml-2 transition-transform group-hover:translate-x-1' size={16} />
+                    View Portfolio{" "}
+                    <ArrowRight
+                      className='ml-2 transition-transform group-hover:translate-x-1'
+                      size={16}
+                    />
                   </Link>
                 </Button>
               </GlassCard>
             </AnimatedSection>
 
             <AnimatedSection direction='right' delay={0.4}>
-              <GlassCard variant='gradient' className='p-8 h-full group relative overflow-hidden' hover>
+              <GlassCard
+                variant='gradient'
+                className='p-8 h-full group relative overflow-hidden'
+                hover
+              >
                 <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent to-accent/50' />
                 <div className='mb-4 flex items-center gap-3'>
                   <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center'>
                     <div className='w-5 h-5 rounded-lg bg-gradient-to-br from-accent to-accent/80' />
                   </div>
-                  <h3 className='text-2xl font-bold text-accent'>
-                    Experience
-                  </h3>
+                  <h3 className='text-2xl font-bold text-accent'>Experience</h3>
                 </div>
                 <p className='text-foreground/70 mb-6 leading-relaxed'>
                   Professional background and skills across multiple disciplines
@@ -578,7 +535,11 @@ export default function Page() {
                   className='group-hover:gap-3 transition-all text-accent hover:text-accent-foreground'
                 >
                   <Link href={`/resume`}>
-                    View Resume <ArrowRight className='ml-2 transition-transform group-hover:translate-x-1' size={16} />
+                    View Resume{" "}
+                    <ArrowRight
+                      className='ml-2 transition-transform group-hover:translate-x-1'
+                      size={16}
+                    />
                   </Link>
                 </Button>
               </GlassCard>
@@ -605,7 +566,11 @@ export default function Page() {
                     delay={0.2 + index * 0.1}
                     initialScale={0.9}
                   >
-                    <GlassCard variant='gradient' className='p-8 text-center group' hover>
+                    <GlassCard
+                      variant='gradient'
+                      className='p-8 text-center group'
+                      hover
+                    >
                       <div className='mb-4 flex justify-center'>
                         <div className='w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center'>
                           <div className='text-4xl font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent'>
@@ -635,7 +600,10 @@ export default function Page() {
             delay={0.2}
             className='text-center mb-16'
           >
-            <GlassCard variant='gradient' className='p-12 relative overflow-hidden'>
+            <GlassCard
+              variant='gradient'
+              className='p-12 relative overflow-hidden'
+            >
               <div className='absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent' />
               <h2 className='text-4xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent'>
                 {homePageData.callToAction.title}
