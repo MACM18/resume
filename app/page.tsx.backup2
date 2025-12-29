@@ -1,14 +1,6 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  ArrowRight,
-  Briefcase,
-  Award,
-  Target,
-  ExternalLink,
-  Github,
-} from "lucide-react";
+import { ArrowRight, Briefcase, Award, Target } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -98,9 +90,7 @@ export default function Page() {
     },
   };
 
-  const featuredProject = allPublishedProjects?.find((p) => p.featured);
-  const featuredProjects =
-    allPublishedProjects?.filter((p) => p.featured).slice(0, 2) || [];
+  const featuredProjects = allPublishedProjects?.filter((p) => p.featured).slice(0, 2) || [];
   const structuredData = generateStructuredData(profileData, hostname);
 
   return (
@@ -692,6 +682,6 @@ export default function Page() {
           </AnimatedSection>
         </div>
       </div>
-    </ErrorBoundary>
+    </>
   );
 }

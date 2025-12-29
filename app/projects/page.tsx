@@ -1,17 +1,18 @@
 "use client";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { ExternalLink, Github, Star } from "lucide-react";
-import { GlassCard } from "@/components/GlassCard";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import Image from "next/image";
+import { ExternalLink, Github, Star } from "lucide-react";
 import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
 import { getEffectiveDomain } from "@/lib/utils";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { ProjectsPageSkeleton } from "@/components/ui/loading-skeleton";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/GlassCard";
+import type { Project } from "@/types/portfolio";
 
 const Projects = () => {
   const [hostname, setHostname] = useState("");
@@ -43,23 +44,15 @@ const Projects = () => {
   const isLoading = isLoadingProfile || isLoadingProjects;
 
   if (isLoading || !hostname) {
-    return (
-      <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto space-y-8'>
-        <Skeleton className='h-8 w-64' />
-        <div className='grid lg:grid-cols-2 gap-8'>
-          <Skeleton className='h-[400px] w-full' />
-          <Skeleton className='h-[400px] w-full' />
-        </div>
-      </div>
-    );
+    return <ProjectsPageSkeleton />;
   }
 
   if (!profileData) {
     return <DomainNotClaimed />;
   }
 
-  const featuredProjects = projects?.filter((p) => p.featured) || [];
-  const otherProjects = projects?.filter((p) => !p.featured) || [];
+  const featuredProjects = projects?.filter((p: Project) => p.featured) || [];
+  const otherProjects = projects?.filter((p: Project) => !p.featured) || [];
 
   return (
     <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
@@ -96,7 +89,7 @@ const Projects = () => {
               </h2>
             </motion.div>
             <div className='grid lg:grid-cols-2 gap-8'>
-              {featuredProjects.map((project, index) => (
+              {featuredProjects.map((project: Project, index: number) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -138,7 +131,7 @@ const Projects = () => {
                         {project.description}
                       </p>
                       <div className='flex flex-wrap gap-2 mb-6'>
-                        {project.tech.map((tech) => (
+                        {project.tech.map((tech: string) => (
                           <span
                             key={tech}
                             className='px-3 py-1.5 text-xs rounded-full bg-gradient-to-r from-secondary/20 to-secondary/10 border border-secondary/30 text-secondary font-medium'
@@ -210,7 +203,7 @@ const Projects = () => {
               More Projects
             </motion.h2>
             <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {otherProjects.map((project, index) => (
+              {otherProjects.map((project: Project, index: number) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -229,7 +222,7 @@ const Projects = () => {
                       {project.description}
                     </p>
                     <div className='flex flex-wrap gap-2 mb-4'>
-                      {project.tech.slice(0, 3).map((tech) => (
+                      {project.tech.slice(0, 3).map((tech: string) => (
                         <span
                           key={tech}
                           className='px-2.5 py-1 text-xs rounded-full bg-gradient-to-r from-glass-bg/30 to-glass-bg/20 border border-glass-border/30 text-foreground/70'
