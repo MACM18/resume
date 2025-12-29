@@ -191,7 +191,8 @@ const About = () => {
               </div>
               <div className='grid md:grid-cols-2 gap-6'>
                 {aboutPageData.skills.map((skillGroup, index) => {
-                  const Icon = iconMap[skillGroup.icon as keyof typeof iconMap];
+                  const Icon =
+                    iconMap[skillGroup.icon as keyof typeof iconMap] ?? Code;
                   return (
                     <motion.div
                       key={skillGroup.category}
