@@ -29,3 +29,14 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/macm18/portfolio-nextjs:latest
+
+      - name: Trigger Coolify Deployment
+        run: |
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+               -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}"
+        
+
+     - name: Second Deployment Trigger
+       run: |
+         curl -X POST "${{ secrets.SECOND_DEPLOYMENT_WEBHOOK_URL }}" \
+                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}"
