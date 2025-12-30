@@ -24,4 +24,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ toLower(github.repository_owner) }}/portfolio-nextjs:latest
+          tags: ghcr.io/macm18/portfolio-nextjs:latest
