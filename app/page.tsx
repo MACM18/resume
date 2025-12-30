@@ -3,9 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   FaArrowRight as ArrowRight,
-  FaBriefcase as Briefcase,
-  FaAward as Award,
-  FaBullseye as Target,
   FaGithub as Github,
 } from "react-icons/fa6";
 import { ExternalLink } from "lucide-react";
@@ -14,24 +11,36 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
-import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { getProjects } from "@/lib/projects";
 import { getCurrentWork } from "@/lib/work-experiences";
 import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
 import { generateStructuredData } from "@/lib/seo";
 import { HomePageData } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
-import { SectionHeader } from "@/components/ui/section-header";
-import { FeatureCard } from "@/components/ui/feature-card";
-import { StatsCard } from "@/components/ui/stats-card";
-import { ProjectCard } from "@/components/ui/project-card";
 import { HomePageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Page() {
   const [hostname, setHostname] = useState("");
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Parallax transforms for hero elements
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  // Interactive scroll indicator
+  const scrollToContent = () => {
+    const content = document.getElementById("main-content");
+    content?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     setHostname(window.location.hostname);
@@ -99,8 +108,6 @@ export default function Page() {
   };
 
   const featuredProject = allPublishedProjects?.find((p) => p.featured);
-  const featuredProjects =
-    allPublishedProjects?.filter((p) => p.featured).slice(0, 2) || [];
   const structuredData = generateStructuredData(profileData, hostname);
 
   return (
@@ -118,125 +125,200 @@ export default function Page() {
         }}
       />
       <div className='min-h-screen relative'>
-        {/* Hero Section with Background Image */}
-        <section className='relative min-h-[80vh] flex items-center justify-center overflow-hidden'>
-          {/* Background Image Container */}
+        {/* Hero Section - Full Screen with Parallax */}
+        <section
+          ref={heroRef}
+          className='relative h-screen flex items-center justify-center overflow-hidden'
+        >
+          {/* Background Image with Parallax */}
           {profileData.background_image_url && (
-            <div className='absolute inset-0'>
+            <motion.div className='absolute inset-0' style={{ y: backgroundY }}>
               <div
-                className='absolute inset-0 bg-cover bg-center bg-no-repeat'
+                className='absolute inset-0 bg-cover bg-center bg-no-repeat scale-110'
                 style={{
                   backgroundImage: `url('${profileData.background_image_url}')`,
                 }}
               />
-              {/* Gradient overlay for text readability */}
-              <div className='absolute inset-0 bg-linear-to-b from-background/80 via-background/70 to-background' />
-            </div>
+              {/* Multi-layer gradient overlay */}
+              <div className='absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background' />
+              <div className='absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30' />
+            </motion.div>
           )}
 
-          {/* Hero Content */}
-          <div className='relative z-10 max-w-5xl mx-auto px-6 text-center'>
-            <AnimatedSection direction='up' delay={0.1}>
-              <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
-                <span className='bg-linear-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent'>
-                  {homePageData.name}
-                </span>
-              </h1>
-            </AnimatedSection>
+          {/* Hero Content with Parallax */}
+          <motion.div
+            className='relative z-10 max-w-6xl mx-auto px-6'
+            style={{ y: textY, opacity }}
+          >
+            <div className='grid lg:grid-cols-2 gap-12 items-center'>
+              {/* Text Content */}
+              <div className='text-center lg:text-left'>
+                <AnimatedSection direction='up' delay={0.1}>
+                  <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-sm font-medium mb-8'>
+                    <span className='w-2 h-2 rounded-full bg-primary animate-pulse' />
+                    Available for opportunities
+                  </div>
+                </AnimatedSection>
 
-            <AnimatedSection direction='up' delay={0.2}>
-              <p className='text-xl md:text-2xl text-foreground/80 mb-12 max-w-3xl mx-auto font-light'>
-                {homePageData.tagline}
-              </p>
-            </AnimatedSection>
+                <AnimatedSection direction='up' delay={0.2}>
+                  <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
+                    <span className='bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent'>
+                      {homePageData.name}
+                    </span>
+                  </h1>
+                </AnimatedSection>
 
-            <AnimatedSection direction='up' delay={0.3}>
-              <div className='flex flex-wrap justify-center gap-4'>
-                <Button
-                  asChild
-                  size='lg'
-                  className='bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-lg'
-                >
-                  <Link href='/projects'>
-                    View Projects <ArrowRight className='ml-2' size={20} />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant='outline'
-                  size='lg'
-                  className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-lg'
-                >
-                  <Link href='/contact'>Get In Touch</Link>
-                </Button>
+                <AnimatedSection direction='up' delay={0.3}>
+                  <p className='text-xl md:text-2xl text-foreground/70 mb-10 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed'>
+                    {homePageData.tagline}
+                  </p>
+                </AnimatedSection>
+
+                <AnimatedSection direction='up' delay={0.4}>
+                  <div className='flex flex-wrap justify-center lg:justify-start gap-4'>
+                    <Button
+                      asChild
+                      size='lg'
+                      className='bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all'
+                    >
+                      <Link href='/projects'>
+                        View Projects <ArrowRight className='ml-2' size={20} />
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant='outline'
+                      size='lg'
+                      className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
+                    >
+                      <Link href='/about'>About Me</Link>
+                    </Button>
+                  </div>
+                </AnimatedSection>
+
+                {/* Social Links in Hero */}
+                {homePageData.socialLinks.length > 0 && (
+                  <AnimatedSection direction='up' delay={0.5}>
+                    <div className='flex justify-center lg:justify-start gap-3 mt-10'>
+                      {homePageData.socialLinks.slice(0, 4).map((social) => {
+                        const Icon = getDynamicIcon(social.icon);
+                        if (!Icon) return null;
+                        return (
+                          <a
+                            key={social.label}
+                            href={social.href}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='p-3 rounded-xl border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all group'
+                            aria-label={social.label}
+                          >
+                            <Icon className='h-5 w-5 text-foreground/60 group-hover:text-primary transition-colors' />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </AnimatedSection>
+                )}
               </div>
-            </AnimatedSection>
-          </div>
 
-          {/* Scroll indicator */}
-          <div className='absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce'>
-            <div className='w-6 h-10 border-2 border-foreground/20 rounded-full flex justify-center'>
-              <div className='w-1 h-3 bg-foreground/40 rounded-full mt-2 animate-pulse' />
+              {/* Profile Image */}
+              {profileData.avatar_url && (
+                <AnimatedSection direction='left' delay={0.3}>
+                  <div className='hidden lg:block relative'>
+                    <div className='relative w-80 h-80 xl:w-96 xl:h-96 mx-auto'>
+                      {/* Decorative elements */}
+                      <div className='absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl' />
+                      <div className='absolute -inset-4 rounded-full border border-foreground/5' />
+                      <div className='absolute -inset-8 rounded-full border border-foreground/5' />
+
+                      {/* Image */}
+                      <div className='relative w-full h-full rounded-full overflow-hidden border-2 border-foreground/10'>
+                        <Image
+                          src={profileData.avatar_url}
+                          alt={homePageData.name}
+                          fill
+                          className='object-cover'
+                          priority
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </AnimatedSection>
+              )}
             </div>
-          </div>
+          </motion.div>
+
+          {/* Interactive Scroll Indicator */}
+          <motion.button
+            onClick={scrollToContent}
+            className='absolute bottom-8 left-1/2 -translate-x-1/2 z-20 group cursor-pointer'
+            style={{ opacity }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className='flex flex-col items-center gap-2'>
+              <span className='text-xs text-foreground/40 uppercase tracking-widest group-hover:text-foreground/60 transition-colors'>
+                Scroll
+              </span>
+              <motion.div
+                className='w-6 h-10 border-2 border-foreground/20 rounded-full flex justify-center group-hover:border-foreground/40 transition-colors'
+                animate={{ y: [0, 5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <motion.div
+                  className='w-1 h-3 bg-foreground/40 rounded-full mt-2 group-hover:bg-foreground/60 transition-colors'
+                  animate={{ y: [0, 4, 0], opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              </motion.div>
+            </div>
+          </motion.button>
         </section>
 
         {/* Main Content Container */}
-        <div className='max-w-7xl mx-auto px-6 pb-20 space-y-32'>
-          {/* Current Role */}
+        <div
+          id='main-content'
+          className='max-w-7xl mx-auto px-6 pb-20 space-y-24'
+        >
+          {/* Current Role - Compact */}
           {currentWork && (
-            <section className='pt-20'>
+            <section className='pt-12'>
               <AnimatedSection direction='up'>
-                <div className='flex justify-center mb-12'>
-                  <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-medium'>
-                    <span className='w-2 h-2 rounded-full bg-primary animate-pulse' />
-                    Currently Working
-                  </div>
-                </div>
-              </AnimatedSection>
-
-              <AnimatedSection direction='up' delay={0.2}>
                 <GlassCard
                   variant='bordered'
-                  className='max-w-4xl mx-auto p-8 md:p-10'
+                  className='max-w-4xl mx-auto p-6 md:p-8'
                 >
-                  <div className='flex flex-col md:flex-row md:items-start justify-between gap-6'>
+                  <div className='flex flex-col md:flex-row md:items-center gap-6'>
+                    {/* Status Badge */}
+                    <div className='flex items-center gap-3'>
+                      <div className='w-3 h-3 rounded-full bg-green-500 animate-pulse' />
+                      <span className='text-sm font-medium text-foreground/60'>
+                        Currently
+                      </span>
+                    </div>
+
+                    {/* Role Info */}
                     <div className='flex-1'>
-                      <h3 className='text-2xl md:text-3xl font-bold mb-2'>
+                      <h3 className='text-xl md:text-2xl font-bold'>
                         {currentWork.position}
                       </h3>
-                      <div className='flex items-center gap-2 text-foreground/60 mb-6'>
-                        <span className='font-medium'>
-                          {currentWork.company}
-                        </span>
-                        {currentWork.location && (
-                          <>
-                            <span>·</span>
-                            <span>{currentWork.location}</span>
-                          </>
-                        )}
-                      </div>
-                      {currentWork.description?.length ? (
-                        <ul className='space-y-3 text-foreground/70'>
-                          {currentWork.description.slice(0, 3).map((d, i) => (
-                            <li key={i} className='flex items-start gap-3'>
-                              <span className='text-primary mt-1'>→</span>
-                              <span>{d}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
+                      <p className='text-foreground/60'>
+                        {currentWork.company}
+                        {currentWork.location && ` · ${currentWork.location}`}
+                      </p>
                     </div>
-                    <div className='flex flex-col items-end gap-4'>
-                      <span className='text-sm text-foreground/60 whitespace-nowrap'>
+
+                    {/* Date & Link */}
+                    <div className='flex items-center gap-4'>
+                      <span className='text-sm text-foreground/50'>
                         {formatDateRange(
                           currentWork.start_date,
                           currentWork.end_date || undefined,
                           currentWork.is_current
                         )}
                       </span>
-                      <Button asChild variant='ghost' size='sm'>
-                        <Link href='/resume'>View full resume →</Link>
+                      <Button asChild variant='outline' size='sm'>
+                        <Link href='/resume'>View Resume</Link>
                       </Button>
                     </div>
                   </div>
@@ -246,59 +328,82 @@ export default function Page() {
           )}
 
           {/* Experience Highlights */}
-          <section>
-            <AnimatedSection direction='up'>
-              <div className='text-center mb-16'>
-                <h2 className='text-4xl md:text-5xl font-bold mb-4'>
-                  Experience Highlights
-                </h2>
-                <p className='text-foreground/60 text-lg'>
-                  Key achievements and milestones
-                </p>
-              </div>
-            </AnimatedSection>
+          {homePageData.experienceHighlights.length > 0 && (
+            <section>
+              <AnimatedSection direction='up'>
+                <div className='text-center mb-12'>
+                  <h2 className='text-3xl md:text-4xl font-bold mb-3'>
+                    Experience Highlights
+                  </h2>
+                  <p className='text-foreground/60'>
+                    Key achievements and milestones
+                  </p>
+                </div>
+              </AnimatedSection>
 
-            <div className='grid md:grid-cols-2 gap-6 max-w-5xl mx-auto'>
-              {homePageData.experienceHighlights.map((highlight, index) => (
-                <AnimatedSection
-                  key={highlight.title}
-                  direction='up'
-                  delay={0.1 * index}
-                >
-                  <GlassCard variant='minimal' className='p-8' hover>
-                    <div className='flex items-start gap-4 mb-4'>
-                      <div className='w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0'>
-                        <span className='text-primary font-bold text-xl'>
-                          {highlight.metric}
-                        </span>
+              {/* Adaptive grid: single item = full width centered, multiple = 2 cols */}
+              <div
+                className={`grid gap-6 max-w-5xl mx-auto ${
+                  homePageData.experienceHighlights.length === 1
+                    ? "max-w-2xl"
+                    : "md:grid-cols-2"
+                }`}
+              >
+                {homePageData.experienceHighlights.map((highlight, index) => (
+                  <AnimatedSection
+                    key={highlight.title}
+                    direction='up'
+                    delay={0.1 * index}
+                  >
+                    <GlassCard
+                      variant='minimal'
+                      className={`p-8 h-full ${
+                        homePageData.experienceHighlights.length === 1
+                          ? "text-center"
+                          : ""
+                      }`}
+                      hover
+                    >
+                      <div
+                        className={`flex items-start gap-4 mb-4 ${
+                          homePageData.experienceHighlights.length === 1
+                            ? "flex-col items-center"
+                            : ""
+                        }`}
+                      >
+                        <div className='w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0'>
+                          <span className='text-primary font-bold text-2xl'>
+                            {highlight.metric}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className='text-xl font-semibold mb-1'>
+                            {highlight.title}
+                          </h3>
+                          <p className='text-foreground/60 text-sm'>
+                            {highlight.subtitle}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className='text-xl font-semibold mb-1'>
-                          {highlight.title}
-                        </h3>
-                        <p className='text-foreground/60 text-sm'>
-                          {highlight.subtitle}
-                        </p>
-                      </div>
-                    </div>
-                    <p className='text-foreground/70 leading-relaxed'>
-                      {highlight.description}
-                    </p>
-                  </GlassCard>
-                </AnimatedSection>
-              ))}
-            </div>
-          </section>
+                      <p className='text-foreground/70 leading-relaxed'>
+                        {highlight.description}
+                      </p>
+                    </GlassCard>
+                  </AnimatedSection>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Featured Work */}
           {featuredProject && (
             <section>
               <AnimatedSection direction='up'>
-                <div className='text-center mb-16'>
-                  <h2 className='text-4xl md:text-5xl font-bold mb-4'>
+                <div className='text-center mb-12'>
+                  <h2 className='text-3xl md:text-4xl font-bold mb-3'>
                     Featured Work
                   </h2>
-                  <p className='text-foreground/60 text-lg'>
+                  <p className='text-foreground/60'>
                     Showcasing my best project
                   </p>
                 </div>
@@ -391,116 +496,138 @@ export default function Page() {
           )}
 
           {/* Technical Expertise */}
+          {homePageData.technicalExpertise.length > 0 && (
+            <section>
+              <AnimatedSection direction='up'>
+                <div className='text-center mb-12'>
+                  <h2 className='text-3xl md:text-4xl font-bold mb-3'>
+                    Technical Expertise
+                  </h2>
+                  <p className='text-foreground/60'>
+                    Core skills and technologies
+                  </p>
+                </div>
+              </AnimatedSection>
+
+              <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto'>
+                {homePageData.technicalExpertise.map((category, index) => (
+                  <AnimatedSection
+                    key={category.name}
+                    direction='up'
+                    delay={0.1 * index}
+                  >
+                    <GlassCard variant='minimal' className='p-6 h-full' hover>
+                      <h3 className='text-lg font-semibold mb-4 text-primary'>
+                        {category.name}
+                      </h3>
+                      <ul className='space-y-2'>
+                        {category.skills.map((skill) => (
+                          <li
+                            key={skill}
+                            className='text-sm text-foreground/70 flex items-center gap-2'
+                          >
+                            <span className='w-1 h-1 rounded-full bg-foreground/30' />
+                            {skill}
+                          </li>
+                        ))}
+                      </ul>
+                    </GlassCard>
+                  </AnimatedSection>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Quick Access Cards - Redesigned with equal heights */}
           <section>
             <AnimatedSection direction='up'>
-              <div className='text-center mb-16'>
-                <h2 className='text-4xl md:text-5xl font-bold mb-4'>
-                  Technical Expertise
+              <div className='text-center mb-12'>
+                <h2 className='text-3xl md:text-4xl font-bold mb-3'>
+                  Explore More
                 </h2>
-                <p className='text-foreground/60 text-lg'>
-                  Core skills and technologies
+                <p className='text-foreground/60'>
+                  Learn more about my work and experience
                 </p>
               </div>
             </AnimatedSection>
 
-            <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto'>
-              {homePageData.technicalExpertise.map((category, index) => (
-                <AnimatedSection
-                  key={category.name}
-                  direction='up'
-                  delay={0.1 * index}
-                >
-                  <GlassCard variant='minimal' className='p-6' hover>
-                    <h3 className='text-lg font-semibold mb-4 text-primary'>
-                      {category.name}
-                    </h3>
-                    <ul className='space-y-2'>
-                      {category.skills.map((skill) => (
-                        <li
-                          key={skill}
-                          className='text-sm text-foreground/70 flex items-center gap-2'
-                        >
-                          <span className='w-1 h-1 rounded-full bg-foreground/30' />
-                          {skill}
-                        </li>
-                      ))}
-                    </ul>
-                  </GlassCard>
-                </AnimatedSection>
-              ))}
-            </div>
-          </section>
-
-          {/* Quick Access Cards */}
-          <section>
             <div className='grid md:grid-cols-3 gap-6 max-w-6xl mx-auto'>
               <AnimatedSection direction='up' delay={0.1}>
-                <GlassCard variant='minimal' className='p-8 h-full group' hover>
-                  <h3 className='text-2xl font-bold mb-4'>About Me</h3>
-                  <p className='text-foreground/70 mb-6 leading-relaxed'>
-                    {homePageData.about_card_description ||
-                      "Passionate developer with years of experience creating modern web applications."}
-                  </p>
-                  <Button
-                    asChild
-                    variant='ghost'
-                    className='p-0 h-auto font-medium'
+                <Link href='/about' className='block h-full'>
+                  <GlassCard
+                    variant='minimal'
+                    className='p-8 h-full group flex flex-col'
+                    hover
                   >
-                    <Link href='/about'>
-                      Learn More{" "}
+                    <div className='w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6'>
+                      <span className='text-2xl'>👤</span>
+                    </div>
+                    <h3 className='text-2xl font-bold mb-3'>About Me</h3>
+                    <p className='text-foreground/60 leading-relaxed flex-1 line-clamp-3'>
+                      {homePageData.about_card_description ||
+                        "Discover my journey, skills, and what drives me to create impactful solutions."}
+                    </p>
+                    <div className='flex items-center gap-2 mt-6 text-primary font-medium'>
+                      <span>Learn More</span>
                       <ArrowRight
-                        className='ml-2 group-hover:translate-x-1 transition-transform'
+                        className='group-hover:translate-x-1 transition-transform'
                         size={16}
                       />
-                    </Link>
-                  </Button>
-                </GlassCard>
+                    </div>
+                  </GlassCard>
+                </Link>
               </AnimatedSection>
 
               <AnimatedSection direction='up' delay={0.2}>
-                <GlassCard variant='minimal' className='p-8 h-full group' hover>
-                  <h3 className='text-2xl font-bold mb-4'>Projects</h3>
-                  <p className='text-foreground/70 mb-6 leading-relaxed'>
-                    Explore my latest work featuring modern technologies and
-                    innovative solutions
-                  </p>
-                  <Button
-                    asChild
-                    variant='ghost'
-                    className='p-0 h-auto font-medium'
+                <Link href='/projects' className='block h-full'>
+                  <GlassCard
+                    variant='minimal'
+                    className='p-8 h-full group flex flex-col'
+                    hover
                   >
-                    <Link href='/projects'>
-                      View Portfolio{" "}
+                    <div className='w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-6'>
+                      <span className='text-2xl'>🚀</span>
+                    </div>
+                    <h3 className='text-2xl font-bold mb-3'>Projects</h3>
+                    <p className='text-foreground/60 leading-relaxed flex-1 line-clamp-3'>
+                      Explore my latest work featuring modern technologies and
+                      innovative solutions.
+                    </p>
+                    <div className='flex items-center gap-2 mt-6 text-primary font-medium'>
+                      <span>View Portfolio</span>
                       <ArrowRight
-                        className='ml-2 group-hover:translate-x-1 transition-transform'
+                        className='group-hover:translate-x-1 transition-transform'
                         size={16}
                       />
-                    </Link>
-                  </Button>
-                </GlassCard>
+                    </div>
+                  </GlassCard>
+                </Link>
               </AnimatedSection>
 
               <AnimatedSection direction='up' delay={0.3}>
-                <GlassCard variant='minimal' className='p-8 h-full group' hover>
-                  <h3 className='text-2xl font-bold mb-4'>Experience</h3>
-                  <p className='text-foreground/70 mb-6 leading-relaxed'>
-                    Professional background and skills across multiple
-                    disciplines
-                  </p>
-                  <Button
-                    asChild
-                    variant='ghost'
-                    className='p-0 h-auto font-medium'
+                <Link href='/resume' className='block h-full'>
+                  <GlassCard
+                    variant='minimal'
+                    className='p-8 h-full group flex flex-col'
+                    hover
                   >
-                    <Link href='/resume'>
-                      View Resume{" "}
+                    <div className='w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-6'>
+                      <span className='text-2xl'>📄</span>
+                    </div>
+                    <h3 className='text-2xl font-bold mb-3'>Experience</h3>
+                    <p className='text-foreground/60 leading-relaxed flex-1 line-clamp-3'>
+                      Professional background and skills across multiple
+                      disciplines.
+                    </p>
+                    <div className='flex items-center gap-2 mt-6 text-primary font-medium'>
+                      <span>View Resume</span>
                       <ArrowRight
-                        className='ml-2 group-hover:translate-x-1 transition-transform'
+                        className='group-hover:translate-x-1 transition-transform'
                         size={16}
                       />
-                    </Link>
-                  </Button>
-                </GlassCard>
+                    </div>
+                  </GlassCard>
+                </Link>
               </AnimatedSection>
             </div>
           </section>
@@ -509,13 +636,11 @@ export default function Page() {
           {homePageData.achievements.length > 0 && (
             <section>
               <AnimatedSection direction='up'>
-                <div className='text-center mb-16'>
-                  <h2 className='text-4xl md:text-5xl font-bold mb-4'>
-                    Achievements & Recognition
+                <div className='text-center mb-12'>
+                  <h2 className='text-3xl md:text-4xl font-bold mb-3'>
+                    Achievements
                   </h2>
-                  <p className='text-foreground/60 text-lg'>
-                    Notable accomplishments
-                  </p>
+                  <p className='text-foreground/60'>Notable accomplishments</p>
                 </div>
               </AnimatedSection>
 
@@ -528,19 +653,19 @@ export default function Page() {
                   >
                     <GlassCard
                       variant='minimal'
-                      className='p-8 text-center'
+                      className='p-8 text-center h-full'
                       hover
                     >
-                      <div className='text-5xl font-bold text-primary mb-4'>
+                      <div className='text-4xl font-bold text-primary mb-3'>
                         {achievement.metric}
                       </div>
-                      <div className='text-sm text-foreground/60 mb-4 uppercase tracking-wide font-medium'>
+                      <div className='text-xs text-foreground/50 mb-4 uppercase tracking-widest font-medium'>
                         {achievement.label}
                       </div>
-                      <h3 className='text-lg font-semibold mb-3'>
+                      <h3 className='text-lg font-semibold mb-2'>
                         {achievement.title}
                       </h3>
-                      <p className='text-foreground/70 text-sm leading-relaxed'>
+                      <p className='text-foreground/60 text-sm leading-relaxed'>
                         {achievement.description}
                       </p>
                     </GlassCard>
@@ -555,26 +680,21 @@ export default function Page() {
             <AnimatedSection direction='up'>
               <GlassCard
                 variant='bordered'
-                className='p-12 md:p-16 text-center max-w-4xl mx-auto'
+                className='p-10 md:p-14 text-center max-w-3xl mx-auto'
               >
-                <h2 className='text-4xl md:text-5xl font-bold mb-6'>
+                <h2 className='text-3xl md:text-4xl font-bold mb-4'>
                   {homePageData.callToAction.title}
                 </h2>
-                <p className='text-xl text-foreground/70 mb-10 max-w-2xl mx-auto leading-relaxed'>
+                <p className='text-lg text-foreground/60 mb-8 max-w-xl mx-auto leading-relaxed'>
                   {homePageData.callToAction.description}
                 </p>
                 <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-                  <Button asChild size='lg' className='px-8 py-6 text-lg'>
+                  <Button asChild size='lg' className='px-8'>
                     <a href={`mailto:${homePageData.callToAction.email}`}>
                       Start a Project
                     </a>
                   </Button>
-                  <Button
-                    asChild
-                    variant='outline'
-                    size='lg'
-                    className='px-8 py-6 text-lg'
-                  >
+                  <Button asChild variant='outline' size='lg' className='px-8'>
                     <Link href='/about'>Learn More About Me</Link>
                   </Button>
                 </div>
@@ -582,72 +702,37 @@ export default function Page() {
             </AnimatedSection>
           </section>
 
-          {/* Contact Numbers & Social Links */}
-          <section>
-            <AnimatedSection direction='up'>
-              {profileData.contact_numbers &&
-              profileData.contact_numbers.length > 0 ? (
-                <div className='grid lg:grid-cols-2 gap-6 max-w-5xl mx-auto'>
-                  {/* Contact Numbers */}
-                  <ContactNumbersDisplay
-                    contactNumbers={profileData.contact_numbers}
-                  />
-
-                  {/* Social Links */}
-                  <GlassCard variant='minimal' className='p-8'>
-                    <h3 className='text-xl font-semibold mb-6 text-center'>
-                      Connect With Me
-                    </h3>
-                    <div className='flex flex-wrap justify-center gap-4'>
-                      {homePageData.socialLinks.map((social) => {
-                        const Icon = getDynamicIcon(social.icon);
-                        if (!Icon) return null;
-                        return (
-                          <a
-                            key={social.label}
-                            href={social.href}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='p-3 rounded-lg border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all'
-                            aria-label={social.label}
-                          >
-                            <Icon className='h-5 w-5 text-foreground/70 hover:text-primary transition-colors' />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </GlassCard>
+          {/* Connect With Me - Social Links Only */}
+          {homePageData.socialLinks.length > 0 && (
+            <section>
+              <AnimatedSection direction='up'>
+                <div className='max-w-lg mx-auto text-center'>
+                  <h3 className='text-2xl font-bold mb-6'>Connect With Me</h3>
+                  <div className='flex justify-center flex-wrap gap-4'>
+                    {homePageData.socialLinks.map((social) => {
+                      const Icon = getDynamicIcon(social.icon);
+                      if (!Icon) return null;
+                      return (
+                        <a
+                          key={social.label}
+                          href={social.href}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='group flex items-center gap-3 px-5 py-3 rounded-xl border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all'
+                          aria-label={social.label}
+                        >
+                          <Icon className='h-5 w-5 text-foreground/60 group-hover:text-primary transition-colors' />
+                          <span className='text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors'>
+                            {social.label}
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                /* Social Links Only */
-                <div className='max-w-md mx-auto'>
-                  <GlassCard variant='minimal' className='p-8'>
-                    <h3 className='text-xl font-semibold mb-6 text-center'>
-                      Connect With Me
-                    </h3>
-                    <div className='flex justify-center flex-wrap gap-4'>
-                      {homePageData.socialLinks.map((social) => {
-                        const Icon = getDynamicIcon(social.icon);
-                        if (!Icon) return null;
-                        return (
-                          <a
-                            key={social.label}
-                            href={social.href}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='p-3 rounded-lg border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all'
-                            aria-label={social.label}
-                          >
-                            <Icon className='h-5 w-5 text-foreground/70 hover:text-primary transition-colors' />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </GlassCard>
-                </div>
-              )}
-            </AnimatedSection>
-          </section>
+              </AnimatedSection>
+            </section>
+          )}
         </div>
       </div>
     </ErrorBoundary>
