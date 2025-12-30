@@ -1,5 +1,9 @@
 name: Build and Push Docker Image
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     branches: ["main", "postgres"]
@@ -24,4 +28,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/MACM18/portfolio-nextjs:latest
+          tags: ghcr.io/macm18/portfolio-nextjs:latest
