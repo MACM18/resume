@@ -26,16 +26,17 @@ export default function ProjectClient({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen relative pt-24 md:pt-40 pb-12 px-6'>
-        <div className='max-w-4xl mx-auto'>
-          <Skeleton className='h-8 w-40 mb-8' />
-          <Skeleton className='h-16 w-3/4 mb-6' />
-          <Skeleton className='h-6 w-full mb-8' />
-          <div className='flex gap-4 mb-8'>
-            <Skeleton className='h-12 w-32' />
-            <Skeleton className='h-12 w-32' />
+      <div className='min-h-screen relative pt-32 pb-20 px-6'>
+        <div className='max-w-5xl mx-auto'>
+          <Skeleton className='h-6 w-32 mb-8' />
+          <Skeleton className='h-12 w-3/4 mb-4' />
+          <Skeleton className='h-6 w-full mb-6' />
+          <div className='flex gap-4 mb-12'>
+            <Skeleton className='h-10 w-32' />
+            <Skeleton className='h-10 w-32' />
           </div>
-          <Skeleton className='aspect-video w-full' />
+          <Skeleton className='aspect-video w-full rounded-xl mb-8' />
+          <Skeleton className='h-32 w-full' />
         </div>
       </div>
     );
@@ -43,13 +44,13 @@ export default function ProjectClient({ id }: { id: string }) {
 
   if (!project) {
     return (
-      <div className='min-h-screen relative pt-24 md:pt-40 pb-12 px-6 flex items-center justify-center'>
-        <GlassCard className='p-8 text-center'>
-          <h1 className='text-2xl font-bold mb-4'>Project Not Found</h1>
-          <p className='text-foreground/70 mb-6'>
+      <div className='min-h-screen relative pt-32 pb-20 px-6 flex items-center justify-center'>
+        <GlassCard variant='bordered' className='p-12 text-center max-w-lg'>
+          <h1 className='text-3xl font-bold mb-4'>Project Not Found</h1>
+          <p className='text-foreground/70 mb-8 leading-relaxed'>
             The project you&apos;re looking for doesn&apos;t exist.
           </p>
-          <Button asChild>
+          <Button asChild size='lg'>
             <Link href='/projects'>
               <ArrowLeft className='mr-2' size={16} />
               Back to Projects
@@ -61,151 +62,146 @@ export default function ProjectClient({ id }: { id: string }) {
   }
 
   return (
-    <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
-      <div className='max-w-4xl mx-auto'>
-        {/* Back Button */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className='mb-8'
-        >
-          <Button
-            asChild
-            variant='ghost'
-            className='text-foreground/70 hover:text-primary'
+    <div className='min-h-screen relative pb-20'>
+      {/* Hero Section */}
+      <section className='pt-32 pb-12 px-6'>
+        <div className='max-w-5xl mx-auto'>
+          {/* Back Button */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className='mb-12'
           >
-            <Link href='/projects'>
-              <ArrowLeft className='mr-2' size={16} />
-              Back to Projects
-            </Link>
-          </Button>
-        </motion.div>
+            <Button
+              asChild
+              variant='ghost'
+              className='text-foreground/70 hover:text-foreground p-0 h-auto'
+            >
+              <Link href='/projects'>
+                <ArrowLeft className='mr-2' size={16} />
+                Back to Projects
+              </Link>
+            </Button>
+          </motion.div>
 
-        {/* Project Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className='mb-12'
-        >
-          <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
-            {project.title}
-          </h1>
-          <p className='text-xl text-foreground/80 mb-8'>
-            {project.description}
-          </p>
+          {/* Project Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className='mb-12'
+          >
+            <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight'>
+              {project.title}
+            </h1>
+            <p className='text-xl md:text-2xl text-foreground/70 mb-8 leading-relaxed font-light'>
+              {project.description}
+            </p>
 
-          <div className='flex flex-wrap gap-4 mb-8'>
-            {project.demo_url && (
-              <Button asChild size='lg'>
-                <a
-                  href={project.demo_url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  <ExternalLink className='mr-2' size={20} />
-                  Live Demo
-                </a>
-              </Button>
-            )}
-            {project.github_url && (
-              <Button asChild variant='outline' size='lg'>
-                <a
-                  href={project.github_url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  <Github className='mr-2' size={20} />
-                  View Code
-                </a>
-              </Button>
-            )}
-          </div>
-        </motion.div>
+            <div className='flex flex-wrap gap-4'>
+              {project.demo_url && (
+                <Button asChild size='lg'>
+                  <a
+                    href={project.demo_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <ExternalLink className='mr-2' size={18} />
+                    Live Demo
+                  </a>
+                </Button>
+              )}
+              {project.github_url && (
+                <Button asChild variant='outline' size='lg'>
+                  <a
+                    href={project.github_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <Github className='mr-2' size={18} />
+                    View Code
+                  </a>
+                </Button>
+              )}
+            </div>
+          </motion.div>
 
-        {/* Project Image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className='mb-12'
-        >
-          <GlassCard className='overflow-hidden'>
-            <div className='aspect-video bg-glass-bg/20'>
+          {/* Project Image */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <div className='aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5'>
               <Image
                 src={project.image || "/placeholder.svg"}
                 alt={project.title}
                 className='w-full h-full object-cover'
-                width={800}
-                height={450}
+                width={1200}
+                height={675}
                 priority
               />
             </div>
-          </GlassCard>
-        </motion.div>
+          </motion.div>
+        </div>
+      </section>
 
-        <div className='grid lg:grid-cols-3 gap-8'>
-          {/* Project Details */}
-          <div className='lg:col-span-2 space-y-8'>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
-              <GlassCard className='p-8'>
-                <h2 className='text-3xl font-bold mb-6 text-primary'>
-                  About This Project
-                </h2>
-                <div className='prose prose-invert max-w-none'>
-                  <p className='text-foreground/80 leading-relaxed'>
-                    {project.long_description?.replace(/"/g, "&quot;")}
-                  </p>
-                </div>
-              </GlassCard>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              <GlassCard className='p-8'>
-                <h2 className='text-2xl font-bold mb-6 text-secondary'>
-                  Key Features
-                </h2>
-                <ul className='space-y-3 text-foreground/80'>
-                  {project.key_features && project.key_features.length > 0 ? (
-                    project.key_features.map((feature, index) => (
-                      <li key={index} className='flex items-start'>
-                        <span className='w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0' />
-                        {feature}
-                      </li>
-                    ))
-                  ) : (
-                    <li className='text-foreground/60'>No key features available.</li>
-                  )}
-                </ul>
-              </GlassCard>
-            </motion.div>
+      {/{/* About Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <div className='mb-8'>
+            <h2 className='text-3xl md:text-4xl font-bold mb-2'>About This Project</h2>
+            <div className='w-20 h-1 bg-primary' />
           </div>
+          <p className='text-lg text-foreground/70 leading-relaxed'>
+            {project.long_description}
+          </p>
+        </motion.section>
 
-          {/* Sidebar */}
+        {/* Key Features & Tech Stack Grid */}
+        <div className='grid lg:grid-cols-3 gap-8'>
+          {/* Key Features */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className='lg:col-span-2'
+          >
+            <GlassCard variant='minimal' className='p-8 h-full'>
+              <h3 className='text-2xl font-bold mb-6'>Key Features</h3>
+              {project.key_features && project.key_features.length > 0 ? (
+                <ul className='space-y-4'>
+                  {project.key_features.map((feature, index) => (
+                    <li key={index} className='flex items-start gap-3'>
+                      <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-2' />
+                      <span className='text-foreground/70 leading-relaxed'>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className='text-foreground/60'>No key features available.</p>
+              )}
+            </GlassCard>
+          </motion.section>
+
+          {/* Sidebar Info */}
           <div className='space-y-6'>
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <GlassCard className='p-6'>
-                <h3 className='text-xl font-bold mb-4 text-accent'>
-                  Technologies Used
-                </h3>
+              <GlassCard variant='minimal' className='p-6'>
+                <h3 className='text-lg font-bold mb-4'>Technologies</h3>
                 <div className='flex flex-wrap gap-2'>
                   {project.tech.map((tech) => (
                     <span
                       key={tech}
-                      className='px-3 py-2 text-sm rounded-full bg-glass-bg/20 border border-glass-border/30 text-foreground/80'
+                      className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/70'
                     >
                       {tech}
                     </span>
@@ -214,26 +210,23 @@ export default function ProjectClient({ id }: { id: string }) {
               </GlassCard>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              <GlassCard className='p-6'>
-                <h3 className='text-xl font-bold mb-4 text-secondary'>
-                  Project Type
-                </h3>
-                <p className='text-foreground/80 text-sm mb-4'>
-                  {project.featured ? "Featured Project" : "Side Project"}
-                </p>
-                {project.featured && (
-                  <div className='flex items-center space-x-2 text-primary'>
+            {project.featured && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              >
+                <GlassCard variant='minimal' className='p-6'>
+                  <div className='flex items-center gap-2 mb-2'>
                     <span className='w-2 h-2 bg-primary rounded-full' />
-                    <span className='text-sm'>
-                      This is a featured project showcasing my best work
-                    </span>
+                    <h3 className='text-lg font-bold'>Featured Project</h3>
                   </div>
-                )}
+                  <p className='text-sm text-foreground/70'>
+                    This project showcases my best work and key skills
+                  </p>
+                </GlassCard>
+              </motion.div>
+            )}
               </GlassCard>
             </motion.div>
           </div>

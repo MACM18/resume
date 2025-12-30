@@ -110,180 +110,176 @@ const About = () => {
 
   return (
     <ErrorBoundary>
-      <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
-        <div className='max-w-4xl mx-auto'>
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className='text-center mb-16'
-          >
-            {avatarUrl && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className='relative w-40 h-40 mx-auto mb-8'
-              >
-                <div className='absolute inset-0 rounded-full bg-gradient-to-br from-primary via-secondary to-accent p-[3px] animate-pulse'>
-                  <div className='relative w-full h-full rounded-full overflow-hidden bg-background'>
+      <div className='min-h-screen relative pb-20'>
+        {/* Hero Section with Avatar */}
+        <section className='relative min-h-[60vh] flex items-center justify-center pt-32 pb-20 px-6'>
+          <div className='max-w-4xl mx-auto text-center'>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className='mb-12'
+            >
+              {avatarUrl && (
+                <div className='relative w-48 h-48 mx-auto mb-10'>
+                  <div className='absolute inset-0 rounded-full border-2 border-foreground/10 overflow-hidden'>
                     <Image
                       src={avatarUrl}
                       alt={profileData.full_name || "Profile Picture"}
                       fill
                       className='object-cover'
-                      sizes='(max-width: 768px) 160px, 160px'
+                      sizes='(max-width: 768px) 192px, 192px'
                       priority
                     />
                   </div>
-                </div>
-                <div className='absolute -inset-4 rounded-full bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 blur-2xl -z-10' />
-              </motion.div>
-            )}
-            <SectionHeader
-              title={aboutPageData.title}
-              subtitle={aboutPageData.subtitle}
-              gradient='mixed'
-            />
-          </motion.div>
-
-          {/* Main Content */}
-          <div className='space-y-12'>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <GlassCard
-                variant='gradient'
-                className='p-8 relative overflow-hidden'
-              >
-                {/* Inset gradient bar to avoid overlapping content */}
-                <div className='absolute left-4 top-6 bottom-6 w-1 rounded-l-2xl bg-gradient-to-b from-primary via-secondary to-accent' />
-
-                <div className='relative z-10 pl-6 md:pl-8'>
-                  <h2 className='text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                    My Story
-                  </h2>
-                  <div className='space-y-4 text-foreground/80 leading-relaxed'>
-                    {aboutPageData.story.map((paragraph, index) => (
-                      <p key={index} className='text-base leading-loose'>
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </GlassCard>
-            </motion.div>
-
-            {/* Skills Grid */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className='text-center mb-8'>
-                <h2 className='text-4xl font-bold bg-gradient-to-r from-secondary via-accent to-primary bg-clip-text text-transparent inline-block'>
-                  Skills & Expertise
-                </h2>
-                <div className='w-24 h-1 bg-gradient-to-r from-secondary via-accent to-primary rounded-full mx-auto mt-3' />
-              </div>
-              <div className='grid md:grid-cols-2 gap-6'>
-                {aboutPageData.skills.map((skillGroup, index) => {
-                  const Icon =
-                    iconMap[skillGroup.icon as keyof typeof iconMap] ?? Code;
-                  return (
-                    <motion.div
-                      key={skillGroup.category}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                    >
-                      <GlassCard
-                        variant='gradient'
-                        className='p-6 group relative overflow-hidden'
-                        hover
-                      >
-                        <div className='flex items-center mb-6'>
-                          <Icon
-                            className='text-primary group-hover:scale-110 transition-transform mr-4'
-                            size={24}
-                          />
-                          <h3 className='text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                            {skillGroup.category}
-                          </h3>
-                        </div>
-                        <div className='flex flex-wrap gap-2'>
-                          {skillGroup.items.map((skill) => (
-                            <span
-                              key={skill}
-                              className='px-3 py-1.5 text-sm rounded-full bg-gradient-to-r from-glass-bg/30 to-glass-bg/20 border border-glass-border/30 text-foreground/80 hover:text-foreground hover:border-primary/50 transition-all'
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </GlassCard>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
-
-            {/* Contact Numbers & Call to Action Combined */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              {profileData.contact_numbers &&
-              profileData.contact_numbers.length > 0 ? (
-                <div className='grid lg:grid-cols-2 gap-8 items-start'>
-                  {/* Contact Numbers */}
-                  <div>
-                    <ContactNumbersDisplay
-                      contactNumbers={profileData.contact_numbers}
-                    />
-                  </div>
-
-                  {/* Call to Action */}
-                  <GlassCard className='p-8'>
-                    <h2 className='text-2xl font-bold mb-4 text-accent'>
-                      {aboutPageData.callToAction.title}
-                    </h2>
-                    <p className='text-foreground/80 mb-6'>
-                      {aboutPageData.callToAction.description}
-                    </p>
-                    <a
-                      href={`mailto:${contactEmail}`}
-                      className='inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:shadow-glow'
-                    >
-                      Get In Touch
-                    </a>
-                  </GlassCard>
-                </div>
-              ) : (
-                /* Call to Action Only - Centered */
-                <div className='text-center'>
-                  <GlassCard className='p-8 max-w-2xl mx-auto'>
-                    <h2 className='text-2xl font-bold mb-4 text-accent'>
-                      {aboutPageData.callToAction.title}
-                    </h2>
-                    <p className='text-foreground/80 mb-6'>
-                      {aboutPageData.callToAction.description}
-                    </p>
-                    <a
-                      href={`mailto:${contactEmail}`}
-                      className='inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:shadow-glow'
-                    >
-                      Get In Touch
-                    </a>
-                  </GlassCard>
+                  {/* Subtle glow effect */}
+                  <div className='absolute -inset-4 bg-primary/5 rounded-full blur-2xl -z-10' />
                 </div>
               )}
+              <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold mb-4'>
+                {aboutPageData.title}
+              </h1>
+              <p className='text-xl md:text-2xl text-foreground/60 font-light'>
+                {aboutPageData.subtitle}
+              </p>
             </motion.div>
           </div>
+        </section>
+
+        {/* Main Content */}
+        <div className='max-w-5xl mx-auto px-6 space-y-24'>
+          {/* My Story Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className='mb-12'>
+              <h2 className='text-3xl md:text-4xl font-bold mb-2'>My Story</h2>
+              <div className='w-20 h-1 bg-primary' />
+            </div>
+            <div className='space-y-6 text-lg text-foreground/80 leading-relaxed'>
+              {aboutPageData.story.map((paragraph, index) => (
+                <motion.p
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                  className='leading-loose'
+                >
+                  {paragraph}
+                </motion.p>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* Skills & Expertise Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <div className='mb-12'>
+              <h2 className='text-3xl md:text-4xl font-bold mb-2'>
+                Skills & Expertise
+              </h2>
+              <div className='w-20 h-1 bg-primary' />
+            </div>
+            <div className='grid sm:grid-cols-2 gap-6'>
+              {aboutPageData.skills.map((skillGroup, index) => {
+                const Icon =
+                  iconMap[skillGroup.icon as keyof typeof iconMap] ?? Code;
+                return (
+                  <motion.div
+                    key={skillGroup.category}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                  >
+                    <GlassCard variant='minimal' className='p-8 h-full' hover>
+                      <div className='flex items-center gap-3 mb-6'>
+                        <div className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                          <Icon className='text-primary' size={20} />
+                        </div>
+                        <h3 className='text-xl font-semibold'>
+                          {skillGroup.category}
+                        </h3>
+                      </div>
+                      <ul className='space-y-3'>
+                        {skillGroup.items.map((skill) => (
+                          <li
+                            key={skill}
+                            className='flex items-center gap-3 text-foreground/70'
+                          >
+                            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />
+                            <span>{skill}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </GlassCard>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.section>
+
+          {/* Get In Touch Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            {profileData.contact_numbers &&
+            profileData.contact_numbers.length > 0 ? (
+              <div className='space-y-12'>
+                <div className='mb-12'>
+                  <h2 className='text-3xl md:text-4xl font-bold mb-2'>
+                    Get In Touch
+                  </h2>
+                  <div className='w-20 h-1 bg-primary' />
+                </div>
+
+                <div className='grid lg:grid-cols-2 gap-8'>
+                  {/* Contact Numbers */}
+                  <ContactNumbersDisplay
+                    contactNumbers={profileData.contact_numbers}
+                  />
+
+                  {/* Call to Action Card */}
+                  <GlassCard
+                    variant='bordered'
+                    className='p-8 flex flex-col justify-center'
+                  >
+                    <h3 className='text-2xl font-bold mb-4'>
+                      {aboutPageData.callToAction.title}
+                    </h3>
+                    <p className='text-foreground/70 mb-6 leading-relaxed'>
+                      {aboutPageData.callToAction.description}
+                    </p>
+                    <Button asChild size='lg' className='w-full sm:w-auto'>
+                      <a href={`mailto:${contactEmail}`}>Send an Email</a>
+                    </Button>
+                  </GlassCard>
+                </div>
+              </div>
+            ) : (
+              /* Call to Action Only - Full Width */
+              <GlassCard
+                variant='bordered'
+                className='p-12 md:p-16 text-center max-w-3xl mx-auto'
+              >
+                <h2 className='text-3xl md:text-4xl font-bold mb-6'>
+                  {aboutPageData.callToAction.title}
+                </h2>
+                <p className='text-xl text-foreground/70 mb-10 leading-relaxed'>
+                  {aboutPageData.callToAction.description}
+                </p>
+                <Button asChild size='lg' className='px-8 py-6 text-lg'>
+                  <a href={`mailto:${contactEmail}`}>Send an Email</a>
+                </Button>
+              </GlassCard>
+            )}
+          </motion.section>
         </div>
       </div>
     </ErrorBoundary>
