@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCurrentUserProfile } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, Move, ZoomIn } from "lucide-react";
+import { Loader2, Move, ZoomIn, ZoomOut, RotateCcw, Hand } from "lucide-react";
 import Image from "next/image";
 
 interface AvatarPositionEditorProps {
@@ -24,6 +24,15 @@ export function AvatarPositionEditor({
   const queryClient = useQueryClient();
   const [position, setPosition] = useState(currentPosition);
   const [zoom, setZoom] = useState(currentZoom);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
+  // Sync state when props change
+  useEffect(() => {
+    setPosition(currentPosition);
+    setZoom(currentZoom);
+  }, [currentPosition, currentZoom]);
 
   const updateMutation = useMutation({
     mutationFn: async () => {
@@ -42,9 +51,87 @@ export function AvatarPositionEditor({
     },
   });
 
+  // Handle drag start
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+      dragStartRef.current = {
+        x: clientX,
+        y: clientY,
+        posX: position.x,
+        posY: position.y,
+      };
+    },
+    [position]
+  );
+
+  // Handle drag move
+  const handleDragMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging || !containerRef.current) return;
+
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const sensitivity = 100 / Math.max(rect.width, rect.height);
+
+      const deltaX = (clientX - dragStartRef.current.x) * sensitivity;
+      const deltaY = (clientY - dragStartRef.current.y) * sensitivity;
+
+      // Invert the direction for intuitive dragging (drag image, not viewport)
+      const newX = Math.max(
+        0,
+        Math.min(100, dragStartRef.current.posX - deltaX)
+      );
+      const newY = Math.max(
+        0,
+        Math.min(100, dragStartRef.current.posY - deltaY)
+      );
+
+      setPosition({ x: Math.round(newX), y: Math.round(newY) });
+    },
+    [isDragging]
+  );
+
+  // Handle drag end
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Add/remove global event listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleDragMove);
+      window.addEventListener("mouseup", handleDragEnd);
+      window.addEventListener("touchmove", handleDragMove);
+      window.addEventListener("touchend", handleDragEnd);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleDragMove);
+      window.removeEventListener("mouseup", handleDragEnd);
+      window.removeEventListener("touchmove", handleDragMove);
+      window.removeEventListener("touchend", handleDragEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
+  // Handle scroll wheel for zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -5 : 5;
+    setZoom((prev) => Math.max(50, Math.min(200, prev + delta)));
+  }, []);
+
   if (!currentAvatarUrl) {
     return (
-      <div className='text-sm text-muted-foreground'>
+      <div className='text-sm text-muted-foreground p-6 border rounded-lg text-center'>
+        <Hand className='h-8 w-8 mx-auto mb-2 opacity-50' />
         Upload an avatar image first to adjust its position
       </div>
     );
@@ -58,16 +145,40 @@ export function AvatarPositionEditor({
           Avatar Position & Zoom
         </h3>
         <p className='text-sm text-muted-foreground'>
-          Adjust how your avatar is positioned and scaled within the circle
+          Drag the image to reposition, scroll to zoom, or use the sliders below
         </p>
       </div>
 
-      {/* Preview */}
+      {/* Interactive Preview - Draggable */}
       <div className='space-y-2'>
-        <Label>Preview</Label>
-        <div className='relative w-48 h-48 mx-auto rounded-full overflow-hidden border-4 border-primary/20 bg-background'>
+        <Label className='flex items-center gap-2'>
+          <Hand className='h-4 w-4' />
+          Interactive Preview
+          {isDragging && (
+            <span className='text-xs text-primary ml-2'>Dragging...</span>
+          )}
+        </Label>
+        <div
+          ref={containerRef}
+          className={`relative w-56 h-56 mx-auto rounded-full overflow-hidden border-4 transition-all select-none ${
+            isDragging
+              ? "border-primary cursor-grabbing shadow-lg shadow-primary/20"
+              : "border-primary/20 cursor-grab hover:border-primary/40"
+          }`}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
+          onWheel={handleWheel}
+        >
+          {/* Crosshair guide */}
+          <div className='absolute inset-0 pointer-events-none z-10'>
+            <div className='absolute top-1/2 left-0 right-0 h-px bg-primary/30' />
+            <div className='absolute left-1/2 top-0 bottom-0 w-px bg-primary/30' />
+            <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-primary/50' />
+          </div>
+
+          {/* Image with positioning */}
           <div
-            className='absolute inset-0'
+            className='absolute inset-0 transition-transform duration-75'
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: `${position.x}% ${position.y}%`,
@@ -77,74 +188,108 @@ export function AvatarPositionEditor({
               src={currentAvatarUrl}
               alt='Avatar preview'
               fill
-              className='object-cover'
+              className='object-cover pointer-events-none'
               style={{
                 objectPosition: `${position.x}% ${position.y}%`,
               }}
+              draggable={false}
+            />
+          </div>
+
+          {/* Drag hint overlay */}
+          {!isDragging && (
+            <div className='absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors'>
+              <div className='bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium opacity-0 hover:opacity-100 transition-opacity pointer-events-none'>
+                Drag to move
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Quick zoom buttons */}
+        <div className='flex justify-center gap-2 mt-3'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={() => setZoom((prev) => Math.max(50, prev - 10))}
+            disabled={zoom <= 50}
+          >
+            <ZoomOut className='h-4 w-4' />
+          </Button>
+          <span className='flex items-center px-3 text-sm font-medium min-w-[60px] justify-center'>
+            {zoom}%
+          </span>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={() => setZoom((prev) => Math.min(200, prev + 10))}
+            disabled={zoom >= 200}
+          >
+            <ZoomIn className='h-4 w-4' />
+          </Button>
+        </div>
+      </div>
+
+      {/* Fine-tune Controls */}
+      <div className='space-y-4 pt-4 border-t'>
+        <Label className='text-sm font-medium'>Fine-tune Controls</Label>
+
+        <div className='space-y-3'>
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm'>
+              <span className='text-muted-foreground'>Horizontal</span>
+              <span className='font-mono'>{position.x}%</span>
+            </div>
+            <Slider
+              value={[position.x]}
+              onValueChange={([value]) =>
+                setPosition({ ...position, x: value })
+              }
+              min={0}
+              max={100}
+              step={1}
+              className='w-full'
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm'>
+              <span className='text-muted-foreground'>Vertical</span>
+              <span className='font-mono'>{position.y}%</span>
+            </div>
+            <Slider
+              value={[position.y]}
+              onValueChange={([value]) =>
+                setPosition({ ...position, y: value })
+              }
+              min={0}
+              max={100}
+              step={1}
+              className='w-full'
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm'>
+              <span className='text-muted-foreground'>Zoom Level</span>
+              <span className='font-mono'>{zoom}%</span>
+            </div>
+            <Slider
+              value={[zoom]}
+              onValueChange={([value]) => setZoom(value)}
+              min={50}
+              max={200}
+              step={5}
+              className='w-full'
             />
           </div>
         </div>
       </div>
 
-      {/* Position Controls */}
-      <div className='space-y-4'>
-        <div className='space-y-2'>
-          <Label className='flex items-center gap-2'>
-            <Move className='h-4 w-4' />
-            Horizontal Position: {position.x}%
-          </Label>
-          <Slider
-            value={[position.x]}
-            onValueChange={([value]) => setPosition({ ...position, x: value })}
-            min={0}
-            max={100}
-            step={1}
-            className='w-full'
-          />
-          <p className='text-xs text-muted-foreground'>
-            Adjust left-right positioning (0 = left, 100 = right)
-          </p>
-        </div>
-
-        <div className='space-y-2'>
-          <Label className='flex items-center gap-2'>
-            <Move className='h-4 w-4' />
-            Vertical Position: {position.y}%
-          </Label>
-          <Slider
-            value={[position.y]}
-            onValueChange={([value]) => setPosition({ ...position, y: value })}
-            min={0}
-            max={100}
-            step={1}
-            className='w-full'
-          />
-          <p className='text-xs text-muted-foreground'>
-            Adjust up-down positioning (0 = top, 100 = bottom)
-          </p>
-        </div>
-
-        <div className='space-y-2'>
-          <Label className='flex items-center gap-2'>
-            <ZoomIn className='h-4 w-4' />
-            Zoom Level: {zoom}%
-          </Label>
-          <Slider
-            value={[zoom]}
-            onValueChange={([value]) => setZoom(value)}
-            min={50}
-            max={200}
-            step={5}
-            className='w-full'
-          />
-          <p className='text-xs text-muted-foreground'>
-            Scale your avatar (50% = zoom out, 200% = zoom in)
-          </p>
-        </div>
-      </div>
-
       {/* Action Buttons */}
-      <div className='flex gap-2'>
+      <div className='flex gap-2 pt-2'>
         <Button
           onClick={() => updateMutation.mutate()}
           disabled={updateMutation.isPending}
@@ -160,13 +305,15 @@ export function AvatarPositionEditor({
           )}
         </Button>
         <Button
+          type='button'
           variant='outline'
           onClick={() => {
             setPosition({ x: 50, y: 50 });
             setZoom(100);
           }}
+          title='Reset to center'
         >
-          Reset
+          <RotateCcw className='h-4 w-4' />
         </Button>
       </div>
     </div>

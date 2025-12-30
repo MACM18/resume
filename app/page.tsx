@@ -31,29 +31,34 @@ export default function Page() {
     offset: ["start start", "end start"],
   });
 
-  // Enhanced parallax transforms for hero elements with layered depth
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.3]);
+  // DRAMATIC parallax transforms - very noticeable layered depth effect
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1.15, 1.4]);
+  const backgroundBlur = useTransform(scrollYProgress, [0, 0.5, 1], [0, 2, 8]);
 
-  // Individual element parallax - each moves at different speeds for depth
-  const badgeY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
-  const badgeOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  // Individual element parallax - MUCH stronger speeds for obvious depth
+  const badgeY = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const badgeOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const badgeScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
 
-  const titleY = useTransform(scrollYProgress, [0, 1], ["0%", "80%"]);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const titleY = useTransform(scrollYProgress, [0, 1], [0, 400]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const titleScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
 
-  const taglineY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-  const taglineOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const taglineY = useTransform(scrollYProgress, [0, 1], [0, 500]);
+  const taglineOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  const buttonsY = useTransform(scrollYProgress, [0, 1], ["0%", "120%"]);
-  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const buttonsY = useTransform(scrollYProgress, [0, 1], [0, 600]);
+  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
-  const socialY = useTransform(scrollYProgress, [0, 1], ["0%", "140%"]);
-  const socialOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+  const socialY = useTransform(scrollYProgress, [0, 1], [0, 700]);
+  const socialOpacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
 
-  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-  const imageOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  // Image moves OPPOSITE direction (up) for dramatic separation
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.75]);
+  const imageOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, -5]);
 
   const scrollIndicatorOpacity = useTransform(
     scrollYProgress,
@@ -190,7 +195,11 @@ export default function Page() {
                 {homePageData.availability_status?.show && (
                   <motion.div
                     className='will-change-transform'
-                    style={{ y: badgeY, opacity: badgeOpacity }}
+                    style={{
+                      y: badgeY,
+                      opacity: badgeOpacity,
+                      scale: badgeScale,
+                    }}
                   >
                     <AnimatedSection direction='up' delay={0.1}>
                       <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/10 backdrop-blur-sm text-primary text-sm font-medium mb-8 shadow-sm'>
@@ -203,7 +212,11 @@ export default function Page() {
 
                 <motion.div
                   className='will-change-transform'
-                  style={{ y: titleY, opacity: titleOpacity }}
+                  style={{
+                    y: titleY,
+                    opacity: titleOpacity,
+                    scale: titleScale,
+                  }}
                 >
                   <AnimatedSection direction='up' delay={0.2}>
                     <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
@@ -291,6 +304,7 @@ export default function Page() {
                     y: imageY,
                     scale: imageScale,
                     opacity: imageOpacity,
+                    rotate: imageRotate,
                   }}
                 >
                   <AnimatedSection direction='left' delay={0.3}>
@@ -302,30 +316,21 @@ export default function Page() {
 
                       {/* Image */}
                       <div className='relative w-full h-full rounded-full overflow-hidden border-2 border-foreground/10'>
-                        <div
-                          className='absolute inset-0'
+                        <Image
+                          src={profileData.avatar_url}
+                          alt={homePageData.name}
+                          fill
+                          className='object-cover'
                           style={{
+                            objectPosition: `${
+                              profileData.avatar_position?.x ?? 50
+                            }% ${profileData.avatar_position?.y ?? 50}%`,
                             transform: `scale(${
-                              (profileData.avatar_zoom || 100) / 100
+                              (profileData.avatar_zoom ?? 100) / 100
                             })`,
-                            transformOrigin: `${
-                              profileData.avatar_position?.x || 50
-                            }% ${profileData.avatar_position?.y || 50}%`,
                           }}
-                        >
-                          <Image
-                            src={profileData.avatar_url}
-                            alt={homePageData.name}
-                            fill
-                            className='object-cover'
-                            style={{
-                              objectPosition: `${
-                                profileData.avatar_position?.x || 50
-                              }% ${profileData.avatar_position?.y || 50}%`,
-                            }}
-                            priority
-                          />
-                        </div>
+                          priority
+                        />
                       </div>
                     </div>
                   </AnimatedSection>
