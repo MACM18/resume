@@ -264,7 +264,7 @@ const About = () => {
                       {aboutPageData.callToAction.description}
                     </p>
                     <Button asChild size='lg' className='w-full sm:w-auto'>
-                      <Link href={`mailto:${contactEmail}`}>Send an Email</a>
+                      <Link href={`mailto:${contactEmail}`}>Send an Email</Link>
                     </Button>
                   </GlassCard>
                 </div>
@@ -282,7 +282,7 @@ const About = () => {
                   {aboutPageData.callToAction.description}
                 </p>
                 <Button asChild size='lg' className='px-8 py-6 text-lg'>
-                  <Link href={`mailto:${contactEmail}`}>Send an Email</a>
+                  <Link href={`mailto:${contactEmail}`}>Send an Email</Link>
                 </Button>
               </GlassCard>
             )}
