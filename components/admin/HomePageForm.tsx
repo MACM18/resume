@@ -217,6 +217,14 @@ export function HomePageForm() {
             Add your professional social media profiles and contact information
             to help visitors connect with you.
           </p>
+          <div className='mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg'>
+            <p className='text-xs text-foreground/70'>
+              <strong>💡 Icon Tip:</strong> Click the circular icon button to
+              select from thousands of brand and social icons. Try searching
+              for: &quot;github&quot;, &quot;linkedin&quot;, &quot;twitter&quot;, &quot;email&quot;, or your preferred
+              platform.
+            </p>
+          </div>
           <div className='space-y-4'>
             {socialFields.map((field, index) => (
               <div

@@ -74,63 +74,59 @@ export function ProfileForm() {
   }
 
   return (
-    <div className='space-y-6'>
-      <div>
-        <h3 className='text-lg font-medium mb-2'>Basic Profile Information</h3>
-        <p className='text-sm text-muted-foreground mb-4'>
-          This information appears prominently on your portfolio and helps
-          visitors understand who you are professionally.
-        </p>
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-          <FormField
-            control={form.control}
-            name='full_name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder='John Doe' {...field} />
-                </FormControl>
-                <FormDescription>
-                  Your full professional name as it should appear on your
-                  portfolio
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='tagline'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Professional Tagline</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Full-Stack Developer & UI/UX Enthusiast passionate about creating amazing user experiences'
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  A compelling one-line description of your role and expertise
-                  that captures who you are professionally
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type='submit' disabled={mutation.isPending}>
-            {mutation.isPending ? (
-              <Loader2 className='animate-spin' />
-            ) : (
-              "Save Profile"
-            )}
-          </Button>
-        </form>
-      </Form>
-    </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <FormField
+          control={form.control}
+          name='full_name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-sm font-medium'>Full Name</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder='John Doe' 
+                  {...field}
+                  className='h-11'
+                />
+              </FormControl>
+              <FormDescription className='text-xs'>
+                Your full professional name
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='tagline'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-sm font-medium'>Professional Tagline</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder='Full-Stack Developer passionate about creating amazing experiences'
+                  {...field}
+                  className='h-11'
+                />
+              </FormControl>
+              <FormDescription className='text-xs'>
+                A one-line description of your expertise
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type='submit' disabled={mutation.isPending} size='lg' className='w-full md:w-auto'>
+          {mutation.isPending ? (
+            <>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              Saving...
+            </>
+          ) : (
+            \"Save Changes\"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }

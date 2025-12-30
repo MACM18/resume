@@ -70,14 +70,20 @@ export function WorkExperienceManagement() {
   const current = (data as WorkExperience[]).find((w) => w.is_current);
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-2xl font-bold text-primary'>Work Experience</h2>
+    <div className='space-y-6'>
+      <div className='flex flex-col md:flex-row justify-between md:items-center gap-4'>
+        <div>
+          <h2 className='text-2xl md:text-3xl font-bold mb-2'>
+            Work Experience
+          </h2>
+          <p className='text-foreground/60'>Manage your career history</p>
+        </div>
         <Button
           onClick={() => {
             setEditing(null);
             setOpen(true);
           }}
+          size='lg'
         >
           <Plus className='mr-2 h-4 w-4' /> Add Experience
         </Button>
@@ -88,29 +94,40 @@ export function WorkExperienceManagement() {
           <Loader2 className='h-6 w-6 animate-spin' />
         </div>
       ) : data.length === 0 ? (
-        <GlassCard className='p-6 text-center text-foreground/70'>
-          No work experiences yet. Add your first role.
-        </GlassCard>
+        <div className='border border-dashed border-foreground/20 rounded-xl p-12 text-center'>
+          <p className='text-foreground/60 mb-4'>No work experiences yet</p>
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setOpen(true);
+            }}
+          >
+            <Plus className='mr-2 h-4 w-4' /> Add Your First Role
+          </Button>
+        </div>
       ) : (
-        <div className='space-y-3'>
+        <div className='space-y-4'>
           {(data as WorkExperience[]).map((exp) => (
-            <GlassCard key={exp.id} className='p-4'>
-              <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
-                <div>
-                  <div className='flex items-center gap-2'>
-                    <div className='font-semibold'>{exp.position}</div>
+            <div
+              key={exp.id}
+              className='border border-foreground/10 rounded-xl p-4 md:p-6 bg-foreground/5 hover:bg-foreground/10 transition-colors'
+            >
+              <div className='flex flex-col gap-4'>
+                <div className='flex-1'>
+                  <div className='flex flex-wrap items-center gap-2 mb-2'>
+                    <h3 className='font-bold text-lg'>{exp.position}</h3>
                     {exp.is_current && (
-                      <span className='text-xs px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20'>
-                        Current
+                      <span className='text-xs px-2 py-1 rounded-md bg-green-500/10 text-green-500 border border-green-500/20 font-medium'>
+                        ✓ Current Role
                       </span>
                     )}
                     {!exp.visible && (
-                      <span className='text-xs px-2 py-0.5 rounded bg-foreground/10 text-foreground/70 border border-glass-border/30'>
+                      <span className='text-xs px-2 py-1 rounded-md bg-foreground/10 text-foreground/70 border border-foreground/20'>
                         Hidden
                       </span>
                     )}
                   </div>
-                  <div className='text-sm text-foreground/70'>
+                  <div className='text-sm text-foreground/70 mb-1'>
                     {exp.company}
                     {exp.location ? ` • ${exp.location}` : ""}
                   </div>
@@ -122,31 +139,35 @@ export function WorkExperienceManagement() {
                     )}
                   </div>
                 </div>
-                <div className='flex gap-2'>
+                <div className='flex flex-wrap gap-2'>
                   {!exp.is_current && (
                     <Button
                       variant='outline'
-                      size='icon'
+                      size='sm'
                       onClick={() => markCurrentMutation.mutate(exp.id)}
                       title='Mark as current'
+                      className='flex-1 md:flex-none'
                     >
-                      <Star size={16} />
+                      <Star size={16} className='mr-2' />
+                      Set Current
                     </Button>
                   )}
                   <Button
                     variant='outline'
-                    size='icon'
+                    size='sm'
                     onClick={() => {
                       setEditing(exp);
                       setOpen(true);
                     }}
                     title='Edit'
+                    className='flex-1 md:flex-none'
                   >
-                    <Pencil size={16} />
+                    <Pencil size={16} className='mr-2' />
+                    Edit
                   </Button>
                   <Button
                     variant='outline'
-                    size='icon'
+                    size='sm'
                     onClick={() =>
                       visibilityMutation.mutate({
                         id: exp.id,
@@ -154,28 +175,41 @@ export function WorkExperienceManagement() {
                       })
                     }
                     title={exp.visible ? "Hide" : "Show"}
+                    className='flex-1 md:flex-none'
                   >
-                    {exp.visible ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {exp.visible ? (
+                      <>
+                        <EyeOff size={16} className='mr-2' />
+                        Hide
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={16} className='mr-2' />
+                        Show
+                      </>
+                    )}
                   </Button>
                   <Button
                     variant='destructive'
-                    size='icon'
+                    size='sm'
                     onClick={() => deleteMutation.mutate(exp.id)}
                     title='Delete'
+                    className='flex-1 md:flex-none'
                   >
-                    <Trash size={16} />
+                    <Trash size={16} className='mr-2' />
+                    Delete
                   </Button>
                 </div>
               </div>
-            </GlassCard>
+            </div>
           ))}
         </div>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto bg-background border-foreground/10'>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className='text-2xl font-bold'>
               {editing ? "Edit Work Experience" : "Add Work Experience"}
             </DialogTitle>
           </DialogHeader>
@@ -190,8 +224,9 @@ export function WorkExperienceManagement() {
       </Dialog>
 
       {current && (
-        <div className='text-xs text-foreground/60'>
-          Current role: <span className='font-medium'>{current.position}</span>{" "}
+        <div className='text-sm text-foreground/60 px-4 py-3 bg-green-500/5 border border-green-500/20 rounded-lg'>
+          Current role:{" "}
+          <span className='font-medium text-green-500'>{current.position}</span>{" "}
           at {current.company}
         </div>
       )}

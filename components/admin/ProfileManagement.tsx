@@ -5,18 +5,26 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
-import { Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileImageManager } from "./ProfileImageManager";
-import { BackgroundManager } from "./BackgroundManager"; // Import the new component
+import { BackgroundManager } from "./BackgroundManager";
 import { FaviconManager } from "./FaviconManager";
 import { normalizeDomain } from "@/lib/utils";
 import { getCurrentUserProfile } from "@/lib/profile";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function ProfileManagement() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [hostname, setHostname] = useState("");
+  const [openSections, setOpenSections] = useState({
+    domain: true,
+    profile: true,
+    images: false,
+    background: false,
+    favicon: false,
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -38,10 +46,8 @@ export function ProfileManagement() {
     mutationFn: async (domain: string) => {
       if (!session) throw new Error("Not authenticated");
 
-      // Normalize domain for consistent storage and lookup
       const normalizedDomain = normalizeDomain(domain);
 
-      // Check if domain is already taken via API
       const checkResponse = await fetch(
         `/api/profile/by-domain?domain=${encodeURIComponent(normalizedDomain)}`
       );
@@ -52,7 +58,6 @@ export function ProfileManagement() {
         }
       }
 
-      // Update profile with new domain via API
       const updateResponse = await fetch("/api/profile/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -82,44 +87,119 @@ export function ProfileManagement() {
 
   const isDomainClaimed = profile?.domain === hostname;
 
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const Section = ({
+    id,
+    title,
+    description,
+    children,
+  }: {
+    id: keyof typeof openSections;
+    title: string;
+    description?: string;
+    children: React.ReactNode;
+  }) => (
+    <div className='border border-foreground/10 rounded-xl overflow-hidden'>
+      <button
+        onClick={() => toggleSection(id)}
+        className='w-full flex items-center justify-between p-4 md:p-6 bg-foreground/5 hover:bg-foreground/10 transition-colors'
+      >
+        <div className='text-left'>
+          <h3 className='text-lg font-semibold'>{title}</h3>
+          {description && (
+            <p className='text-sm text-foreground/60 mt-1'>{description}</p>
+          )}
+        </div>
+        {openSections[id] ? (
+          <ChevronUp size={20} className='text-foreground/60' />
+        ) : (
+          <ChevronDown size={20} className='text-foreground/60' />
+        )}
+      </button>
+      <AnimatePresence>
+        {openSections[id] && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className='p-4 md:p-6 border-t border-foreground/10'>
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
   return (
-    <div className='space-y-8'>
-      <div>
-        <h2 className='text-2xl font-bold text-primary mb-4'>Your Domain</h2>
-        <div className='flex items-center gap-4'>
-          <div className='flex-1 p-2 border border-glass-border rounded-md bg-glass-bg/20'>
-            <code>{hostname}</code>
+    <div className='space-y-4'>
+      <div className='mb-6'>
+        <h2 className='text-2xl md:text-3xl font-bold mb-2'>
+          Profile & Domain
+        </h2>
+        <p className='text-foreground/60'>
+          Manage your portfolio identity and assets
+        </p>
+      </div>
+
+      <Section
+        id='domain'
+        title='Domain Setup'
+        description='Connect this domain to your portfolio'
+      >
+        <div className='flex flex-col md:flex-row gap-4'>
+          <div className='flex-1 p-3 border border-foreground/20 rounded-lg bg-foreground/5 font-mono text-sm'>
+            {hostname}
           </div>
           {isDomainClaimed ? (
-            <p className='text-green-400'>
-              This domain is linked to your profile.
-            </p>
+            <div className='flex items-center text-green-500 font-medium'>
+              ✓ Domain claimed
+            </div>
           ) : (
             <Button
               onClick={() => claimDomainMutation.mutate(hostname)}
               disabled={claimDomainMutation.isPending}
+              className='whitespace-nowrap'
             >
               <LinkIcon className='mr-2' size={16} />
-              {claimDomainMutation.isPending
-                ? "Claiming..."
-                : "Claim this Domain"}
+              {claimDomainMutation.isPending ? "Claiming..." : "Claim Domain"}
             </Button>
           )}
         </div>
-      </div>
-      <div>
-        <h2 className='text-2xl font-bold text-primary mb-4'>Your Profile</h2>
+      </Section>
+
+      <Section
+        id='profile'
+        title='Basic Information'
+        description='Your name and professional tagline'
+      >
         <ProfileForm />
-      </div>
-      <div>
+      </Section>
+
+      <Section
+        id='images'
+        title='Profile Images'
+        description='Upload and manage your profile photos'
+      >
         <ProfileImageManager />
-      </div>
-      <div>
-        <BackgroundManager /> {/* New Background Image Manager */}
-      </div>
-      <div>
+      </Section>
+
+      <Section
+        id='background'
+        title='Background Image'
+        description='Set a custom background for your portfolio'
+      >
+        <BackgroundManager />
+      </Section>
+
+      <Section id='favicon' title='Favicon' description='Upload your site icon'>
         <FaviconManager />
-      </div>
+      </Section>
     </div>
   );
 }

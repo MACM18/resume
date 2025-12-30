@@ -73,21 +73,18 @@ export function ProjectManagement() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-primary">
-          Manage Your Projects
-        </h2>
+    <div className='space-y-6'>
+      <div className=\"flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6\">\n        <div>\n          <h2 className=\"text-2xl md:text-3xl font-bold mb-2\">Projects</h2>\n          <p className='text-foreground/60'>Manage your portfolio projects</p>\n        </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddNew}>
-              <Plus className="mr-2" size={20} /> Add New Project
+            <Button onClick={handleAddNew} size='lg'>
+              <Plus className=\"mr-2\" size={20} /> Add Project
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-background/80 backdrop-blur-md border-glass-border">
+          <DialogContent className=\"max-w-3xl max-h-[90vh] overflow-y-auto bg-background border-foreground/10\">
             <DialogHeader>
-              <DialogTitle className="text-primary">
-                {selectedProject ? "Edit Project" : "Add New Project"}
+              <DialogTitle className='text-2xl font-bold'>
+                {selectedProject ? \"Edit Project\" : \"Add New Project\"}
               </DialogTitle>
             </DialogHeader>
             <ProjectForm
@@ -99,59 +96,77 @@ export function ProjectManagement() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-6">
-          {projects?.map((project) => (
-            <GlassCard key={project.id} className="p-4 flex flex-col justify-between bg-glass-bg/10">
-              <div>
-                <h3 className="font-bold text-lg">{project.title}</h3>
-                <p className="text-sm text-foreground/70 truncate mb-4">
-                  {project.description}
-                </p>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(project)}>
-                    <Edit className="mr-2" size={16} /> Edit
+        <div className=\"flex justify-center items-center h-64\">\n          <Loader2 className=\"h-8 w-8 animate-spin text-primary\" />\n        </div>
+      ) : projects && projects.length > 0 ? (
+        <div className=\"grid gap-4\">\n          {projects?.map((project) => (
+            <div 
+              key={project.id} 
+              className='border border-foreground/10 rounded-xl p-4 md:p-6 bg-foreground/5 hover:bg-foreground/10 transition-colors'
+            >
+              <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4'>
+                <div className='flex-1'>
+                  <div className='flex items-start justify-between mb-2'>
+                    <h3 className=\"font-bold text-lg md:text-xl\">{project.title}</h3>
+                    <div className=\"flex items-center gap-2 ml-4\">\n                      <Switch
+                        id={`published-${project.id}`}
+                        checked={project.published}
+                        onCheckedChange={(checked) => {
+                          toggleVisibilityMutation.mutate({ id: project.id, published: checked });
+                        }}
+                      />
+                      <Label htmlFor={`published-${project.id}`} className='text-xs'>
+                        {project.published ? 'Published' : 'Draft'}
+                      </Label>
+                    </div>
+                  </div>
+                  <p className=\"text-sm text-foreground/70 mb-3 line-clamp-2\">\n                    {project.description}
+                  </p>
+                  <div className='flex flex-wrap gap-2'>
+                    {project.tech.slice(0, 5).map((tech) => (
+                      <span key={tech} className='px-2 py-1 text-xs rounded-md bg-primary/10 text-primary border border-primary/20'>
+                        {tech}
+                      </span>
+                    ))}
+                    {project.tech.length > 5 && (
+                      <span className='px-2 py-1 text-xs text-foreground/60'>+{project.tech.length - 5}</span>
+                    )}
+                  </div>
+                </div>
+                <div className=\"flex md:flex-col gap-2\">\n                  <Button size=\"sm\" variant=\"outline\" onClick={() => handleEdit(project)} className='flex-1 md:flex-none'>
+                    <Edit className=\"mr-2\" size={16} /> Edit
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="destructive">
-                        <Trash className="mr-2" size={16} /> Delete
+                      <Button size=\"sm\" variant=\"destructive\" className='flex-1 md:flex-none'>
+                        <Trash className=\"mr-2\" size={16} /> Delete
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className='bg-background border-foreground/10'>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete Project?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your project.
+                          This action cannot be undone. This will permanently delete <strong>{project.title}</strong>.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteMutation.mutate(project.id)}>
-                          Delete
+                        <AlertDialogAction onClick={() => deleteMutation.mutate(project.id)} className='bg-destructive text-destructive-foreground'>
+                          Delete Project
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id={`published-${project.id}`}
-                    checked={project.published}
-                    onCheckedChange={(checked) => {
-                      toggleVisibilityMutation.mutate({ id: project.id, published: checked });
-                    }}
-                  />
-                  <Label htmlFor={`published-${project.id}`}>Published</Label>
-                </div>
               </div>
-            </GlassCard>
+            </div>
           ))}
+        </div>
+      ) : (
+        <div className='border border-dashed border-foreground/20 rounded-xl p-12 text-center'>
+          <p className='text-foreground/60 mb-4'>No projects yet</p>
+          <Button onClick={handleAddNew}>
+            <Plus className=\"mr-2\" size={20} /> Add Your First Project
+          </Button>
         </div>
       )}
     </div>

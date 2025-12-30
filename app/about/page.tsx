@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
-import { Code, Palette, Zap, Heart } from "lucide-react";
+import { Code } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { AboutPageData } from "@/types/portfolio";
+import { getDynamicIcon } from "@/lib/icons";
 
 // Define the shape of data returned by getProfileData
 interface ProfileData {
@@ -36,13 +37,6 @@ interface ProfileData {
     isPrimary: boolean;
   }[];
 }
-
-const iconMap: Record<string, typeof Code> = {
-  Code,
-  Palette,
-  Zap,
-  Heart,
-};
 
 const About = () => {
   const [hostname, setHostname] = useState("");
@@ -187,8 +181,13 @@ const About = () => {
             </div>
             <div className='grid sm:grid-cols-2 gap-6'>
               {aboutPageData.skills.map((skillGroup, index) => {
-                const Icon =
-                  iconMap[skillGroup.icon as keyof typeof iconMap] ?? Code;
+                // Dynamically get the icon from the stored string (e.g., "Fa.FaReact")
+                const IconComponent = skillGroup.icon
+                  ? getDynamicIcon(skillGroup.icon)
+                  : null;
+                // Fallback to Code icon if the stored icon is not found
+                const Icon = IconComponent || Code;
+
                 return (
                   <motion.div
                     key={skillGroup.category}
