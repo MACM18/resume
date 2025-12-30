@@ -68,7 +68,9 @@ const homePageSchema = z.object({
     description: z.string().min(1, "Required"),
     email: z.string().email("Must be a valid email"),
   }),
-  about_card_description: z.string().optional(), // Add to schema
+  about_card_description: z.string().optional(),
+  projects_card_description: z.string().optional(),
+  experience_card_description: z.string().optional(),
 });
 
 type HomePageFormValues = z.infer<typeof homePageSchema>;
@@ -101,7 +103,11 @@ export function HomePageForm() {
         email: "",
       },
       about_card_description:
-        profile?.home_page_data?.about_card_description || "", // Initialize
+        profile?.home_page_data?.about_card_description || "",
+      projects_card_description:
+        profile?.home_page_data?.projects_card_description || "",
+      experience_card_description:
+        profile?.home_page_data?.experience_card_description || "",
     },
   });
 
@@ -221,7 +227,8 @@ export function HomePageForm() {
             <p className='text-xs text-foreground/70'>
               <strong>💡 Icon Tip:</strong> Click the circular icon button to
               select from thousands of brand and social icons. Try searching
-              for: &quot;github&quot;, &quot;linkedin&quot;, &quot;twitter&quot;, &quot;email&quot;, or your preferred
+              for: &quot;github&quot;, &quot;linkedin&quot;,
+              &quot;twitter&quot;, &quot;email&quot;, or your preferred
               platform.
             </p>
           </div>
@@ -684,6 +691,71 @@ export function HomePageForm() {
                   )}
                   Generate from About Page Story
                 </Button>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Separator />
+
+        {/* Projects Card Description */}
+        <div>
+          <h3 className='text-lg font-medium mb-4'>Projects Card Summary</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Customize the description that appears on your homepage Projects
+            card to showcase your work.
+          </p>
+          <FormField
+            control={form.control}
+            name='projects_card_description'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Projects Card Summary</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='Explore my latest work featuring modern technologies and innovative solutions.'
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This summary appears on the &quot;Projects&quot; quick access
+                  card on your homepage. Keep it brief and highlight your work
+                  (2-3 sentences).
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Separator />
+
+        {/* Experience Card Description */}
+        <div>
+          <h3 className='text-lg font-medium mb-4'>Experience Card Summary</h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Customize the description that appears on your homepage Experience
+            card to highlight your professional background.
+          </p>
+          <FormField
+            control={form.control}
+            name='experience_card_description'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Experience Card Summary</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='Professional background and skills across multiple disciplines.'
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This summary appears on the &quot;Experience&quot; quick
+                  access card on your homepage. Keep it concise (2-3 sentences).
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

@@ -90,16 +90,20 @@ export default function Page() {
 
   // Use profile data with sensible defaults if home_page_data is missing
   const rawHomeData = profileData.home_page_data;
-  const homePageData: HomePageData & { about_card_description?: string } = {
+  const homePageData: HomePageData & {
+    about_card_description?: string;
+    projects_card_description?: string;
+    experience_card_description?: string;
+  } = {
     name: profileData.full_name || "Welcome",
     tagline: profileData.tagline || "My Portfolio",
     socialLinks: rawHomeData?.socialLinks || [],
     experienceHighlights: rawHomeData?.experienceHighlights || [],
     technicalExpertise: rawHomeData?.technicalExpertise || [],
     achievements: rawHomeData?.achievements || [],
-    about_card_description: (
-      rawHomeData as { about_card_description?: string } | null
-    )?.about_card_description,
+    about_card_description: rawHomeData?.about_card_description,
+    projects_card_description: rawHomeData?.projects_card_description,
+    experience_card_description: rawHomeData?.experience_card_description,
     callToAction: rawHomeData?.callToAction || {
       title: "Get in Touch",
       description: "Let's connect!",
@@ -590,8 +594,8 @@ export default function Page() {
                     </div>
                     <h3 className='text-2xl font-bold mb-3'>Projects</h3>
                     <p className='text-foreground/60 leading-relaxed flex-1 line-clamp-3'>
-                      Explore my latest work featuring modern technologies and
-                      innovative solutions.
+                      {homePageData.projects_card_description ||
+                        "Explore my latest work featuring modern technologies and innovative solutions."}
                     </p>
                     <div className='flex items-center gap-2 mt-6 text-primary font-medium'>
                       <span>View Portfolio</span>
@@ -616,8 +620,8 @@ export default function Page() {
                     </div>
                     <h3 className='text-2xl font-bold mb-3'>Experience</h3>
                     <p className='text-foreground/60 leading-relaxed flex-1 line-clamp-3'>
-                      Professional background and skills across multiple
-                      disciplines.
+                      {homePageData.experience_card_description ||
+                        "Professional background and skills across multiple disciplines."}
                     </p>
                     <div className='flex items-center gap-2 mt-6 text-primary font-medium'>
                       <span>View Resume</span>
