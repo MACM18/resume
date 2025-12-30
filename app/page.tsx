@@ -66,6 +66,19 @@ export default function Page() {
     [1, 0]
   );
 
+  // Next section parallax - content rises up as hero fades
+  const nextSectionY = useTransform(scrollYProgress, [0, 0.5, 1], [200, 50, 0]);
+  const nextSectionOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.3, 0.6],
+    [0, 0.5, 1]
+  );
+  const nextSectionScale = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.95, 0.98, 1]
+  );
+
   // Interactive scroll indicator
   const scrollToContent = () => {
     const content = document.getElementById("main-content");
@@ -181,9 +194,9 @@ export default function Page() {
                   backgroundImage: `url('${profileData.background_image_url}')`,
                 }}
               />
-              {/* Subtle gradient overlays for better text visibility */}
-              <div className='absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background' />
-              <div className='absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent' />
+              {/* Very subtle gradient overlays for better text visibility */}
+              <div className='absolute inset-0 bg-gradient-to-b from-background/50 via-background/30 to-background/80' />
+              <div className='absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent' />
             </motion.div>
           )}
 
@@ -366,10 +379,15 @@ export default function Page() {
           </motion.button>
         </section>
 
-        {/* Main Content Container */}
-        <div
+        {/* Main Content Container with Parallax Rise */}
+        <motion.div
           id='main-content'
-          className='max-w-7xl mx-auto px-6 pb-20 space-y-24'
+          className='max-w-7xl mx-auto px-6 pb-20 space-y-24 relative z-20 will-change-transform'
+          style={{
+            y: nextSectionY,
+            opacity: nextSectionOpacity,
+            scale: nextSectionScale,
+          }}
         >
           {/* Current Role - Compact */}
           {currentWork && (
@@ -824,7 +842,7 @@ export default function Page() {
               </AnimatedSection>
             </section>
           )}
-        </div>
+        </motion.div>
       </div>
     </ErrorBoundary>
   );
