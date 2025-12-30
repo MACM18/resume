@@ -125,6 +125,9 @@ export function Navigation() {
                 );
               })}
             </div>
+
+            {/* Auth buttons integrated in nav - dynamically injected by AuthButton component */}
+            <div id='nav-auth-container' />
           </div>
         </div>
       </motion.nav>

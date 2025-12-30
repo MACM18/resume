@@ -181,7 +181,7 @@ export default function ProjectClient({ id }: { id: string }) {
                   <ul className='space-y-4'>
                     {project.key_features.map((feature, index) => (
                       <li key={index} className='flex items-start gap-3'>
-                        <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-2' />
+                        <span className='w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2' />
                         <span className='text-foreground/70 leading-relaxed'>
                           {feature}
                         </span>

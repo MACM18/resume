@@ -130,7 +130,7 @@ export default function Page() {
                 }}
               />
               {/* Gradient overlay for text readability */}
-              <div className='absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background' />
+              <div className='absolute inset-0 bg-linear-to-b from-background/80 via-background/70 to-background' />
             </div>
           )}
 
@@ -138,7 +138,7 @@ export default function Page() {
           <div className='relative z-10 max-w-5xl mx-auto px-6 text-center'>
             <AnimatedSection direction='up' delay={0.1}>
               <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
-                <span className='bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent'>
+                <span className='bg-linear-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent'>
                   {homePageData.name}
                 </span>
               </h1>
@@ -267,7 +267,7 @@ export default function Page() {
                 >
                   <GlassCard variant='minimal' className='p-8' hover>
                     <div className='flex items-start gap-4 mb-4'>
-                      <div className='w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                      <div className='w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0'>
                         <span className='text-primary font-bold text-xl'>
                           {highlight.metric}
                         </span>

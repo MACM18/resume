@@ -42,7 +42,7 @@ export function SectionHeader({
         className={cn(
           "text-4xl md:text-5xl font-bold",
           gradient !== "none"
-            ? `bg-gradient-to-r bg-clip-text text-transparent ${gradientStyles[gradient]}`
+            ? `bg-linear-to-r bg-clip-text text-transparent ${gradientStyles[gradient]}`
             : "text-foreground"
         )}
       >

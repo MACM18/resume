@@ -54,7 +54,7 @@ export default async function RootLayout({
               <TooltipProvider>
                 <div className='min-h-screen bg-background relative'>
                   {/* Subtle gradient overlay */}
-                  <div className='fixed inset-0 bg-gradient-to-br from-background via-background to-background-secondary pointer-events-none' />
+                  <div className='fixed inset-0 bg-linear-to-br from-background via-background to-background-secondary pointer-events-none' />
 
                   {/* Minimal accent orbs */}
                   <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-40' />

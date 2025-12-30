@@ -197,7 +197,7 @@ const About = () => {
                   >
                     <GlassCard variant='minimal' className='p-8 h-full' hover>
                       <div className='flex items-center gap-3 mb-6'>
-                        <div className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                        <div className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0'>
                           <Icon className='text-primary' size={20} />
                         </div>
                         <h3 className='text-xl font-semibold'>
@@ -210,7 +210,7 @@ const About = () => {
                             key={skill}
                             className='flex items-center gap-3 text-foreground/70'
                           >
-                            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />
+                            <span className='w-1.5 h-1.5 rounded-full bg-primary shrink-0' />
                             <span>{skill}</span>
                           </li>
                         ))}
