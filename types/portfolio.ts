@@ -100,6 +100,10 @@ export interface HomePageData {
     description: string;
     email: string;
   };
+  availability_status?: {
+    show: boolean;
+    message: string;
+  };
   about_card_description?: string;
   projects_card_description?: string;
   experience_card_description?: string;
@@ -128,6 +132,8 @@ export interface Profile {
   user_id: string; // Auth user id - used for RLS policies
   full_name: string;
   avatar_url: string | null;
+  avatar_position?: { x: number; y: number };
+  avatar_zoom?: number;
   tagline: string;
   domain: string | null;
   home_page_data: HomePageData;

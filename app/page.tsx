@@ -31,10 +31,35 @@ export default function Page() {
     offset: ["start start", "end start"],
   });
 
-  // Parallax transforms for hero elements
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  // Enhanced parallax transforms for hero elements with layered depth
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.3]);
+
+  // Individual element parallax - each moves at different speeds for depth
+  const badgeY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
+  const badgeOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+
+  const titleY = useTransform(scrollYProgress, [0, 1], ["0%", "80%"]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  const taglineY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const taglineOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  const buttonsY = useTransform(scrollYProgress, [0, 1], ["0%", "120%"]);
+  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  const socialY = useTransform(scrollYProgress, [0, 1], ["0%", "140%"]);
+  const socialOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const imageOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  const scrollIndicatorOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.3],
+    [1, 0]
+  );
 
   // Interactive scroll indicator
   const scrollToContent = () => {
@@ -94,6 +119,7 @@ export default function Page() {
     about_card_description?: string;
     projects_card_description?: string;
     experience_card_description?: string;
+    availability_status?: { show: boolean; message: string };
   } = {
     name: profileData.full_name || "Welcome",
     tagline: profileData.tagline || "My Portfolio",
@@ -104,6 +130,10 @@ export default function Page() {
     about_card_description: rawHomeData?.about_card_description,
     projects_card_description: rawHomeData?.projects_card_description,
     experience_card_description: rawHomeData?.experience_card_description,
+    availability_status: rawHomeData?.availability_status || {
+      show: true,
+      message: "Available for opportunities",
+    },
     callToAction: rawHomeData?.callToAction || {
       title: "Get in Touch",
       description: "Let's connect!",
@@ -134,101 +164,136 @@ export default function Page() {
           ref={heroRef}
           className='relative h-screen flex items-center justify-center overflow-hidden'
         >
-          {/* Background Image with Parallax */}
+          {/* Background Image with Enhanced Parallax */}
           {profileData.background_image_url && (
-            <motion.div className='absolute inset-0' style={{ y: backgroundY }}>
+            <motion.div
+              className='absolute inset-0 will-change-transform'
+              style={{ y: backgroundY, scale: backgroundScale }}
+            >
               <div
-                className='absolute inset-0 bg-cover bg-center bg-no-repeat scale-110'
+                className='absolute inset-0 bg-cover bg-center bg-no-repeat'
                 style={{
                   backgroundImage: `url('${profileData.background_image_url}')`,
                 }}
               />
-              {/* Multi-layer gradient overlay */}
-              <div className='absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background' />
-              <div className='absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30' />
+              {/* Subtle gradient overlays for better text visibility */}
+              <div className='absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background' />
+              <div className='absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent' />
             </motion.div>
           )}
 
-          {/* Hero Content with Parallax */}
-          <motion.div
-            className='relative z-10 max-w-6xl mx-auto px-6'
-            style={{ y: textY, opacity }}
-          >
+          {/* Hero Content with Individual Element Parallax */}
+          <div className='relative z-10 max-w-6xl mx-auto px-6'>
             <div className='grid lg:grid-cols-2 gap-12 items-center'>
               {/* Text Content */}
               <div className='text-center lg:text-left'>
-                <AnimatedSection direction='up' delay={0.1}>
-                  <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-sm font-medium mb-8'>
-                    <span className='w-2 h-2 rounded-full bg-primary animate-pulse' />
-                    Available for opportunities
-                  </div>
-                </AnimatedSection>
+                {homePageData.availability_status?.show && (
+                  <motion.div
+                    className='will-change-transform'
+                    style={{ y: badgeY, opacity: badgeOpacity }}
+                  >
+                    <AnimatedSection direction='up' delay={0.1}>
+                      <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/10 backdrop-blur-sm text-primary text-sm font-medium mb-8 shadow-sm'>
+                        <span className='w-2 h-2 rounded-full bg-primary animate-pulse' />
+                        {homePageData.availability_status.message}
+                      </div>
+                    </AnimatedSection>
+                  </motion.div>
+                )}
 
-                <AnimatedSection direction='up' delay={0.2}>
-                  <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
-                    <span className='bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent'>
-                      {homePageData.name}
-                    </span>
-                  </h1>
-                </AnimatedSection>
+                <motion.div
+                  className='will-change-transform'
+                  style={{ y: titleY, opacity: titleOpacity }}
+                >
+                  <AnimatedSection direction='up' delay={0.2}>
+                    <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
+                      <span className='bg-gradient-to-br from-foreground to-foreground/80 bg-clip-text text-transparent drop-shadow-sm'>
+                        {homePageData.name}
+                      </span>
+                    </h1>
+                  </AnimatedSection>
+                </motion.div>
 
-                <AnimatedSection direction='up' delay={0.3}>
-                  <p className='text-xl md:text-2xl text-foreground/70 mb-10 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed'>
-                    {homePageData.tagline}
-                  </p>
-                </AnimatedSection>
+                <motion.div
+                  className='will-change-transform'
+                  style={{ y: taglineY, opacity: taglineOpacity }}
+                >
+                  <AnimatedSection direction='up' delay={0.3}>
+                    <p className='text-xl md:text-2xl text-foreground/80 mb-10 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed drop-shadow-sm'>
+                      {homePageData.tagline}
+                    </p>
+                  </AnimatedSection>
+                </motion.div>
 
-                <AnimatedSection direction='up' delay={0.4}>
-                  <div className='flex flex-wrap justify-center lg:justify-start gap-4'>
-                    <Button
-                      asChild
-                      size='lg'
-                      className='bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all'
-                    >
-                      <Link href='/projects'>
-                        View Projects <ArrowRight className='ml-2' size={20} />
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant='outline'
-                      size='lg'
-                      className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
-                    >
-                      <Link href='/about'>About Me</Link>
-                    </Button>
-                  </div>
-                </AnimatedSection>
+                <motion.div
+                  className='will-change-transform'
+                  style={{ y: buttonsY, opacity: buttonsOpacity }}
+                >
+                  <AnimatedSection direction='up' delay={0.4}>
+                    <div className='flex flex-wrap justify-center lg:justify-start gap-4'>
+                      <Button
+                        asChild
+                        size='lg'
+                        className='bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all'
+                      >
+                        <Link href='/projects'>
+                          View Projects{" "}
+                          <ArrowRight className='ml-2' size={20} />
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        variant='outline'
+                        size='lg'
+                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
+                      >
+                        <Link href='/about'>About Me</Link>
+                      </Button>
+                    </div>
+                  </AnimatedSection>
+                </motion.div>
 
                 {/* Social Links in Hero */}
                 {homePageData.socialLinks.length > 0 && (
-                  <AnimatedSection direction='up' delay={0.5}>
-                    <div className='flex justify-center lg:justify-start gap-3 mt-10'>
-                      {homePageData.socialLinks.slice(0, 4).map((social) => {
-                        const Icon = getDynamicIcon(social.icon);
-                        if (!Icon) return null;
-                        return (
-                          <a
-                            key={social.label}
-                            href={social.href}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='p-3 rounded-xl border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all group'
-                            aria-label={social.label}
-                          >
-                            <Icon className='h-5 w-5 text-foreground/60 group-hover:text-primary transition-colors' />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </AnimatedSection>
+                  <motion.div
+                    className='will-change-transform'
+                    style={{ y: socialY, opacity: socialOpacity }}
+                  >
+                    <AnimatedSection direction='up' delay={0.5}>
+                      <div className='flex justify-center lg:justify-start gap-3 mt-10'>
+                        {homePageData.socialLinks.slice(0, 4).map((social) => {
+                          const Icon = getDynamicIcon(social.icon);
+                          if (!Icon) return null;
+                          return (
+                            <a
+                              key={social.label}
+                              href={social.href}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='p-3 rounded-xl border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all group'
+                              aria-label={social.label}
+                            >
+                              <Icon className='h-5 w-5 text-foreground/60 group-hover:text-primary transition-colors' />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </AnimatedSection>
+                  </motion.div>
                 )}
               </div>
 
-              {/* Profile Image */}
+              {/* Profile Image with Parallax */}
               {profileData.avatar_url && (
-                <AnimatedSection direction='left' delay={0.3}>
-                  <div className='hidden lg:block relative'>
+                <motion.div
+                  className='hidden lg:block relative will-change-transform'
+                  style={{
+                    y: imageY,
+                    scale: imageScale,
+                    opacity: imageOpacity,
+                  }}
+                >
+                  <AnimatedSection direction='left' delay={0.3}>
                     <div className='relative w-80 h-80 xl:w-96 xl:h-96 mx-auto'>
                       {/* Decorative elements */}
                       <div className='absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl' />
@@ -237,26 +302,43 @@ export default function Page() {
 
                       {/* Image */}
                       <div className='relative w-full h-full rounded-full overflow-hidden border-2 border-foreground/10'>
-                        <Image
-                          src={profileData.avatar_url}
-                          alt={homePageData.name}
-                          fill
-                          className='object-cover'
-                          priority
-                        />
+                        <div
+                          className='absolute inset-0'
+                          style={{
+                            transform: `scale(${
+                              (profileData.avatar_zoom || 100) / 100
+                            })`,
+                            transformOrigin: `${
+                              profileData.avatar_position?.x || 50
+                            }% ${profileData.avatar_position?.y || 50}%`,
+                          }}
+                        >
+                          <Image
+                            src={profileData.avatar_url}
+                            alt={homePageData.name}
+                            fill
+                            className='object-cover'
+                            style={{
+                              objectPosition: `${
+                                profileData.avatar_position?.x || 50
+                              }% ${profileData.avatar_position?.y || 50}%`,
+                            }}
+                            priority
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </AnimatedSection>
+                  </AnimatedSection>
+                </motion.div>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Interactive Scroll Indicator */}
           <motion.button
             onClick={scrollToContent}
             className='absolute bottom-8 left-1/2 -translate-x-1/2 z-20 group cursor-pointer'
-            style={{ opacity }}
+            style={{ opacity: scrollIndicatorOpacity }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -345,12 +427,12 @@ export default function Page() {
                 </div>
               </AnimatedSection>
 
-              {/* Adaptive grid: single item = full width centered, multiple = 2 cols */}
+              {/* Adaptive grid: single item = centered, multiple = 2 cols */}
               <div
-                className={`grid gap-6 max-w-5xl mx-auto ${
+                className={`grid gap-6 mx-auto ${
                   homePageData.experienceHighlights.length === 1
                     ? "max-w-2xl"
-                    : "md:grid-cols-2"
+                    : "md:grid-cols-2 max-w-5xl"
                 }`}
               >
                 {homePageData.experienceHighlights.map((highlight, index) => (

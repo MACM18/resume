@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Link as LinkIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileImageManager } from "./ProfileImageManager";
+import { AvatarPositionEditor } from "./AvatarPositionEditor";
 import { BackgroundManager } from "./BackgroundManager";
 import { FaviconManager } from "./FaviconManager";
 import { normalizeDomain } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function ProfileManagement() {
     domain: true,
     profile: true,
     images: false,
+    avatarPosition: false,
     background: false,
     favicon: false,
   });
@@ -187,6 +189,18 @@ export function ProfileManagement() {
         description='Upload and manage your profile photos'
       >
         <ProfileImageManager />
+      </Section>
+
+      <Section
+        id='avatarPosition'
+        title='Avatar Position & Zoom'
+        description='Adjust how your avatar appears in the circle'
+      >
+        <AvatarPositionEditor
+          currentAvatarUrl={profile?.avatar_url || null}
+          currentPosition={profile?.avatar_position}
+          currentZoom={profile?.avatar_zoom}
+        />
       </Section>
 
       <Section

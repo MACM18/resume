@@ -29,6 +29,8 @@ interface ProfileData {
   };
   about_page_data: AboutPageData;
   avatar_url: string | null;
+  avatar_position?: { x: number; y: number };
+  avatar_zoom?: number;
   contact_numbers?: {
     id: string;
     number: string;
@@ -117,14 +119,31 @@ const About = () => {
               {avatarUrl && (
                 <div className='relative w-48 h-48 mx-auto mb-10'>
                   <div className='absolute inset-0 rounded-full border-2 border-foreground/10 overflow-hidden'>
-                    <Image
-                      src={avatarUrl}
-                      alt={profileData.full_name || "Profile Picture"}
-                      fill
-                      className='object-cover'
-                      sizes='(max-width: 768px) 192px, 192px'
-                      priority
-                    />
+                    <div
+                      className='absolute inset-0'
+                      style={{
+                        transform: `scale(${
+                          (profileData.avatar_zoom || 100) / 100
+                        })`,
+                        transformOrigin: `${
+                          profileData.avatar_position?.x || 50
+                        }% ${profileData.avatar_position?.y || 50}%`,
+                      }}
+                    >
+                      <Image
+                        src={avatarUrl}
+                        alt={profileData.full_name || "Profile Picture"}
+                        fill
+                        className='object-cover'
+                        style={{
+                          objectPosition: `${
+                            profileData.avatar_position?.x || 50
+                          }% ${profileData.avatar_position?.y || 50}%`,
+                        }}
+                        sizes='(max-width: 768px) 192px, 192px'
+                        priority
+                      />
+                    </div>
                   </div>
                   {/* Subtle glow effect */}
                   <div className='absolute -inset-4 bg-primary/5 rounded-full blur-2xl -z-10' />

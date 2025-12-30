@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { IconPicker } from "./IconPicker";
 import { Separator } from "@/components/ui/separator";
 import { DeleteButton } from "../DeleteButton";
+import { Switch } from "@/components/ui/switch";
 
 const homePageSchema = z.object({
   socialLinks: z.array(
@@ -68,6 +69,12 @@ const homePageSchema = z.object({
     description: z.string().min(1, "Required"),
     email: z.string().email("Must be a valid email"),
   }),
+  availability_status: z
+    .object({
+      show: z.boolean(),
+      message: z.string().min(1, "Required"),
+    })
+    .optional(),
   about_card_description: z.string().optional(),
   projects_card_description: z.string().optional(),
   experience_card_description: z.string().optional(),
@@ -101,6 +108,10 @@ export function HomePageForm() {
         description:
           "I'm always excited to discuss new opportunities, share ideas, or explore potential collaborations. Feel free to reach out!",
         email: "",
+      },
+      availability_status: profile?.home_page_data?.availability_status || {
+        show: true,
+        message: "Available for opportunities",
       },
       about_card_description:
         profile?.home_page_data?.about_card_description || "",
@@ -639,6 +650,63 @@ export function HomePageForm() {
           >
             Add Achievement
           </Button>
+        </div>
+
+        <Separator />
+
+        {/* Availability Status */}
+        <div>
+          <h3 className='text-lg font-medium mb-4'>
+            Availability Status Badge
+          </h3>
+          <p className='text-sm text-muted-foreground mb-4'>
+            Control the availability badge shown on your homepage hero section.
+            Toggle visibility and customize the message.
+          </p>
+          <div className='space-y-4'>
+            <FormField
+              control={form.control}
+              name='availability_status.show'
+              render={({ field }) => (
+                <FormItem className='flex items-center justify-between rounded-lg border p-4'>
+                  <div className='space-y-0.5'>
+                    <FormLabel>Show Availability Badge</FormLabel>
+                    <FormDescription>
+                      Display your availability status on the homepage
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='availability_status.message'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Badge Message</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='Available for opportunities'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Customize the text displayed in your availability badge
+                    (e.g., &quot;Available for opportunities&quot;,
+                    &quot;Currently booked&quot;, &quot;Open to new
+                    projects&quot;)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <Separator />

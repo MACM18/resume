@@ -8,6 +8,8 @@ function transformProfile(prismaProfile: {
   userId: string;
   fullName: string;
   avatarUrl: string | null;
+  avatarPosition: unknown;
+  avatarZoom: number | null;
   tagline: string;
   domain: string | null;
   homePageData: unknown;
@@ -25,6 +27,8 @@ function transformProfile(prismaProfile: {
     user_id: prismaProfile.userId,
     full_name: prismaProfile.fullName,
     avatar_url: prismaProfile.avatarUrl,
+    avatar_position: prismaProfile.avatarPosition as { x: number; y: number } | undefined,
+    avatar_zoom: prismaProfile.avatarZoom || undefined,
     tagline: prismaProfile.tagline,
     domain: prismaProfile.domain,
     home_page_data: prismaProfile.homePageData as HomePageData,
@@ -51,6 +55,8 @@ export async function getProfileDataServer(domain?: string) {
         homePageData: true,
         aboutPageData: true,
         avatarUrl: true,
+        avatarPosition: true,
+        avatarZoom: true,
         backgroundImageUrl: true,
         faviconUrl: true,
         contactNumbers: true,
@@ -68,6 +74,8 @@ export async function getProfileDataServer(domain?: string) {
       home_page_data: profile.homePageData as unknown as HomePageData,
       about_page_data: profile.aboutPageData as unknown as AboutPageData,
       avatar_url: profile.avatarUrl,
+      avatar_position: profile.avatarPosition as { x: number; y: number } | undefined,
+      avatar_zoom: profile.avatarZoom || undefined,
       background_image_url: profile.backgroundImageUrl,
       favicon_url: profile.faviconUrl,
       contact_numbers: profile.contactNumbers,

@@ -48,6 +48,8 @@ model Profile {
   userId           String   @unique @map("user_id")
   fullName         String   @map("full_name")
   avatarUrl        String?  @map("avatar_url")
+  avatarPosition   Json?    @map("avatar_position") // { x: number, y: number }
+  avatarZoom       Int?     @map("avatar_zoom") // Zoom percentage (50-200)
   tagline          String   @default("")
   domain           String?  @unique
   homePageData     Json     @map("home_page_data")
