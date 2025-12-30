@@ -25,9 +25,29 @@ import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Page() {
   const [hostname, setHostname] = useState("");
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [parallaxTarget, setParallaxTarget] = useState<
+    HTMLElement | null | undefined
+  >(undefined);
   const heroRef = useRef<HTMLElement>(null);
+
+  // avoid "Target ref is defined but not hydrated" warning from Framer Motion
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Only set the parallax target after the DOM node exists to avoid warnings
+  useEffect(() => {
+    if (!isHydrated) return;
+    const el = document.getElementById("hero-section");
+    if (el) {
+      setParallaxTarget(el);
+    }
+  }, [isHydrated]);
+
   const { scrollYProgress } = useScroll({
-    target: heroRef,
+    // Don't pass any target during initial render; set it only after the element exists
+    target: parallaxTarget ? () => parallaxTarget : undefined,
     offset: ["start start", "end start"],
   });
 
@@ -179,6 +199,7 @@ export default function Page() {
       <div className='min-h-screen relative'>
         {/* Hero Section - Full Screen with Parallax */}
         <section
+          id='hero-section'
           ref={heroRef}
           className='relative h-screen flex items-center justify-center overflow-hidden'
         >
