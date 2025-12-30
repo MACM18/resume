@@ -26,9 +26,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 export default function Page() {
   const [hostname, setHostname] = useState("");
   const [isHydrated, setIsHydrated] = useState(false);
-  const [parallaxTarget, setParallaxTarget] = useState<
-    HTMLElement | null | undefined
-  >(undefined);
+  const parallaxRef = useRef<HTMLElement | null>(null);
   const heroRef = useRef<HTMLElement>(null);
 
   // avoid "Target ref is defined but not hydrated" warning from Framer Motion
@@ -36,18 +34,18 @@ export default function Page() {
     setIsHydrated(true);
   }, []);
 
-  // Only set the parallax target after the DOM node exists to avoid warnings
+  // Assign the ref.current only after the element exists to avoid timing races
   useEffect(() => {
     if (!isHydrated) return;
     const el = document.getElementById("hero-section");
     if (el) {
-      setParallaxTarget(el);
+      parallaxRef.current = el;
     }
   }, [isHydrated]);
 
   const { scrollYProgress } = useScroll({
-    // Don't pass any target during initial render; set it only after the element exists
-    target: parallaxTarget ? () => parallaxTarget : undefined,
+    // Pass a RefObject when available (matches Motion's expected type)
+    target: parallaxRef.current ? parallaxRef : undefined,
     offset: ["start start", "end start"],
   });
 
