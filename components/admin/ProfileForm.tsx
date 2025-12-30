@@ -83,11 +83,7 @@ export function ProfileForm() {
             <FormItem>
               <FormLabel className='text-sm font-medium'>Full Name</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder='John Doe' 
-                  {...field}
-                  className='h-11'
-                />
+                <Input placeholder='John Doe' {...field} className='h-11' />
               </FormControl>
               <FormDescription className='text-xs'>
                 Your full professional name
@@ -101,7 +97,9 @@ export function ProfileForm() {
           name='tagline'
           render={({ field }) => (
             <FormItem>
-              <FormLabel className='text-sm font-medium'>Professional Tagline</FormLabel>
+              <FormLabel className='text-sm font-medium'>
+                Professional Tagline
+              </FormLabel>
               <FormControl>
                 <Input
                   placeholder='Full-Stack Developer passionate about creating amazing experiences'
@@ -116,14 +114,19 @@ export function ProfileForm() {
             </FormItem>
           )}
         />
-        <Button type='submit' disabled={mutation.isPending} size='lg' className='w-full md:w-auto'>
+        <Button
+          type='submit'
+          disabled={mutation.isPending}
+          size='lg'
+          className='w-full md:w-auto'
+        >
           {mutation.isPending ? (
             <>
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               Saving...
             </>
           ) : (
-            \"Save Changes\"
+            "Save Changes"
           )}
         </Button>
       </form>

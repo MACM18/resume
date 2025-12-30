@@ -147,91 +147,98 @@ export default function ProjectClient({ id }: { id: string }) {
         </div>
       </section>
 
-      {/{/* About Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <div className='mb-8'>
-            <h2 className='text-3xl md:text-4xl font-bold mb-2'>About This Project</h2>
-            <div className='w-20 h-1 bg-primary' />
-          </div>
-          <p className='text-lg text-foreground/70 leading-relaxed'>
-            {project.long_description}
-          </p>
-        </motion.section>
-
-        {/* Key Features & Tech Stack Grid */}
-        <div className='grid lg:grid-cols-3 gap-8'>
-          {/* Key Features */}
+      {/* About Section */}
+      <section className='px-6 py-16'>
+        <div className='max-w-5xl mx-auto'>
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className='lg:col-span-2'
+            transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <GlassCard variant='minimal' className='p-8 h-full'>
-              <h3 className='text-2xl font-bold mb-6'>Key Features</h3>
-              {project.key_features && project.key_features.length > 0 ? (
-                <ul className='space-y-4'>
-                  {project.key_features.map((feature, index) => (
-                    <li key={index} className='flex items-start gap-3'>
-                      <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-2' />
-                      <span className='text-foreground/70 leading-relaxed'>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className='text-foreground/60'>No key features available.</p>
-              )}
-            </GlassCard>
+            <div className='mb-8'>
+              <h2 className='text-3xl md:text-4xl font-bold mb-2'>
+                About This Project
+              </h2>
+              <div className='w-20 h-1 bg-primary' />
+            </div>
+            <p className='text-lg text-foreground/70 leading-relaxed'>
+              {project.long_description}
+            </p>
           </motion.section>
 
-          {/* Sidebar Info */}
-          <div className='space-y-6'>
-            <motion.div
+          {/* Key Features & Tech Stack Grid */}
+          <div className='grid lg:grid-cols-3 gap-8 mt-16'>
+            {/* Key Features */}
+            <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className='lg:col-span-2'
             >
-              <GlassCard variant='minimal' className='p-6'>
-                <h3 className='text-lg font-bold mb-4'>Technologies</h3>
-                <div className='flex flex-wrap gap-2'>
-                  {project.tech.map((tech) => (
-                    <span
-                      key={tech}
-                      className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/70'
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+              <GlassCard variant='minimal' className='p-8 h-full'>
+                <h3 className='text-2xl font-bold mb-6'>Key Features</h3>
+                {project.key_features && project.key_features.length > 0 ? (
+                  <ul className='space-y-4'>
+                    {project.key_features.map((feature, index) => (
+                      <li key={index} className='flex items-start gap-3'>
+                        <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-2' />
+                        <span className='text-foreground/70 leading-relaxed'>
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className='text-foreground/60'>
+                    No key features available.
+                  </p>
+                )}
               </GlassCard>
-            </motion.div>
+            </motion.section>
 
-            {project.featured && (
+            {/* Sidebar Info */}
+            <div className='space-y-6'>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
               >
                 <GlassCard variant='minimal' className='p-6'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <span className='w-2 h-2 bg-primary rounded-full' />
-                    <h3 className='text-lg font-bold'>Featured Project</h3>
+                  <h3 className='text-lg font-bold mb-4'>Technologies</h3>
+                  <div className='flex flex-wrap gap-2'>
+                    {project.tech.map((tech) => (
+                      <span
+                        key={tech}
+                        className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/70'
+                      >
+                        {tech}
+                      </span>
+                    ))}
                   </div>
-                  <p className='text-sm text-foreground/70'>
-                    This project showcases my best work and key skills
-                  </p>
                 </GlassCard>
               </motion.div>
-            )}
-              </GlassCard>
-            </motion.div>
+
+              {project.featured && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  <GlassCard variant='minimal' className='p-6'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <span className='w-2 h-2 bg-primary rounded-full' />
+                      <h3 className='text-lg font-bold'>Featured Project</h3>
+                    </div>
+                    <p className='text-sm text-foreground/70'>
+                      This project showcases my best work and key skills
+                    </p>
+                  </GlassCard>
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
