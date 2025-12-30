@@ -7,7 +7,7 @@ import {
   deleteProject,
   updateProject,
 } from "@/lib/projects";
-import { GlassCard } from "@/components/GlassCard";
+// import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash, Loader2 } from "lucide-react";
 import {

@@ -3,8 +3,8 @@
 import { useAuth } from "@/components/providers/AuthProvider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { GlassCard } from "@/components/GlassCard";
-import { AdminNav } from "@/components/admin/AdminNav";
+// import { GlassCard } from "@/components/GlassCard";
+// import { AdminNav } from "@/components/admin/AdminNav";
 import { ProjectManagement } from "@/components/admin/ProjectManagement";
 import { ProfileManagement } from "@/components/admin/ProfileManagement";
 import { HomePageForm } from "@/components/admin/HomePageForm";

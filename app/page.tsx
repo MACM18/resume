@@ -195,8 +195,8 @@ export default function Page() {
                 }}
               />
               {/* Very subtle gradient overlays for better text visibility */}
-              <div className='absolute inset-0 bg-gradient-to-b from-background/50 via-background/30 to-background/80' />
-              <div className='absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent' />
+              <div className='absolute inset-0 bg-linear-to-b from-background/50 via-background/30 to-background/80' />
+              <div className='absolute inset-0 bg-linear-to-t from-background/60 via-transparent to-transparent' />
             </motion.div>
           )}
 
@@ -233,7 +233,7 @@ export default function Page() {
                 >
                   <AnimatedSection direction='up' delay={0.2}>
                     <h1 className='text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight'>
-                      <span className='bg-gradient-to-br from-foreground to-foreground/80 bg-clip-text text-transparent drop-shadow-sm'>
+                      <span className='bg-linear-to-br from-foreground to-foreground/80 bg-clip-text text-transparent drop-shadow-sm'>
                         {homePageData.name}
                       </span>
                     </h1>
@@ -323,7 +323,7 @@ export default function Page() {
                   <AnimatedSection direction='left' delay={0.3}>
                     <div className='relative w-80 h-80 xl:w-96 xl:h-96 mx-auto'>
                       {/* Decorative elements */}
-                      <div className='absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl' />
+                      <div className='absolute inset-0 rounded-full bg-linear-to-br from-primary/20 to-secondary/20 blur-3xl' />
                       <div className='absolute -inset-4 rounded-full border border-foreground/5' />
                       <div className='absolute -inset-8 rounded-full border border-foreground/5' />
 

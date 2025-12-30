@@ -22,17 +22,87 @@ export function AvatarPositionEditor({
   currentZoom = 100,
 }: AvatarPositionEditorProps) {
   const queryClient = useQueryClient();
-  const [position, setPosition] = useState(currentPosition);
-  const [zoom, setZoom] = useState(currentZoom);
+
+  // Normalize incoming position shapes (object, array, or JSON string)
+  const normalizePosition = useCallback((p: unknown) => {
+    if (!p) return { x: 50, y: 50 };
+    if (Array.isArray(p) && p.length >= 2) {
+      const x = Number(p[0]) || 50;
+      const y = Number(p[1]) || 50;
+      return {
+        x: Math.max(0, Math.min(100, Math.round(x))),
+        y: Math.max(0, Math.min(100, Math.round(y))),
+      };
+    }
+    if (typeof p === "string") {
+      try {
+        const parsed = JSON.parse(p);
+        return normalizePosition(parsed);
+      } catch {
+        const parts = p.split(",").map((s: string) => s.trim());
+        if (parts.length >= 2) {
+          const x = Number(parts[0]) || 50;
+          const y = Number(parts[1]) || 50;
+          return {
+            x: Math.max(0, Math.min(100, Math.round(x))),
+            y: Math.max(0, Math.min(100, Math.round(y))),
+          };
+        }
+      }
+    }
+    if (typeof p === "object" && p !== null) {
+      const maybe = p as { x?: unknown; y?: unknown };
+      const x = Number(maybe.x as number | string);
+      const y = Number(maybe.y as number | string);
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        return {
+          x: Math.max(0, Math.min(100, Math.round(x))),
+          y: Math.max(0, Math.min(100, Math.round(y))),
+        };
+      }
+    }
+    return { x: 50, y: 50 };
+  }, []);
+
+  const [position, setPosition] = useState(() =>
+    normalizePosition(currentPosition)
+  );
+  const [zoom, setZoom] = useState(() => {
+    const z = Number(currentZoom);
+    return Number.isFinite(z)
+      ? Math.max(50, Math.min(200, Math.round(z)))
+      : 100;
+  });
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
   // Sync state when props change
   useEffect(() => {
-    setPosition(currentPosition);
-    setZoom(currentZoom);
-  }, [currentPosition, currentZoom]);
+    setPosition(normalizePosition(currentPosition));
+
+    const z = Number(currentZoom);
+    setZoom(
+      Number.isFinite(z) ? Math.max(50, Math.min(200, Math.round(z))) : 100
+    );
+
+    // Log unexpected shapes (helps diagnose malformed DB values)
+    const isValid = (() => {
+      if (!currentPosition || typeof currentPosition !== "object") return false;
+      const maybe = currentPosition as { x?: unknown; y?: unknown };
+      return (
+        Number.isFinite(Number(maybe.x as number | string)) &&
+        Number.isFinite(Number(maybe.y as number | string))
+      );
+    })();
+
+    if (!isValid && currentPosition) {
+      console.warn(
+        "AvatarPositionEditor: normalized unexpected currentPosition",
+        currentPosition
+      );
+    }
+  }, [currentPosition, currentZoom, normalizePosition]);
 
   const updateMutation = useMutation({
     mutationFn: async () => {
@@ -245,7 +315,7 @@ export function AvatarPositionEditor({
             <Slider
               value={[position.x]}
               onValueChange={([value]) =>
-                setPosition({ ...position, x: value })
+                setPosition((prev) => ({ ...prev, x: Number(value) }))
               }
               min={0}
               max={100}
@@ -262,7 +332,7 @@ export function AvatarPositionEditor({
             <Slider
               value={[position.y]}
               onValueChange={([value]) =>
-                setPosition({ ...position, y: value })
+                setPosition((prev) => ({ ...prev, y: Number(value) }))
               }
               min={0}
               max={100}
@@ -278,7 +348,7 @@ export function AvatarPositionEditor({
             </div>
             <Slider
               value={[zoom]}
-              onValueChange={([value]) => setZoom(value)}
+              onValueChange={([value]) => setZoom(Number(value))}
               min={50}
               max={200}
               step={5}

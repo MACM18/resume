@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
-import { SectionHeader } from "@/components/ui/section-header";
+// import { SectionHeader } from "@/components/ui/section-header";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { AboutPageSkeleton } from "@/components/ui/loading-skeleton";
 

@@ -15,7 +15,6 @@ import {
   Briefcase,
 } from "lucide-react";
 import { useState } from "react";
-import { GlassCard } from "./GlassCard";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },

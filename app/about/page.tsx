@@ -9,8 +9,6 @@ import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import Image from "next/image";
 import { getEffectiveDomain } from "@/lib/utils";
-import { SectionHeader } from "@/components/ui/section-header";
-import { StatsCard } from "@/components/ui/stats-card";
 import { AboutPageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Button } from "@/components/ui/button";
@@ -266,7 +264,7 @@ const About = () => {
                       {aboutPageData.callToAction.description}
                     </p>
                     <Button asChild size='lg' className='w-full sm:w-auto'>
-                      <a href={`mailto:${contactEmail}`}>Send an Email</a>
+                      <Link href={`mailto:${contactEmail}`}>Send an Email</a>
                     </Button>
                   </GlassCard>
                 </div>
@@ -284,7 +282,7 @@ const About = () => {
                   {aboutPageData.callToAction.description}
                 </p>
                 <Button asChild size='lg' className='px-8 py-6 text-lg'>
-                  <a href={`mailto:${contactEmail}`}>Send an Email</a>
+                  <Link href={`mailto:${contactEmail}`}>Send an Email</a>
                 </Button>
               </GlassCard>
             )}

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { GlassCard } from "./GlassCard";
+// import { GlassCard } from "./GlassCard";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { toast } from "./ui/sonner";
