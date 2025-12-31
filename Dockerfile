@@ -36,8 +36,10 @@ RUN adduser --system --uid 1001 nextjs
 # Copy only the necessary files from builder
 # We use the 'standalone' folder which is much smaller
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 
 USER nextjs
 
