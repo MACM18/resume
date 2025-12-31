@@ -13,7 +13,6 @@ import { BackgroundManager } from "./BackgroundManager";
 import dynamic from "next/dynamic";
 
 // lazy load the GradientPicker (it's client-only)
-// @ts-expect-error - dynamic import of client component
 const GradientPicker = dynamic(() => import("./GradientPicker"), {
   ssr: false,
 });
