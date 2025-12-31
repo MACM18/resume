@@ -54,12 +54,12 @@ jobs:
       # 5. Notify Coolify to pull the new image
       - name: Trigger Coolify Deployment (Resource 1)
         run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?tag=${{env.TAG}}&uuid=${{secrets.COOLIFY_UUID}}&force=false" \
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?uuid=${{secrets.COOLIFY_UUID}}&force=false" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
       - name: Second Deployment Trigger (Resource 2)
         run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?tag=${{env.TAG}}&uuid=${{secrets.COOLIFY_UUID_SECOND}}&force=false" \
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?uuid=${{secrets.COOLIFY_UUID_SECOND}}&force=false" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
