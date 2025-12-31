@@ -50,7 +50,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          
+
       # -------------------------------
       # UPDATE COOLIFY APPLICATION TAG ONLY
       # -------------------------------
@@ -64,7 +64,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             --data "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
-            "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_APP_UUID }}"
+            "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_UUID }}"
 
       - name: Update Coolify Application 2 Tag
         run: |
@@ -75,7 +75,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             --data "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
-            "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_APP_UUID_SECOND }}"
+            "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_UUID_SECOND }}"
 
 
       # 5. Notify Coolify to pull the new image
