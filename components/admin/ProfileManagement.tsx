@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Link as LinkIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileImageManager } from "./ProfileImageManager";
-import { AvatarPositionEditor } from "./AvatarPositionEditor";
+import { AdvancedAvatarEditor } from "./AdvancedAvatarEditor";
 import { BackgroundManager } from "./BackgroundManager";
 import { FaviconManager } from "./FaviconManager";
 import { normalizeDomain } from "@/lib/utils";
@@ -197,7 +197,7 @@ export function ProfileManagement() {
         title='Avatar Position & Zoom'
         description='Adjust how your avatar appears in the circle'
       >
-        <AvatarPositionEditor
+        <AdvancedAvatarEditor
           currentAvatarUrl={profile?.avatar_url || null}
           currentPosition={profile?.avatar_position}
           currentZoom={profile?.avatar_zoom}
