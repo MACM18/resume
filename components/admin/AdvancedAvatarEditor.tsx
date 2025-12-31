@@ -23,14 +23,12 @@ interface AdvancedAvatarEditorProps {
   currentAvatarUrl: string | null;
   currentPosition?: { x: number; y: number };
   currentZoom?: number;
-  currentSize?: number;
 }
 
 export function AdvancedAvatarEditor({
   currentAvatarUrl,
   currentPosition = { x: 50, y: 50 },
   currentZoom = 100,
-  currentSize = 320,
 }: AdvancedAvatarEditorProps) {
   const queryClient = useQueryClient();
 
@@ -83,7 +81,6 @@ export function AdvancedAvatarEditor({
       await updateCurrentUserProfile({
         avatar_position: position,
         avatar_zoom: zoom,
-        avatar_size: containerSize,
       });
     },
     onSuccess: () => {
@@ -97,11 +94,7 @@ export function AdvancedAvatarEditor({
     },
   });
 
-  // Container sizing & drag state
-  const [containerSize, setContainerSize] = useState<number>(320); // px (w-80 = 320)
-  const [previewMode, setPreviewMode] = useState<"home" | "about" | "custom">(
-    "home"
-  );
+
 
   // Drag start/end logic (mouse + touch)
   const handleDragStart = useCallback(
@@ -185,12 +178,7 @@ export function AdvancedAvatarEditor({
     setZoom((prev) => Math.max(50, Math.min(200, prev + delta)));
   };
 
-  // Sync preview mode presets
-  useEffect(() => {
-    if (previewMode === "home") setContainerSize(320);
-    if (previewMode === "about") setContainerSize(192);
-    // custom keeps the current size
-  }, [previewMode]);
+
 
   // Sync incoming prop changes (e.g., after save)
   useEffect(() => {
@@ -201,12 +189,8 @@ export function AdvancedAvatarEditor({
     if (normalized.x !== position.x || normalized.y !== position.y) {
       setPosition(normalized);
     }
-
-    const cs = Number(currentSize) || 320;
-    if (cs !== containerSize)
-      setContainerSize(Math.max(64, Math.min(512, Math.round(cs))));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPosition, currentZoom, currentSize]);
+  }, [currentPosition, currentZoom]);
 
   if (!currentAvatarUrl) {
     return (
@@ -257,18 +241,14 @@ export function AdvancedAvatarEditor({
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
           onWheel={handleWheel}
-          className={`relative overflow-hidden border-4 transition-all select-none ${
+          className={`relative w-80 h-80 overflow-hidden border-4 transition-all select-none ${
             shape === "circle" ? "rounded-full" : "rounded-2xl"
           } ${
             isDragging
               ? "border-primary cursor-grabbing scale-105 shadow-2xl"
               : "border-primary/40 cursor-grab hover:border-primary hover:shadow-xl"
           } bg-background`}
-          style={{
-            width: `${containerSize}px`,
-            height: `${containerSize}px`,
-            touchAction: "none",
-          }}
+          style={{ touchAction: "none" }}
         >
           {/* Crosshair */}
           <div className='absolute inset-0 pointer-events-none z-10'>
@@ -316,9 +296,7 @@ export function AdvancedAvatarEditor({
           <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
             Zoom: {zoom}%
           </div>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
-            Size: {containerSize}px
-          </div>
+
         </div>
       </div>
 
@@ -362,56 +340,7 @@ export function AdvancedAvatarEditor({
           />
         </div>
 
-        {/* Container Size */}
-        <div className='space-y-3'>
-          <Label className='text-sm font-semibold'>Container Size</Label>
-          <div className='flex gap-2 items-center'>
-            <Input
-              type='range'
-              min='64'
-              max='512'
-              step='8'
-              value={containerSize}
-              onChange={(e) => {
-                setPreviewMode("custom");
-                setContainerSize(Number(e.target.value));
-              }}
-              className='w-full'
-            />
-            <div className='w-20 text-sm font-mono text-right'>
-              {containerSize}px
-            </div>
-          </div>
-          <div className='flex gap-2 mt-2'>
-            <Button
-              size='sm'
-              variant={previewMode === "home" ? "default" : "outline"}
-              onClick={() => {
-                setPreviewMode("home");
-                setContainerSize(320);
-              }}
-            >
-              Home
-            </Button>
-            <Button
-              size='sm'
-              variant={previewMode === "about" ? "default" : "outline"}
-              onClick={() => {
-                setPreviewMode("about");
-                setContainerSize(192);
-              }}
-            >
-              About
-            </Button>
-            <Button
-              size='sm'
-              variant={previewMode === "custom" ? "default" : "outline"}
-              onClick={() => setPreviewMode("custom")}
-            >
-              Custom
-            </Button>
-          </div>
-        </div>
+
 
         {/* Position Fine-tune */}
         <div className='space-y-3'>
@@ -518,8 +447,7 @@ export function AdvancedAvatarEditor({
           onClick={() => {
             setPosition({ x: 50, y: 50 });
             setZoom(100);
-            setPreviewMode("home");
-            setContainerSize(320);
+
             toast.info("Reset to center");
           }}
           size='lg'

@@ -212,7 +212,6 @@ export function ProfileManagement() {
           currentAvatarUrl={profile?.avatar_url || null}
           currentPosition={profile?.avatar_position}
           currentZoom={profile?.avatar_zoom}
-          currentSize={profile?.avatar_size}
         />
       </Section>
 
