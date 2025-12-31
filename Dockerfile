@@ -5,7 +5,11 @@ WORKDIR /app
 
 # Use pnpm (project uses pnpm locally) to install dependencies deterministically
 COPY package.json pnpm-lock.yaml ./
+# Copy all Prisma-related config so postinstall scripts (prisma generate) can run in deps stage
 COPY prisma ./prisma
+COPY prisma.config.js prisma.config.cjs prisma.config.mjs prisma.config.ts ./
+# Create bin dir to avoid warnings from packages attempting to write bin shims
+RUN mkdir -p /app/node_modules/.bin
 # Enable corepack and install with pnpm to respect pnpm-lock.yaml
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
