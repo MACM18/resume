@@ -61,10 +61,24 @@ export function AdvancedAvatarEditor({
   const imageRef = useRef<HTMLImageElement>(null);
   const dragStartRef = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
 
-  // Sync with props when they change
+  // Only sync with props on initial mount or if they actually change
   useEffect(() => {
     setPosition(normalizePosition(currentPosition));
     setZoom(normalizeZoom(currentZoom));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // If parent changes the prop (e.g. after save), update local state
+  useEffect(() => {
+    const normalized = normalizePosition(currentPosition);
+    if (normalized.x !== position.x || normalized.y !== position.y) {
+      setPosition(normalized);
+    }
+    const z = normalizeZoom(currentZoom);
+    if (z !== zoom) {
+      setZoom(z);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPosition, currentZoom]);
 
   const updateMutation = useMutation({
