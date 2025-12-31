@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 # Copy all Prisma-related config so postinstall scripts (prisma generate) can run in deps stage
 COPY prisma ./prisma
-COPY prisma.config.js prisma.config.cjs prisma.config.mjs prisma.config.ts ./
+COPY prisma.config.js prisma.config.cjs ./
 # Create bin dir to avoid warnings from packages attempting to write bin shims
 RUN mkdir -p /app/node_modules/.bin
 # Enable corepack and install with pnpm to respect pnpm-lock.yaml
