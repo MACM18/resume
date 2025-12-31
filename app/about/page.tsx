@@ -126,6 +126,10 @@ const About = () => {
                         objectPosition: `${
                           profileData.avatar_position?.x ?? 50
                         }% ${profileData.avatar_position?.y ?? 50}%`,
+                        transformOrigin: `${
+                          profileData.avatar_position?.x ?? 50
+                        }% ${profileData.avatar_position?.y ?? 50}%`,
+
                         transform: `scale(${
                           (profileData.avatar_zoom ?? 100) / 100
                         })`,
