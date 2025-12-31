@@ -1,6 +1,7 @@
 # 1. Dependencies
 FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache curl
 WORKDIR /app
 
 COPY package*.json ./
