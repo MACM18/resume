@@ -15,11 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1. Fix UpperCase issue: Create a lowercase env variable for the repo name
-      - name: Set lowercase repository name
-        run: |
-          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
       # 2. Fix Cache issue: Set up Docker Buildx (required for type=gha cache)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -30,13 +25,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+     
+     - name: Set Tag Environment Variable
+        run: echo "TAG=sha-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       # 3. Extract metadata (tags/labels) using the lowercase repo name
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ env.REPO_LC }}
+          images: ghcr.io/${{ github.repository_owner }}/portfolio
           tags: |
             type=ref,event=branch
             type=sha,prefix=,suffix=,format=short
@@ -56,12 +54,12 @@ jobs:
       # 5. Notify Coolify to pull the new image
       - name: Trigger Coolify Deployment (Resource 1)
         run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}&tag=${{env.TAG}}" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
       - name: Second Deployment Trigger (Resource 2)
         run: |
-          curl -X POST "${{ secrets.SECOND_DEPLOYMENT_WEBHOOK_URL }}" \
+          curl -X POST "${{ secrets.SECOND_DEPLOYMENT_WEBHOOK_URL }}&tag=${{env.TAG}}" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
