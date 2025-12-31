@@ -14,6 +14,7 @@ import { getProfileDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateHomeMetadata } from "@/lib/seo";
 import { Metadata } from "next";
+import type { Profile } from "@/types/portfolio";
 
 export async function generateMetadata(): Promise<Metadata> {
   const hdr = await headers();
@@ -36,6 +37,7 @@ export default async function RootLayout({
   const domain = getEffectiveDomain(host);
   const profileData = domain ? await getProfileDataServer(domain) : null;
   const faviconUrl = profileData?.favicon_url ?? null;
+  const profile = profileData as Profile | null;
 
   return (
     <html lang='en'>
@@ -54,7 +56,28 @@ export default async function RootLayout({
               <TooltipProvider>
                 <div className='min-h-screen bg-background relative'>
                   {/* Very subtle gradient overlay */}
-                  <div className='fixed inset-0 bg-linear-to-br from-background/10 via-background/5 to-background-secondary/10 pointer-events-none' />
+                  {/* If the profile has a selected gradient, render it with low opacity.
+                      If selectedGradientUseTheme is true, use CSS theme variables (HSL) where possible.
+                  */}
+                  {profile?.selected_gradient && (
+                    <div
+                      className='fixed inset-0 pointer-events-none'
+                      style={{
+                        // Use selected preset previewCss by default. If the profile opted to use theme colors,
+                        // use theme variables (primary/accent HSL) for low impact overlays.
+                        background: profile.selected_gradient_use_theme
+                          ? `linear-gradient(${
+                              profile.selected_gradient?.angle ?? 135
+                            }deg, hsl(var(--primary) / 0.06) 0%, hsl(var(--accent) / 0.03) 100%)`
+                          : profile.selected_gradient?.preview_css ?? "",
+                        opacity: 0.1,
+                      }}
+                    />
+                  )}
+                  {/* Default subtle gradient overlay (fallback) */}
+                  {!profile?.selected_gradient && (
+                    <div className='fixed inset-0 bg-linear-to-br from-background/10 via-background/5 to-secondary/10 pointer-events-none' />
+                  )}
 
                   {/* Soft accent orbs (reduced intensity) */}
                   <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-20' />

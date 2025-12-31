@@ -53,27 +53,31 @@ export async function GET(request: NextRequest) {
 
     const normalizedDomain = normalizeDomain(domain);
 
-    const profile = await db.profile.findFirst({
-      where: { domain: normalizedDomain },
-    });
+    const profile = await db.profile.findFirst({ where: { domain: normalizedDomain } });
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     // Transform to frontend format
+    const p = profile as unknown as Record<string, unknown>;
+    const sel = (p["selectedGradient"] as Record<string, unknown> | undefined) || undefined;
+
     return NextResponse.json({
-      full_name: profile.fullName,
-      tagline: profile.tagline,
-      home_page_data: profile.homePageData,
-      about_page_data: profile.aboutPageData,
-      avatar_url: profile.avatarUrl,
-      avatar_position: profile.avatarPosition,
-      avatar_zoom: profile.avatarZoom,
-      avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
-      background_image_url: profile.backgroundImageUrl,
-      favicon_url: profile.faviconUrl,
-      contact_numbers: profile.contactNumbers,
+      full_name: (p["fullName"] as string) || "",
+      tagline: (p["tagline"] as string) || "",
+      home_page_data: p["homePageData"],
+      about_page_data: p["aboutPageData"],
+      avatar_url: p["avatarUrl"] as string | null,
+      avatar_position: p["avatarPosition"],
+      avatar_zoom: (p["avatarZoom"] as number) || undefined,
+      selected_gradient_id: (p["selectedGradientId"] as string) || undefined,
+      selected_gradient_use_theme: (p["selectedGradientUseTheme"] as boolean) || undefined,
+      selected_gradient: sel ? { id: String(sel["id"]), name: String(sel["name"]), preview_css: (sel["previewCss"] as string | null) } : undefined,
+      avatar_size: (p["avatarSize"] as number) || undefined,
+      background_image_url: p["backgroundImageUrl"] as string | null,
+      favicon_url: p["faviconUrl"] as string | null,
+      contact_numbers: p["contactNumbers"],
     });
   } catch (error: unknown) {
     console.error("Error fetching profile by domain:", error);

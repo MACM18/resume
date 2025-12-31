@@ -51,6 +51,8 @@ model Profile {
   avatarPosition   Json?    @map("avatar_position") // { x: number, y: number }
   avatarZoom       Int?     @map("avatar_zoom") // Zoom percentage (50-200)
   avatarSize       Int?     @map("avatar_size") // Container size in px (e.g., 320)
+  selectedGradientId       String?  @map("selected_gradient_id")
+  selectedGradientUseTheme Boolean? @map("selected_gradient_use_theme") // whether to adapt preset to theme
   tagline          String   @default("")
   domain           String?  @unique
   homePageData     Json     @map("home_page_data")
@@ -66,7 +68,21 @@ model Profile {
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Relation to selected gradient
+  selectedGradient Gradient? @relation(fields: [selectedGradientId], references: [id])
+
   @@map("profiles")
+}
+
+model Gradient {
+  id         String   @id @default(cuid())
+  name       String
+  type       String   @default("linear")
+  angle      Int?     // degrees for linear gradients
+  colorStops Json
+  previewCss String?  @map("preview_css")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 }
 
 model Project {

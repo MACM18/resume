@@ -48,39 +48,31 @@ export async function getProfileDataServer(domain?: string) {
   if (!effectiveDomain) return null;
 
   try {
-    const profile = await db.profile.findFirst({
-      where: { domain: effectiveDomain },
-      select: {
-        fullName: true,
-        tagline: true,
-        homePageData: true,
-        aboutPageData: true,
-        avatarUrl: true,
-        avatarPosition: true,
-        avatarZoom: true,
-        backgroundImageUrl: true,
-        faviconUrl: true,
-        contactNumbers: true,
-      },
-    });
+    const profile = await db.profile.findFirst({ where: { domain: effectiveDomain } });
 
     if (!profile) {
       return null;
     }
 
     // Transform to match frontend expectations
+    const p = profile as unknown as Record<string, unknown>;
+    const sel = (p["selectedGradient"] as Record<string, unknown> | undefined) || undefined;
+
     return {
-      full_name: profile.fullName,
-      tagline: profile.tagline,
-      home_page_data: profile.homePageData as unknown as HomePageData,
-      about_page_data: profile.aboutPageData as unknown as AboutPageData,
-      avatar_url: profile.avatarUrl,
-      avatar_position: profile.avatarPosition as { x: number; y: number } | undefined,
-      avatar_zoom: profile.avatarZoom || undefined,
-      avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined || undefined,
-      background_image_url: profile.backgroundImageUrl,
-      favicon_url: profile.faviconUrl,
-      contact_numbers: profile.contactNumbers,
+      full_name: (p["fullName"] as string) || "",
+      tagline: (p["tagline"] as string) || "",
+      home_page_data: p["homePageData"] as unknown as HomePageData,
+      about_page_data: p["aboutPageData"] as unknown as AboutPageData,
+      avatar_url: p["avatarUrl"] as string | null,
+      avatar_position: p["avatarPosition"] as { x: number; y: number } | undefined,
+      avatar_zoom: (p["avatarZoom"] as number) || undefined,
+      selected_gradient_id: (p["selectedGradientId"] as string) || undefined,
+      selected_gradient_use_theme: (p["selectedGradientUseTheme"] as boolean) || undefined,
+      selected_gradient: sel ? { id: String(sel["id"]), name: String(sel["name"]), preview_css: (sel["previewCss"] as string | null) } : undefined,
+      avatar_size: (p["avatarSize"] as number) || undefined,
+      background_image_url: p["backgroundImageUrl"] as string | null,
+      favicon_url: p["faviconUrl"] as string | null,
+      contact_numbers: p["contactNumbers"],
     };
   } catch (error) {
     console.error("Error fetching profile data (server):", error);

@@ -135,6 +135,16 @@ export interface Profile {
   avatar_position?: { x: number; y: number };
   avatar_zoom?: number;
   avatar_size?: number;
+  selected_gradient_id?: string;
+  selected_gradient_use_theme?: boolean;
+  selected_gradient?: {
+    id: string;
+    name: string;
+    preview_css?: string | null;
+    angle?: number;
+    type?: string;
+    colorStops?: string[];
+  };
   tagline: string;
   domain: string | null;
   home_page_data: HomePageData;
