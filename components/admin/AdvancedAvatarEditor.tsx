@@ -94,8 +94,6 @@ export function AdvancedAvatarEditor({
     },
   });
 
-
-
   // Drag start/end logic (mouse + touch)
   const handleDragStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
@@ -177,8 +175,6 @@ export function AdvancedAvatarEditor({
     const delta = e.deltaY > 0 ? -5 : 5;
     setZoom((prev) => Math.max(50, Math.min(200, prev + delta)));
   };
-
-
 
   // Sync incoming prop changes (e.g., after save)
   useEffect(() => {
@@ -296,7 +292,6 @@ export function AdvancedAvatarEditor({
           <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
             Zoom: {zoom}%
           </div>
-
         </div>
       </div>
 
@@ -339,8 +334,6 @@ export function AdvancedAvatarEditor({
             className='w-full'
           />
         </div>
-
-
 
         {/* Position Fine-tune */}
         <div className='space-y-3'>
