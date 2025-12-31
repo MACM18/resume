@@ -29,7 +29,6 @@ interface ProfileData {
   avatar_url: string | null;
   avatar_position?: { x: number; y: number };
   avatar_zoom?: number;
-  avatar_size?: number;
   contact_numbers?: {
     id: string;
     number: string;
@@ -116,15 +115,8 @@ const About = () => {
               className='mb-12'
             >
               {avatarUrl && (
-                <div
-                  className='relative mx-auto mb-10'
-                  style={
-                    {
-                      ["--avatar-size"]: `${profileData.avatar_size ?? 192}px`,
-                    } as React.CSSProperties
-                  }
-                >
-                  <div className='absolute inset-0 rounded-full border-2 border-foreground/10 overflow-hidden w-(--avatar-size) h-(--avatar-size) xl:w-[calc(var(--avatar-size)*1.0)] xl:h-[calc(var(--avatar-size)*1.0)]'>
+                <div className='relative w-48 h-48 mx-auto mb-10'>
+                  <div className='absolute inset-0 rounded-full border-2 border-foreground/10 overflow-hidden'>
                     <Image
                       src={avatarUrl}
                       alt={profileData.full_name || "Profile Picture"}

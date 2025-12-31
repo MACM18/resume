@@ -341,23 +341,14 @@ export default function Page() {
                   }}
                 >
                   <AnimatedSection direction='left' delay={0.3}>
-                    {/* Use persisted avatar size (fallback 320) and apply responsive scale on xl screens */}
-                    <div
-                      className='relative mx-auto'
-                      style={
-                        {
-                          ["--avatar-size"]: `${
-                            profileData.avatar_size ?? 320
-                          }px`,
-                        } as React.CSSProperties
-                      }
-                    >
+                    <div className='relative w-80 h-80 xl:w-96 xl:h-96 mx-auto'>
+                      {/* Decorative elements */}
                       <div className='absolute inset-0 rounded-full bg-linear-to-br from-primary/20 to-secondary/20 blur-3xl' />
                       <div className='absolute -inset-4 rounded-full border border-foreground/5' />
                       <div className='absolute -inset-8 rounded-full border border-foreground/5' />
 
-                      {/* Image - container sized by CSS variable */}
-                      <div className='relative w-(--avatar-size) h-(--avatar-size) xl:w-[calc(var(--avatar-size)*1.2)] xl:h-[calc(var(--avatar-size)*1.2)] rounded-full overflow-hidden border-2 border-foreground/10'>
+                      {/* Image */}
+                      <div className='relative w-full h-full rounded-full overflow-hidden border-2 border-foreground/10'>
                         <Image
                           src={profileData.avatar_url}
                           alt={homePageData.name}
