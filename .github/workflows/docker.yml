@@ -37,6 +37,9 @@ jobs:
             type=sha,prefix=,suffix=,format=short
             latest
 
+      - name: Set TAG variable
+        run: echo "TAG=sha-${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       # 4. Build and Push with caching enabled
       - name: Build and push image
         uses: docker/build-push-action@v5
@@ -51,12 +54,12 @@ jobs:
       # 5. Notify Coolify to pull the new image
       - name: Trigger Coolify Deployment (Resource 1)
         run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?tag=${{env.TAG}}&uuid=${{secrets.COOLIFY_UUID}}&force=false" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
       - name: Second Deployment Trigger (Resource 2)
         run: |
-          curl -X POST "${{ secrets.SECOND_DEPLOYMENT_WEBHOOK_URL }}" \
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?tag=${{env.TAG}}&uuid=${{secrets.COOLIFY_UUID_SECOND}}&force=false" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
