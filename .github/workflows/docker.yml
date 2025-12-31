@@ -26,10 +26,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set Tag Environment Variable
-        run: |
-          echo "TAG=sha-${GITHUB_SHA::7}" >> $GITHUB_ENV
-
       # 3. Extract metadata (tags/labels) using the lowercase repo name
       - name: Extract metadata
         id: meta
@@ -55,12 +51,12 @@ jobs:
       # 5. Notify Coolify to pull the new image
       - name: Trigger Coolify Deployment (Resource 1)
         run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}&tag=${{env.TAG}}" \
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
       - name: Second Deployment Trigger (Resource 2)
         run: |
-          curl -X POST "${{ secrets.SECOND_DEPLOYMENT_WEBHOOK_URL }}&tag=${{env.TAG}}" \
+          curl -X POST "${{ secrets.SECOND_DEPLOYMENT_WEBHOOK_URL }}" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
                -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
