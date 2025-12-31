@@ -102,7 +102,17 @@ export function AvatarPositionEditor({
         currentPosition
       );
     }
-  }, [currentPosition, currentZoom, normalizePosition]);
+
+    // Dev-time mount log to help reproduce ephemeral rendering errors
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.debug("AvatarPositionEditor mount", {
+        currentAvatarUrl,
+        currentPosition,
+        currentZoom,
+      });
+    }
+  }, [currentPosition, currentZoom, normalizePosition, currentAvatarUrl]);
 
   const updateMutation = useMutation({
     mutationFn: async () => {

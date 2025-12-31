@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/providers/AuthProvider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 // import { GlassCard } from "@/components/GlassCard";
 // import { AdminNav } from "@/components/admin/AdminNav";
 import { ProjectManagement } from "@/components/admin/ProjectManagement";
@@ -144,7 +145,11 @@ export default function AdminPage() {
           {/* Content Area */}
           <div className='border border-foreground/10 rounded-xl bg-background/50 backdrop-blur-sm overflow-hidden'>
             <div className='p-4 md:p-6'>
-              {section === "profile" && <ProfileManagement />}
+              {section === "profile" && (
+                <ErrorBoundary>
+                  <ProfileManagement />
+                </ErrorBoundary>
+              )}
               {section === "theme" && (
                 <div className='max-h-[calc(100vh-200px)] overflow-y-auto'>
                   <ThemeEditor />

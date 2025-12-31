@@ -53,13 +53,13 @@ export default async function RootLayout({
             <ThemeProvider>
               <TooltipProvider>
                 <div className='min-h-screen bg-background relative'>
-                  {/* Subtle gradient overlay */}
-                  <div className='fixed inset-0 bg-linear-to-br from-background via-background to-background-secondary pointer-events-none' />
+                  {/* Very subtle gradient overlay */}
+                  <div className='fixed inset-0 bg-gradient-to-br from-background/20 via-background/10 to-background-secondary/12 pointer-events-none' />
 
-                  {/* Minimal accent orbs */}
-                  <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-40' />
+                  {/* Soft accent orbs (reduced intensity) */}
+                  <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-20' />
                   <div
-                    className='fixed bottom-20 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl animate-float opacity-30'
+                    className='fixed bottom-20 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl animate-float opacity-12'
                     style={{ animationDelay: "3s" }}
                   />
 
