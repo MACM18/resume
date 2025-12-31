@@ -50,6 +50,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          
       # -------------------------------
       # UPDATE COOLIFY APPLICATION TAG ONLY
       # -------------------------------
@@ -62,7 +63,7 @@ jobs:
           curl -X PATCH \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
+            --data "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
             "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_APP_UUID }}"
 
       - name: Update Coolify Application 2 Tag
@@ -73,8 +74,9 @@ jobs:
           curl -X PATCH \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
+            --data "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
             "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_APP_UUID_SECOND }}"
+
 
       # 5. Notify Coolify to pull the new image
       - name: Trigger Coolify Deployment (Resource 1)
