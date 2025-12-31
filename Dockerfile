@@ -3,9 +3,11 @@ FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package*.json ./
+# Use pnpm (project uses pnpm locally) to install dependencies deterministically
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
-RUN npm ci
+# Enable corepack and install with pnpm to respect pnpm-lock.yaml
+RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
 # 2. Builder
 FROM node:22-alpine AS builder
@@ -18,8 +20,9 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npx prisma generate
-RUN npm run build
+# Generate Prisma client and build using pnpm
+RUN pnpm exec prisma generate
+RUN pnpm run build
 
 # 3. Production Runner
 FROM node:22-alpine AS runner
