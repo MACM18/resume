@@ -1,7 +1,6 @@
 # 1. Dependencies
 FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
-RUN apk add --no-cache curl
 WORKDIR /app
 
 COPY package*.json ./
@@ -14,6 +13,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+
 # Next.js collects telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -24,6 +24,7 @@ RUN npm run build
 # 3. Production Runner
 FROM node:22-alpine AS runner
 WORKDIR /app
+RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
