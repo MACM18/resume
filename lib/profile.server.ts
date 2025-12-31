@@ -29,6 +29,7 @@ function transformProfile(prismaProfile: {
     avatar_url: prismaProfile.avatarUrl,
     avatar_position: prismaProfile.avatarPosition as { x: number; y: number } | undefined,
     avatar_zoom: prismaProfile.avatarZoom || undefined,
+    avatar_size: ((prismaProfile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined || undefined,
     tagline: prismaProfile.tagline,
     domain: prismaProfile.domain,
     home_page_data: prismaProfile.homePageData as HomePageData,
@@ -76,6 +77,7 @@ export async function getProfileDataServer(domain?: string) {
       avatar_url: profile.avatarUrl,
       avatar_position: profile.avatarPosition as { x: number; y: number } | undefined,
       avatar_zoom: profile.avatarZoom || undefined,
+      avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined || undefined,
       background_image_url: profile.backgroundImageUrl,
       favicon_url: profile.faviconUrl,
       contact_numbers: profile.contactNumbers,
@@ -169,5 +171,6 @@ export function getDefaultProfileData(email: string, fullName: string = "New Use
       accent: "280 80% 50%",
       "accent-glow": "280 80% 60%",
     } as Theme,
+    avatarSize: 320,
   };
 }

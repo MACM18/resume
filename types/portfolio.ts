@@ -134,6 +134,7 @@ export interface Profile {
   avatar_url: string | null;
   avatar_position?: { x: number; y: number };
   avatar_zoom?: number;
+  avatar_size?: number;
   tagline: string;
   domain: string | null;
   home_page_data: HomePageData;

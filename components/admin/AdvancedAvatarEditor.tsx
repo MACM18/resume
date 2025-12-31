@@ -17,17 +17,20 @@ import {
   Square,
   Circle,
 } from "lucide-react";
+import Image from "next/image";
 
 interface AdvancedAvatarEditorProps {
   currentAvatarUrl: string | null;
   currentPosition?: { x: number; y: number };
   currentZoom?: number;
+  currentSize?: number;
 }
 
 export function AdvancedAvatarEditor({
   currentAvatarUrl,
   currentPosition = { x: 50, y: 50 },
   currentZoom = 100,
+  currentSize = 320,
 }: AdvancedAvatarEditorProps) {
   const queryClient = useQueryClient();
 
@@ -58,15 +61,9 @@ export function AdvancedAvatarEditor({
   const [shape, setShape] = useState<"circle" | "square">("circle");
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
   const dragStartRef = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
 
-  // Only sync with props on initial mount or if they actually change
-  useEffect(() => {
-    setPosition(normalizePosition(currentPosition));
-    setZoom(normalizeZoom(currentZoom));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Props are synced by the effect below when `currentPosition` or `currentZoom` change.
 
   // If parent changes the prop (e.g. after save), update local state
   useEffect(() => {
@@ -86,6 +83,7 @@ export function AdvancedAvatarEditor({
       await updateCurrentUserProfile({
         avatar_position: position,
         avatar_zoom: zoom,
+        avatar_size: containerSize,
       });
     },
     onSuccess: () => {
@@ -99,62 +97,74 @@ export function AdvancedAvatarEditor({
     },
   });
 
-  // Mouse/Touch drag handlers
-  const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    dragStartRef.current = {
-      clientX: e.clientX,
-      clientY: e.clientY,
-      posX: position.x,
-      posY: position.y,
-    };
-  };
+  // Container sizing & drag state
+  const [containerSize, setContainerSize] = useState<number>(320); // px (w-80 = 320)
+  const [previewMode, setPreviewMode] = useState<"home" | "about" | "custom">("home");
 
-  const handlePointerMove = useCallback(
-    (e: PointerEvent) => {
-      if (!isDragging) return;
+  // Drag start/end logic (mouse + touch)
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
 
-      // Calculate movement in pixels
-      const deltaX = e.clientX - dragStartRef.current.clientX;
-      const deltaY = e.clientY - dragStartRef.current.clientY;
+      const clientX = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
 
-      // Convert to percentage (inverse for intuitive dragging)
-      // Dividing by 3 to make it less sensitive
-      const percentX = -(deltaX / 3);
-      const percentY = -(deltaY / 3);
+      dragStartRef.current = {
+        clientX,
+        clientY,
+        posX: position.x,
+        posY: position.y,
+      };
+    },
+    [position]
+  );
 
-      const newX = Math.max(
-        0,
-        Math.min(100, dragStartRef.current.posX + percentX)
-      );
-      const newY = Math.max(
-        0,
-        Math.min(100, dragStartRef.current.posY + percentY)
-      );
+  const handleDragMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging || !containerRef.current) return;
+
+      const clientX = "touches" in (e as TouchEvent)
+        ? (e as TouchEvent).touches[0].clientX
+        : (e as MouseEvent).clientX;
+      const clientY = "touches" in (e as TouchEvent)
+        ? (e as TouchEvent).touches[0].clientY
+        : (e as MouseEvent).clientY;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const sensitivity = 100 / Math.max(rect.width, rect.height);
+
+      const deltaX = (clientX - dragStartRef.current.clientX) * sensitivity;
+      const deltaY = (clientY - dragStartRef.current.clientY) * sensitivity;
+
+      // Invert direction to move the image when dragging the preview
+      const newX = Math.max(0, Math.min(100, dragStartRef.current.posX - deltaX));
+      const newY = Math.max(0, Math.min(100, dragStartRef.current.posY - deltaY));
 
       setPosition({ x: Math.round(newX), y: Math.round(newY) });
     },
     [isDragging]
   );
 
-  const handlePointerUp = useCallback(() => {
+  const handleDragEnd = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Setup pointer event listeners
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener("pointermove", handlePointerMove);
-      document.addEventListener("pointerup", handlePointerUp);
-      document.addEventListener("pointercancel", handlePointerUp);
+      window.addEventListener("mousemove", handleDragMove);
+      window.addEventListener("mouseup", handleDragEnd);
+      window.addEventListener("touchmove", handleDragMove);
+      window.addEventListener("touchend", handleDragEnd);
     }
+
     return () => {
-      document.removeEventListener("pointermove", handlePointerMove);
-      document.removeEventListener("pointerup", handlePointerUp);
-      document.removeEventListener("pointercancel", handlePointerUp);
+      window.removeEventListener("mousemove", handleDragMove);
+      window.removeEventListener("mouseup", handleDragEnd);
+      window.removeEventListener("touchmove", handleDragMove);
+      window.removeEventListener("touchend", handleDragEnd);
     };
-  }, [isDragging, handlePointerMove, handlePointerUp]);
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
   // Wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
@@ -162,6 +172,28 @@ export function AdvancedAvatarEditor({
     const delta = e.deltaY > 0 ? -5 : 5;
     setZoom((prev) => Math.max(50, Math.min(200, prev + delta)));
   };
+
+  // Sync preview mode presets
+  useEffect(() => {
+    if (previewMode === "home") setContainerSize(320);
+    if (previewMode === "about") setContainerSize(192);
+    // custom keeps the current size
+  }, [previewMode]);
+
+  // Sync incoming prop changes (e.g., after save)
+  useEffect(() => {
+    const z = normalizeZoom(currentZoom);
+    if (z !== zoom) setZoom(z);
+
+    const normalized = normalizePosition(currentPosition);
+    if (normalized.x !== position.x || normalized.y !== position.y) {
+      setPosition(normalized);
+    }
+
+    const cs = Number(currentSize) || 320;
+    if (cs !== containerSize) setContainerSize(Math.max(64, Math.min(512, Math.round(cs))));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPosition, currentZoom, currentSize]);
 
   if (!currentAvatarUrl) {
     return (
@@ -209,34 +241,42 @@ export function AdvancedAvatarEditor({
       <div className='flex flex-col items-center gap-4'>
         <div
           ref={containerRef}
-          onPointerDown={handlePointerDown}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
           onWheel={handleWheel}
-          className={`relative w-80 h-80 overflow-hidden border-4 transition-all ${
+          className={`relative overflow-hidden border-4 transition-all select-none ${
             shape === "circle" ? "rounded-full" : "rounded-2xl"
           } ${
             isDragging
               ? "border-primary cursor-grabbing scale-105 shadow-2xl"
               : "border-primary/40 cursor-grab hover:border-primary hover:shadow-xl"
           } bg-background`}
-          style={{ touchAction: "none" }}
+          style={{ width: `${containerSize}px`, height: `${containerSize}px`, touchAction: "none" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={imageRef}
-            src={currentAvatarUrl}
-            alt='Avatar preview'
-            className='absolute pointer-events-none select-none'
-            draggable={false}
+          {/* Crosshair */}
+          <div className='absolute inset-0 pointer-events-none z-10'>
+            <div className='absolute left-1/2 top-0 bottom-0 w-px bg-primary/20' />
+            <div className='absolute top-1/2 left-0 right-0 h-px bg-primary/20' />
+          </div>
+
+          <div
+            className='absolute inset-0 transition-transform duration-75'
             style={{
-              width: `${zoom}%`,
-              height: `${zoom}%`,
-              left: `${position.x}%`,
-              top: `${position.y}%`,
-              transform: "translate(-50%, -50%)",
-              objectFit: "cover",
-              transition: isDragging ? "none" : "all 0.1s ease-out",
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: `${position.x}% ${position.y}%`,
             }}
-          />
+          >
+            <Image
+              src={currentAvatarUrl}
+              alt='Avatar preview'
+              fill
+              className='object-cover pointer-events-none'
+              style={{
+                objectPosition: `${position.x}% ${position.y}%`,
+              }}
+              draggable={false}
+            />
+          </div>
 
           {/* Drag instruction overlay */}
           {!isDragging && (
@@ -246,25 +286,14 @@ export function AdvancedAvatarEditor({
               </div>
             </div>
           )}
-
-          {/* Crosshair */}
-          <div className='absolute inset-0 pointer-events-none'>
-            <div className='absolute left-1/2 top-0 bottom-0 w-px bg-primary/20' />
-            <div className='absolute top-1/2 left-0 right-0 h-px bg-primary/20' />
-          </div>
         </div>
 
         {/* Status Display */}
         <div className='flex gap-3 text-sm'>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
-            X: {position.x}%
-          </div>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
-            Y: {position.y}%
-          </div>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
-            Zoom: {zoom}%
-          </div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>X: {position.x}%</div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>Y: {position.y}%</div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>Zoom: {zoom}%</div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>Size: {containerSize}px</div>
         </div>
       </div>
 
@@ -306,6 +335,37 @@ export function AdvancedAvatarEditor({
             onChange={(e) => setZoom(Number(e.target.value))}
             className='w-full'
           />
+        </div>
+
+        {/* Container Size */}
+        <div className='space-y-3'>
+          <Label className='text-sm font-semibold'>Container Size</Label>
+          <div className='flex gap-2 items-center'>
+            <Input
+              type='range'
+              min='64'
+              max='512'
+              step='8'
+              value={containerSize}
+              onChange={(e) => {
+                setPreviewMode("custom");
+                setContainerSize(Number(e.target.value));
+              }}
+              className='w-full'
+            />
+            <div className='w-20 text-sm font-mono text-right'>{containerSize}px</div>
+          </div>
+          <div className='flex gap-2 mt-2'>
+            <Button size='sm' variant={previewMode === 'home' ? 'default' : 'outline'} onClick={() => { setPreviewMode('home'); setContainerSize(320); }}>
+              Home
+            </Button>
+            <Button size='sm' variant={previewMode === 'about' ? 'default' : 'outline'} onClick={() => { setPreviewMode('about'); setContainerSize(192); }}>
+              About
+            </Button>
+            <Button size='sm' variant={previewMode === 'custom' ? 'default' : 'outline'} onClick={() => setPreviewMode('custom')}>
+              Custom
+            </Button>
+          </div>
         </div>
 
         {/* Position Fine-tune */}
@@ -413,6 +473,8 @@ export function AdvancedAvatarEditor({
           onClick={() => {
             setPosition({ x: 50, y: 50 });
             setZoom(100);
+            setPreviewMode("home");
+            setContainerSize(320);
             toast.info("Reset to center");
           }}
           size='lg'

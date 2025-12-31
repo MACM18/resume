@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         avatar_url: null,
         avatar_position: { x: 50, y: 50 },
         avatar_zoom: 100,
+        avatar_size: 320,
         background_image_url: null,
         favicon_url: null,
         contact_numbers: [],
@@ -54,18 +55,6 @@ export async function GET(request: NextRequest) {
 
     const profile = await db.profile.findFirst({
       where: { domain: normalizedDomain },
-      select: {
-        fullName: true,
-        tagline: true,
-        homePageData: true,
-        aboutPageData: true,
-        avatarUrl: true,
-        avatarPosition: true,
-        avatarZoom: true,
-        backgroundImageUrl: true,
-        faviconUrl: true,
-        contactNumbers: true,
-      },
     });
 
     if (!profile) {
@@ -81,6 +70,7 @@ export async function GET(request: NextRequest) {
       avatar_url: profile.avatarUrl,
       avatar_position: profile.avatarPosition,
       avatar_zoom: profile.avatarZoom,
+      avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
       background_image_url: profile.backgroundImageUrl,
       favicon_url: profile.faviconUrl,
       contact_numbers: profile.contactNumbers,

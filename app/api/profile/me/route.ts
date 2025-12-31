@@ -30,6 +30,9 @@ export async function GET() {
       user_id: profile.userId,
       full_name: profile.fullName,
       avatar_url: profile.avatarUrl,
+      avatar_position: profile.avatarPosition,
+      avatar_zoom: profile.avatarZoom,
+      avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
       tagline: profile.tagline,
       domain: profile.domain,
       home_page_data: profile.homePageData,
@@ -69,6 +72,9 @@ export async function PATCH(request: NextRequest) {
     if (body.full_name !== undefined) updateData.fullName = body.full_name;
     if (body.tagline !== undefined) updateData.tagline = body.tagline;
     if (body.avatar_url !== undefined) updateData.avatarUrl = body.avatar_url;
+    if (body.avatar_position !== undefined) updateData.avatarPosition = body.avatar_position;
+    if (body.avatar_zoom !== undefined) updateData.avatarZoom = body.avatar_zoom;
+    if (body.avatar_size !== undefined) updateData.avatarSize = body.avatar_size;
     if (body.domain !== undefined) updateData.domain = body.domain;
     if (body.home_page_data !== undefined) updateData.homePageData = body.home_page_data;
     if (body.about_page_data !== undefined) updateData.aboutPageData = body.about_page_data;
@@ -91,6 +97,9 @@ export async function PATCH(request: NextRequest) {
       user_id: profile.userId,
       full_name: profile.fullName,
       avatar_url: profile.avatarUrl,
+      avatar_position: profile.avatarPosition,
+      avatar_zoom: profile.avatarZoom,
+      avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
       tagline: profile.tagline,
       domain: profile.domain,
       home_page_data: profile.homePageData,

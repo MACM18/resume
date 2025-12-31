@@ -12,6 +12,7 @@ interface ProfileData {
   avatar_url: string | null;
   avatar_position?: { x: number; y: number };
   avatar_zoom?: number;
+  avatar_size?: number;
   background_image_url: string | null;
   favicon_url?: string | null;
   contact_numbers?: {
