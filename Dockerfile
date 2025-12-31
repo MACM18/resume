@@ -24,7 +24,8 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Generate Prisma client and build using pnpm
+# Ensure pnpm is available in the builder stage and then generate Prisma client and build
+RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm exec prisma generate
 RUN pnpm run build
 
