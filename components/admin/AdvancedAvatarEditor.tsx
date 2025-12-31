@@ -78,6 +78,7 @@ export function AdvancedAvatarEditor({
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
       toast.success("Avatar position saved");
     },
@@ -306,13 +307,14 @@ export function AdvancedAvatarEditor({
                 }}
                 draggable={false}
                 priority
+                unoptimized
               />
             </div>
 
             {/* Hover Hint */}
             {!isDragging && (
-              <div className='absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 transition-colors'>
-                <div className='bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity shadow-lg border border-foreground/10'>
+              <div className='absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none'>
+                <div className='bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium shadow-lg border border-foreground/10'>
                   🖱️ Drag • 🖲️ Scroll to zoom
                 </div>
               </div>

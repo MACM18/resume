@@ -90,7 +90,18 @@ export function ProfileManagement() {
   const isDomainClaimed = profile?.domain === hostname;
 
   const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+    setOpenSections((prev) => {
+      // If clicking the already-open section, close it
+      if (prev[section]) {
+        return { ...prev, [section]: false };
+      }
+      // Otherwise, close all others and open this one
+      const allClosed = Object.keys(prev).reduce(
+        (acc, key) => ({ ...acc, [key]: false }),
+        {} as typeof prev
+      );
+      return { ...allClosed, [section]: true };
+    });
   };
 
   const Section = ({
