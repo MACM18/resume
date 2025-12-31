@@ -1,2 +1,11 @@
-// Delegate to the canonical CommonJS config so the CLI always reads one file
-module.exports = require("./prisma.config.js");
+// Canonical CJS Prisma config with datasource provided via `fromEnvVar`
+module.exports = {
+  seed: {
+    run: "npx tsx prisma/seed.ts",
+  },
+  datasources: {
+    db: {
+      url: { fromEnvVar: "DATABASE_URL" },
+    },
+  },
+};

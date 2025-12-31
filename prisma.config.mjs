@@ -1,5 +1,11 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-
-// Delegate to the canonical CommonJS config so the CLI always reads one file
-export default require("./prisma.config.js");
+// ESM Prisma config — export plain object (use fromEnvVar to declare env dependency)
+export default {
+  seed: {
+    run: "npx tsx prisma/seed.ts",
+  },
+  datasources: {
+    db: {
+      url: { fromEnvVar: "DATABASE_URL" },
+    },
+  },
+};

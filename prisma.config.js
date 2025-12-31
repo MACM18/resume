@@ -1,3 +1,3 @@
-// Disabled config — keep a disabled copy in prisma.config.js while the CLI avoids parsing problems.
-// Export a plain empty object as CommonJS to be the least surprising to both ESM and CJS loaders.
+// Minimal placeholder config (dev fallback) so the Prisma CLI doesn't fail parsing.
+// For production and migration tasks, use prisma.config.cjs or prisma.config.mjs.
 module.exports = {};
