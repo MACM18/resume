@@ -33,7 +33,6 @@ RUN pnpm run build
 FROM node:22-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache curl
-RUN npm install prisma
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
