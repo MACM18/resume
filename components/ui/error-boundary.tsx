@@ -59,7 +59,9 @@ export class ErrorBoundary extends Component<Props, State> {
                 </pre>
                 {this.state.componentStack && (
                   <details className='text-xs text-left bg-background/50 p-3 rounded-lg mb-4 overflow-auto max-h-48'>
-                    <summary className='font-mono text-foreground/70 mb-2'>Component Stack</summary>
+                    <summary className='font-mono text-foreground/70 mb-2'>
+                      Component Stack
+                    </summary>
                     <pre>{this.state.componentStack}</pre>
                   </details>
                 )}
