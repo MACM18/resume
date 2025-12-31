@@ -45,6 +45,8 @@ RUN adduser --system --uid 1001 nextjs
 # We use the 'standalone' folder which is much smaller
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+# Include Prisma config in the runtime image so we can run migrations from the container when needed
+COPY prisma.config.cjs ./prisma.config.cjs
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
