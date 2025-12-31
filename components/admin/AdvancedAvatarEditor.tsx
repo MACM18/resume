@@ -99,7 +99,9 @@ export function AdvancedAvatarEditor({
 
   // Container sizing & drag state
   const [containerSize, setContainerSize] = useState<number>(320); // px (w-80 = 320)
-  const [previewMode, setPreviewMode] = useState<"home" | "about" | "custom">("home");
+  const [previewMode, setPreviewMode] = useState<"home" | "about" | "custom">(
+    "home"
+  );
 
   // Drag start/end logic (mouse + touch)
   const handleDragStart = useCallback(
@@ -107,8 +109,10 @@ export function AdvancedAvatarEditor({
       e.preventDefault();
       setIsDragging(true);
 
-      const clientX = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-      const clientY = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+      const clientX =
+        "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+      const clientY =
+        "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
 
       dragStartRef.current = {
         clientX,
@@ -124,12 +128,14 @@ export function AdvancedAvatarEditor({
     (e: MouseEvent | TouchEvent) => {
       if (!isDragging || !containerRef.current) return;
 
-      const clientX = "touches" in (e as TouchEvent)
-        ? (e as TouchEvent).touches[0].clientX
-        : (e as MouseEvent).clientX;
-      const clientY = "touches" in (e as TouchEvent)
-        ? (e as TouchEvent).touches[0].clientY
-        : (e as MouseEvent).clientY;
+      const clientX =
+        "touches" in (e as TouchEvent)
+          ? (e as TouchEvent).touches[0].clientX
+          : (e as MouseEvent).clientX;
+      const clientY =
+        "touches" in (e as TouchEvent)
+          ? (e as TouchEvent).touches[0].clientY
+          : (e as MouseEvent).clientY;
 
       const rect = containerRef.current.getBoundingClientRect();
       const sensitivity = 100 / Math.max(rect.width, rect.height);
@@ -138,8 +144,14 @@ export function AdvancedAvatarEditor({
       const deltaY = (clientY - dragStartRef.current.clientY) * sensitivity;
 
       // Invert direction to move the image when dragging the preview
-      const newX = Math.max(0, Math.min(100, dragStartRef.current.posX - deltaX));
-      const newY = Math.max(0, Math.min(100, dragStartRef.current.posY - deltaY));
+      const newX = Math.max(
+        0,
+        Math.min(100, dragStartRef.current.posX - deltaX)
+      );
+      const newY = Math.max(
+        0,
+        Math.min(100, dragStartRef.current.posY - deltaY)
+      );
 
       setPosition({ x: Math.round(newX), y: Math.round(newY) });
     },
@@ -191,7 +203,8 @@ export function AdvancedAvatarEditor({
     }
 
     const cs = Number(currentSize) || 320;
-    if (cs !== containerSize) setContainerSize(Math.max(64, Math.min(512, Math.round(cs))));
+    if (cs !== containerSize)
+      setContainerSize(Math.max(64, Math.min(512, Math.round(cs))));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPosition, currentZoom, currentSize]);
 
@@ -251,7 +264,11 @@ export function AdvancedAvatarEditor({
               ? "border-primary cursor-grabbing scale-105 shadow-2xl"
               : "border-primary/40 cursor-grab hover:border-primary hover:shadow-xl"
           } bg-background`}
-          style={{ width: `${containerSize}px`, height: `${containerSize}px`, touchAction: "none" }}
+          style={{
+            width: `${containerSize}px`,
+            height: `${containerSize}px`,
+            touchAction: "none",
+          }}
         >
           {/* Crosshair */}
           <div className='absolute inset-0 pointer-events-none z-10'>
@@ -290,10 +307,18 @@ export function AdvancedAvatarEditor({
 
         {/* Status Display */}
         <div className='flex gap-3 text-sm'>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>X: {position.x}%</div>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>Y: {position.y}%</div>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>Zoom: {zoom}%</div>
-          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>Size: {containerSize}px</div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
+            X: {position.x}%
+          </div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
+            Y: {position.y}%
+          </div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
+            Zoom: {zoom}%
+          </div>
+          <div className='bg-muted px-4 py-2 rounded-lg font-mono'>
+            Size: {containerSize}px
+          </div>
         </div>
       </div>
 
@@ -353,16 +378,36 @@ export function AdvancedAvatarEditor({
               }}
               className='w-full'
             />
-            <div className='w-20 text-sm font-mono text-right'>{containerSize}px</div>
+            <div className='w-20 text-sm font-mono text-right'>
+              {containerSize}px
+            </div>
           </div>
           <div className='flex gap-2 mt-2'>
-            <Button size='sm' variant={previewMode === 'home' ? 'default' : 'outline'} onClick={() => { setPreviewMode('home'); setContainerSize(320); }}>
+            <Button
+              size='sm'
+              variant={previewMode === "home" ? "default" : "outline"}
+              onClick={() => {
+                setPreviewMode("home");
+                setContainerSize(320);
+              }}
+            >
               Home
             </Button>
-            <Button size='sm' variant={previewMode === 'about' ? 'default' : 'outline'} onClick={() => { setPreviewMode('about'); setContainerSize(192); }}>
+            <Button
+              size='sm'
+              variant={previewMode === "about" ? "default" : "outline"}
+              onClick={() => {
+                setPreviewMode("about");
+                setContainerSize(192);
+              }}
+            >
               About
             </Button>
-            <Button size='sm' variant={previewMode === 'custom' ? 'default' : 'outline'} onClick={() => setPreviewMode('custom')}>
+            <Button
+              size='sm'
+              variant={previewMode === "custom" ? "default" : "outline"}
+              onClick={() => setPreviewMode("custom")}
+            >
               Custom
             </Button>
           </div>
