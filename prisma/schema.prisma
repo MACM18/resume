@@ -79,7 +79,7 @@ model Gradient {
   name       String
   type       String   @default("linear")
   angle      Int?     // degrees for linear gradients
-  colorStops Json
+  colorStops Json     @map("color_stops")
   previewCss String?  @map("preview_css")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

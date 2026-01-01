@@ -42,10 +42,7 @@ export default function GradientPicker() {
 
   const handleSave = async () => {
     try {
-      await updateCurrentUserProfile({
-        selected_gradient_id: selectedId ?? undefined,
-        selected_gradient_use_theme: useTheme,
-      });
+      await updateCurrentUserProfile({ selected_gradient_id: selectedId ?? undefined, selected_gradient_use_theme: useTheme });
       toast.success("Gradient saved");
     } catch {
       toast.error("Failed to save gradient");
@@ -57,43 +54,31 @@ export default function GradientPicker() {
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-3'>
           <h4 className='font-medium'>Preset Gradients</h4>
-          <p className='text-sm text-muted-foreground'>
-            Choose a subtle overlay
-          </p>
+          <p className='text-sm text-muted-foreground'>Choose a subtle overlay</p>
         </div>
         <div className='flex items-center gap-3'>
           <span className='text-sm'>Use theme colors</span>
-          <Switch
-            checked={useTheme}
-            onCheckedChange={(v) => setUseTheme(Boolean(v))}
-          />
+          <Switch checked={useTheme} onCheckedChange={(v) => setUseTheme(Boolean(v))} />
         </div>
       </div>
 
       <div className='grid grid-cols-3 gap-3'>
-        {gradients &&
-          gradients.map((g: Gradient) => (
-            <button
-              key={g.id}
-              type='button'
-              className={`rounded-lg p-3 aspect-square border-2 ${
-                selectedId === g.id ? "border-primary" : "border-transparent"
-              }`}
-              onClick={() => setSelectedId(g.id)}
-              title={g.name}
-              style={{ background: g.previewCss ?? undefined }}
-            >
-              <div className='text-xs font-semibold text-foreground'>
-                {g.name}
-              </div>
-            </button>
-          ))}
+        {gradients && gradients.map((g: Gradient) => (
+          <button
+            key={g.id}
+            type='button'
+            className={`rounded-lg p-3 aspect-square border-2 ${selectedId === g.id ? "border-primary" : "border-transparent"}`}
+            onClick={() => setSelectedId(g.id)}
+            title={g.name}
+            style={{ background: g.previewCss ?? undefined }}
+          >
+            <div className='text-xs font-semibold text-foreground'>{g.name}</div>
+          </button>
+        ))}
       </div>
 
       <div className='flex gap-3'>
-        <Button onClick={handleSave} className='ml-auto'>
-          Save
-        </Button>
+        <Button onClick={handleSave} className='ml-auto'>Save</Button>
       </div>
     </div>
   );

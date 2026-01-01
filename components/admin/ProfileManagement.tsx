@@ -10,13 +10,6 @@ import { ProfileForm } from "./ProfileForm";
 import { ProfileImageManager } from "./ProfileImageManager";
 import { AdvancedAvatarEditor } from "./AdvancedAvatarEditor";
 import { BackgroundManager } from "./BackgroundManager";
-import dynamic from "next/dynamic";
-
-// lazy load the GradientPicker (it's client-only)
-const GradientPicker = dynamic(() => import("./GradientPicker"), {
-  ssr: false,
-});
-
 import { FaviconManager } from "./FaviconManager";
 import { normalizeDomain } from "@/lib/utils";
 import { getCurrentUserProfile } from "@/lib/profile";
@@ -32,7 +25,6 @@ export function ProfileManagement() {
     images: false,
     avatarPosition: false,
     background: false,
-    gradient: false,
     favicon: false,
   });
 
@@ -229,14 +221,6 @@ export function ProfileManagement() {
         description='Set a custom background for your portfolio'
       >
         <BackgroundManager />
-      </Section>
-
-      <Section
-        id={"gradient"}
-        title='Background Gradient'
-        description='Pick a subtle site-wide gradient overlay'
-      >
-        <GradientPicker />
       </Section>
 
       <Section id='favicon' title='Favicon' description='Upload your site icon'>
