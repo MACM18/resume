@@ -154,7 +154,8 @@ export function ThemeEditor() {
       <div className='border-t pt-6 mt-6'>
         <h3 className='text-lg font-medium mb-4'>Background Gradient</h3>
         <p className='text-sm text-muted-foreground mb-4'>
-          Pick a subtle site-wide gradient overlay that adapts to your theme colors.
+          Pick a subtle site-wide gradient overlay that adapts to your theme
+          colors.
         </p>
         <GradientPicker />
       </div>
