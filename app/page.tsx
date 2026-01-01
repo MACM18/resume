@@ -90,7 +90,7 @@ export default function Page() {
   const nextSectionOpacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.6],
-    [0, 0.5, 1]
+    [0.5, 0.8, 1]
   );
   const nextSectionScale = useTransform(
     scrollYProgress,
