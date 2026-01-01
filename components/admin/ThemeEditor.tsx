@@ -9,12 +9,6 @@ import { toast } from "@/components/ui/sonner";
 import { Loader2, RotateCcw } from "lucide-react";
 import { defaultTheme } from "@/data/theme";
 import { hslStringToHex, hexToHslString } from "@/lib/colors";
-import dynamic from "next/dynamic";
-
-// lazy load the GradientPicker (it's client-only)
-const GradientPicker = dynamic(() => import("./GradientPicker"), {
-  ssr: false,
-});
 
 const editableColors = [
   "--background",
@@ -150,15 +144,6 @@ export function ThemeEditor() {
           "Save Theme"
         )}
       </Button>
-
-      <div className='border-t pt-6 mt-6'>
-        <h3 className='text-lg font-medium mb-4'>Background Gradient</h3>
-        <p className='text-sm text-muted-foreground mb-4'>
-          Pick a subtle site-wide gradient overlay that adapts to your theme
-          colors.
-        </p>
-        <GradientPicker />
-      </div>
     </div>
   );
 }

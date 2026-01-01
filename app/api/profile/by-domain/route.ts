@@ -61,7 +61,6 @@ export async function GET(request: NextRequest) {
 
     // Transform to frontend format
     const p = profile as unknown as Record<string, unknown>;
-    const sel = (p["selectedGradient"] as Record<string, unknown> | undefined) || undefined;
 
     return NextResponse.json({
       full_name: (p["fullName"] as string) || "",
@@ -71,9 +70,6 @@ export async function GET(request: NextRequest) {
       avatar_url: p["avatarUrl"] as string | null,
       avatar_position: p["avatarPosition"],
       avatar_zoom: (p["avatarZoom"] as number) || undefined,
-      selected_gradient_id: (p["selectedGradientId"] as string) || undefined,
-      selected_gradient_use_theme: (p["selectedGradientUseTheme"] as boolean) || undefined,
-      selected_gradient: sel ? { id: String(sel["id"]), name: String(sel["name"]), preview_css: (sel["previewCss"] as string | null) } : undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       background_image_url: p["backgroundImageUrl"] as string | null,
       favicon_url: p["faviconUrl"] as string | null,

@@ -49,8 +49,7 @@ export async function getProfileDataServer(domain?: string) {
 
   try {
     const profile = await db.profile.findFirst({ 
-      where: { domain: effectiveDomain },
-      include: { selectedGradient: true }
+      where: { domain: effectiveDomain }
     });
 
     if (!profile) {
@@ -59,7 +58,6 @@ export async function getProfileDataServer(domain?: string) {
 
     // Transform to match frontend expectations
     const p = profile as unknown as Record<string, unknown>;
-    const sel = (p["selectedGradient"] as Record<string, unknown> | undefined) || undefined;
 
     return {
       full_name: (p["fullName"] as string) || "",
@@ -69,14 +67,6 @@ export async function getProfileDataServer(domain?: string) {
       avatar_url: p["avatarUrl"] as string | null,
       avatar_position: p["avatarPosition"] as { x: number; y: number } | undefined,
       avatar_zoom: (p["avatarZoom"] as number) || undefined,
-      selected_gradient_id: (p["selectedGradientId"] as string) || undefined,
-      selected_gradient: sel ? { 
-        id: String(sel["id"]), 
-        name: String(sel["name"]), 
-        patternType: String(sel["patternType"] || "diagonal"),
-        intensity: String(sel["intensity"] || "subtle"),
-        description: (sel["description"] as string) || undefined,
-      } : undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       background_image_url: p["backgroundImageUrl"] as string | null,
       favicon_url: p["faviconUrl"] as string | null,

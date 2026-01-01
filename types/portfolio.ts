@@ -136,14 +136,6 @@ export interface Profile {
   avatar_position?: { x: number; y: number };
   avatar_zoom?: number;
   avatar_size?: number;
-  selected_gradient_id?: string;
-  selected_gradient?: {
-    id: string;
-    name: string;
-    patternType: string; // diagonal, radial, mesh, spiral, wave, dots
-    intensity: string; // subtle, medium, vibrant
-    description?: string;
-  };
   tagline?: string;
   domain?: string | null;
   home_page_data?: HomePageData;
