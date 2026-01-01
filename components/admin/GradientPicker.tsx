@@ -113,9 +113,7 @@ export default function GradientPicker() {
           Clear
         </Button>
         <div className='ml-auto'>
-          <Button onClick={handleSave}>
-            Save
-          </Button>
+          <Button onClick={handleSave}>Save</Button>
         </div>
       </div>
     </div>
