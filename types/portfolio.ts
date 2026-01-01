@@ -78,6 +78,7 @@ export interface HomePageData {
     icon: string;
     href: string;
     label: string;
+    display_label?: string; // Custom display text for home page
   }[];
   experienceHighlights: {
     metric: string;
@@ -139,9 +140,8 @@ export interface Profile {
   selected_gradient?: {
     id: string;
     name: string;
-    angle: number;
-    intensity: string; // subtle, medium, bold
-    pattern: string; // primary-accent, secondary-primary, etc.
+    patternType: string; // diagonal, radial, mesh, spiral, wave, dots
+    intensity: string; // subtle, medium, vibrant
     description?: string;
   };
   tagline?: string;

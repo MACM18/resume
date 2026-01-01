@@ -855,7 +855,7 @@ export default function Page() {
                         >
                           <Icon className='h-5 w-5 text-foreground/60 group-hover:text-primary transition-colors' />
                           <span className='text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors'>
-                            {social.platform}
+                            {social.display_label || social.platform}
                           </span>
                         </a>
                       );

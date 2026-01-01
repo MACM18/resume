@@ -40,6 +40,7 @@ const homePageSchema = z.object({
           return urlPattern.test(value) || emailPattern.test(value);
         }, "Must be a valid URL or email address"),
       label: z.string().min(1, "Required"),
+      display_label: z.string().optional(), // Custom text shown on home page
     })
   ),
   experienceHighlights: z.array(
@@ -288,7 +289,7 @@ export function HomePageForm() {
                   render={({ field }) => (
                     <FormItem className='flex-1'>
                       <FormControl>
-                        <div className='flex gap-2 items-center'>
+                        <div className='flex gap-2 items-start flex-col'>
                           <Input
                             {...field}
                             placeholder={
@@ -305,9 +306,25 @@ export function HomePageForm() {
                             }
                             className='h-10'
                           />
-                          <DeleteButton
-                            onDelete={() => removeSocial(index)}
-                            title='Delete Social Link?'
+                          <FormField
+                            control={form.control}
+                            name={`socialLinks.${index}.display_label`}
+                            render={({ field: labelField }) => (
+                              <FormItem className='w-full'>
+                                <FormControl>
+                                  <Input
+                                    {...labelField}
+                                    placeholder={`Display text (optional, defaults to "${form.getValues(
+                                      `socialLinks.${index}.platform`
+                                    )}")`}
+                                    className='h-9 text-sm'
+                                  />
+                                </FormControl>
+                                <FormDescription className='text-xs'>
+                                  Custom label shown on your home page
+                                </FormDescription>
+                              </FormItem>
+                            )}
                           />
                         </div>
                       </FormControl>
@@ -324,6 +341,10 @@ export function HomePageForm() {
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+                <DeleteButton
+                  onDelete={() => removeSocial(index)}
+                  title='Delete Social Link?'
                 />
               </div>
             ))}

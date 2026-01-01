@@ -55,34 +55,55 @@ export default async function RootLayout({
             <ThemeProvider>
               <TooltipProvider>
                 <div className='min-h-screen bg-background relative'>
-                  {/* Theme-aware gradient overlay */}
+                  {/* Theme-aware pattern overlay */}
                   {profile?.selected_gradient &&
                     (() => {
                       const g = profile.selected_gradient;
                       const opacities = {
-                        subtle: { start: 0.08, end: 0.04 },
-                        medium: { start: 0.15, end: 0.08 },
-                        bold: { start: 0.25, end: 0.12 },
+                        subtle: 0.06,
+                        medium: 0.12,
+                        vibrant: 0.2,
                       };
                       const opacity =
                         opacities[g.intensity as keyof typeof opacities] ||
                         opacities.subtle;
 
                       const patterns: Record<string, string> = {
-                        "primary-accent": `linear-gradient(${g.angle}deg, hsl(var(--primary) / ${opacity.start}) 0%, hsl(var(--accent) / ${opacity.end}) 100%)`,
-                        "secondary-primary": `linear-gradient(${g.angle}deg, hsl(var(--secondary) / ${opacity.start}) 0%, hsl(var(--primary) / ${opacity.end}) 100%)`,
-                        "accent-secondary": `linear-gradient(${g.angle}deg, hsl(var(--accent) / ${opacity.start}) 0%, hsl(var(--secondary) / ${opacity.end}) 100%)`,
-                        warm: `linear-gradient(${g.angle}deg, hsl(25 85% 60% / ${opacity.start}) 0%, hsl(340 75% 55% / ${opacity.end}) 100%)`,
-                        cool: `linear-gradient(${g.angle}deg, hsl(200 85% 60% / ${opacity.start}) 0%, hsl(260 75% 55% / ${opacity.end}) 100%)`,
+                        diagonal: `linear-gradient(135deg, hsl(var(--primary) / ${opacity}) 0%, hsl(var(--accent) / ${
+                          opacity * 0.6
+                        }) 100%)`,
+                        radial: `radial-gradient(circle at 30% 30%, hsl(var(--primary) / ${opacity}) 0%, hsl(var(--accent) / ${
+                          opacity * 0.4
+                        }) 50%, transparent 100%)`,
+                        mesh: `
+                          radial-gradient(at 20% 30%, hsl(var(--primary) / ${opacity}) 0px, transparent 50%),
+                          radial-gradient(at 80% 20%, hsl(var(--accent) / ${opacity}) 0px, transparent 50%),
+                          radial-gradient(at 50% 80%, hsl(var(--secondary) / ${
+                            opacity * 0.7
+                          }) 0px, transparent 50%)
+                        `,
+                        spiral: `conic-gradient(from 45deg at 50% 50%, hsl(var(--primary) / ${opacity}), hsl(var(--accent) / ${
+                          opacity * 0.8
+                        }), hsl(var(--secondary) / ${
+                          opacity * 0.6
+                        }), hsl(var(--primary) / ${opacity}))`,
+                        wave: `linear-gradient(110deg, hsl(var(--primary) / ${opacity}) 0%, hsl(var(--accent) / ${
+                          opacity * 0.7
+                        }) 30%, hsl(var(--secondary) / ${
+                          opacity * 0.5
+                        }) 60%, hsl(var(--primary) / ${opacity * 0.3}) 100%)`,
+                        dots: `radial-gradient(circle, hsl(var(--primary) / ${opacity}) 1px, transparent 1px) 0 0 / 20px 20px, radial-gradient(circle, hsl(var(--accent) / ${
+                          opacity * 0.5
+                        }) 1px, transparent 1px) 10px 10px / 20px 20px`,
                       };
 
-                      const gradientStyle =
-                        patterns[g.pattern] || patterns["primary-accent"];
+                      const patternStyle =
+                        patterns[g.patternType] || patterns.diagonal;
 
                       return (
                         <div
                           className='fixed inset-0 pointer-events-none z-0'
-                          style={{ background: gradientStyle }}
+                          style={{ background: patternStyle }}
                         />
                       );
                     })()}

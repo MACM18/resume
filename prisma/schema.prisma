@@ -76,10 +76,8 @@ model Profile {
 model Gradient {
   id          String   @id @default(cuid())
   name        String
-  type        String   @default("linear")
-  angle       Int      @default(135)
-  intensity   String   @default("subtle") // subtle, medium, bold
-  pattern     String   // primary-accent, secondary-primary, accent-secondary, warm, cool
+  patternType String   @map("pattern_type") // diagonal, radial, mesh, spiral, wave, dots
+  intensity   String   @default("subtle") // subtle, medium, vibrant
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

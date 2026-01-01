@@ -9,10 +9,8 @@ import { toast } from "@/components/ui/sonner";
 interface Gradient {
   id: string;
   name: string;
-  type: string;
-  angle: number;
-  intensity: string; // subtle, medium, bold
-  pattern: string; // primary-accent, secondary-primary, etc.
+  patternType: string; // diagonal, radial, mesh, spiral, wave, dots
+  intensity: string; // subtle, medium, vibrant
   description?: string | null;
 }
 
@@ -65,61 +63,101 @@ export default function GradientPicker() {
     }
   };
 
-  // Generate preview gradient CSS based on pattern and intensity
+  // Generate preview gradient CSS based on pattern type and intensity
   const getPreviewGradient = (g: Gradient) => {
     const opacities = {
-      subtle: { start: 0.08, end: 0.04 },
-      medium: { start: 0.15, end: 0.08 },
-      bold: { start: 0.25, end: 0.12 },
+      subtle: 0.06,
+      medium: 0.12,
+      vibrant: 0.2,
     };
     const opacity =
       opacities[g.intensity as keyof typeof opacities] || opacities.subtle;
 
     const patterns: Record<string, string> = {
-      "primary-accent": `linear-gradient(${g.angle}deg, hsl(var(--primary) / ${opacity.start}) 0%, hsl(var(--accent) / ${opacity.end}) 100%)`,
-      "secondary-primary": `linear-gradient(${g.angle}deg, hsl(var(--secondary) / ${opacity.start}) 0%, hsl(var(--primary) / ${opacity.end}) 100%)`,
-      "accent-secondary": `linear-gradient(${g.angle}deg, hsl(var(--accent) / ${opacity.start}) 0%, hsl(var(--secondary) / ${opacity.end}) 100%)`,
-      warm: `linear-gradient(${g.angle}deg, hsl(25 85% 60% / ${opacity.start}) 0%, hsl(340 75% 55% / ${opacity.end}) 100%)`,
-      cool: `linear-gradient(${g.angle}deg, hsl(200 85% 60% / ${opacity.start}) 0%, hsl(260 75% 55% / ${opacity.end}) 100%)`,
+      diagonal: `linear-gradient(135deg, hsl(var(--primary) / ${opacity}) 0%, hsl(var(--accent) / ${
+        opacity * 0.6
+      }) 100%)`,
+      radial: `radial-gradient(circle at 30% 30%, hsl(var(--primary) / ${opacity}) 0%, hsl(var(--accent) / ${
+        opacity * 0.4
+      }) 50%, transparent 100%)`,
+      mesh: `
+        radial-gradient(at 20% 30%, hsl(var(--primary) / ${opacity}) 0px, transparent 50%),
+        radial-gradient(at 80% 20%, hsl(var(--accent) / ${opacity}) 0px, transparent 50%),
+        radial-gradient(at 50% 80%, hsl(var(--secondary) / ${
+          opacity * 0.7
+        }) 0px, transparent 50%)
+      `,
+      spiral: `conic-gradient(from 45deg at 50% 50%, hsl(var(--primary) / ${opacity}), hsl(var(--accent) / ${
+        opacity * 0.8
+      }), hsl(var(--secondary) / ${
+        opacity * 0.6
+      }), hsl(var(--primary) / ${opacity}))`,
+      wave: `linear-gradient(110deg, hsl(var(--primary) / ${opacity}) 0%, hsl(var(--accent) / ${
+        opacity * 0.7
+      }) 30%, hsl(var(--secondary) / ${
+        opacity * 0.5
+      }) 60%, hsl(var(--primary) / ${opacity * 0.3}) 100%)`,
+      dots: `radial-gradient(circle, hsl(var(--primary) / ${opacity}) 1px, transparent 1px), radial-gradient(circle, hsl(var(--accent) / ${
+        opacity * 0.5
+      }) 1px, transparent 1px)`,
     };
 
-    return patterns[g.pattern] || patterns["primary-accent"];
+    return patterns[g.patternType] || patterns.diagonal;
   };
 
   return (
     <div className='space-y-4'>
       <div>
-        <h4 className='font-medium mb-2'>Theme-Aware Gradients</h4>
+        <h4 className='font-medium mb-2'>Background Patterns</h4>
         <p className='text-sm text-muted-foreground'>
-          These gradients automatically adapt to your theme colors and provide
-          subtle depth to your pages.
+          Choose a subtle visual pattern using your theme colors
         </p>
       </div>
 
-      <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+      <div className='space-y-2'>
+        {/* Default / None option */}
+        <button
+          type='button'
+          onClick={() => setSelectedId(undefined)}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-all ${
+            !selectedId
+              ? "border-primary bg-primary/5"
+              : "border-foreground/10 hover:border-foreground/20 hover:bg-foreground/5"
+          }`}
+        >
+          <div className='w-10 h-10 rounded-full border-2 border-foreground/20 bg-background flex items-center justify-center'>
+            <span className='text-xs text-foreground/50'>None</span>
+          </div>
+          <div className='flex-1 text-left'>
+            <div className='font-medium text-sm'>No Pattern</div>
+            <div className='text-xs text-muted-foreground'>
+              Clean background
+            </div>
+          </div>
+        </button>
+
+        {/* Gradient patterns */}
         {gradients &&
           gradients.map((g: Gradient) => (
             <button
               key={g.id}
               type='button'
-              className={`group relative rounded-lg p-4 aspect-square border-2 transition-all ${
-                selectedId === g.id
-                  ? "border-primary shadow-lg scale-105"
-                  : "border-foreground/10 hover:border-foreground/30 hover:scale-102"
-              }`}
               onClick={() => setSelectedId(g.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-all ${
+                selectedId === g.id
+                  ? "border-primary bg-primary/5"
+                  : "border-foreground/10 hover:border-foreground/20 hover:bg-foreground/5"
+              }`}
               title={g.description || g.name}
             >
               <div
-                className='absolute inset-0 rounded-lg'
+                className='w-10 h-10 rounded-full border border-foreground/10 overflow-hidden'
                 style={{ background: getPreviewGradient(g) }}
               />
-              <div className='relative z-10 flex flex-col items-center justify-center h-full'>
-                <div className='text-sm font-semibold text-foreground text-center mb-1'>
-                  {g.name}
-                </div>
-                <div className='text-xs text-foreground/60 capitalize'>
-                  {g.intensity}
+              <div className='flex-1 text-left'>
+                <div className='font-medium text-sm'>{g.name}</div>
+                <div className='text-xs text-muted-foreground capitalize'>
+                  {g.patternType} · {g.intensity}
                 </div>
               </div>
             </button>

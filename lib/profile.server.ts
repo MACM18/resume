@@ -73,9 +73,9 @@ export async function getProfileDataServer(domain?: string) {
       selected_gradient: sel ? { 
         id: String(sel["id"]), 
         name: String(sel["name"]), 
-        angle: (sel["angle"] as number) || 135,
+        patternType: String(sel["patternType"] || "diagonal"),
         intensity: String(sel["intensity"] || "subtle"),
-        pattern: String(sel["pattern"] || "primary-accent"),
+        description: (sel["description"] as string) || undefined,
       } : undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       background_image_url: p["backgroundImageUrl"] as string | null,
