@@ -56,7 +56,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # npm-created node_modules won't conflict with the files copied from the
 # standalone folder (buildkit overlayfs can error when replacing existing
 # directories). Then ensure the non-root user owns node_modules.
-RUN npm install prisma && chown -R nextjs:nodejs /app/node_modules
+RUN npm install prisma
 
 USER nextjs
 
