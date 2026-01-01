@@ -61,37 +61,46 @@ export default async function RootLayout({
                   */}
                   {profile?.selected_gradient && (
                     <div
-                      className='fixed inset-0 pointer-events-none'
+                      className='fixed inset-0 pointer-events-none z-0'
                       style={{
                         // Use selected preset previewCss by default. If the profile opted to use theme colors,
-                        // use theme variables (primary/accent HSL) for low impact overlays.
+                        // use theme variables (primary/accent HSL) for more dynamic overlays.
                         background: profile.selected_gradient_use_theme
                           ? `linear-gradient(${
                               profile.selected_gradient?.angle ?? 135
-                            }deg, hsl(var(--primary) / 0.06) 0%, hsl(var(--accent) / 0.03) 100%)`
+                            }deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--accent) / 0.08) 100%)`
                           : profile.selected_gradient?.preview_css ?? "",
-                        opacity: 0.1,
                       }}
                     />
                   )}
                   {/* Default subtle gradient overlay (fallback) */}
                   {!profile?.selected_gradient && (
-                    <div className='fixed inset-0 bg-linear-to-br from-background/10 via-background/5 to-secondary/10 pointer-events-none' />
+                    <div className='fixed inset-0 pointer-events-none z-0'>
+                      <div
+                        className='absolute inset-0'
+                        style={{
+                          background:
+                            "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--secondary) / 0.1) 100%)",
+                        }}
+                      />
+                    </div>
                   )}
 
                   {/* Soft accent orbs (reduced intensity) */}
-                  <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-20' />
+                  <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-20 pointer-events-none z-0' />
                   <div
-                    className='fixed bottom-20 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl animate-float opacity-12'
+                    className='fixed bottom-20 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl animate-float opacity-12 pointer-events-none z-0'
                     style={{ animationDelay: "3s" }}
                   />
 
-                  <Toaster />
-                  <Sonner />
-                  <Navigation />
-                  <PageTransition>{children}</PageTransition>
-                  <AuthButton />
-                  <ContactButton />
+                  <div className='relative z-10'>
+                    <Toaster />
+                    <Sonner />
+                    <Navigation />
+                    <PageTransition>{children}</PageTransition>
+                    <AuthButton />
+                    <ContactButton />
+                  </div>
                 </div>
               </TooltipProvider>
             </ThemeProvider>

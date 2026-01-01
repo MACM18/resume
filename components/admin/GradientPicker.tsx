@@ -46,9 +46,27 @@ export default function GradientPicker() {
         selected_gradient_id: selectedId ?? undefined,
         selected_gradient_use_theme: useTheme,
       });
-      toast.success("Gradient saved");
+      toast.success("Gradient saved! Refreshing to show changes...");
+      // Refresh the page to show the new gradient in the layout
+      setTimeout(() => window.location.reload(), 500);
     } catch {
       toast.error("Failed to save gradient");
+    }
+  };
+
+  const handleClear = async () => {
+    try {
+      await updateCurrentUserProfile({
+        selected_gradient_id: undefined,
+        selected_gradient_use_theme: false,
+      });
+      // update local state for immediate UI feedback
+      setSelectedId(undefined);
+      setUseTheme(false);
+      toast.success("Gradient cleared — using default. Refreshing...");
+      setTimeout(() => window.location.reload(), 500);
+    } catch {
+      toast.error("Failed to clear gradient");
     }
   };
 
@@ -91,9 +109,14 @@ export default function GradientPicker() {
       </div>
 
       <div className='flex gap-3'>
-        <Button onClick={handleSave} className='ml-auto'>
-          Save
+        <Button variant='outline' onClick={handleClear}>
+          Clear
         </Button>
+        <div className='ml-auto'>
+          <Button onClick={handleSave}>
+            Save
+          </Button>
+        </div>
       </div>
     </div>
   );
