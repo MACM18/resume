@@ -7,8 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // Connection URL moved to Prisma config (prisma.config.js / .cjs / .mjs / .ts)
-  // See: https://pris.ly/d/config-datasource
+  url      = env("DATABASE_URL")
 }
 
 model User {

@@ -8,8 +8,8 @@ COPY package.json pnpm-lock.yaml ./
 # Copy all Prisma-related config so postinstall scripts (prisma generate) can run in deps stage
 COPY prisma ./prisma
 # Copy only the config files that exist in the repository
-# Use the CommonJS config file present in the repo
-COPY prisma.config.js ./
+# (No Prisma config files required for schema-based datasource)
+# (prisma config files archived)
 # Create bin dir to avoid warnings from packages attempting to write bin shims
 RUN mkdir -p /app/node_modules/.bin
 # Enable corepack and install with pnpm to respect pnpm-lock.yaml
@@ -35,6 +35,7 @@ RUN pnpm run build
 FROM node:22-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache curl
+RUN npm in
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -47,8 +48,8 @@ RUN adduser --system --uid 1001 nextjs
 # We use the 'standalone' folder which is much smaller
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
-# Include Prisma config in the runtime image so we can run migrations from the container when needed
-COPY prisma.config.js ./prisma.config.js
+# (Do not include Prisma runtime config; runtime uses schema-based datasource)
+# Archived configs are kept in the repo but not copied into the image
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
