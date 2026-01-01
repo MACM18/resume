@@ -78,6 +78,7 @@ export interface HomePageData {
     icon: string;
     href: string;
     label: string;
+    display_label?: string; // Custom display text for home page
   }[];
   experienceHighlights: {
     metric: string;
@@ -100,7 +101,13 @@ export interface HomePageData {
     description: string;
     email: string;
   };
-  about_card_description?: string; // New field for the About Me card description
+  availability_status?: {
+    show: boolean;
+    message: string;
+  };
+  about_card_description?: string;
+  projects_card_description?: string;
+  experience_card_description?: string;
 }
 
 export interface AboutPageData {
@@ -122,18 +129,21 @@ export interface AboutPageData {
 export type Theme = Record<string, string>;
 
 export interface Profile {
-  id: string;
-  user_id: string; // Auth user id - used for RLS policies
-  full_name: string;
-  avatar_url: string | null;
-  tagline: string;
-  domain: string | null;
-  home_page_data: HomePageData;
-  about_page_data: AboutPageData;
-  active_resume_role: string | null;
-  theme: Theme | null;
-  updated_at: string;
-  background_image_url: string | null; // New field for background image
+  id?: string;
+  user_id?: string; // Auth user id - used for RLS policies
+  full_name?: string;
+  avatar_url?: string | null;
+  avatar_position?: { x: number; y: number };
+  avatar_zoom?: number;
+  avatar_size?: number;
+  tagline?: string;
+  domain?: string | null;
+  home_page_data?: HomePageData;
+  about_page_data?: AboutPageData;
+  active_resume_role?: string | null;
+  theme?: Theme | null;
+  updated_at?: string;
+  background_image_url?: string | null; // New field for background image
   favicon_url?: string | null; // Optional favicon URL
   contact_numbers?: {
     id: string;

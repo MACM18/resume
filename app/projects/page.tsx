@@ -1,17 +1,18 @@
 "use client";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { ExternalLink, Github, Star } from "lucide-react";
-import { GlassCard } from "@/components/GlassCard";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import Image from "next/image";
+import { ExternalLink, Github, Star } from "lucide-react";
 import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
 import { getEffectiveDomain } from "@/lib/utils";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { ProjectsPageSkeleton } from "@/components/ui/loading-skeleton";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/GlassCard";
+import type { Project } from "@/types/portfolio";
 
 const Projects = () => {
   const [hostname, setHostname] = useState("");
@@ -43,120 +44,129 @@ const Projects = () => {
   const isLoading = isLoadingProfile || isLoadingProjects;
 
   if (isLoading || !hostname) {
-    return (
-      <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto space-y-8'>
-        <Skeleton className='h-8 w-64' />
-        <div className='grid lg:grid-cols-2 gap-8'>
-          <Skeleton className='h-[400px] w-full' />
-          <Skeleton className='h-[400px] w-full' />
-        </div>
-      </div>
-    );
+    return <ProjectsPageSkeleton />;
   }
 
   if (!profileData) {
     return <DomainNotClaimed />;
   }
 
-  const featuredProjects = projects?.filter((p) => p.featured) || [];
-  const otherProjects = projects?.filter((p) => !p.featured) || [];
+  const featuredProjects = projects?.filter((p: Project) => p.featured) || [];
+  const otherProjects = projects?.filter((p: Project) => !p.featured) || [];
 
   return (
-    <div className='min-h-screen relative pt-24 md:pt-40 pb-32 md:pb-12 px-6'>
-      <div className='max-w-6xl mx-auto'>
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className='text-center mb-16'
-        >
-          <h1 className='text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
-            My Projects
-          </h1>
-          <p className='text-xl text-foreground/80 max-w-2xl mx-auto'>
-            A showcase of my recent work, featuring modern technologies and
-            innovative solutions
-          </p>
-        </motion.div>
+    <div className='min-h-screen relative pb-20'>
+      {/* Hero Section */}
+      <section className='pt-32 pb-20 px-6'>
+        <div className='max-w-6xl mx-auto'>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className='text-center max-w-3xl mx-auto'
+          >
+            <h1 className='text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight'>
+              My Projects
+            </h1>
+            <p className='text-xl md:text-2xl text-foreground/60 font-light leading-relaxed'>
+              A showcase of my recent work, featuring modern technologies and
+              innovative solutions
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
+      <div className='max-w-7xl mx-auto px-6 space-y-24'>
         {/* Featured Projects */}
         {featuredProjects.length > 0 && (
-          <section className='mb-16'>
-            <motion.h2
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
+          <section>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className='text-3xl font-bold mb-8 flex items-center text-primary'
+              className='mb-12'
             >
-              <Star className='mr-3' size={28} />
-              Featured Projects
-            </motion.h2>
+              <div className='flex items-center gap-3 mb-2'>
+                <Star className='text-primary' size={20} fill='currentColor' />
+                <h2 className='text-3xl md:text-4xl font-bold'>
+                  Featured Projects
+                </h2>
+              </div>
+              <div className='w-20 h-1 bg-primary ml-8' />
+            </motion.div>
             <div className='grid lg:grid-cols-2 gap-8'>
-              {featuredProjects.map((project, index) => (
+              {featuredProjects.map((project: Project, index: number) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 + index * 0.2 }}
+                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 >
-                  <GlassCard className='overflow-hidden group' hover>
-                    <div className='aspect-video bg-glass-bg/20 relative overflow-hidden'>
+                  <GlassCard
+                    variant='bordered'
+                    className='overflow-hidden h-full flex flex-col group'
+                    hover
+                  >
+                    <div className='aspect-video relative overflow-hidden bg-foreground/5'>
                       <Image
                         src={project.image || "/placeholder.svg"}
                         alt={project.title}
-                        className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
-                        width={800}
-                        height={450}
+                        fill
+                        className='object-cover transition-transform duration-500 group-hover:scale-105'
+                        sizes='(max-width: 1024px) 100vw, 50vw'
                         priority={index === 0}
-                        style={{
-                          objectFit: "cover",
-                          width: "100%",
-                          height: "100%",
-                        }}
                       />
-                      <div className='absolute inset-0 bg-gradient-to-t from-glass-bg/80 to-transparent' />
+                      <div className='absolute top-4 right-4 px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-semibold'>
+                        Featured
+                      </div>
                     </div>
-                    <div className='p-6'>
-                      <h3 className='text-2xl font-bold mb-3 text-primary group-hover:text-primary-glow transition-colors duration-300'>
+                    <div className='p-8 flex flex-col flex-1'>
+                      <h3 className='text-2xl font-bold mb-3'>
                         {project.title}
                       </h3>
-                      <p className='text-foreground/80 mb-4'>
+                      <p className='text-foreground/70 mb-6 leading-relaxed flex-1'>
                         {project.description}
                       </p>
                       <div className='flex flex-wrap gap-2 mb-6'>
-                        {project.tech.map((tech) => (
+                        {project.tech.slice(0, 6).map((tech: string) => (
                           <span
                             key={tech}
-                            className='px-3 py-1 text-xs rounded-full bg-secondary/10 border border-secondary/20 text-secondary'
+                            className='px-3 py-1 text-xs rounded-md bg-foreground/5 border border-foreground/10 text-foreground/80'
                           >
                             {tech}
                           </span>
                         ))}
+                        {project.tech.length > 6 && (
+                          <span className='px-3 py-1 text-xs text-foreground/60'>
+                            +{project.tech.length - 6} more
+                          </span>
+                        )}
                       </div>
-                      <div className='flex space-x-3'>
+                      <div className='flex gap-3'>
                         <Button asChild size='sm' className='flex-1'>
                           <Link href={`/projects/${project.id}`}>
                             View Details
                           </Link>
                         </Button>
                         {project.demo_url && (
-                          <Button asChild variant='outline' size='sm'>
+                          <Button asChild variant='outline' size='icon'>
                             <a
                               href={project.demo_url}
                               target='_blank'
                               rel='noopener noreferrer'
+                              aria-label='View demo'
                             >
                               <ExternalLink size={16} />
                             </a>
                           </Button>
                         )}
                         {project.github_url && (
-                          <Button asChild variant='outline' size='sm'>
+                          <Button asChild variant='outline' size='icon'>
                             <a
                               href={project.github_url}
                               target='_blank'
                               rel='noopener noreferrer'
+                              aria-label='View source'
                             >
                               <Github size={16} />
                             </a>
@@ -171,56 +181,57 @@ const Projects = () => {
           </section>
         )}
 
-        {/* Other Projects */}
+        {/* All Projects */}
         {otherProjects.length > 0 && (
           <section>
-            <motion.h2
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className='text-3xl font-bold mb-8 text-secondary'
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className='mb-12'
             >
-              More Projects
-            </motion.h2>
-            <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {otherProjects.map((project, index) => (
+              <h2 className='text-3xl md:text-4xl font-bold mb-2'>
+                {featuredProjects.length > 0 ? "All Projects" : "Projects"}
+              </h2>
+              <div className='w-20 h-1 bg-primary' />
+            </motion.div>
+            <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {otherProjects.map((project: Project, index: number) => (
                 <motion.div
                   key={project.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.6 + index * 0.05 }}
                 >
-                  <GlassCard className='p-6 h-full group' hover>
-                    <h3 className='text-xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors duration-300'>
-                      {project.title}
-                    </h3>
-                    <p className='text-foreground/70 mb-4 text-sm'>
-                      {project.description}
-                    </p>
-                    <div className='flex flex-wrap gap-1 mb-4'>
-                      {project.tech.slice(0, 3).map((tech) => (
-                        <span
-                          key={tech}
-                          className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                      {project.tech.length > 3 && (
-                        <span className='px-2 py-1 text-xs rounded bg-glass-bg/20 text-foreground/60'>
-                          +{project.tech.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                    <Button
-                      asChild
-                      size='sm'
-                      variant='ghost'
-                      className='w-full'
+                  <Link href={`/projects/${project.id}`}>
+                    <GlassCard
+                      variant='minimal'
+                      className='p-6 h-full flex flex-col group cursor-pointer'
+                      hover
                     >
-                      <Link href={`/projects/${project.id}`}>View Project</Link>
-                    </Button>
-                  </GlassCard>
+                      <h3 className='text-xl font-bold mb-3 group-hover:text-primary transition-colors'>
+                        {project.title}
+                      </h3>
+                      <p className='text-foreground/70 mb-4 text-sm leading-relaxed line-clamp-3 flex-1'>
+                        {project.description}
+                      </p>
+                      <div className='flex flex-wrap gap-2'>
+                        {project.tech.slice(0, 3).map((tech: string) => (
+                          <span
+                            key={tech}
+                            className='px-2.5 py-1 text-xs rounded-md bg-foreground/5 border border-foreground/10 text-foreground/70'
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                        {project.tech.length > 3 && (
+                          <span className='px-2.5 py-1 text-xs text-foreground/60'>
+                            +{project.tech.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </GlassCard>
+                  </Link>
                 </motion.div>
               ))}
             </div>

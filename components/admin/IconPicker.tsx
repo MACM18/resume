@@ -132,6 +132,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
           variant='outline'
           size='icon'
           className='h-10 w-10 rounded-full'
+          title={value ? `Current: ${value}` : "Select an icon"}
         >
           {CurrentIcon ? (
             <CurrentIcon className='h-4 w-4' />
@@ -143,17 +144,26 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
       <DialogContent className='max-w-3xl max-h-[80vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Select an Icon</DialogTitle>
+          {value && (
+            <p className='text-xs text-foreground/60 font-mono'>
+              Current: {value}
+            </p>
+          )}
         </DialogHeader>
         <div className='flex items-center border rounded-md px-3 mb-4'>
           <Search className='w-4 h-4 mr-2 opacity-50' />
           <Input
-            placeholder='Search icons...'
+            placeholder='Search icons... (e.g., github, react, code)'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className='border-0 focus-visible:ring-0 focus-visible:ring-offset-0'
           />
         </div>
-        <div className='grid grid-cols-8 gap-2 p-2'>
+        <div
+          role='list'
+          aria-label='Icon results'
+          className='grid grid-cols-8 gap-2 p-2 max-h-[50vh] overflow-y-auto'
+        >
           {isLoading
             ? Array.from({ length: 32 }).map((_, i) => (
                 <div
@@ -161,15 +171,16 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
                   className='h-12 w-12 rounded-md bg-foreground/5 animate-pulse'
                 />
               ))
-            : filteredIcons.map(({ name, Icon }) => {
+            : filteredIcons.slice(0, 200).map(({ name, Icon }) => {
                 // Extract platform/label from icon name
-                const [, iconComponent] = name.split(".");
+                const [prefix, iconComponent] = name.split(".");
                 const pretty = prettifyIconName(iconComponent);
                 return (
                   <Button
                     key={name}
                     variant={value === name ? "default" : "outline"}
                     className='h-12 w-12 p-0'
+                    title={`${pretty} (${name})`}
                     onClick={() => {
                       onChange({
                         icon: name,
@@ -184,6 +195,16 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
                 );
               })}
         </div>
+        {filteredIcons.length > 200 && (
+          <p className='text-xs text-center text-foreground/60 mt-2'>
+            Showing first 200 results. Refine your search to see more.
+          </p>
+        )}
+        {filteredIcons.length === 0 && !isLoading && (
+          <p className='text-sm text-center text-foreground/60 py-8'>
+            No icons found. Try a different search term.
+          </p>
+        )}
       </DialogContent>
     </Dialog>
   );

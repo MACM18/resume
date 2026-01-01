@@ -1,169 +1,143 @@
 "use client";
 
-import { supabase } from "./supabase";
 import { WorkExperience } from "@/types/portfolio";
 import { normalizeDomain } from "./utils";
 
-async function getUserIdByDomain(domain: string): Promise<string | null> {
-  const normalizedDomain = normalizeDomain(domain);
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("user_id")
-    .eq("domain", normalizedDomain)
-    .single();
-  if (error || !data) {
-    console.error("Error fetching user by domain:", error?.message);
-    return null;
-  }
-  return data.user_id;
-}
-
-// Public/domain-scoped: only return visible experiences, newest first
+/**
+ * Get visible work experiences for a domain (public)
+ */
 export async function getVisibleWorkExperiences(
   domain: string
 ): Promise<WorkExperience[]> {
-  const userId = await getUserIdByDomain(domain);
-  if (!userId) return [];
-
-  const { data, error } = await supabase
-    .from("work_experiences")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("visible", true)
-    .order("is_current", { ascending: false })
-    .order("end_date", { ascending: false, nullsFirst: true })
-    .order("start_date", { ascending: false });
-
-  if (error) {
+  const normalizedDomain = normalizeDomain(domain);
+  try {
+    const response = await fetch(
+      `/api/work-experiences/by-domain?domain=${encodeURIComponent(normalizedDomain)}`
+    );
+    if (!response.ok) {
+      return [];
+    }
+    return response.json();
+  } catch (error) {
     console.error("Error fetching visible work experiences:", error);
     return [];
   }
-  return (data as WorkExperience[]) || [];
 }
 
-// Admin: list for current user
+/**
+ * Get all work experiences for the current user
+ */
 export async function getWorkExperiencesForCurrentUser(): Promise<
   WorkExperience[]
 > {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return [];
-
-  const { data, error } = await supabase
-    .from("work_experiences")
-    .select("*")
-    .eq("user_id", session.user.id)
-    .order("is_current", { ascending: false })
-    .order("end_date", { ascending: false, nullsFirst: true })
-    .order("start_date", { ascending: false });
-
-  if (error) {
+  try {
+    const response = await fetch("/api/work-experiences/me");
+    if (!response.ok) {
+      return [];
+    }
+    return response.json();
+  } catch (error) {
     console.error("Error fetching user work experiences:", error);
     return [];
   }
-  return (data as WorkExperience[]) || [];
 }
 
+/**
+ * Add a new work experience
+ */
 export async function addWorkExperience(
   experience: Omit<
     WorkExperience,
     "id" | "user_id" | "created_at" | "is_current"
   > & { is_current?: boolean }
 ): Promise<WorkExperience | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) throw new Error("Not authenticated");
+  const response = await fetch("/api/work-experiences/me", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(experience),
+  });
 
-  const payload = {
-    ...experience,
-    user_id: session.user.id,
-    // normalize empty end_date if current
-    end_date: experience.is_current ? null : experience.end_date ?? null,
-  };
-
-  const { data, error } = await supabase
-    .from("work_experiences")
-    .insert([payload])
-    .select()
-    .single();
-
-  if (error) {
+  if (!response.ok) {
+    const error = await response.json();
     console.error("Error adding work experience:", error);
-    throw error;
+    return null;
   }
-  return data as WorkExperience;
+  return response.json();
 }
 
+/**
+ * Update a work experience
+ */
 export async function updateWorkExperience(
   id: string,
-  patch: Partial<WorkExperience>
+  experience: Partial<WorkExperience>
 ): Promise<WorkExperience | null> {
-  // If toggling is_current to true, end_date should be null
-  const normalized = {
-    ...patch,
-    end_date:
-      patch.is_current === true
-        ? null
-        : patch.end_date === undefined
-        ? undefined
-        : patch.end_date,
-  } as Partial<WorkExperience>;
+  const response = await fetch(`/api/work-experiences/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(experience),
+  });
 
-  const { data, error } = await supabase
-    .from("work_experiences")
-    .update(normalized)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
+  if (!response.ok) {
+    const error = await response.json();
     console.error("Error updating work experience:", error);
-    throw error;
+    return null;
   }
-  return data as WorkExperience;
+  return response.json();
 }
 
+/**
+ * Delete a work experience
+ */
 export async function deleteWorkExperience(id: string): Promise<boolean> {
-  const { error } = await supabase
-    .from("work_experiences")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
+  try {
+    const response = await fetch(`/api/work-experiences/${id}`, {
+      method: "DELETE",
+    });
+    return response.ok;
+  } catch (error) {
     console.error("Error deleting work experience:", error);
-    throw error;
+    return false;
   }
-  return true;
 }
 
+/**
+ * Set a work experience as the primary one
+ */
+export async function setPrimaryWorkExperience(id: string): Promise<boolean> {
+  const response = await fetch(`/api/work-experiences/${id}/set-primary`, {
+    method: "POST",
+  });
+  return response.ok;
+}
+
+/**
+ * Alias for setPrimaryWorkExperience for backward compatibility
+ */
+export const setAsCurrent = setPrimaryWorkExperience;
+
+/**
+ * Get current work experience for a domain (public)
+ * Returns the work experience marked as "current" or the most recent one
+ */
 export async function getCurrentWork(
   domain: string
 ): Promise<WorkExperience | null> {
-  const list = await getVisibleWorkExperiences(domain);
-  // Return only current work experience, or null if none exists
-  return list.find((w) => w.is_current) || null;
-}
-
-// Admin helper: ensure only one current by unsetting others first
-export async function setAsCurrent(id: string): Promise<void> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) throw new Error("Not authenticated");
-
-  // Unset all current for this user
-  const { error: unsetErr } = await supabase
-    .from("work_experiences")
-    .update({ is_current: false })
-    .eq("user_id", session.user.id)
-    .eq("is_current", true);
-  if (unsetErr) {
-    console.error("Failed to unset previous current work:", unsetErr);
-    throw unsetErr;
+  const normalizedDomain = normalizeDomain(domain);
+  try {
+    const response = await fetch(
+      `/api/work-experiences/current?domain=${encodeURIComponent(normalizedDomain)}`
+    );
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching current work experience:", error);
+    return null;
   }
-
-  // Set the target as current (end_date becomes null via update normalization)
-  await updateWorkExperience(id, { is_current: true });
 }

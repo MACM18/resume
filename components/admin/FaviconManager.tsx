@@ -49,7 +49,7 @@ export function FaviconManager() {
       if (profile?.favicon_url === imageUrl) {
         await updateCurrentUserProfile({ favicon_url: null });
       }
-      return deleteFavicon(session.user.id, imageUrl);
+      return deleteFavicon(imageUrl);
     },
     onSuccess: () => {
       toast.success("Favicon deleted successfully!");
@@ -99,7 +99,7 @@ export function FaviconManager() {
         fileToUpload = resized;
       }
 
-      const publicUrl = await uploadFavicon(fileToUpload, session.user.id);
+      const publicUrl = await uploadFavicon(fileToUpload);
       toast.success("Favicon uploaded successfully!");
       // Set the newly uploaded image as the favicon
       updateProfileMutation.mutate(publicUrl);
@@ -188,7 +188,7 @@ export function FaviconManager() {
       {/* Current Favicon */}
       {profile?.favicon_url && (
         <div className='flex flex-col sm:flex-row items-center gap-4 p-3 border rounded-lg bg-glass-bg/10'>
-          <div className='relative w-12 h-12 rounded-md overflow-hidden border flex-shrink-0'>
+          <div className='relative w-12 h-12 rounded-md overflow-hidden border shrink-0'>
             <Image
               src={profile.favicon_url}
               alt='Current Favicon'

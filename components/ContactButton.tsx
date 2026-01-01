@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { GlassCard } from "./GlassCard";
+// import { GlassCard } from "./GlassCard";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfileData } from "@/lib/profile";
 import { toast } from "./ui/sonner";
@@ -97,100 +97,120 @@ export function ContactButton() {
 
   return (
     <>
+      {/* Fixed Contact Button - Bottom Left on Mobile, Bottom Right on Desktop */}
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.5 }}
-        className='fixed bottom-30 right-6 md:bottom-6 z-50'
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className='fixed bottom-20 left-4 md:bottom-6 md:right-6 md:left-auto z-40'
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <button onClick={() => setIsOpen(true)} className='group'>
-              <GlassCard className='rounded-full p-4' hover={true}>
-                <Mail className='h-6 w-6 text-foreground/80 group-hover:text-primary transition-colors duration-300' />
-              </GlassCard>
+            <button
+              onClick={() => setIsOpen(true)}
+              className='group flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105'
+            >
+              <Mail className='h-5 w-5 md:h-6 md:w-6' />
             </button>
           </TooltipTrigger>
-          <TooltipContent side='left'>
+          <TooltipContent side='right' className='md:hidden'>
+            <p>Contact Me</p>
+          </TooltipContent>
+          <TooltipContent side='left' className='hidden md:block'>
             <p>Contact Me</p>
           </TooltipContent>
         </Tooltip>
       </motion.div>
 
+      {/* Contact Form Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className='bg-transparent border-none shadow-none p-0 max-w-lg'>
-          <GlassCard className='p-8' hover={false}>
-            <DialogHeader>
-              <DialogTitle className='text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2'>
-                Let&apos;s Create Something Amazing
-              </DialogTitle>
-              <DialogDescription className='text-foreground/70'>
-                I&apos;m always excited to hear about new projects and
-                opportunities. Drop me a line and let&apos;s chat.
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className='space-y-4 mt-6'
+        <DialogContent className='bg-background border-foreground/10 max-w-lg'>
+          <DialogHeader>
+            <DialogTitle className='text-2xl md:text-3xl font-bold mb-2'>
+              Let&apos;s Connect
+            </DialogTitle>
+            <DialogDescription className='text-foreground/70'>
+              I&apos;m always excited to hear about new projects and
+              opportunities. Drop me a message!
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className='space-y-5 mt-4'
+            >
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='John Doe'
+                        {...field}
+                        className='h-11'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='john.doe@example.com'
+                        {...field}
+                        className='h-11'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='message'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Message</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Tell me about your project...'
+                        {...field}
+                        rows={5}
+                        className='resize-none'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type='submit'
+                disabled={mutation.isPending}
+                className='w-full'
+                size='lg'
               >
-                <FormField
-                  control={form.control}
-                  name='name'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder='John Doe' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='email'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder='john.doe@example.com' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='message'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Message</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder='Your message here...'
-                          {...field}
-                          rows={5}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type='submit'
-                  disabled={mutation.isPending}
-                  className='w-full'
-                >
-                  {mutation.isPending ? (
-                    <Loader2 className='animate-spin' />
-                  ) : (
-                    "Send Message"
-                  )}
-                </Button>
-              </form>
-            </Form>
-          </GlassCard>
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className='mr-2 h-4 w-4' />
+                    Send Message
+                  </>
+                )}
+              </Button>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </>

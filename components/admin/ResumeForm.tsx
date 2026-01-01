@@ -371,7 +371,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
                         }}
                       >
                         <div className='flex items-start gap-3'>
-                          <div className='w-12 h-16 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-semibold flex-shrink-0'>
+                          <div className='w-12 h-16 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-semibold shrink-0'>
                             PDF
                           </div>
                           <div className='flex-1 min-w-0'>

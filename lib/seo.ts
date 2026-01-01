@@ -100,7 +100,8 @@ export function getBaseMetadata(
 
 export function generateHomeMetadata(
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
@@ -109,6 +110,11 @@ export function generateHomeMetadata(
     profile?.tagline ||
     profile?.home_page_data?.callToAction?.description ||
     config.defaultDescription;
+
+  // Generate OG image URL if we have an avatar and origin
+  const ogImageUrl = profile?.avatar_url && origin
+    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+    : config.defaultImage;
 
   const base: Metadata = {
     title,
@@ -136,7 +142,7 @@ export function generateHomeMetadata(
       description,
       images: [
         {
-          url: config.defaultImage,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: title,
@@ -160,7 +166,7 @@ export function generateHomeMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: [config.defaultImage],
+      images: [ogImageUrl],
       creator: config.twitterHandle,
     };
   }
@@ -169,7 +175,8 @@ export function generateHomeMetadata(
 
 export function generateAboutMetadata(
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
@@ -179,6 +186,11 @@ export function generateAboutMetadata(
     profile?.tagline ||
     config.defaultDescription;
 
+  // Generate OG image URL if we have an avatar and origin
+  const ogImageUrl = profile?.avatar_url && origin
+    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+    : config.defaultImage;
+
   const meta: Metadata = {
     title,
     description,
@@ -187,7 +199,7 @@ export function generateAboutMetadata(
       url: `${config.siteUrl}/about`,
       title,
       description,
-      images: [config.defaultImage],
+      images: [ogImageUrl],
     },
   };
   if (config.twitterHandle) {
@@ -195,7 +207,7 @@ export function generateAboutMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: [config.defaultImage],
+      images: [ogImageUrl],
     };
   }
   return meta;
@@ -203,7 +215,8 @@ export function generateAboutMetadata(
 
 export function generateProjectsMetadata(
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
@@ -211,6 +224,11 @@ export function generateProjectsMetadata(
     ? `Projects by ${profile.full_name}`
     : "Projects";
   const description = `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
+
+  // Generate OG image URL if we have an avatar and origin
+  const ogImageUrl = profile?.avatar_url && origin
+    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+    : config.defaultImage;
 
   const meta: Metadata = {
     title,
@@ -220,7 +238,7 @@ export function generateProjectsMetadata(
       url: `${config.siteUrl}/projects`,
       title,
       description,
-      images: [config.defaultImage],
+      images: [ogImageUrl],
     },
   };
   if (config.twitterHandle) {
@@ -228,7 +246,7 @@ export function generateProjectsMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: [config.defaultImage],
+      images: [ogImageUrl],
     };
   }
   return meta;
@@ -237,7 +255,8 @@ export function generateProjectsMetadata(
 export function generateProjectMetadata(
   project: Project | null,
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
@@ -250,6 +269,11 @@ export function generateProjectMetadata(
 
   const title = `${project.title} - ${config.siteName}`;
   const description = project.description || project.long_description;
+
+  // Generate OG image URL if we have an avatar and origin (for fallback)
+  const fallbackImageUrl = profile?.avatar_url && origin
+    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+    : config.defaultImage;
 
   const meta: Metadata = {
     title,
@@ -269,7 +293,7 @@ export function generateProjectMetadata(
               alt: project.title,
             },
           ]
-        : [config.defaultImage],
+        : [fallbackImageUrl],
       publishedTime: project.created_at,
     },
   };
@@ -278,7 +302,7 @@ export function generateProjectMetadata(
       card: "summary_large_image",
       title: project.title,
       description,
-      images: [project.image || config.defaultImage],
+      images: [project.image || fallbackImageUrl],
     };
   }
   return meta;
@@ -286,7 +310,8 @@ export function generateProjectMetadata(
 
 export function generateResumeMetadata(
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
@@ -294,6 +319,11 @@ export function generateResumeMetadata(
   const description =
     profile?.tagline ||
     "Professional resume showcasing experience, skills, and qualifications.";
+
+  // Generate OG image URL if we have an avatar and origin
+  const ogImageUrl = profile?.avatar_url && origin
+    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+    : config.defaultImage;
 
   const meta: Metadata = {
     title,
@@ -303,7 +333,7 @@ export function generateResumeMetadata(
       url: `${config.siteUrl}/resume`,
       title,
       description,
-      images: [config.defaultImage],
+      images: [ogImageUrl],
     },
   };
   if (config.twitterHandle) {

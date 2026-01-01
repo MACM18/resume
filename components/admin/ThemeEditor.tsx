@@ -27,11 +27,19 @@ export function ThemeEditor() {
     queryFn: getCurrentUserProfile,
   });
 
-  const [theme, setTheme] = useState(profile?.theme || defaultTheme);
+  // Keep a local theme state and default to `defaultTheme` so the UI
+  // always has values even if the stored profile theme is missing or null.
+  const [theme, setTheme] = useState<typeof defaultTheme>(defaultTheme);
 
   useEffect(() => {
-    if (profile?.theme) {
-      setTheme(profile.theme);
+    // If profile has a theme object, merge it over the defaults so missing
+    // keys are still available in the editor.
+    if (profile) {
+      const merged = {
+        ...defaultTheme,
+        ...(profile.theme || {}),
+      } as typeof defaultTheme;
+      setTheme(merged);
     }
   }, [profile]);
 
@@ -89,7 +97,7 @@ export function ThemeEditor() {
         </Button>
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {Object.entries(theme)
+        {Object.entries({ ...defaultTheme, ...(theme || {}) })
           .filter(([key]) => editableColors.includes(key))
           .map(([key, value]) => (
             <div key={key} className='space-y-2'>

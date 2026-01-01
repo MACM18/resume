@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  emailVerified DateTime? @map("email_verified")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  profile         Profile?
+  projects        Project[]
+  resumes         Resume[]
+  uploadedResumes UploadedResume[]
+  workExperiences WorkExperience[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Profile {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id")
+  fullName         String   @map("full_name")
+  avatarUrl        String?  @map("avatar_url")
+  avatarPosition   Json?    @map("avatar_position") // { x: number, y: number }
+  avatarZoom       Int?     @map("avatar_zoom") // Zoom percentage (50-200)
+  avatarSize       Int?     @map("avatar_size") // Container size in px (e.g., 320)
+  tagline          String   @default("")
+  domain           String?  @unique
+  homePageData     Json     @map("home_page_data")
+  aboutPageData    Json     @map("about_page_data")
+  activeResumeRole String?  @map("active_resume_role")
+  theme            Json?
+  backgroundImageUrl String? @map("background_image_url")
+  faviconUrl       String?  @map("favicon_url")
+  contactNumbers   Json?    @map("contact_numbers") // Array of contact number objects
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  title           String
+  description     String
+  longDescription String   @map("long_description") @db.Text
+  image           String?
+  tech            String[] // Array of technologies
+  demoUrl         String?  @map("demo_url")
+  githubUrl       String?  @map("github_url")
+  featured        Boolean  @default(false)
+  published       Boolean  @default(false)
+  keyFeatures     String[] @map("key_features") // AI-generated key features
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model UploadedResume {
+  id               String   @id @default(cuid())
+  userId           String   @map("user_id")
+  filePath         String   @map("file_path")
+  publicUrl        String?  @map("public_url")
+  originalFilename String   @map("original_filename")
+  fileSize         Int?     @map("file_size")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumes Resume[]
+
+  @@map("uploaded_resumes")
+}
+
+model Resume {
+  id               String   @id @default(cuid())
+  userId           String   @map("user_id")
+  role             String
+  title            String?
+  summary          String   @db.Text
+  experience       Json     // Array of experience objects
+  skills           String[]
+  education        Json     // Array of education objects
+  projectIds       String[] @map("project_ids")
+  resumeUrl        String?  @map("resume_url")
+  pdfSource        String   @map("pdf_source") // "uploaded" or "generated"
+  uploadedResumeId String?  @map("uploaded_resume_id")
+  certifications   Json?    // Array of certification objects
+  location         String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uploadedResume UploadedResume? @relation(fields: [uploadedResumeId], references: [id], onDelete: SetNull)
+
+  @@map("resumes")
+}
+
+model WorkExperience {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  company     String
+  position    String
+  location    String?
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  isCurrent   Boolean   @default(false) @map("is_current")
+  visible     Boolean   @default(true)
+  description String[]  // Bullet points as array
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("work_experiences")
+}

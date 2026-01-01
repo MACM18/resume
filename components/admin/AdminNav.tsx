@@ -31,7 +31,7 @@ export function AdminNav({
       )}
       aria-label='Admin navigation'
     >
-      <div className='absolute inset-0 rounded-xl bg-gradient-to-b from-white/2 to-white/1 pointer-events-none' />
+      <div className='absolute inset-0 rounded-xl bg-linear-to-b from-white/2 to-white/1 pointer-events-none' />
       <div className='relative flex h-full'>
         <nav className='flex flex-1 items-center justify-center p-4'>
           <ul className='flex flex-col gap-2 w-full max-w-[220px]'>

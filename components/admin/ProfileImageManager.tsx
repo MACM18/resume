@@ -12,8 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, FileUp, CheckCircle, Trash, Image as ImageIcon } from "lucide-react";
-import { useSupabase } from "@/components/providers/AuthProvider";
+import {
+  Loader2,
+  FileUp,
+  CheckCircle,
+  Trash,
+  Image as ImageIcon,
+} from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -31,7 +37,7 @@ const MAX_IMAGES = 10;
 
 export function ProfileImageManager() {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
@@ -46,7 +52,7 @@ export function ProfileImageManager() {
     refetch: refetchImages,
   } = useQuery({
     queryKey: ["profileImages", session?.user.id],
-    queryFn: () => getProfileImages(session!.user.id),
+    queryFn: () => getProfileImages(),
     enabled: !!session?.user.id,
   });
 
@@ -74,7 +80,7 @@ export function ProfileImageManager() {
       if (profile?.avatar_url === imageUrl) {
         await updateCurrentUserProfile({ avatar_url: null });
       }
-      return deleteProfileImage(session.user.id, imageUrl);
+      return deleteProfileImage(imageUrl);
     },
     onSuccess: () => {
       toast.success("Image deleted successfully!");
@@ -98,7 +104,9 @@ export function ProfileImageManager() {
     if (!file || !session?.user.id) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
+      toast.error(
+        "Invalid file type. Please upload a JPG, PNG, or WEBP image."
+      );
       return;
     }
 
@@ -109,7 +117,7 @@ export function ProfileImageManager() {
 
     setIsUploading(true);
     try {
-      const publicUrl = await uploadProfileImage(file, session.user.id);
+      const publicUrl = await uploadProfileImage(file);
       toast.success("Image uploaded successfully!");
       refetchImages(); // Re-fetch images to show the new one
       // Optionally set the newly uploaded image as the avatar
@@ -132,13 +140,14 @@ export function ProfileImageManager() {
     <div className='space-y-6'>
       <h2 className='text-2xl font-bold text-primary'>Profile Picture</h2>
       <p className='text-foreground/70'>
-        Upload and select your profile picture. You can store up to {MAX_IMAGES} images.
+        Upload and select your profile picture. You can store up to {MAX_IMAGES}{" "}
+        images.
       </p>
 
       {/* Current Profile Picture */}
       {profile?.avatar_url && (
         <div className='flex items-center gap-4 p-4 border rounded-lg bg-glass-bg/10'>
-          <div className='relative w-24 h-24 rounded-full overflow-hidden border border-primary/50 flex-shrink-0'>
+          <div className='relative w-24 h-24 rounded-full overflow-hidden border border-primary/50 shrink-0'>
             <Image
               src={profile.avatar_url}
               alt='Current Profile'
@@ -149,7 +158,7 @@ export function ProfileImageManager() {
           <div>
             <p className='font-medium'>Currently Selected:</p>
             <p className='text-sm text-foreground/70 truncate'>
-              {profile.avatar_url.split('/').pop()}
+              {profile.avatar_url.split("/").pop()}
             </p>
             <Button
               variant='ghost'
@@ -166,14 +175,20 @@ export function ProfileImageManager() {
 
       {/* Image Upload */}
       <div className='flex items-center gap-4'>
-        <Button asChild variant='outline' disabled={isUploading || (images && images.length >= MAX_IMAGES)}>
+        <Button
+          asChild
+          variant='outline'
+          disabled={isUploading || (images && images.length >= MAX_IMAGES)}
+        >
           <label htmlFor='profile-image-upload' className='cursor-pointer'>
             {isUploading ? (
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
             ) : (
               <FileUp className='mr-2 h-4 w-4' />
             )}
-            {isUploading ? "Uploading..." : `Upload New Image (${images?.length || 0}/${MAX_IMAGES})`}
+            {isUploading
+              ? "Uploading..."
+              : `Upload New Image (${images?.length || 0}/${MAX_IMAGES})`}
           </label>
         </Button>
         <input
@@ -185,14 +200,16 @@ export function ProfileImageManager() {
           disabled={isUploading || (images && images.length >= MAX_IMAGES)}
         />
         {images && images.length >= MAX_IMAGES && (
-          <p className="text-sm text-destructive">Maximum images reached.</p>
+          <p className='text-sm text-destructive'>Maximum images reached.</p>
         )}
       </div>
 
       {/* Existing Images */}
       {images && images.length > 0 && (
         <div className='space-y-4'>
-          <h3 className='text-lg font-medium text-secondary'>Your Uploaded Images</h3>
+          <h3 className='text-lg font-medium text-secondary'>
+            Your Uploaded Images
+          </h3>
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
             {images.map((imageUrl) => (
               <div
@@ -204,18 +221,21 @@ export function ProfileImageManager() {
                   alt='Uploaded Profile Image'
                   layout='fill'
                   objectFit='cover'
-                  className='transition-transform duration-300 group-hover:scale-105'
+                  className='transition-all duration-500 group-hover:brightness-110'
                 />
                 <div className='absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
                   <Button
                     size='sm'
                     onClick={() => updateProfileMutation.mutate(imageUrl)}
-                    disabled={updateProfileMutation.isPending || profile?.avatar_url === imageUrl}
+                    disabled={
+                      updateProfileMutation.isPending ||
+                      profile?.avatar_url === imageUrl
+                    }
                     className='mb-2'
                   >
                     {profile?.avatar_url === imageUrl ? (
                       <>
-                        <CheckCircle size={16} className="mr-1" /> Selected
+                        <CheckCircle size={16} className='mr-1' /> Selected
                       </>
                     ) : (
                       "Select"
@@ -235,9 +255,13 @@ export function ProfileImageManager() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Image?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete this image.
+                          This action cannot be undone. This will permanently
+                          delete this image.
                           {profile?.avatar_url === imageUrl && (
-                            <p className="text-red-400 mt-2">Note: This is your current profile picture. Deleting it will clear your profile picture.</p>
+                            <p className='text-red-400 mt-2'>
+                              Note: This is your current profile picture.
+                              Deleting it will clear your profile picture.
+                            </p>
                           )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -259,8 +283,8 @@ export function ProfileImageManager() {
         </div>
       )}
       {images && images.length === 0 && (
-        <div className="text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10">
-          <ImageIcon size={48} className="mx-auto mb-4 text-foreground/40" />
+        <div className='text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10'>
+          <ImageIcon size={48} className='mx-auto mb-4 text-foreground/40' />
           <p>No profile images uploaded yet.</p>
         </div>
       )}

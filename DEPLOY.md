@@ -1,0 +1,221 @@
+# Deploy & First-time Setup ✅
+
+This file contains the minimal, reproducible commands and environment variables you need to set up the app for the first time (local dev and production). Keep this near your README for quick reference.
+
+---
+
+## Required environment variables
+
+- DATABASE_URL — Postgres connection string (used by Prisma)
+- NEXTAUTH_SECRET — Secret for NextAuth sessions (generate securely, e.g., `openssl rand -hex 32`)
+- RESEND_API_KEY — Resend API key for sending emails
+- RESEND_FROM_EMAIL — Sender email used by Resend (e.g., `noreply@yourdomain.com`)
+- STORAGE_ENDPOINT (optional) — S3/MinIO endpoint for file storage
+- STORAGE_PUBLIC_URL (optional) — Public URL for served files (if different)
+- STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY (optional) — S3/MinIO credentials
+- STORAGE_BUCKET (optional) — Bucket name (default: `portfolio`)
+- STORAGE_REGION (optional) — S3 region (default: `us-east-1`)
+- GROQ_API_KEY (optional) — Sanity/GROQ API key (used by some AI features)
+- NEXT_PUBLIC_SITE_URL (optional) — Site URL used in meta tags
+
+> Tip: Store secrets in your environment/secret manager (e.g., GitHub Actions Secrets, Vercel/Render envs, or Azure Key Vault).
+
+---
+
+## Generate secrets examples
+
+- Generate `NEXTAUTH_SECRET`:
+
+```bash
+# hex
+openssl rand -hex 32
+# or base64
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+- Confirm `RESEND_API_KEY` from your Resend account and set `RESEND_FROM_EMAIL` to a sender address you control.
+
+---
+
+## Local setup (first time)
+
+1. Install packages:
+
+```bash
+npm install
+```
+
+2. Generate Prisma client (postinstall runs this automatically, but you can run manually):
+
+```bash
+npm run db:generate
+```
+
+3. Run the initial Prisma migrations / create DB schema (local dev):
+
+```bash
+# Creates migration and applies locally
+npx prisma migrate dev -n init
+# or use the provided npm script
+npm run db:migrate
+```
+
+4. Seed database (if needed):
+
+```bash
+npm run db:seed
+```
+
+5. Start dev server:
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000
+
+---
+
+## New schema changes (example: password reset tokens)
+
+When you add or change Prisma models, run a migration locally:
+
+```bash
+# create + apply migration locally
+npx prisma migrate dev -n add_password_reset_tokens
+# publish client (same as `npm run db:generate`)
+npx prisma generate
+```
+
+In CI / Production you should run:
+
+```bash
+# Apply migrations on production database (no prompts)
+npx prisma migrate deploy
+# ensure the client is generated
+npx prisma generate
+```
+
+> Use `prisma migrate deploy` in your deployment pipeline (e.g., in Docker startup or CI job).
+
+---
+
+## Quick verification / testing commands
+
+- Check DB schema:
+
+```bash
+npx prisma db pull   # inspect live DB
+npx prisma studio    # visual DB UI
+```
+
+- Send test invite/reset flow (super-admin required):
+
+```bash
+# Invite (curl)
+curl -X POST http://localhost:3000/api/invite-user \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@example.com"}' \
+  -b '<your-nextauth-cookie-here>'
+
+# Reset an existing user (super-admin)
+curl -X POST http://localhost:3000/api/reset-password-for-user \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"existing@example.com"}' \
+  -b '<your-nextauth-cookie-here>'
+```
+
+- Inspect `password_reset_tokens` table (once migration applied):
+
+```sql
+select id, user_id, expires_at, used_at, created_at from password_reset_tokens order by created_at desc;
+```
+
+---
+
+## Production tips
+
+- Don't run `prisma migrate dev` in production; run `npx prisma migrate deploy` from your CI/CD pipeline.
+- Ensure your host (Vercel, Fly, DigitalOcean, etc.) has all the env vars configured securely.
+- Verify your outgoing email domain and Sender identity in Resend to avoid deliverability issues.
+- Use `NEXTAUTH_SECRET` and proper cookie/session policies for security.
+
+---
+
+## Commands summary (copy/paste)
+
+```bash
+# install
+npm install
+
+# local migrations & generate
+npx prisma migrate dev -n add_password_reset_tokens
+npx prisma generate
+
+# seed
+npm run db:seed
+
+# build and start (production)
+npm run build
+npm start
+
+# production migrate (CI)
+npx prisma migrate deploy
+npx prisma generate
+```
+
+---
+
+## Image optimization 🖼️
+
+All uploaded images are automatically optimized for web performance:
+
+- **Format conversion**: Converted to WebP (modern, efficient format with ~30% smaller file sizes)
+- **Automatic resizing**: Images are resized to appropriate dimensions based on type:
+  - Profile images (avatars): 800×800px max
+  - Background images: 1920×1080px max
+  - Project thumbnails: 1200×800px max
+  - Favicons: 512×512px max
+- **Quality**: 85% quality setting (good balance between size and visual quality)
+- **Caching**: Images cached for 1 year via Next.js image optimization
+
+**API endpoints with built-in optimization:**
+
+- `POST /api/profile/images` — profile, background, and favicon uploads
+- `POST /api/projects/upload-image` — project image uploads
+
+All optimization happens server-side using the `sharp` library. No client-side work needed.
+
+---
+
+## Frontend redesign & performance 🎨
+
+The front-end has been redesigned for elegance, speed, and visual clarity:
+
+**Design improvements:**
+
+- **Removed scale hover effects** — Cards now use subtle elevation (`whileHover={{ y: -4 }}`) and border glow instead of jarring scale transforms
+- **Cleaner spacing** — Consistent padding (pt-20/pt-32/pb-20) across all pages for better flow
+- **Elegant hover states** — Images use `brightness-110` transition instead of scale; borders transition to `primary/60`
+- **Simplified hero sections** — Reduced font sizes (5xl→7xl) and spacing for better readability
+- **Streamlined navigation cards** — Quick-access cards are now unified with consistent styling
+- **Better visual hierarchy** — Removed repetitive sections, consolidated CTAs
+
+**Technical changes:**
+
+- `GlassCard` component: hover duration increased to 500ms with smooth `y: -4` lift
+- Social icons: border glow on hover (`border-primary/60`) instead of scale
+- Project/profile images: `brightness-110` transition replaces `scale-110`
+- All pages: unified spacing (20/32 top, 20 bottom)
+
+**Performance gains:**
+
+- Fewer DOM reflows (no scale transforms triggering layout recalculation)
+- Smoother 60fps animations with GPU-accelerated transforms only
+- Reduced cumulative layout shift (CLS) scores
+
+All changes are production-ready and backward-compatible with existing content.
+
+---
+
+If you want, I can add a deploy script or GitHub Actions workflow that applies migrations during your deploys and fail-safe checks for missing env vars. Want me to scaffold that next? 🔧

@@ -15,9 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
-import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
-import { useSupabase } from "../providers/AuthProvider";
+import { useAuth } from "../providers/AuthProvider";
 import { normalizeDomain } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -28,7 +27,7 @@ const domainSchema = z.object({
 type DomainFormValues = z.infer<typeof domainSchema>;
 
 export function ClaimDomainForm() {
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -43,21 +42,28 @@ export function ClaimDomainForm() {
       // Normalize domain for consistent storage and lookup
       const normalizedDomain = normalizeDomain(data.domain);
 
-      const { data: existing, error: checkError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("domain", normalizedDomain);
+      // Check if domain is already taken via API
+      const checkResponse = await fetch(
+        `/api/profile/by-domain?domain=${encodeURIComponent(normalizedDomain)}`
+      );
+      if (checkResponse.ok) {
+        const existing = await checkResponse.json();
+        if (existing && existing.id) {
+          throw new Error("This domain is already taken.");
+        }
+      }
 
-      if (checkError) throw checkError;
-      if (existing && existing.length > 0)
-        throw new Error("This domain is already taken.");
+      // Update profile with new domain via API
+      const updateResponse = await fetch("/api/profile/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: normalizedDomain }),
+      });
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ domain: normalizedDomain })
-        .eq("user_id", session.user.id);
-
-      if (updateError) throw updateError;
+      if (!updateResponse.ok) {
+        const error = await updateResponse.json();
+        throw new Error(error.error || "Failed to claim domain");
+      }
     },
     onSuccess: (_, variables) => {
       toast.success(`Domain ${variables.domain} claimed successfully!`);

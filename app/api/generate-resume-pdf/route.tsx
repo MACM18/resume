@@ -351,10 +351,9 @@ export async function POST(request: Request) {
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${profile.full_name.replace(
-          /[^a-zA-Z0-9]/g,
-          "_"
-        )}_Resume.pdf"`,
+        "Content-Disposition": `attachment; filename="${(
+          profile.full_name || "Resume"
+        ).replace(/[^a-zA-Z0-9]/g, "_")}_Resume.pdf"`,
       },
     });
   } catch (error) {

@@ -1,34 +1,47 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { db } from '@/lib/db';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 // Prevent static generation - this route needs runtime env vars
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Get all users from auth
-    const {
-      data: { users },
-      error: authError,
-    } = await supabaseAdmin.auth.admin.listUsers();
-    if (authError) throw authError;
+    // Check if user is authenticated
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    // Get domains from profiles
-    const { data: profiles, error: profilesError } = await supabaseAdmin
-      .from('profiles')
-      .select('user_id, domain');
-    if (profilesError) throw profilesError;
+    // Check if user is super admin (has macm.dev domain)
+    const currentUserProfile = await db.profile.findFirst({
+      where: {
+        user: { email: session.user.email }
+      },
+      select: { domain: true }
+    });
 
-    const domainMap = new Map(
-      (profiles ?? []).map((p) => [p.user_id, p.domain])
-    );
+    if (currentUserProfile?.domain !== 'macm.dev') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
-    const result = (users ?? []).map((u) => ({
+    // Get all users with their profiles
+    const users = await db.user.findMany({
+      include: {
+        profile: {
+          select: { domain: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const result = users.map((u) => ({
       id: u.id,
-      email: u.email ?? '',
-      domain: domainMap.get(u.id) ?? '',
-      created_at: u.created_at,
-      email_confirmed_at: u.email_confirmed_at ?? null,
+      email: u.email,
+      domain: u.profile?.domain ?? '',
+      created_at: u.createdAt.toISOString(),
+      email_confirmed_at: u.emailVerified?.toISOString() ?? null,
     }));
 
     return NextResponse.json(result);

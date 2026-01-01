@@ -246,7 +246,22 @@ Today, I combine my technical expertise with a deep understanding of business ne
 
           {/* Skills */}
           <div>
-            <h3 className='text-lg font-medium mb-4'>Skills</h3>
+            <h3 className='text-lg font-medium mb-4'>Skills & Expertise</h3>
+            <div className='mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg'>
+              <p className='text-xs text-foreground/70'>
+                <strong>💡 Icon Tip:</strong> Click the circular icon button to
+                browse thousands of icons. Icons are stored as{" "}
+                <code className='bg-foreground/10 px-1 rounded'>
+                  Prefix.IconName
+                </code>{" "}
+                (e.g.,{" "}
+                <code className='bg-foreground/10 px-1 rounded'>
+                  Si.SiReact
+                </code>
+                ). Search for keywords like &quot;code&quot;, &quot;react&quot;,
+                or &quot;github&quot; to find relevant icons.
+              </p>
+            </div>
             <div className='space-y-4'>
               {skillFields.map((field, index) => (
                 <div
