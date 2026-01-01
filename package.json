@@ -11,6 +11,7 @@
     "db:generate": "prisma generate --schema=prisma/schema.prisma --config prisma.config.js",
     "db:push": "prisma db push --schema=prisma/schema.prisma --config prisma.config.js",
     "db:migrate": "prisma migrate dev --schema=prisma/schema.prisma --config prisma.config.js",
+    "migrate:deploy": "prisma migrate deploy --schema=prisma/schema.prisma --config prisma.config.js",
     "db:studio": "prisma studio --schema=prisma/schema.prisma --config prisma.config.js",
     "db:seed": "npx tsx prisma/seed.ts"
   },

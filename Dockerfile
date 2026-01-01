@@ -8,11 +8,12 @@ COPY package.json pnpm-lock.yaml ./
 # Copy all Prisma-related config so postinstall scripts (prisma generate) can run in deps stage
 COPY prisma ./prisma
 # Copy only the config files that exist in the repository
-COPY prisma.config.cjs prisma.config.ts ./
+# Use the CommonJS config file present in the repo
+COPY prisma.config.js ./
 # Create bin dir to avoid warnings from packages attempting to write bin shims
 RUN mkdir -p /app/node_modules/.bin
 # Enable corepack and install with pnpm to respect pnpm-lock.yaml
-RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
+RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile --ignore-scripts
 
 # 2. Builder
 FROM node:22-alpine AS builder
@@ -47,7 +48,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 # Include Prisma config in the runtime image so we can run migrations from the container when needed
-COPY prisma.config.cjs ./prisma.config.cjs
+COPY prisma.config.js ./prisma.config.js
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
