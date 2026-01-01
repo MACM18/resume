@@ -35,7 +35,6 @@ RUN pnpm run build
 FROM node:22-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache curl
-RUN npm install prisma
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -53,6 +52,11 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Install Prisma in the runtime image after copying the standalone output so
+# npm-created node_modules won't conflict with the files copied from the
+# standalone folder (buildkit overlayfs can error when replacing existing
+# directories). Then ensure the non-root user owns node_modules.
+RUN npm install prisma && chown -R nextjs:nodejs /app/node_modules
 
 USER nextjs
 
