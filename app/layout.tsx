@@ -52,16 +52,19 @@ export default async function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               <TooltipProvider>
-                <div className='min-h-screen relative' style={{
-                  background: `
+                <div
+                  className='min-h-screen relative'
+                  style={{
+                    background: `
                     linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background-secondary)) 100%),
                     linear-gradient(135deg, transparent 0%, hsl(var(--primary) / 0.03) 50%, hsl(var(--secondary) / 0.02) 100%),
                     var(--background-image-url, none)
                   `,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-                }}>
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                >
                   {/* Soft accent orbs (reduced intensity) */}
                   <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-20 pointer-events-none z-0' />
                   <div
