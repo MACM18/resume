@@ -52,11 +52,10 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Install Prisma in the runtime image after copying the standalone output so
-# npm-created node_modules won't conflict with the files copied from the
-# standalone folder (buildkit overlayfs can error when replacing existing
-# directories). Then ensure the non-root user owns node_modules.
-RUN npm install prisma
+# Copy production node_modules (including the Prisma CLI) from the deps stage
+# so we can run migrations in the runtime container without running npm install
+# during the image build, which avoids the earlier install errors.
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 
