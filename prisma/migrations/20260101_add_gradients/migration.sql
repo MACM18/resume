@@ -17,9 +17,17 @@ CREATE TABLE IF NOT EXISTS gradients (
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS selected_gradient_id text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS selected_gradient_use_theme boolean DEFAULT false;
 
--- Add foreign key
-ALTER TABLE profiles
-  ADD CONSTRAINT IF NOT EXISTS profiles_selected_gradient_id_fkey FOREIGN KEY (selected_gradient_id) REFERENCES gradients(id) ON DELETE SET NULL;
+-- Add foreign key (Postgres versions that don't support ADD CONSTRAINT IF NOT EXISTS)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'profiles_selected_gradient_id_fkey'
+  ) THEN
+    ALTER TABLE profiles
+      ADD CONSTRAINT profiles_selected_gradient_id_fkey FOREIGN KEY (selected_gradient_id) REFERENCES gradients(id) ON DELETE SET NULL;
+  END IF;
+END
+$$;
 
 -- Seed: insert default gradient presets
 INSERT INTO gradients (id, name, type, angle, color_stops, preview_css)

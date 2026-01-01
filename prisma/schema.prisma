@@ -52,7 +52,7 @@ model Profile {
   avatarZoom       Int?     @map("avatar_zoom") // Zoom percentage (50-200)
   avatarSize       Int?     @map("avatar_size") // Container size in px (e.g., 320)
   selectedGradientId       String?  @map("selected_gradient_id")
-  selectedGradientUseTheme Boolean? @map("selected_gradient_use_theme") // whether to adapt preset to theme
+  selectedGradientUseTheme Boolean? @map("selected_gradient_use_theme") @default(false) // whether to adapt preset to theme
   tagline          String   @default("")
   domain           String?  @unique
   homePageData     Json     @map("home_page_data")
@@ -69,7 +69,7 @@ model Profile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Relation to selected gradient
-  selectedGradient Gradient? @relation(fields: [selectedGradientId], references: [id])
+  selectedGradient Gradient? @relation(fields: [selectedGradientId], references: [id], onDelete: SetNull)
 
   @@map("profiles")
 }
@@ -86,6 +86,8 @@ model Gradient {
 
   // Back-relation: profiles that have selected this gradient
   profiles   Profile[]
+
+  @@map("gradients")
 }
 
 model Project {
