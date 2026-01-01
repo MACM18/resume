@@ -52,7 +52,6 @@ model Profile {
   avatarZoom       Int?     @map("avatar_zoom") // Zoom percentage (50-200)
   avatarSize       Int?     @map("avatar_size") // Container size in px (e.g., 320)
   selectedGradientId       String?  @map("selected_gradient_id")
-  selectedGradientUseTheme Boolean? @map("selected_gradient_use_theme") @default(false) // whether to adapt preset to theme
   tagline          String   @default("")
   domain           String?  @unique
   homePageData     Json     @map("home_page_data")
@@ -75,17 +74,18 @@ model Profile {
 }
 
 model Gradient {
-  id         String   @id @default(cuid())
-  name       String
-  type       String   @default("linear")
-  angle      Int?     // degrees for linear gradients
-  colorStops Json     @map("color_stops")
-  previewCss String?  @map("preview_css")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(cuid())
+  name        String
+  type        String   @default("linear")
+  angle       Int      @default(135)
+  intensity   String   @default("subtle") // subtle, medium, bold
+  pattern     String   // primary-accent, secondary-primary, accent-secondary, warm, cool
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Back-relation: profiles that have selected this gradient
-  profiles   Profile[]
+  profiles    Profile[]
 
   @@map("gradients")
 }

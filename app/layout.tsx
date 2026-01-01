@@ -55,24 +55,37 @@ export default async function RootLayout({
             <ThemeProvider>
               <TooltipProvider>
                 <div className='min-h-screen bg-background relative'>
-                  {/* Very subtle gradient overlay */}
-                  {/* If the profile has a selected gradient, render it with low opacity.
-                      If selectedGradientUseTheme is true, use CSS theme variables (HSL) where possible.
-                  */}
-                  {profile?.selected_gradient && (
-                    <div
-                      className='fixed inset-0 pointer-events-none z-0'
-                      style={{
-                        // Use selected preset previewCss by default. If the profile opted to use theme colors,
-                        // use theme variables (primary/accent HSL) for more dynamic overlays.
-                        background: profile.selected_gradient_use_theme
-                          ? `linear-gradient(${
-                              profile.selected_gradient?.angle ?? 135
-                            }deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--accent) / 0.08) 100%)`
-                          : profile.selected_gradient?.preview_css ?? "",
-                      }}
-                    />
-                  )}
+                  {/* Theme-aware gradient overlay */}
+                  {profile?.selected_gradient &&
+                    (() => {
+                      const g = profile.selected_gradient;
+                      const opacities = {
+                        subtle: { start: 0.08, end: 0.04 },
+                        medium: { start: 0.15, end: 0.08 },
+                        bold: { start: 0.25, end: 0.12 },
+                      };
+                      const opacity =
+                        opacities[g.intensity as keyof typeof opacities] ||
+                        opacities.subtle;
+
+                      const patterns: Record<string, string> = {
+                        "primary-accent": `linear-gradient(${g.angle}deg, hsl(var(--primary) / ${opacity.start}) 0%, hsl(var(--accent) / ${opacity.end}) 100%)`,
+                        "secondary-primary": `linear-gradient(${g.angle}deg, hsl(var(--secondary) / ${opacity.start}) 0%, hsl(var(--primary) / ${opacity.end}) 100%)`,
+                        "accent-secondary": `linear-gradient(${g.angle}deg, hsl(var(--accent) / ${opacity.start}) 0%, hsl(var(--secondary) / ${opacity.end}) 100%)`,
+                        warm: `linear-gradient(${g.angle}deg, hsl(25 85% 60% / ${opacity.start}) 0%, hsl(340 75% 55% / ${opacity.end}) 100%)`,
+                        cool: `linear-gradient(${g.angle}deg, hsl(200 85% 60% / ${opacity.start}) 0%, hsl(260 75% 55% / ${opacity.end}) 100%)`,
+                      };
+
+                      const gradientStyle =
+                        patterns[g.pattern] || patterns["primary-accent"];
+
+                      return (
+                        <div
+                          className='fixed inset-0 pointer-events-none z-0'
+                          style={{ background: gradientStyle }}
+                        />
+                      );
+                    })()}
                   {/* Default subtle gradient overlay (fallback) */}
                   {!profile?.selected_gradient && (
                     <div className='fixed inset-0 pointer-events-none z-0'>
@@ -80,7 +93,7 @@ export default async function RootLayout({
                         className='absolute inset-0'
                         style={{
                           background:
-                            "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--secondary) / 0.1) 100%)",
+                            "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--secondary) / 0.05) 100%)",
                         }}
                       />
                     </div>

@@ -851,11 +851,11 @@ export default function Page() {
                           target='_blank'
                           rel='noopener noreferrer'
                           className='group flex items-center gap-3 px-5 py-3 rounded-xl border border-foreground/10 hover:border-primary/30 hover:bg-foreground/5 transition-all'
-                          aria-label={social.label}
+                          aria-label={social.platform}
                         >
                           <Icon className='h-5 w-5 text-foreground/60 group-hover:text-primary transition-colors' />
                           <span className='text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors'>
-                            {social.label}
+                            {social.platform}
                           </span>
                         </a>
                       );

@@ -70,12 +70,12 @@ export async function getProfileDataServer(domain?: string) {
       avatar_position: p["avatarPosition"] as { x: number; y: number } | undefined,
       avatar_zoom: (p["avatarZoom"] as number) || undefined,
       selected_gradient_id: (p["selectedGradientId"] as string) || undefined,
-      selected_gradient_use_theme: (p["selectedGradientUseTheme"] as boolean) || undefined,
       selected_gradient: sel ? { 
         id: String(sel["id"]), 
         name: String(sel["name"]), 
-        preview_css: (sel["previewCss"] as string | null) || null,
-        angle: (sel["angle"] as number) || 135
+        angle: (sel["angle"] as number) || 135,
+        intensity: String(sel["intensity"] || "subtle"),
+        pattern: String(sel["pattern"] || "primary-accent"),
       } : undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       background_image_url: p["backgroundImageUrl"] as string | null,
