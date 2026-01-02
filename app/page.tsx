@@ -354,6 +354,7 @@ export default function Page() {
                           alt={homePageData.name}
                           fill
                           className='object-cover'
+                          fetchPriority="high"
                           style={{
                             objectPosition: `${
                               profileData.avatar_position?.x ?? 50
