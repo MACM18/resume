@@ -25,6 +25,13 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "**",
       },
+      // Production storage domain
+      {
+        protocol: "https",
+        hostname: "storage.macm.dev",
+        port: "",
+        pathname: "**",
+      },
       // Dynamic storage hostname from env (supports S3, MinIO, etc.)
       ...(storageHostname
         ? [

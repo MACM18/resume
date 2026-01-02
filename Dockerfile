@@ -21,6 +21,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Build-time env vars for Next.js image optimization config
+# These must be set during build for remotePatterns to work correctly
+ARG STORAGE_PUBLIC_URL
+ARG STORAGE_ENDPOINT
+ENV STORAGE_PUBLIC_URL=$STORAGE_PUBLIC_URL
+ENV STORAGE_ENDPOINT=$STORAGE_ENDPOINT
 
 # Next.js collects telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
