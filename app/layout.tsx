@@ -10,9 +10,10 @@ import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
-import { getProfileDataServer } from "@/lib/profile.server";
+import { getProfileDataServer, getThemeDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateHomeMetadata } from "@/lib/seo";
+import { generateCssVariables } from "@/lib/theme";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,11 +31,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Server-side: determine hostname and fetch profile data to get favicon_url
+  // Server-side: determine hostname and fetch profile and theme data (for favicon & background)
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
   const domain = getEffectiveDomain(host);
   const profileData = domain ? await getProfileDataServer(domain) : null;
+  const themeData = domain ? await getThemeDataServer(domain) : null;
   const faviconUrl = profileData?.favicon_url ?? null;
 
   return (
@@ -44,6 +46,28 @@ export default async function RootLayout({
           <>
             <link rel='icon' href={faviconUrl} />
             <link rel='shortcut icon' href={faviconUrl} />
+          </>
+        )}
+        {/* Inject CSS variables server-side to avoid client fetch delays impacting LCP */}
+        {themeData && (
+          <>
+            <style
+              dangerouslySetInnerHTML={{
+                __html: generateCssVariables(
+                  themeData.theme || {},
+                  themeData.background_image_url || null
+                ),
+              }}
+            />
+            {themeData.background_image_url && (
+              <link
+                rel='preload'
+                as='image'
+                href={themeData.background_image_url}
+                // hint the browser this is important for first paint
+                fetchPriority='high'
+              />
+            )}
           </>
         )}
       </head>

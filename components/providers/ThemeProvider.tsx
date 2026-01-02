@@ -2,30 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Theme } from "@/types/portfolio";
 import { getEffectiveDomain } from "@/lib/utils";
 
-const generateCssVariables = (
-  theme: Theme,
-  backgroundImageUrl: string | null
-) => {
-  let css = `:root { ${Object.entries(theme)
-    .map(([key, value]) => `${key}: ${value};`)
-    .join(" ")} }`;
-
-  if (backgroundImageUrl) {
-    css += `\n:root { 
-      --background-image-url: url('${backgroundImageUrl}');
-      --has-background-image: 1;
-    }`;
-  } else {
-    css += `\n:root { 
-      --background-image-url: none;
-      --has-background-image: 0;
-    }`;
-  }
-  return css;
-};
+import { generateCssVariables } from "@/lib/theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [hostname, setHostname] = useState("");
@@ -33,6 +12,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setHostname(window.location.hostname);
   }, []);
+
+  // If server-side CSS variables are present (SSR injected), avoid fetching again on client
+  const hasServerVars =
+    typeof window !== "undefined" &&
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--has-background-image"
+    ) !== "";
 
   const { data: profileData } = useQuery({
     queryKey: ["theme", hostname],
@@ -56,12 +42,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         background_image_url: data?.background_image_url || null,
       };
     },
-    enabled: !!hostname,
+    // Only enable the client fetch if hostname is present AND server-side CSS variables are not already set
+    enabled: !!hostname && !hasServerVars,
   });
 
   return (
     <>
-      {profileData && (
+      {/* Only apply client-side CSS when we did fetch it (and server hasn't already applied it) */}
+      {profileData && !hasServerVars && (
         <style
           dangerouslySetInnerHTML={{
             __html: generateCssVariables(
