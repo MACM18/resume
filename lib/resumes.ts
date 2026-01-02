@@ -88,15 +88,16 @@ export async function uploadResumePdf(
     const res = await fetch("/api/resumes/upload", { method: "POST", body: form });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
+      const errorMessage = err.error || "Failed to upload resume";
       console.error("Error uploading resume PDF:", err);
-      return null;
+      throw new Error(errorMessage);
     }
 
     const uploaded = await res.json();
     return uploaded as UploadedResume;
   } catch (error) {
     console.error("Error uploading resume PDF:", error);
-    return null;
+    throw error;
   }
 }
 

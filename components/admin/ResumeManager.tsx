@@ -70,7 +70,8 @@ export function ResumeManager() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed");
+      const errorMessage = err instanceof Error ? err.message : "Upload failed";
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
       // Reset file input

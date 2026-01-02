@@ -123,7 +123,9 @@ export function ProfileImageManager() {
       // Optionally set the newly uploaded image as the avatar
       updateProfileMutation.mutate(publicUrl);
     } catch (error) {
-      toast.error("Failed to upload image.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to upload image.";
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       setIsUploading(false);

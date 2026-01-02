@@ -55,13 +55,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
 
+    // Enforce upload limits per bucket
+    const userId = session.user.id;
+    const existingFiles = await listFiles(bucket, userId);
+    
+    const limits: Record<string, number> = {
+      "profile-images": 10,
+      "background-images": 5,
+      "project-images": 20,
+      "favicons": 3,
+    };
+    
+    const limit = limits[bucket] || 10;
+    if (existingFiles.length >= limit) {
+      return NextResponse.json(
+        { error: `Upload limit reached. You can only upload ${limit} ${bucket.replace("-images", "")} images. Please delete some existing images first.` },
+        { status: 400 }
+      );
+    }
+
     // Validate content type
     const contentType = file.type || "application/octet-stream";
     if (!["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(contentType)) {
       return NextResponse.json({ error: "Invalid file type. Please upload JPEG, PNG, or WebP." }, { status: 400 });
     }
 
-    const userId = session.user.id;
     const arrayBuffer = await file.arrayBuffer();
     const originalBuffer = Buffer.from(arrayBuffer);
 
