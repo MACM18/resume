@@ -17,6 +17,9 @@ This file contains the minimal, reproducible commands and environment variables 
 - STORAGE_REGION (optional) — S3 region (default: `us-east-1`)
 - GROQ_API_KEY (optional) — Sanity/GROQ API key (used by some AI features)
 - NEXT_PUBLIC_SITE_URL (optional) — Site URL used in meta tags
+- NEXT_PUBLIC_GTM_ID (optional) — Google Tag Manager container ID (e.g., GTM-XXXXXXX). If set in production, GTM script and noscript iframe are injected.
+- NEXT_PUBLIC_GA_MEASUREMENT_ID (optional) — GA4 Measurement ID (e.g., G-XXXXXXXXXX). If set, gtag.js will be loaded and configured (page_view sent from client).
+- NEXT_PUBLIC_ENABLE_ANALYTICS (optional) — Set to "false" to disable analytics in production even when IDs are present. Defaults to enabled when IDs are present and NODE_ENV=production.
 
 > Tip: Store secrets in your environment/secret manager (e.g., GitHub Actions Secrets, Vercel/Render envs, or Azure Key Vault).
 
