@@ -105,7 +105,6 @@ export function AvatarPositionEditor({
 
     // Dev-time mount log to help reproduce ephemeral rendering errors
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
       console.debug("AvatarPositionEditor mount", {
         currentAvatarUrl,
         currentPosition,

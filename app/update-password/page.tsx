@@ -39,7 +39,7 @@ const passwordSchema = z
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 const UpdatePasswordPage = () => {
-  const { session, status } = useAuth();
+  const { status } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);

@@ -173,7 +173,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
               ))
             : filteredIcons.slice(0, 200).map(({ name, Icon }) => {
                 // Extract platform/label from icon name
-                const [prefix, iconComponent] = name.split(".");
+                const [, iconComponent] = name.split(".");
                 const pretty = prettifyIconName(iconComponent);
                 return (
                   <Button

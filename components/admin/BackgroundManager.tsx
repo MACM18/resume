@@ -64,7 +64,10 @@ export function BackgroundManager() {
       queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
       queryClient.invalidateQueries({ queryKey: ["profileData"] });
       queryClient.invalidateQueries({ queryKey: ["theme"] }); // Invalidate theme to re-apply background
-    },deleteImageMutation = useMutation({
+    },
+  });
+
+  const deleteImageMutation = useMutation({
     mutationFn: async (imageUrl: string) => {
       if (!session?.user.id) throw new Error("Not authenticated.");
       // If the image being deleted is the current background, clear it from profile
@@ -76,16 +79,6 @@ export function BackgroundManager() {
     onSuccess: () => {
       toast.success("Background image deleted successfully!");
       refetchImages(); // Re-fetch images to update the list
-    mutationFn: async (imageUrl: string) => {
-      if (!session?.user.id) throw new Error("Not authenticated.");
-      // If the image being deleted is the current background, clear it from profile
-      if (profile?.background_image_url === imageUrl) {
-        await updateCurrentUserProfile({ background_image_url: null });
-      }
-      return deleteBackgroundImage(imageUrl);
-    },
-    onSuccess: () => {
-      toast.success("Background image deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] }); // Invalidate profile to reflect background_image_url change
       queryClient.invalidateQueries({ queryKey: ["profileData"] });
       queryClient.invalidateQueries({ queryKey: ["theme"] }); // Invalidate theme to re-apply background
@@ -113,7 +106,9 @@ export function BackgroundManager() {
     }
 
     if (images && images.length >= MAX_IMAGES) {
-      toast.error(`You can only upload a maximum of ${MAX_IMAGES} background images.`);
+      toast.error(
+        `You can only upload a maximum of ${MAX_IMAGES} background images.`
+      );
       return;
     }
 
@@ -125,7 +120,8 @@ export function BackgroundManager() {
       // Set the newly uploaded image as the background
       updateProfileMutation.mutate(publicUrl);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to upload image.";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to upload image.";
       toast.error(errorMessage);
       console.error(error);
     } finally {
@@ -143,8 +139,8 @@ export function BackgroundManager() {
     <div className='space-y-6'>
       <h2 className='text-2xl font-bold text-primary'>Background Image</h2>
       <p className='text-foreground/70'>
-        Upload and select your background image. You can store up to {MAX_IMAGES}{" "}
-        images.
+        Upload and select your background image. You can store up to{" "}
+        {MAX_IMAGES} images.
       </p>
 
       {/* Current Background Image */}

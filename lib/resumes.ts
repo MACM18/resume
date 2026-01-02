@@ -83,7 +83,7 @@ export async function uploadResumePdf(
   try {
     const form = new FormData();
     form.append("file", file);
-    form.append("role", role);
+    form.append("role", safeRole);
 
     const res = await fetch("/api/resumes/upload", { method: "POST", body: form });
     if (!res.ok) {
