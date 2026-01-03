@@ -190,7 +190,6 @@ export default function Page() {
       email: homePageData.callToAction?.email,
       phone: profileData.contact_numbers?.[0]?.number,
       url: `https://${hostname}`,
-      title: homePageData.tagline,
       photo: profileData.avatar_url || undefined,
     });
     downloadVCard(
