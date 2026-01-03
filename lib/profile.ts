@@ -184,6 +184,23 @@ export async function getProfileImages(): Promise<string[]> {
 }
 
 /**
+ * Get all background images for a user
+ */
+export async function getBackgroundImages(): Promise<string[]> {
+  try {
+    const res = await fetch(`/api/profile/images?bucket=background-images`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to fetch background images");
+    }
+    return res.json();
+  } catch (error) {
+    console.error("Error listing background images:", error);
+    throw error;
+  }
+}
+
+/**
  * Delete a profile image
  */
 export async function deleteProfileImage(imageUrl: string): Promise<boolean> {

@@ -10,6 +10,7 @@ if (!process.env.DATABASE_URL) {
     get(_target, prop) {
       // Return sensible defaults per common Prisma methods
       return async (..._args: unknown[]): Promise<unknown> => {
+        void _args;
         const method = String(prop);
         if (method === "findMany") return [];
         if (method === "findFirst" || method === "findUnique") return null;

@@ -89,7 +89,10 @@ A high-performance, AI-powered personal portfolio and resume management system b
    NEXTAUTH_SECRET="your_secret"
    GROQ_API_KEY="your_groq_key"
    RESEND_API_KEY="your_resend_key"
+   STORAGE_PUBLIC_URL="your_storage_url"  # Your storage domain for images
    ```
+
+   > **Note:** For Docker builds, `STORAGE_PUBLIC_URL` must be provided as a build arg for Next.js image optimization to work correctly.
 
 4. **Database Migration:**
 

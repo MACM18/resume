@@ -10,9 +10,12 @@ import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
-import { getProfileDataServer } from "@/lib/profile.server";
+import { getProfileDataServer, getThemeDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateHomeMetadata } from "@/lib/seo";
+import { generateCssVariables } from "@/lib/theme";
+import Analytics from "@/components/Analytics";
+import Script from "next/script";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,12 +33,22 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Server-side: determine hostname and fetch profile data to get favicon_url
+  // Server-side: determine hostname and fetch profile and theme data (for favicon & background)
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
   const domain = getEffectiveDomain(host);
   const profileData = domain ? await getProfileDataServer(domain) : null;
+  const themeData = domain ? await getThemeDataServer(domain) : null;
   const faviconUrl = profileData?.favicon_url ?? null;
+
+  // Analytics configuration (only enable in production when IDs are present)
+  const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? null;
+  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? null;
+  const ENABLED_IN_PROD = process.env.NODE_ENV === "production";
+  const ANALYTICS_ENABLED =
+    ENABLED_IN_PROD &&
+    (GTM_ID || GA_MEASUREMENT_ID) &&
+    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS !== "false";
 
   return (
     <html lang='en'>
@@ -46,8 +59,58 @@ export default async function RootLayout({
             <link rel='shortcut icon' href={faviconUrl} />
           </>
         )}
+        {/* Inject CSS variables server-side to avoid client fetch delays impacting LCP */}
+        {themeData && (
+          <>
+            <style
+              dangerouslySetInnerHTML={{
+                __html: generateCssVariables(
+                  themeData.theme || {},
+                  themeData.background_image_url || null
+                ),
+              }}
+            />
+            {themeData.background_image_url && (
+              <link
+                rel='preload'
+                as='image'
+                href={themeData.background_image_url}
+                // hint the browser this is important for first paint
+                fetchPriority='high'
+              />
+            )}
+          </>
+        )}
+
+        {/* Google Tag Manager (GTM) and GA4 (gtag) - only injected in production when env vars are set */}
+        {ANALYTICS_ENABLED && GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy='afterInteractive'
+            />
+            <Script id='gtag-init' strategy='afterInteractive'>
+              {`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });`}
+            </Script>
+          </>
+        )}
+
+        {ANALYTICS_ENABLED && GTM_ID && (
+          <Script id='gtm-init' strategy='afterInteractive'>
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        )}
       </head>
       <body>
+        {/* GTM noscript fallback (placed immediately after opening body tag) */}
+        {ANALYTICS_ENABLED && GTM_ID && (
+          <noscript
+            dangerouslySetInnerHTML={{
+              __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
+            }}
+          />
+        )}
+
         <ReactQueryProvider>
           <AuthProvider>
             <ThemeProvider>
@@ -85,6 +148,9 @@ export default async function RootLayout({
             </ThemeProvider>
           </AuthProvider>
         </ReactQueryProvider>
+
+        {/* Client-side SPA pageview tracking (only load Analytics client when analytics is enabled) */}
+        {ANALYTICS_ENABLED && <Analytics />}
       </body>
     </html>
   );

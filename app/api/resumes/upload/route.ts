@@ -26,13 +26,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
 
+    // Enforce resume upload limit (20 per user)
+    const userId = session.user.id;
+    const existingResumes = await db.uploadedResume.count({
+      where: { userId },
+    });
+
+    if (existingResumes >= 20) {
+      return NextResponse.json(
+        { error: "Upload limit reached. You can only upload 20 resumes. Please delete some existing resumes first." },
+        { status: 400 }
+      );
+    }
+
     // Validate content type
     const contentType = file.type || "application/pdf";
     if (contentType !== "application/pdf") {
       return NextResponse.json({ error: "Only PDF files are allowed" }, { status: 400 });
     }
 
-    const userId = session.user.id;
     const safeRole = role ? role.replace(/[^a-zA-Z0-9-_]/g, "-") : "resume";
     const filePath = `${userId}/${safeRole}-${Date.now()}.pdf`;
 

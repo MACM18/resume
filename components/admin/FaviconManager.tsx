@@ -43,7 +43,7 @@ export function FaviconManager() {
     },
   });
 
-  const _deleteImageMutation = useMutation({
+  const deleteImageMutation = useMutation({
     mutationFn: async (imageUrl: string) => {
       if (!session?.user.id) throw new Error("Not authenticated.");
       if (profile?.favicon_url === imageUrl) {
@@ -204,8 +204,10 @@ export function FaviconManager() {
             <Button
               variant='ghost'
               size='sm'
-              onClick={() => updateProfileMutation.mutate(null)}
-              disabled={updateProfileMutation.isPending}
+              onClick={() =>
+                deleteImageMutation.mutate(profile.favicon_url as string)
+              }
+              disabled={deleteImageMutation.isPending}
               className='mt-2 text-destructive hover:bg-destructive/10'
             >
               Clear Favicon

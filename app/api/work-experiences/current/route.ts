@@ -42,18 +42,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(null);
     }
 
-    // Transform to expected format
+    // Transform to expected format (match frontend WorkExperience shape)
     return NextResponse.json({
       id: currentWork.id,
       user_id: currentWork.userId,
       company: currentWork.company,
-      role: currentWork.position,
+      position: currentWork.position,
+      location: currentWork.location || null,
       start_date: currentWork.startDate?.toISOString().split("T")[0] || null,
       end_date: currentWork.endDate?.toISOString().split("T")[0] || null,
       description: currentWork.description,
       is_current: currentWork.isCurrent,
-      is_visible: currentWork.visible,
-      display_order: 0, // Not in schema, use default
+      visible: currentWork.visible,
       created_at: currentWork.createdAt.toISOString(),
     });
   } catch (error) {
