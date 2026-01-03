@@ -301,14 +301,14 @@ export default function Page() {
                         className='bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all'
                       >
                         <Link href='/resume'>
-                          View Resume <Download className='ml-2' size={20} />
+                          View Resume <ArrowRight className='ml-2' size={20} />
                         </Link>
                       </Button>
                       <Button
                         onClick={handleSaveContact}
                         variant='outline'
                         size='lg'
-                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
+                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 text-white hover:text-white px-8 py-6 text-lg rounded-xl'
                       >
                         <Contact className='mr-2' size={20} />
                         Save Contact
