@@ -293,7 +293,7 @@ export default function Page() {
                   style={{ y: buttonsY, opacity: buttonsOpacity }}
                 >
                   <AnimatedSection direction='up' delay={0.4}>
-                    <div className='flex flex-wrap justify-center lg:justify-start gap-4'>
+                    <div className='flex flex-wrap justify-center lg:justify-start gap-4 items-center'>
                       <Button
                         asChild
                         size='lg'
@@ -304,13 +304,21 @@ export default function Page() {
                         </Link>
                       </Button>
                       <Button
+                        asChild
+                        variant='outline'
+                        size='lg'
+                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
+                      >
+                        <Link href='/about'>About Me</Link>
+                      </Button>
+                      <Button
                         onClick={handleSaveContact}
                         variant='outline'
                         size='lg'
-                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 text-white hover:text-white px-8 py-6 text-lg rounded-xl'
+                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 p-6 rounded-xl w-16 h-16 flex items-center justify-center'
+                        title='Save Contact'
                       >
-                        <Contact className='mr-2' size={20} />
-                        Save Contact
+                        <Contact size={24} />
                       </Button>
                     </div>
                   </AnimatedSection>
