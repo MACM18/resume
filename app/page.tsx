@@ -19,9 +19,11 @@ import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
 import { generateStructuredData } from "@/lib/seo";
 import { HomePageData } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
+import { generateVCard, downloadVCard } from "@/lib/vcard";
 import { HomePageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { Download, Contact } from "lucide-react";
 
 export default function Page() {
   const [hostname, setHostname] = useState("");
@@ -181,6 +183,22 @@ export default function Page() {
   const featuredProject = allPublishedProjects?.find((p) => p.featured);
   const structuredData = generateStructuredData(profileData, hostname);
 
+  // Handle vCard download
+  const handleSaveContact = () => {
+    const vcard = generateVCard({
+      fullName: homePageData.name,
+      email: homePageData.callToAction?.email,
+      phone: profileData.contact_numbers?.[0]?.number,
+      url: `https://${hostname}`,
+      title: homePageData.tagline,
+      photo: profileData.avatar_url || undefined,
+    });
+    downloadVCard(
+      vcard,
+      `${homePageData.name.replace(/\s+/g, "_")}_contact.vcf`
+    );
+  };
+
   return (
     <ErrorBoundary>
       <script
@@ -282,18 +300,18 @@ export default function Page() {
                         size='lg'
                         className='bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all'
                       >
-                        <Link href='/projects'>
-                          View Projects{" "}
-                          <ArrowRight className='ml-2' size={20} />
+                        <Link href='/resume'>
+                          View Resume <Download className='ml-2' size={20} />
                         </Link>
                       </Button>
                       <Button
-                        asChild
+                        onClick={handleSaveContact}
                         variant='outline'
                         size='lg'
                         className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
                       >
-                        <Link href='/about'>About Me</Link>
+                        <Contact className='mr-2' size={20} />
+                        Save Contact
                       </Button>
                     </div>
                   </AnimatedSection>
@@ -354,7 +372,7 @@ export default function Page() {
                           alt={homePageData.name}
                           fill
                           className='object-cover'
-                          fetchPriority="high"
+                          fetchPriority='high'
                           style={{
                             objectPosition: `${
                               profileData.avatar_position?.x ?? 50
