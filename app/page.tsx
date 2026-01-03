@@ -307,7 +307,7 @@ export default function Page() {
                         asChild
                         variant='outline'
                         size='lg'
-                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
+                        className='border-foreground/20 text-white hover:text-white hover:border-foreground/40 hover:bg-foreground/5 px-8 py-6 text-lg rounded-xl'
                       >
                         <Link href='/about'>About Me</Link>
                       </Button>
@@ -315,7 +315,7 @@ export default function Page() {
                         onClick={handleSaveContact}
                         variant='outline'
                         size='lg'
-                        className='border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 p-6 rounded-xl w-16 h-16 flex items-center justify-center'
+                        className='border-foreground/20 text-white hover:text-white hover:border-foreground/40 hover:bg-foreground/5 p-3 rounded-xl flex items-center justify-center'
                         title='Save Contact'
                       >
                         <Contact size={24} />
