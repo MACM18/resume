@@ -50,7 +50,7 @@ export default function ProjectClient({ id }: { id: string }) {
           <p className='text-foreground/70 mb-8 leading-relaxed'>
             The project you&apos;re looking for doesn&apos;t exist.
           </p>
-          <Button asChild size='lg'>
+          <Button asChild size='sm' className='flex-1'>
             <Link href='/projects'>
               <ArrowLeft className='mr-2' size={16} />
               Back to Projects

@@ -52,7 +52,9 @@ const Projects = () => {
   }
 
   const featuredProjects = projects?.filter((p: Project) => p.featured) || [];
-  const otherProjects = projects?.filter((p: Project) => !p.featured) || [];
+  // switched to allProjects
+  // const otherProjects = projects?.filter((p: Project) => !p.featured) || [];
+  const allProjects = projects || [];
 
   return (
     <div className='min-h-screen relative pb-20'>
@@ -182,7 +184,7 @@ const Projects = () => {
         )}
 
         {/* All Projects */}
-        {otherProjects.length > 0 && (
+        {allProjects.length > 0 && (
           <section>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -196,7 +198,7 @@ const Projects = () => {
               <div className='w-20 h-1 bg-primary' />
             </motion.div>
             <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {otherProjects.map((project: Project, index: number) => (
+              {allProjects.map((project: Project, index: number) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 20 }}
