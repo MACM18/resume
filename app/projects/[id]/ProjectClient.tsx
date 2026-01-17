@@ -50,7 +50,7 @@ export default function ProjectClient({ id }: { id: string }) {
           <p className='text-foreground/70 mb-8 leading-relaxed'>
             The project you&apos;re looking for doesn&apos;t exist.
           </p>
-          <Button asChild size='sm' className='flex-1'>
+          <Button asChild size='lg'>
             <Link href='/projects'>
               <ArrowLeft className='mr-2' size={16} />
               Back to Projects
@@ -73,11 +73,7 @@ export default function ProjectClient({ id }: { id: string }) {
             transition={{ duration: 0.4 }}
             className='mb-12'
           >
-            <Button
-              asChild
-              variant='ghost'
-              className='text-foreground/70 hover:text-foreground p-0 h-auto'
-            >
+            <Button asChild variant='ghost'>
               <Link href='/projects'>
                 <ArrowLeft className='mr-2' size={16} />
                 Back to Projects
