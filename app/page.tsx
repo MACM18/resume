@@ -84,7 +84,7 @@ export default function Page() {
   const scrollIndicatorOpacity = useTransform(
     scrollYProgress,
     [0, 0.3],
-    [1, 0]
+    [1, 0],
   );
 
   // Next section parallax - content rises up as hero fades
@@ -92,12 +92,12 @@ export default function Page() {
   const nextSectionOpacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.6],
-    [0.5, 0.8, 1]
+    [0.5, 0.8, 1],
   );
   const nextSectionScale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [0.95, 0.98, 1]
+    [0.95, 0.98, 1],
   );
 
   // Interactive scroll indicator
@@ -129,7 +129,7 @@ export default function Page() {
         return getProjects(domain);
       },
       enabled: !!hostname && !!profileData,
-    }
+    },
   );
 
   const { data: currentWork } = useQuery({
@@ -180,7 +180,8 @@ export default function Page() {
     },
   };
 
-  const featuredProject = allPublishedProjects?.find((p) => p.featured);
+  const featuredProjects =
+    allPublishedProjects?.filter((p) => p.featured) || [];
   const structuredData = generateStructuredData(profileData, hostname);
 
   // Handle vCard download
@@ -194,7 +195,7 @@ export default function Page() {
     });
     downloadVCard(
       vcard,
-      `${homePageData.name.replace(/\s+/g, "_")}_contact.vcf`
+      `${homePageData.name.replace(/\s+/g, "_")}_contact.vcf`,
     );
   };
 
@@ -472,7 +473,7 @@ export default function Page() {
                         {formatDateRange(
                           currentWork.start_date,
                           currentWork.end_date || undefined,
-                          currentWork.is_current
+                          currentWork.is_current,
                         )}
                       </span>
                       <Button asChild variant='outline' size='sm'>
@@ -553,8 +554,8 @@ export default function Page() {
             </section>
           )}
 
-          {/* Featured Work */}
-          {featuredProject && (
+          {/* Featured Works */}
+          {featuredProjects && (
             <section>
               <AnimatedSection direction='up'>
                 <div className='text-center mb-12'>
@@ -566,90 +567,93 @@ export default function Page() {
                   </p>
                 </div>
               </AnimatedSection>
+              <div className='grid gap-12 grid-cols-1 md:grid-cols-2 mx-auto'>
+                {featuredProjects.map((featuredProject, index) => (
+                  <AnimatedSection key={index} direction='up' delay={0.2}>
+                    <GlassCard
+                      variant='bordered'
+                      className='overflow-hidden mx-auto group'
+                    >
+                      <div className='grid lg:grid-cols-2'>
+                        {/* Image Section */}
+                        <div className='relative aspect-video lg:aspect-auto lg:min-h-100 overflow-hidden'>
+                          <Image
+                            src={featuredProject.image || "/placeholder.svg"}
+                            alt={featuredProject.title}
+                            fill
+                            className='object-cover transition-transform duration-700 group-hover:scale-105'
+                            sizes='(max-width: 1024px) 100vw, 50vw'
+                            priority
+                          />
+                          <div className='absolute top-4 left-4 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold'>
+                            Featured
+                          </div>
+                        </div>
 
-              <AnimatedSection direction='up' delay={0.2}>
-                <GlassCard
-                  variant='bordered'
-                  className='overflow-hidden max-w-6xl mx-auto group'
-                >
-                  <div className='grid lg:grid-cols-2'>
-                    {/* Image Section */}
-                    <div className='relative aspect-video lg:aspect-auto lg:min-h-[500px] overflow-hidden'>
-                      <Image
-                        src={featuredProject.image || "/placeholder.svg"}
-                        alt={featuredProject.title}
-                        fill
-                        className='object-cover transition-transform duration-700 group-hover:scale-105'
-                        sizes='(max-width: 1024px) 100vw, 50vw'
-                        priority
-                      />
-                      <div className='absolute top-4 left-4 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold'>
-                        Featured
+                        {/* Content Section */}
+                        <div className='p-8 lg:p-12 flex flex-col justify-center'>
+                          <h3 className='text-3xl font-bold mb-4'>
+                            {featuredProject.title}
+                          </h3>
+                          <p className='text-foreground/70 mb-6 leading-relaxed'>
+                            {featuredProject.description}
+                          </p>
+
+                          {/* Tech stack */}
+                          <div className='flex flex-wrap gap-2 mb-8'>
+                            {featuredProject.tech.slice(0, 6).map((tech) => (
+                              <span
+                                key={tech}
+                                className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/80'
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                            {featuredProject.tech.length > 6 && (
+                              <span className='px-3 py-1 text-sm text-foreground/60'>
+                                +{featuredProject.tech.length - 6} more
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Action buttons */}
+                          <div className='flex gap-3'>
+                            <Button asChild className='flex-1'>
+                              <Link href={`/projects/${featuredProject.id}`}>
+                                View Project
+                              </Link>
+                            </Button>
+                            {featuredProject.demo_url && (
+                              <Button asChild variant='outline' size='icon'>
+                                <a
+                                  href={featuredProject.demo_url}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  aria-label='View demo'
+                                >
+                                  <ExternalLink size={18} />
+                                </a>
+                              </Button>
+                            )}
+                            {featuredProject.github_url && (
+                              <Button asChild variant='outline' size='icon'>
+                                <a
+                                  href={featuredProject.github_url}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  aria-label='View source'
+                                >
+                                  <Github size={18} />
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Content Section */}
-                    <div className='p-8 lg:p-12 flex flex-col justify-center'>
-                      <h3 className='text-3xl font-bold mb-4'>
-                        {featuredProject.title}
-                      </h3>
-                      <p className='text-foreground/70 mb-6 leading-relaxed'>
-                        {featuredProject.description}
-                      </p>
-
-                      {/* Tech stack */}
-                      <div className='flex flex-wrap gap-2 mb-8'>
-                        {featuredProject.tech.slice(0, 6).map((tech) => (
-                          <span
-                            key={tech}
-                            className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/80'
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                        {featuredProject.tech.length > 6 && (
-                          <span className='px-3 py-1 text-sm text-foreground/60'>
-                            +{featuredProject.tech.length - 6} more
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className='flex gap-3'>
-                        <Button asChild className='flex-1'>
-                          <Link href={`/projects/${featuredProject.id}`}>
-                            View Project
-                          </Link>
-                        </Button>
-                        {featuredProject.demo_url && (
-                          <Button asChild variant='outline' size='icon'>
-                            <a
-                              href={featuredProject.demo_url}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              aria-label='View demo'
-                            >
-                              <ExternalLink size={18} />
-                            </a>
-                          </Button>
-                        )}
-                        {featuredProject.github_url && (
-                          <Button asChild variant='outline' size='icon'>
-                            <a
-                              href={featuredProject.github_url}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              aria-label='View source'
-                            >
-                              <Github size={18} />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </GlassCard>
-              </AnimatedSection>
+                    </GlassCard>
+                  </AnimatedSection>
+                ))}
+              </div>
             </section>
           )}
 
