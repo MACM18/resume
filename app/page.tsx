@@ -5,7 +5,7 @@ import {
   FaArrowRight as ArrowRight,
   FaGithub as Github,
 } from "react-icons/fa6";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Contact } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import { generateVCard, downloadVCard } from "@/lib/vcard";
 import { HomePageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Download, Contact } from "lucide-react";
+
 
 export default function Page() {
   const [hostname, setHostname] = useState("");
@@ -572,104 +572,96 @@ export default function Page() {
                   <AnimatedSection key={index} direction='up' delay={0.2}>
                     <GlassCard
                       variant='bordered'
-                      className='overflow-hidden mx-auto group h-96 relative'
+                      className='overflow-hidden mx-auto group relative'
                     >
-                      {/* Image Section - Full Width */}
-                      <motion.div className='absolute inset-0'>
-                        <Image
-                          src={featuredProject.image || "/placeholder.svg"}
-                          alt={featuredProject.title}
-                          fill
-                          className='object-cover transition-transform duration-700 group-hover:scale-105'
-                          sizes='(max-width: 1024px) 100vw, 50vw'
-                          priority
-                        />
-                      </motion.div>
-
-                      {/* Floating Title and Badge */}
-                      <motion.div
-                        className='absolute inset-0 flex flex-col justify-end p-6 md:p-8 bg-gradient-to-t from-background/80 via-background/20 to-transparent z-10'
-                        initial={{ opacity: 1 }}
-                        whileHover={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className='flex items-start justify-between gap-4'>
-                          <div className='flex-1'>
-                            <h3 className='text-2xl md:text-3xl font-bold text-white drop-shadow-lg'>
-                              {featuredProject.title}
-                            </h3>
-                          </div>
-                          <div className='px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shrink-0'>
+                      <div className='relative'>
+                        {/* Image Section - full width visual */}
+                        <div className='relative aspect-video lg:aspect-auto lg:min-h-100 overflow-hidden'>
+                          <Image
+                            src={featuredProject.image || "/placeholder.svg"}
+                            alt={featuredProject.title}
+                            fill
+                            className='object-cover transition-all duration-700 group-hover:brightness-90'
+                            sizes='(max-width: 1024px) 100vw, 50vw'
+                            priority
+                          />
+                          <div className='absolute top-4 left-4 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold z-30'>
                             Featured
                           </div>
-                        </div>
-                      </motion.div>
 
-                      {/* Content Section - Overlay on Hover */}
-                      <motion.div
-                        className='absolute inset-0 bg-background/95 backdrop-blur-sm p-8 md:p-12 flex flex-col justify-center z-20'
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        <h3 className='text-2xl md:text-3xl font-bold mb-4'>
-                          {featuredProject.title}
-                        </h3>
-                        <p className='text-foreground/70 mb-6 leading-relaxed line-clamp-3'>
-                          {featuredProject.description}
-                        </p>
-
-                        {/* Tech stack */}
-                        <div className='flex flex-wrap gap-2 mb-8'>
-                          {featuredProject.tech.slice(0, 6).map((tech) => (
-                            <span
-                              key={tech}
-                              className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/80'
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                          {featuredProject.tech.length > 6 && (
-                            <span className='px-3 py-1 text-sm text-foreground/60'>
-                              +{featuredProject.tech.length - 6} more
-                            </span>
-                          )}
+                          {/* Floating title over image (visible on lg and up) */}
+                          <h3 className='hidden lg:block absolute left-6 bottom-6 z-30 text-3xl font-bold text-white drop-shadow-lg bg-linear-to-r from-black/40 via-transparent to-transparent px-4 py-2 rounded-md'>
+                            {featuredProject.title}
+                          </h3>
                         </div>
 
-                        {/* Action buttons */}
-                        <div className='flex gap-3 pt-4'>
-                          <Button asChild className='flex-1' size='sm'>
-                            <Link href={`/projects/${featuredProject.id}`}>
-                              View Project
-                            </Link>
-                          </Button>
-                          {featuredProject.demo_url && (
-                            <Button asChild variant='outline' size='icon'>
-                              <a
-                                href={featuredProject.demo_url}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                aria-label='View demo'
+                        {/* Content Panel - hidden by default on lg, slides in to cover right half on hover */}
+                        <div
+                          className='p-8 lg:p-12 flex flex-col justify-center bg-background/80 backdrop-blur-md shadow-2xl
+                                     lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-1/2 lg:translate-x-full lg:opacity-0
+                                     lg:group-hover:translate-x-0 lg:group-hover:opacity-100 lg:group-focus-within:translate-x-0 lg:group-focus-within:opacity-100 lg:transition-all lg:duration-700 lg:ease-in-out
+                                     lg:pointer-events-none lg:group-hover:pointer-events-auto lg:group-focus-within:pointer-events-auto'
+                          aria-hidden='false'
+                        >
+                          {/* Title for small screens */}
+                          <h3 className='text-3xl font-bold mb-4 lg:hidden'>
+                            {featuredProject.title}
+                          </h3>
+                          <p className='text-foreground/70 mb-6 leading-relaxed'>
+                            {featuredProject.description}
+                          </p>
+
+                          {/* Tech stack */}
+                          <div className='flex flex-wrap gap-2 mb-8'>
+                            {featuredProject.tech.slice(0, 6).map((tech) => (
+                              <span
+                                key={tech}
+                                className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/80'
                               >
-                                <ExternalLink size={18} />
-                              </a>
+                                {tech}
+                              </span>
+                            ))}
+                            {featuredProject.tech.length > 6 && (
+                              <span className='px-3 py-1 text-sm text-foreground/60'>
+                                +{featuredProject.tech.length - 6} more
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Action buttons */}
+                          <div className='flex gap-3'>
+                            <Button asChild className='flex-1'>
+                              <Link href={`/projects/${featuredProject.id}`}>
+                                View Project
+                              </Link>
                             </Button>
-                          )}
-                          {featuredProject.github_url && (
-                            <Button asChild variant='outline' size='icon'>
-                              <a
-                                href={featuredProject.github_url}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                aria-label='View source'
-                              >
-                                <Github size={18} />
-                              </a>
-                            </Button>
-                          )}
+                            {featuredProject.demo_url && (
+                              <Button asChild variant='outline' size='icon'>
+                                <a
+                                  href={featuredProject.demo_url}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  aria-label='View demo'
+                                >
+                                  <ExternalLink size={18} />
+                                </a>
+                              </Button>
+                            )}
+                            {featuredProject.github_url && (
+                              <Button asChild variant='outline' size='icon'>
+                                <a
+                                  href={featuredProject.github_url}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  aria-label='View source'
+                                >
+                                  <Github size={18} />
+                                </a>
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </motion.div>
+                      </div>
                     </GlassCard>
                   </AnimatedSection>
                 ))}
