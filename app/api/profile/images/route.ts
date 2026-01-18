@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
 
     // map keys to public URLs
     const urls = files.slice(0, 10).map((key) => {
-      const relativePath = key.replace(new RegExp(`^${bucket}\\/`), "");
+      const prefix = `${bucket}/`;
+      const relativePath = key.startsWith(prefix) ? key.slice(prefix.length) : key;
       return getPublicUrl(bucket, relativePath);
     });
 
