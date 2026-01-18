@@ -69,10 +69,23 @@ export function getBaseMetadata(
   if (links && links.length) {
     const xLink = links.find((l) => {
       const token = `${l.platform} ${l.icon} ${l.label}`.toLowerCase();
-      return (
-        /twitter|\bx\b/.test(token) &&
-        (l.href.includes("twitter.com") || l.href.includes("x.com"))
-      );
+      if (!/twitter|\bx\b/.test(token)) {
+        return false;
+      }
+      try {
+        const url = new URL(l.href);
+        const host = url.hostname.toLowerCase();
+        const allowedHosts = [
+          "twitter.com",
+          "www.twitter.com",
+          "x.com",
+          "www.x.com",
+        ];
+        return allowedHosts.includes(host);
+      } catch {
+        // If the URL cannot be parsed, do not treat it as a valid X/Twitter link
+        return false;
+      }
     });
     if (xLink) {
       try {
