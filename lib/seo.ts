@@ -5,6 +5,7 @@ import { Profile, Project } from "@/types/portfolio";
 type ProfileLike =
   | Pick<
       Profile,
+      | "id"
       | "full_name"
       | "tagline"
       | "avatar_url"
@@ -125,8 +126,8 @@ export function generateHomeMetadata(
     config.defaultDescription;
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.avatar_url && origin
-    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+  const ogImageUrl = profile?.id && origin
+    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const base: Metadata = {
@@ -200,8 +201,8 @@ export function generateAboutMetadata(
     config.defaultDescription;
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.avatar_url && origin
-    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+  const ogImageUrl = profile?.id && origin
+    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -239,8 +240,8 @@ export function generateProjectsMetadata(
   const description = `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.avatar_url && origin
-    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+  const ogImageUrl = profile?.id && origin
+    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -284,8 +285,8 @@ export function generateProjectMetadata(
   const description = project.description || project.long_description;
 
   // Generate OG image URL if we have an avatar and origin (for fallback)
-  const fallbackImageUrl = profile?.avatar_url && origin
-    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+  const fallbackImageUrl = profile?.id && origin
+    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -334,8 +335,8 @@ export function generateResumeMetadata(
     "Professional resume showcasing experience, skills, and qualifications.";
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.avatar_url && origin
-    ? `${origin}/api/og/avatar?url=${encodeURIComponent(profile.avatar_url)}`
+  const ogImageUrl = profile?.id && origin
+    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {

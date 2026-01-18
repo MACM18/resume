@@ -60,6 +60,7 @@ export async function getProfileDataServer(domain?: string) {
     const p = profile as unknown as Record<string, unknown>;
 
     return {
+      id: profile.id,
       full_name: (p["fullName"] as string) || "",
       tagline: (p["tagline"] as string) || "",
       home_page_data: p["homePageData"] as unknown as HomePageData,

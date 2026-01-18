@@ -1,79 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
-
-function isAllowedImageUrl(rawUrl: string): URL | null {
-  let url: URL;
-  try {
-    url = new URL(rawUrl);
-  } catch {
-    return null;
-  }
-
-  const protocol = url.protocol.toLowerCase();
-  if (protocol !== "http:" && protocol !== "https:") {
-    return null;
-  }
-
-  const hostname = url.hostname.toLowerCase();
-
-  // Disallow localhost and common internal host patterns to mitigate SSRF
-  if (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "::1" ||
-    hostname.endsWith(".localhost") ||
-    hostname.endsWith(".local") ||
-    hostname.endsWith(".internal")
-  ) {
-    return null;
-  }
-
-  return url;
-}
-
-async function bufferFromUrl(url: string): Promise<Buffer> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image: ${response.statusText}`);
-  }
-  const arrayBuffer = await response.arrayBuffer();
-  return Buffer.from(arrayBuffer);
-}
+import { db } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const imageUrl = searchParams.get("url");
+    const profileId = searchParams.get("profileId");
 
-    if (!imageUrl) {
+    if (!profileId) {
       return NextResponse.json(
-        { error: "Missing image URL parameter" },
+        { error: "Missing profileId parameter" },
         { status: 400 }
       );
     }
 
-    const allowedUrl = isAllowedImageUrl(imageUrl);
-    if (!allowedUrl) {
+    // 1. Fetch from Database (The Trusted Source)
+    // This removes the SSRF risk because the user cannot provide an arbitrary URL
+    const profile = await db.profile.findUnique({
+      where: { id: profileId },
+      select: { avatarUrl: true },
+    });
+
+    if (!profile?.avatarUrl) {
       return NextResponse.json(
-        { error: "Invalid or disallowed image URL" },
-        { status: 400 }
+        { error: "Profile or avatar not found" },
+        { status: 404 }
       );
     }
 
-    // Fetch the image buffer
-    const imageBuffer = await bufferFromUrl(allowedUrl.toString());
+    // 2. Fetch the image from the URL stored in your DB
+    const response = await fetch(profile.avatarUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch source image: ${response.statusText}`);
+    }
 
-    // Process with Sharp: auto-rotate based on EXIF, strip metadata, convert to JPEG
+    const arrayBuffer = await response.arrayBuffer();
+    const imageBuffer = Buffer.from(arrayBuffer);
+
+    // 3. Process with Sharp
     const processedBuffer = await sharp(imageBuffer)
       .rotate() // Auto-rotate based on EXIF orientation
-      .jpeg({ quality: 90 }) // Convert to JPEG with good quality
+      .resize(1200, 630, { 
+        fit: "contain", 
+        background: { r: 255, g: 255, b: 255, alpha: 0 } 
+      }) // Standard OG size
+      .jpeg({ quality: 90 })
       .toBuffer();
 
-    // Return the processed image
+    // 4. Return the processed image
     return new Response(new Uint8Array(processedBuffer), {
       headers: {
         "Content-Type": "image/jpeg",
         "Cache-Control": "public, max-age=31536000, immutable", // Cache for 1 year
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {
