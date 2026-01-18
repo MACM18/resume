@@ -35,11 +35,8 @@ export function FaviconManager() {
       queryClient.invalidateQueries({ queryKey: ["profileData"] });
     },
     onError: (error: unknown) => {
-      if (error instanceof Error) {
-        toast.error(`Failed to update favicon: ${error.message}`);
-      } else {
-        toast.error("Failed to update favicon.");
-      }
+      const message = error instanceof Error ? error.message : "Failed to update favicon";
+      toast.error(message);
     },
   });
 
@@ -57,87 +54,33 @@ export function FaviconManager() {
       queryClient.invalidateQueries({ queryKey: ["profileData"] });
     },
     onError: (error: unknown) => {
-      if (error instanceof Error) {
-        toast.error(`Failed to delete favicon: ${error.message}`);
-      } else {
-        toast.error("Failed to delete favicon.");
-      }
+      const message = error instanceof Error ? error.message : "Failed to delete favicon";
+      toast.error(message);
     },
   });
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file || !session?.user.id) return;
-
-    // Accept common PNG and ICO mime types; fallback to extension check for .ico
-    const allowedTypes = [
-      "image/png",
-      "image/x-icon",
-      "image/vnd.microsoft.icon",
-    ];
-    const isIcoByName = file.name.toLowerCase().endsWith(".ico");
-
-    if (!allowedTypes.includes(file.type) && !isIcoByName) {
-      toast.error("Invalid file type. Please upload a PNG or ICO file.");
-      return;
-    }
-
-    // If the file is not an .ico, resize to a supported favicon resolution (64x64)
-    const isIco =
-      isIcoByName ||
-      file.type === "image/x-icon" ||
-      file.type === "image/vnd.microsoft.icon";
-
-    setIsUploading(true);
-    try {
-      let fileToUpload: File = file;
-      if (!isIco) {
-        // Resize image to 64x64 PNG
-        const resized = await resizeImageFile(file, 64);
-        fileToUpload = resized;
-      }
-
-      const publicUrl = await uploadFavicon(fileToUpload);
-      toast.success("Favicon uploaded successfully!");
-      // Set the newly uploaded image as the favicon
-      updateProfileMutation.mutate(publicUrl);
-    } catch (error) {
-      toast.error("Failed to upload favicon.");
-      console.error(error);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  // Helper: resize image file to square PNG of given size using canvas
-  async function resizeImageFile(file: File, size: number): Promise<File> {
+  // Helper: resize image file using a safer approach
+  const resizeImageFile = async (file: File, size: number): Promise<File> => {
     return new Promise((resolve, reject) => {
-      const img = document.createElement("img") as HTMLImageElement;
+      const img = new window.Image(); // Use new Image() constructor
       const url = URL.createObjectURL(file);
+      
       img.onload = () => {
         try {
           const canvas = document.createElement("canvas");
           canvas.width = size;
           canvas.height = size;
           const ctx = canvas.getContext("2d");
-          if (!ctx) throw new Error("Canvas not supported");
+          if (!ctx) throw new Error("Canvas context not found");
 
-          // Draw image centered and cover-style
           const { width: iw, height: ih } = img;
           const aspect = iw / ih;
-          let sx = 0,
-            sy = 0,
-            sWidth = iw,
-            sHeight = ih;
+          let sx = 0, sy = 0, sWidth = iw, sHeight = ih;
 
           if (aspect > 1) {
-            // image is wider -> crop sides
             sWidth = ih;
             sx = (iw - ih) / 2;
           } else if (aspect < 1) {
-            // taller -> crop top/bottom
             sHeight = iw;
             sy = (ih - iw) / 2;
           }
@@ -147,13 +90,14 @@ export function FaviconManager() {
 
           canvas.toBlob(
             (blob) => {
-              if (!blob) return reject(new Error("Failed to create blob"));
+              URL.revokeObjectURL(url); // Clean up immediately after use
+              if (!blob) return reject(new Error("Blob creation failed"));
+              
               const resizedFile = new File(
                 [blob],
-                `${file.name.split(".")[0]}-favicon.png`,
+                `${file.name.replace(/\.[^/.]+$/, "")}-favicon.png`,
                 { type: "image/png" }
               );
-              URL.revokeObjectURL(url);
               resolve(resizedFile);
             },
             "image/png",
@@ -164,19 +108,50 @@ export function FaviconManager() {
           reject(err);
         }
       };
+
       img.onerror = () => {
         URL.revokeObjectURL(url);
         reject(new Error("Failed to load image"));
       };
+
+      // Security Note: Assigning a blob URL is generally safe, 
+      // but ensure 'url' is never user-provided text.
       img.src = url;
     });
-  }
+  };
 
-  const isLoading = isLoadingProfile;
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !session?.user.id) return;
 
-  if (isLoading) {
-    return <Skeleton className='h-24 w-full' />;
-  }
+    const allowedTypes = ["image/png", "image/x-icon", "image/vnd.microsoft.icon"];
+    const isIcoByName = file.name.toLowerCase().endsWith(".ico");
+
+    if (!allowedTypes.includes(file.type) && !isIcoByName) {
+      toast.error("Invalid file type. Please upload a PNG or ICO file.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      let fileToUpload: File = file;
+      const isIco = isIcoByName || file.type.includes("icon");
+
+      if (!isIco) {
+        fileToUpload = await resizeImageFile(file, 64);
+      }
+
+      const publicUrl = await uploadFavicon(fileToUpload);
+      updateProfileMutation.mutate(publicUrl);
+    } catch (error) {
+      toast.error("Failed to upload favicon.");
+      console.error(error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  if (isLoadingProfile) return <Skeleton className='h-24 w-full' />;
 
   return (
     <div className='space-y-6'>
@@ -185,15 +160,14 @@ export function FaviconManager() {
         Upload a favicon for your site. Accepted formats: .png, .ico
       </p>
 
-      {/* Current Favicon */}
       {profile?.favicon_url && (
         <div className='flex flex-col sm:flex-row items-center gap-4 p-3 border rounded-lg bg-glass-bg/10'>
           <div className='relative w-12 h-12 rounded-md overflow-hidden border shrink-0'>
             <Image
               src={profile.favicon_url}
               alt='Current Favicon'
-              layout='fill'
-              objectFit='contain'
+              fill
+              className="object-contain"
             />
           </div>
           <div className='flex-1'>
@@ -204,19 +178,16 @@ export function FaviconManager() {
             <Button
               variant='ghost'
               size='sm'
-              onClick={() =>
-                deleteImageMutation.mutate(profile.favicon_url as string)
-              }
+              onClick={() => deleteImageMutation.mutate(profile.favicon_url as string)}
               disabled={deleteImageMutation.isPending}
               className='mt-2 text-destructive hover:bg-destructive/10'
             >
-              Clear Favicon
+              {deleteImageMutation.isPending ? "Clearing..." : "Clear Favicon"}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Image Upload */}
       <div className='flex items-center gap-4'>
         <Button asChild variant='outline' disabled={isUploading}>
           <label htmlFor='favicon-upload' className='cursor-pointer'>
