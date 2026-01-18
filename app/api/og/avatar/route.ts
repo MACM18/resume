@@ -8,58 +8,72 @@ export async function GET(request: NextRequest) {
     const profileId = searchParams.get("profileId");
 
     if (!profileId) {
-      return NextResponse.json(
-        { error: "Missing profileId parameter" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing profileId" }, { status: 400 });
     }
 
-    // 1. Fetch from Database (The Trusted Source)
-    // This removes the SSRF risk because the user cannot provide an arbitrary URL
     const profile = await db.profile.findUnique({
       where: { id: profileId },
-      select: { avatarUrl: true },
+      select: { 
+        avatarUrl: true,
+        avatarPosition: true, 
+        avatarZoom: true,    
+      },
     });
 
     if (!profile?.avatarUrl) {
-      return NextResponse.json(
-        { error: "Profile or avatar not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Avatar not found" }, { status: 404 });
     }
 
-    // 2. Fetch the image from the URL stored in your DB
     const response = await fetch(profile.avatarUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch source image: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error("Fetch failed");
 
     const arrayBuffer = await response.arrayBuffer();
     const imageBuffer = Buffer.from(arrayBuffer);
 
-    // 3. Process with Sharp
-    const processedBuffer = await sharp(imageBuffer)
-      .rotate() // Auto-rotate based on EXIF orientation
-      .resize(1200, 630, { 
-        fit: "contain", 
-        background: { r: 255, g: 255, b: 255, alpha: 0 } 
-      }) // Standard OG size
+    // --- Dynamic Parameters ---
+    const targetSize = 512;
+    const zoom = (profile.avatarZoom ?? 100) / 100; // e.g., 1.2
+    const posX = (profile.avatarPosition as { x: number; y: number })?.x ?? 50; // percentage 0-100
+    const posY = (profile.avatarPosition as { x: number; y: number })?.y ?? 50; // percentage 0-100
+
+    // 1. Get metadata to handle the original aspect ratio
+    const pipeline = sharp(imageBuffer).rotate(); // Apply EXIF rotation first
+    const metadata = await pipeline.metadata();
+    
+    if (!metadata.width || !metadata.height) throw new Error("Invalid metadata");
+
+    // 2. Calculate the Resize dimensions to fill the square (Object-Fit: Cover)
+    // Then multiply by zoom
+    const baseScale = Math.max(targetSize / metadata.width, targetSize / metadata.height);
+    const scaledWidth = Math.round(metadata.width * baseScale * zoom);
+    const scaledHeight = Math.round(metadata.height * baseScale * zoom);
+
+    // 3. Calculate Crop Position (Object-Position)
+    // We calculate how much "extra" image we have and use the % to find the top/left
+    const left = Math.round((scaledWidth - targetSize) * (posX / 100));
+    const top = Math.round((scaledHeight - targetSize) * (posY / 100));
+
+    // 4. Execute Pipeline
+    const processedBuffer = await pipeline
+      .resize(scaledWidth, scaledHeight)
+      .extract({
+        left: Math.max(0, Math.min(left, scaledWidth - targetSize)),
+        top: Math.max(0, Math.min(top, scaledHeight - targetSize)),
+        width: targetSize,
+        height: targetSize,
+      })
       .jpeg({ quality: 90 })
       .toBuffer();
 
-    // 4. Return the processed image
     return new Response(new Uint8Array(processedBuffer), {
       headers: {
         "Content-Type": "image/jpeg",
-        "Cache-Control": "public, max-age=31536000, immutable", // Cache for 1 year
+        "Cache-Control": "public, max-age=31536000, immutable",
         "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {
-    console.error("Error processing OG image:", error);
-    return NextResponse.json(
-      { error: "Failed to process image" },
-      { status: 500 }
-    );
+    console.error("OG Processing Error:", error);
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 }
