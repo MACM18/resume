@@ -42,11 +42,21 @@ export async function GET(request: NextRequest) {
     
     if (!metadata.width || !metadata.height) throw new Error("Invalid metadata");
 
+    // Correct dimensions based on EXIF orientation
+    // Orientations 5, 6, 7, 8 imply the image matches after a 90/270 degree rotation,
+    // so we must swap width and height for calculations.
+    let inputWidth = metadata.width;
+    let inputHeight = metadata.height;
+
+    if (metadata.orientation && metadata.orientation >= 5) {
+      [inputWidth, inputHeight] = [inputHeight, inputWidth];
+    }
+
     // 2. Calculate the Resize dimensions to fill the square (Object-Fit: Cover)
     // Then multiply by zoom
-    const baseScale = Math.max(targetSize / metadata.width, targetSize / metadata.height);
-    const scaledWidth = Math.round(metadata.width * baseScale * zoom);
-    const scaledHeight = Math.round(metadata.height * baseScale * zoom);
+    const baseScale = Math.max(targetSize / inputWidth, targetSize / inputHeight);
+    const scaledWidth = Math.round(inputWidth * baseScale * zoom);
+    const scaledHeight = Math.round(inputHeight * baseScale * zoom);
 
     // 3. Calculate Crop Position (Object-Position)
     // We calculate how much "extra" image we have and use the % to find the top/left
