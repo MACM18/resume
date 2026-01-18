@@ -24,7 +24,6 @@ import { HomePageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-
 export default function Page() {
   const [hostname, setHostname] = useState("");
   const [isHydrated, setIsHydrated] = useState(false);
@@ -576,7 +575,7 @@ export default function Page() {
                     >
                       <div className='relative'>
                         {/* Image Section - full width visual */}
-                        <div className='relative aspect-video lg:aspect-auto lg:min-h-100 overflow-hidden'>
+                        <div className='relative aspect-video lg:aspect-auto lg:min-h-125 overflow-hidden'>
                           <Image
                             src={featuredProject.image || "/placeholder.svg"}
                             alt={featuredProject.title}
@@ -590,81 +589,21 @@ export default function Page() {
                           </div>
 
                           {/* Floating title over image (visible on lg and up) */}
-                          <h3 className='hidden lg:block absolute left-6 bottom-6 z-10 text-3xl font-bold text-white drop-shadow-lg bg-linear-to-r from-black/40 via-transparent to-transparent px-4 py-2 rounded-md'>
+                          <h3 className='hidden lg:block absolute left-6 bottom-6 z-30 text-3xl font-bold text-white drop-shadow-lg bg-linear-to-r from-black/40 via-transparent to-transparent px-4 py-2 rounded-md'>
                             {featuredProject.title}
                           </h3>
-                        </div>
-
-                        {/* Invisible spacer (in flow) to set card height based on sidebar height on lg */}
-                        <div className='hidden lg:block lg:opacity-0 lg:invisible'>
-                          <div className='p-8 lg:p-12 flex flex-col justify-center'>
-                            <h3 className='text-3xl font-bold mb-4 lg:hidden'>
-                              {featuredProject.title}
-                            </h3>
-                            <p className='text-foreground/70 mb-6 leading-relaxed'>
-                              {featuredProject.description}
-                            </p>
-
-                            <div className='flex flex-wrap gap-2 mb-8'>
-                              {featuredProject.tech.slice(0, 6).map((tech) => (
-                                <span
-                                  key={tech}
-                                  className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/80'
-                                >
-                                  {tech}
-                                </span>
-                              ))}
-                              {featuredProject.tech.length > 6 && (
-                                <span className='px-3 py-1 text-sm text-foreground/60'>
-                                  +{featuredProject.tech.length - 6} more
-                                </span>
-                              )}
-                            </div>
-
-                            <div className='flex gap-3'>
-                              <Button asChild className='flex-1'>
-                                <Link href={`/projects/${featuredProject.id}`}>
-                                  View Project
-                                </Link>
-                              </Button>
-                              {featuredProject.demo_url && (
-                                <Button asChild variant='outline' size='icon'>
-                                  <a
-                                    href={featuredProject.demo_url}
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    aria-label='View demo'
-                                  >
-                                    <ExternalLink size={18} />
-                                  </a>
-                                </Button>
-                              )}
-                              {featuredProject.github_url && (
-                                <Button asChild variant='outline' size='icon'>
-                                  <a
-                                    href={featuredProject.github_url}
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    aria-label='View source'
-                                  >
-                                    <Github size={18} />
-                                  </a>
-                                </Button>
-                              )}
-                            </div>
-                          </div>
                         </div>
 
                         {/* Content Panel - hidden by default on lg, slides in to cover right half on hover */}
                         <div
                           className='p-8 lg:p-12 flex flex-col justify-center bg-background/80 backdrop-blur-md shadow-2xl
-                                     lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-1/2 lg:translate-x-full lg:opacity-0
+                                     lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-auto lg:h-full lg:translate-x-full lg:opacity-0
                                      lg:group-hover:translate-x-0 lg:group-hover:opacity-100 lg:group-focus-within:translate-x-0 lg:group-focus-within:opacity-100 lg:transition-all lg:duration-700 lg:ease-in-out
-                                     lg:pointer-events-none lg:group-hover:pointer-events-auto lg:group-focus-within:pointer-events-auto'
+                                     lg:pointer-events-none lg:group-hover:pointer-events-auto lg:group-focus-within:pointer-events-auto z-40'
                           aria-hidden='false'
                         >
                           {/* Title for small screens */}
-                          <h3 className='text-3xl font-bold mb-4 lg:hidden'>
+                          <h3 className='text-3xl font-bold mb-4'>
                             {featuredProject.title}
                           </h3>
                           <p className='text-foreground/70 mb-6 leading-relaxed'>
