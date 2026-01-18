@@ -1,6 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
+function isAllowedImageUrl(rawUrl: string): URL | null {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return null;
+  }
+
+  const protocol = url.protocol.toLowerCase();
+  if (protocol !== "http:" && protocol !== "https:") {
+    return null;
+  }
+
+  const hostname = url.hostname.toLowerCase();
+
+  // Disallow localhost and common internal host patterns to mitigate SSRF
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".internal")
+  ) {
+    return null;
+  }
+
+  return url;
+}
+
 async function bufferFromUrl(url: string): Promise<Buffer> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -22,8 +52,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const allowedUrl = isAllowedImageUrl(imageUrl);
+    if (!allowedUrl) {
+      return NextResponse.json(
+        { error: "Invalid or disallowed image URL" },
+        { status: 400 }
+      );
+    }
+
     // Fetch the image buffer
-    const imageBuffer = await bufferFromUrl(imageUrl);
+    const imageBuffer = await bufferFromUrl(allowedUrl.toString());
 
     // Process with Sharp: auto-rotate based on EXIF, strip metadata, convert to JPEG
     const processedBuffer = await sharp(imageBuffer)
