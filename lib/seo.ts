@@ -34,6 +34,17 @@ const DEFAULT_SEO: SEOConfig = {
   // twitterHandle intentionally blank; derived dynamically from social links (X)
 };
 
+function buildTitle(profile: ProfileLike) {
+  if (!profile) return DEFAULT_SEO.defaultTitle;
+  const name = profile.full_name || DEFAULT_SEO.siteName;
+  const expertiseValues =
+    profile.home_page_data?.technicalExpertise?.map((t) => t.name) || [];
+  const values = expertiseValues.filter(Boolean);
+  const nameAndValues = values.length ? `${name} ${values.join(" ")}` : name;
+  const tagline = profile.tagline ? profile.tagline.trim() : "";
+  return tagline ? `${nameAndValues} | ${tagline}` : nameAndValues;
+}
+
 export function getBaseMetadata(
   profile: ProfileLike,
   hostname?: string
@@ -103,9 +114,7 @@ export function getBaseMetadata(
   return {
     siteName: profile?.full_name || DEFAULT_SEO.siteName,
     siteUrl,
-    defaultTitle: profile?.full_name
-      ? `${profile.full_name} - ${profile.tagline}`
-      : DEFAULT_SEO.defaultTitle,
+    defaultTitle: profile?.full_name ? buildTitle(profile) : DEFAULT_SEO.defaultTitle,
     defaultDescription: profile?.tagline || DEFAULT_SEO.defaultDescription,
     defaultImage: profile?.avatar_url || DEFAULT_SEO.defaultImage,
     twitterHandle: derivedHandle,
@@ -119,8 +128,9 @@ export function generateHomeMetadata(
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
-  const title = profile?.full_name || config.defaultTitle;
+  const title = profile ? `Home — ${buildTitle(profile)}` : config.defaultTitle;
   const description =
+    profile?.home_page_data?.about_card_description ||
     profile?.tagline ||
     profile?.home_page_data?.callToAction?.description ||
     config.defaultDescription;
@@ -133,18 +143,17 @@ export function generateHomeMetadata(
   const base: Metadata = {
     title,
     description,
-    keywords: [
-      "software developer",
-      "portfolio",
-      "web development",
-      "full stack",
-      profile?.full_name,
-      ...(profile?.home_page_data?.technicalExpertise?.flatMap(
-        (cat) => cat.skills
-      ) || []),
-    ]
-      .filter(Boolean)
-      .join(", "),
+    keywords: Array.from(
+      new Set(
+        [
+          ...(profile?.full_name ? profile.full_name.split(/\s+/) : []),
+          ...(profile?.home_page_data?.technicalExpertise?.flatMap(
+            (cat) => cat.skills
+          ) || []),
+          ...(profile?.tagline ? profile.tagline.split("|").map((s) => s.trim()) : []),
+        ].filter(Boolean)
+      )
+    ).join(", "),
     authors: [{ name: profile?.full_name || "Developer" }],
     creator: profile?.full_name || "Developer",
     openGraph: {
@@ -194,8 +203,9 @@ export function generateAboutMetadata(
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
-  const title = profile?.full_name ? `About ${profile.full_name}` : "About Me";
+  const title = profile?.full_name ? `About — ${buildTitle(profile)}` : "About Me";
   const description =
+    profile?.home_page_data?.about_card_description ||
     profile?.about_page_data?.subtitle ||
     profile?.tagline ||
     config.defaultDescription;
@@ -235,9 +245,11 @@ export function generateProjectsMetadata(
   const config = getBaseMetadata(profile, hostname);
 
   const title = profile?.full_name
-    ? `Projects by ${profile.full_name}`
+    ? `Projects — ${buildTitle(profile)}`
     : "Projects";
-  const description = `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
+  const description =
+    profile?.home_page_data?.about_card_description ||
+    `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
 
   // Generate OG image URL if we have an avatar and origin
   const ogImageUrl = profile?.id && origin
@@ -281,8 +293,11 @@ export function generateProjectMetadata(
     };
   }
 
-  const title = `${project.title} - ${config.siteName}`;
-  const description = project.description || project.long_description;
+  const title = `${project.title} — ${buildTitle(profile)}`;
+  const description =
+    profile?.home_page_data?.about_card_description ||
+    project.description ||
+    project.long_description;
 
   // Generate OG image URL if we have an avatar and origin (for fallback)
   const fallbackImageUrl = profile?.id && origin
@@ -329,8 +344,9 @@ export function generateResumeMetadata(
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
-  const title = profile?.full_name ? `Resume - ${profile.full_name}` : "Resume";
+  const title = profile?.full_name ? `Resume — ${buildTitle(profile)}` : "Resume";
   const description =
+    profile?.home_page_data?.about_card_description ||
     profile?.tagline ||
     "Professional resume showcasing experience, skills, and qualifications.";
 
