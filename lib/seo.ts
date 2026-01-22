@@ -45,7 +45,7 @@ function buildTitle(profile: ProfileLike) {
   return tagline ? `${nameAndValues} | ${tagline}` : nameAndValues;
 }
 
-export function buildMetaDescription(profile: ProfileLike, maxLen = 155) {
+export function buildMetaDescription(profile: ProfileLike, maxLen = 255) {
   const name = profile?.full_name?.trim();
   const tagline = profile?.tagline?.trim();
   const about = profile?.home_page_data?.about_card_description?.trim();
@@ -144,11 +144,7 @@ export function generateHomeMetadata(
   const config = getBaseMetadata(profile, hostname);
 
   const title = profile ? `Home — ${buildTitle(profile)}` : config.defaultTitle;
-  const description =
-    profile?.home_page_data?.about_card_description ||
-    profile?.tagline ||
-    profile?.home_page_data?.callToAction?.description ||
-    config.defaultDescription;
+  const description = buildMetaDescription(profile);
 
   // Generate OG image URL if we have an avatar and origin
   const ogImageUrl = profile?.id && origin
@@ -252,20 +248,40 @@ export function generateAboutMetadata(
   return meta;
 }
 
+export function buildProjectsDescription(
+  profile: ProfileLike,
+  projectTitles: string[] = [],
+  currentRole?: string,
+  maxLen = 255
+) {
+  const name = profile?.full_name?.trim();
+
+  const projectsPart = projectTitles.length
+    ? `Projects: ${projectTitles.slice(0, 6).join(", ")}${projectTitles.length > 6 ? ` +${projectTitles.length - 6} more` : ""}`
+    : "";
+  const rolePart = currentRole ? `Role: ${currentRole}` : "";
+
+  const parts = [name, projectsPart, rolePart].filter(Boolean);
+  const desc = parts.join(" — ").replace(/\s+/g, " ").trim();
+  if (!desc) return DEFAULT_SEO.defaultDescription;
+  if (desc.length <= maxLen) return desc;
+  const truncated = desc.slice(0, maxLen).replace(/\s+\S*$/, "");
+  return `${truncated}…`;
+}
+
 export function generateProjectsMetadata(
   profile: ProfileLike,
   hostname?: string,
-  origin?: string
+  origin?: string,
+  projectTitles: string[] = [],
+  currentRole?: string
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
   const title = profile?.full_name
     ? `Projects — ${buildTitle(profile)}`
     : "Projects";
-  const description =
-    profile?.home_page_data?.about_card_description ||
-    `Explore the portfolio of projects showcasing expertise in modern web development, software engineering, and innovative solutions.`;
-
+  const description = buildProjectsDescription(profile, projectTitles, currentRole);
   // Generate OG image URL if we have an avatar and origin
   const ogImageUrl = profile?.id && origin
     ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
@@ -310,7 +326,6 @@ export function generateProjectMetadata(
 
   const title = `${project.title} — ${buildTitle(profile)}`;
   const description =
-    profile?.home_page_data?.about_card_description ||
     project.description ||
     project.long_description;
 
