@@ -45,6 +45,21 @@ function buildTitle(profile: ProfileLike) {
   return tagline ? `${nameAndValues} | ${tagline}` : nameAndValues;
 }
 
+export function buildMetaDescription(profile: ProfileLike, maxLen = 155) {
+  const name = profile?.full_name?.trim();
+  const tagline = profile?.tagline?.trim();
+  const about = profile?.home_page_data?.about_card_description?.trim();
+
+  const namePart = name ? (tagline ? `${name} - ${tagline}` : name) : "";
+  const parts = [namePart, about].filter(Boolean);
+  const desc = parts.join(" — ").replace(/\s+/g, " ").trim();
+  if (!desc) return DEFAULT_SEO.defaultDescription;
+  if (desc.length <= maxLen) return desc;
+  // Truncate cleanly at word boundary
+  const truncated = desc.slice(0, maxLen).replace(/\s+\S*$/, "");
+  return `${truncated}…`;
+}
+
 export function getBaseMetadata(
   profile: ProfileLike,
   hostname?: string

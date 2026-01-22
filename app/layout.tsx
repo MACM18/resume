@@ -12,7 +12,7 @@ import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
 import { getProfileDataServer, getThemeDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
-import { generateHomeMetadata } from "@/lib/seo";
+import { generateHomeMetadata, buildMetaDescription } from "@/lib/seo";
 import { generateCssVariables } from "@/lib/theme";
 import Analytics from "@/components/Analytics";
 import Script from "next/script";
@@ -59,6 +59,10 @@ export default async function RootLayout({
             <link rel='shortcut icon' href={faviconUrl} />
           </>
         )}
+
+        {/* Ensure a meta description is always present (prefer about card description) */}
+        <meta name='description' content={buildMetaDescription(profileData)} />
+
         {/* Inject CSS variables server-side to avoid client fetch delays impacting LCP */}
         {themeData && (
           <>
@@ -66,7 +70,7 @@ export default async function RootLayout({
               dangerouslySetInnerHTML={{
                 __html: generateCssVariables(
                   themeData.theme || {},
-                  themeData.background_image_url || null
+                  themeData.background_image_url || null,
                 ),
               }}
             />
