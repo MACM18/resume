@@ -19,8 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
         `${origin}/api/projects/by-domain?domain=${encodeURIComponent(domain)}`,
       );
       if (res.ok) {
-        const data = await res.json();
-        projectTitles = (data || []).map((p: any) => p.title).filter(Boolean);
+        const data = (await res.json()) as Array<{ title?: string }>;
+        projectTitles = (data || []).map((p) => p.title).filter(Boolean) as string[];
       }
     } catch (err) {
       // fail silently; metadata should still be returned

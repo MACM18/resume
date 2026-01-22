@@ -72,6 +72,7 @@ export async function getProfileDataServer(domain?: string) {
       background_image_url: p["backgroundImageUrl"] as string | null,
       favicon_url: p["faviconUrl"] as string | null,
       contact_numbers: p["contactNumbers"],
+      active_resume_role: (p["activeResumeRole"] as string) || undefined,
     };
   } catch (error) {
     console.error("Error fetching profile data (server):", error);
