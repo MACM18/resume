@@ -37,12 +37,8 @@ const DEFAULT_SEO: SEOConfig = {
 function buildTitle(profile: ProfileLike) {
   if (!profile) return DEFAULT_SEO.defaultTitle;
   const name = profile.full_name || DEFAULT_SEO.siteName;
-  const expertiseValues =
-    profile.home_page_data?.technicalExpertise?.map((t) => t.name) || [];
-  const values = expertiseValues.filter(Boolean);
-  const nameAndValues = values.length ? `${name} ${values.join(" ")}` : name;
   const tagline = profile.tagline ? profile.tagline.trim() : "";
-  return tagline ? `${nameAndValues} | ${tagline}` : nameAndValues;
+  return tagline ? `${name} | ${tagline}` : name;
 }
 
 export function buildMetaDescription(profile: ProfileLike, maxLen = 255) {
