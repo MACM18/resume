@@ -60,6 +60,8 @@ export default function ProjectClient({ id }: { id: string }) {
       </div>
     );
   }
+  const isImageReal =
+    project.image && !project.image.includes("placeholder.svg");
 
   return (
     <div className='min-h-screen relative pb-20'>
@@ -104,7 +106,7 @@ export default function ProjectClient({ id }: { id: string }) {
                     rel='noopener noreferrer'
                   >
                     <ExternalLink className='mr-2' size={18} />
-                    Live Demo
+                    View live
                   </a>
                 </Button>
               )}
@@ -124,7 +126,7 @@ export default function ProjectClient({ id }: { id: string }) {
           </motion.div>
 
           {/* Project Image */}
-          {project.image && (
+          {isImageReal && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -132,7 +134,7 @@ export default function ProjectClient({ id }: { id: string }) {
             >
               <div className='aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5'>
                 <Image
-                  src={project.image}
+                  src={project.image || ""}
                   alt={project.title}
                   className='w-full h-full object-cover'
                   width={1200}
