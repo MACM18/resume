@@ -10,7 +10,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className='toaster group'
+      // Make sure Sonner toasts show above dialogs and other overlays
+      className='toaster group z-[10000]'
       toastOptions={{
         classNames: {
           toast:

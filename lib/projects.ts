@@ -124,9 +124,10 @@ export async function addProject(
     headers: {
       "Content-Type": "application/json",
     },
+    // Send `null` when there's no image so the DB stores no image instead of a placeholder
     body: JSON.stringify({
       ...project,
-      image: project.image || "/placeholder.svg",
+      image: project.image ? project.image : null,
     }),
   });
 

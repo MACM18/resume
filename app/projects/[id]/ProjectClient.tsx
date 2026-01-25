@@ -124,22 +124,24 @@ export default function ProjectClient({ id }: { id: string }) {
           </motion.div>
 
           {/* Project Image */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <div className='aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5'>
-              <Image
-                src={project.image || "/placeholder.svg"}
-                alt={project.title}
-                className='w-full h-full object-cover'
-                width={1200}
-                height={675}
-                priority
-              />
-            </div>
-          </motion.div>
+          {project.image && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <div className='aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5'>
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  className='w-full h-full object-cover'
+                  width={1200}
+                  height={675}
+                  priority
+                />
+              </div>
+            </motion.div>
+          )}
         </div>
       </section>
 

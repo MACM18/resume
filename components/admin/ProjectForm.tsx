@@ -84,13 +84,21 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const { session } = useSupabase();
   const [isUploading, setIsUploading] = useState(false);
 
+  // Helper: treat placeholder or empty values as "no image"
+  const isRealImageUrl = (url?: string | null) =>
+    !!url &&
+    url !== "" &&
+    url !== "/placeholder.svg" &&
+    !url.startsWith("/placeholder");
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       title: project?.title || "",
       description: project?.description || "",
       long_description: project?.long_description || "",
-      image: project?.image || "",
+      // If project.image is a placeholder/internal value, treat it as empty
+      image: isRealImageUrl(project?.image) ? (project?.image ?? "") : "",
       tech: project?.tech.join(", ") || "",
       demo_url: project?.demo_url || "",
       github_url: project?.github_url || "",
@@ -104,14 +112,14 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const longDescription = form.watch("long_description");
 
   const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       toast.error(
-        "Invalid file type. Please upload a JPG, PNG, or WEBP image."
+        "Invalid file type. Please upload a JPG, PNG, or WEBP image.",
       );
       return;
     }
@@ -130,7 +138,19 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   };
 
   const handleRemoveImage = async () => {
-    if (!imageUrl || !session?.user.id) return;
+    // If there's no image or no session, just clear the field locally
+    if (!imageUrl || !session?.user.id) {
+      form.setValue("image", "", { shouldValidate: true });
+      toast.success("Image removed successfully!");
+      return;
+    }
+
+    // If image is not a real uploaded image (e.g., placeholder), clear locally without calling deletion
+    if (!isRealImageUrl(imageUrl)) {
+      form.setValue("image", "", { shouldValidate: true });
+      toast.success("Image removed successfully!");
+      return;
+    }
 
     try {
       await deleteProjectImage(session.user.id, imageUrl);
@@ -183,10 +203,17 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
               .filter((f) => f.length > 0)
           : [],
       };
+
+      // Ensure empty/placeholder image values are sent as undefined so DB stores no image
+      const payload = {
+        ...processedData,
+        image: processedData.image ? processedData.image : undefined,
+      };
+
       if (project) {
-        return updateProject(project.id, processedData);
+        return updateProject(project.id, payload);
       }
-      return addProject(processedData);
+      return addProject(payload);
     },
     onSuccess: () => {
       toast.success(`Project ${project ? "updated" : "added"} successfully!`);
@@ -318,18 +345,18 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                   onChange={handleImageUpload}
                   disabled={isUploading}
                 />
-                {imageUrl && (
+                {isRealImageUrl(imageUrl) && (
                   <div className='flex items-center gap-2 text-sm text-green-400'>
                     <CheckCircle size={16} />
                     <span>Image Linked</span>
                   </div>
                 )}
               </div>
-              {imageUrl && (
+              {isRealImageUrl(imageUrl) && (
                 <div className='mt-4 space-y-2'>
                   <div className='aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-glass-border'>
                     <Image
-                      src={imageUrl}
+                      src={imageUrl || ""}
                       alt='Project preview'
                       width={400}
                       height={225}
