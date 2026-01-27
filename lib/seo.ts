@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { Profile, Project } from "@/types/portfolio";
+import { hostname } from "os";
 
 // Flexible profile type that works with both full Profile and client ProfileData
 type ProfileLike =
@@ -34,11 +35,11 @@ const DEFAULT_SEO: SEOConfig = {
   // twitterHandle intentionally blank; derived dynamically from social links (X)
 };
 
-function buildTitle(profile: ProfileLike) {
+function buildTitle(profile: ProfileLike, hostname?: string) {
   if (!profile) return DEFAULT_SEO.defaultTitle;
   const name = profile.full_name || DEFAULT_SEO.siteName;
-  const tagline = profile.tagline ? profile.tagline.trim() : "";
-  return tagline ? `${name} | ${tagline}` : name;
+  const hostnameTag = hostname ? ` (${hostname})` : "";
+  return `${name} | ${hostnameTag}`;
 }
 
 export function buildMetaDescription(profile: ProfileLike, maxLen = 255) {
@@ -125,7 +126,7 @@ export function getBaseMetadata(
   return {
     siteName: profile?.full_name || DEFAULT_SEO.siteName,
     siteUrl,
-    defaultTitle: profile?.full_name ? buildTitle(profile) : DEFAULT_SEO.defaultTitle,
+    defaultTitle: profile?.full_name ? buildTitle(profile, hostname) : DEFAULT_SEO.defaultTitle,
     defaultDescription: profile?.tagline || DEFAULT_SEO.defaultDescription,
     defaultImage: profile?.avatar_url || DEFAULT_SEO.defaultImage,
     twitterHandle: derivedHandle,
@@ -139,7 +140,7 @@ export function generateHomeMetadata(
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
-  const title = profile ? `Home — ${buildTitle(profile)}` : config.defaultTitle;
+  const title = profile ? `Home — ${buildTitle(profile, hostname)}` : config.defaultTitle;
   const description = buildMetaDescription(profile);
 
   // Generate OG image URL if we have an avatar and origin
@@ -210,7 +211,7 @@ export function generateAboutMetadata(
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
-  const title = profile?.full_name ? `About — ${buildTitle(profile)}` : "About Me";
+  const title = profile?.full_name ? `About — ${buildTitle(profile, hostname)}` : "About Me";
   const description =
     profile?.home_page_data?.about_card_description ||
     profile?.about_page_data?.subtitle ||
@@ -275,7 +276,7 @@ export function generateProjectsMetadata(
   const config = getBaseMetadata(profile, hostname);
 
   const title = profile?.full_name
-    ? `Projects — ${buildTitle(profile)}`
+    ? `Projects — ${buildTitle(profile, hostname)}`
     : "Projects";
   const description = buildProjectsDescription(profile, projectTitles, currentRole);
   // Generate OG image URL if we have an avatar and origin
@@ -320,7 +321,7 @@ export function generateProjectMetadata(
     };
   }
 
-  const title = `${project.title} — ${buildTitle(profile)}`;
+  const title = `${project.title} — ${buildTitle(profile, hostname)}`;
   const description =
     project.description ||
     project.long_description;
@@ -370,7 +371,7 @@ export function generateResumeMetadata(
 ): Metadata {
   const config = getBaseMetadata(profile, hostname);
 
-  const title = profile?.full_name ? `Resume — ${buildTitle(profile)}` : "Resume";
+  const title = profile?.full_name ? `Resume — ${buildTitle(profile, hostname)}` : "Resume";
   const description =
     profile?.home_page_data?.about_card_description ||
     profile?.tagline ||
