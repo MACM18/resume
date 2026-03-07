@@ -40,7 +40,6 @@ export function GalleryManager() {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
-
   const {
     data: images,
     isLoading: isLoadingImages,
@@ -98,7 +97,6 @@ export function GalleryManager() {
       toast.error("Failed to move images");
     }
   };
-
 
   const updateGalleryImageMutation = useMutation({
     mutationFn: async (vars: { id: string; albumName: string | null }) => {
@@ -180,7 +178,8 @@ export function GalleryManager() {
     console.error("GalleryManager fetch error", imagesError);
     return (
       <div className='text-center text-destructive p-8'>
-        Unable to load gallery photos. Please make sure you are logged in and try again.
+        Unable to load gallery photos. Please make sure you are logged in and
+        try again.
       </div>
     );
   }
@@ -193,13 +192,11 @@ export function GalleryManager() {
           <select
             className='px-2 py-1 border rounded'
             onChange={(e) =>
-              moveSelectedToAlbum(
-                e.target.value === "" ? null : e.target.value,
-              )
+              moveSelectedToAlbum(e.target.value === "" ? null : e.target.value)
             }
-            defaultValue=""
+            defaultValue=''
           >
-            <option value="">Uncategorized</option>
+            <option value=''>Uncategorized</option>
             {albums.map((a) => (
               <option key={a} value={a}>
                 {a}
@@ -210,7 +207,7 @@ export function GalleryManager() {
       )}
       <h2 className='text-2xl font-bold text-primary'>Gallery Photos</h2>
       <p className='text-foreground/70'>
-        Upload and manage photos for your public gallery. You can store up to {" "}
+        Upload and manage photos for your public gallery. You can store up to{" "}
         {MAX_IMAGES} images.
         <br />
         <a
@@ -338,8 +335,8 @@ export function GalleryManager() {
                 selectedAlbum === "All"
                   ? true
                   : selectedAlbum === "Uncategorized"
-                  ? !img.albumName
-                  : img.albumName === selectedAlbum,
+                    ? !img.albumName
+                    : img.albumName === selectedAlbum,
               )
               .map((img) => (
                 <div
@@ -437,7 +434,9 @@ export function GalleryManager() {
         <div className='text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10'>
           <ImageIcon size={48} className='mx-auto mb-4 text-foreground/40' />
           <p>No gallery photos uploaded yet.</p>
-          <p className='mt-2 text-sm'>Use the uploader above to add your first photo.</p>
+          <p className='mt-2 text-sm'>
+            Use the uploader above to add your first photo.
+          </p>
         </div>
       )}
     </div>

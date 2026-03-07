@@ -8,7 +8,6 @@ export const dynamic = "force-dynamic";
 // Albums endpoint also uses Prisma, so force Node runtime.
 export const runtime = "nodejs";
 
-
 export async function GET(request: NextRequest) {
     try {
         const url = new URL(request.url);

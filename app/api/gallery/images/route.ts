@@ -18,7 +18,6 @@ export const dynamic = "force-dynamic";
 // the Edge runtime where it would crash during database access.
 export const runtime = "nodejs";
 
-
 /**
  * GET /api/gallery/images?domain=example.com
  * GET /api/gallery/images?userId=xxx
