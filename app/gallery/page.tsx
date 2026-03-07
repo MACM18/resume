@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import Image from "next/image";
 import { getProfileDataServer } from "@/lib/profile.server";
 import {
   listGalleryImagesForUser,
@@ -7,6 +6,7 @@ import {
 } from "@/lib/gallery.server";
 import { normalizeDomain } from "@/lib/utils";
 import AlbumSelector from "@/components/AlbumSelector";
+import ClientGallerySection from "@/components/ClientGallerySection";
 
 export const dynamic = "force-dynamic";
 
@@ -64,44 +64,28 @@ export default async function GalleryPage(props: GalleryPageProps) {
 
   return (
     <div className='max-w-7xl mx-auto py-12 px-4'>
-      <h1 className='text-3xl font-bold mb-6'>Gallery</h1>
+      <div className='mb-12'>
+        <h1 className='text-4xl md:text-5xl font-bold mb-2'>Gallery</h1>
+        <p className='text-foreground/60'>
+          {images.length} photo{images.length !== 1 ? "s" : ""} across{" "}
+          {Object.keys(grouped).length} album
+          {Object.keys(grouped).length !== 1 ? "s" : ""}
+        </p>
+      </div>
       {images.length === 0 ? (
-        <p className='text-foreground/60'>No photos have been uploaded yet.</p>
+        <div className='text-center py-12'>
+          <p className='text-foreground/60 mb-4'>
+            No photos have been uploaded yet.
+          </p>
+          <p className='text-sm text-foreground/40'>Come back soon!</p>
+        </div>
       ) : (
         <>
           {/* album selector */}
-          {/* album filter will be rendered via client component */}
-          <div className='mb-6'>
+          <div className='mb-8'>
             <AlbumSelector albums={albums} selected={selectedAlbum || "All"} />
           </div>
-          <div className='space-y-8'>
-            {Object.entries(grouped).map(([album, imgs]) => (
-              <div key={album}>
-                {album && (
-                  <h2 className='text-2xl font-semibold mb-4'>{album}</h2>
-                )}
-                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-                  {imgs.map((img) => (
-                    <div
-                      key={img.id}
-                      className='relative w-full h-64 rounded-lg overflow-hidden'
-                    >
-                      <Image
-                        src={img.url}
-                        alt='Gallery photo'
-                        fill
-                        className='object-cover'
-                        priority={false}
-                      />
-                      <div className='absolute bottom-0 left-0 bg-black/50 text-white text-xs px-2 py-1'>
-                        {new Date(img.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ClientGallerySection grouped={grouped} />
         </>
       )}
     </div>
