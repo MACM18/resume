@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
-import { Profile, HomePageData, AboutPageData, Theme } from "@/types/portfolio";
+import { AboutPageData, HomePageData, Profile, Theme } from "@/types/portfolio";
 
 // Transform Prisma profile to frontend Profile type
 function transformProfile(prismaProfile: {
@@ -27,9 +27,14 @@ function transformProfile(prismaProfile: {
     user_id: prismaProfile.userId,
     full_name: prismaProfile.fullName,
     avatar_url: prismaProfile.avatarUrl,
-    avatar_position: prismaProfile.avatarPosition as { x: number; y: number } | undefined,
+    avatar_position: prismaProfile.avatarPosition as
+      | { x: number; y: number }
+      | undefined,
     avatar_zoom: prismaProfile.avatarZoom || undefined,
-    avatar_size: ((prismaProfile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined || undefined,
+    avatar_size:
+      ((prismaProfile as unknown) as Record<string, unknown>)["avatarSize"] as
+        | number
+        | undefined || undefined,
     tagline: prismaProfile.tagline,
     domain: prismaProfile.domain,
     home_page_data: prismaProfile.homePageData as HomePageData,
@@ -48,8 +53,8 @@ export async function getProfileDataServer(domain?: string) {
   if (!effectiveDomain) return null;
 
   try {
-    const profile = await db.profile.findFirst({ 
-      where: { domain: effectiveDomain }
+    const profile = await db.profile.findFirst({
+      where: { domain: effectiveDomain },
     });
 
     if (!profile) {
@@ -61,12 +66,15 @@ export async function getProfileDataServer(domain?: string) {
 
     return {
       id: profile.id,
+      user_id: profile.userId,
       full_name: (p["fullName"] as string) || "",
       tagline: (p["tagline"] as string) || "",
       home_page_data: p["homePageData"] as unknown as HomePageData,
       about_page_data: p["aboutPageData"] as unknown as AboutPageData,
       avatar_url: p["avatarUrl"] as string | null,
-      avatar_position: p["avatarPosition"] as { x: number; y: number } | undefined,
+      avatar_position: p["avatarPosition"] as
+        | { x: number; y: number }
+        | undefined,
       avatar_zoom: (p["avatarZoom"] as number) || undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       background_image_url: p["backgroundImageUrl"] as string | null,
@@ -80,7 +88,9 @@ export async function getProfileDataServer(domain?: string) {
   }
 }
 
-export async function getProfileByUserId(userId: string): Promise<Profile | null> {
+export async function getProfileByUserId(
+  userId: string,
+): Promise<Profile | null> {
   try {
     const profile = await db.profile.findUnique({
       where: { userId },
@@ -127,7 +137,10 @@ export async function getThemeDataServer(domain?: string) {
 /**
  * Default profile data for new users (server-safe version)
  */
-export function getDefaultProfileData(email: string, fullName: string = "New User") {
+export function getDefaultProfileData(
+  email: string,
+  fullName: string = "New User",
+) {
   return {
     fullName,
     tagline: "Welcome to my portfolio",

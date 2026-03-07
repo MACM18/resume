@@ -151,3 +151,16 @@ model WorkExperience {
 
   @@map("work_experiences")
 }
+// --- gallery photos for album/date organization --------------------------------
+model GalleryImage {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  url        String
+  albumName  String?  @map("album_name")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_images")
+}

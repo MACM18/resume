@@ -1,7 +1,7 @@
 "use client";
 
 // Storage operations are performed on the server via API endpoints.
-import { HomePageData, AboutPageData, Profile, Theme } from "@/types/portfolio";
+import { AboutPageData, HomePageData, Profile, Theme } from "@/types/portfolio";
 import { normalizeDomain } from "./utils";
 
 interface ProfileData {
@@ -27,7 +27,10 @@ interface ProfileData {
 /**
  * Default profile data for new users
  */
-export function getDefaultProfileData(email: string, fullName: string = "New User") {
+export function getDefaultProfileData(
+  email: string,
+  fullName: string = "New User",
+) {
   return {
     fullName,
     tagline: "Welcome to my portfolio",
@@ -90,16 +93,24 @@ export async function ensureUserProfile(): Promise<Profile | null> {
 /**
  * Get profile data by domain (client-side)
  */
-export async function getProfileData(domain: string): Promise<ProfileData | null> {
+export async function getProfileData(
+  domain: string,
+): Promise<ProfileData | null> {
   const normalizedDomain = normalizeDomain(domain);
   try {
-    const response = await fetch(`/api/profile/by-domain?domain=${encodeURIComponent(normalizedDomain)}`);
+    const response = await fetch(
+      `/api/profile/by-domain?domain=${encodeURIComponent(normalizedDomain)}`,
+    );
     if (!response.ok) {
       return null;
     }
     return response.json();
   } catch (error) {
-    console.error("Error fetching profile data for domain:", normalizedDomain, error);
+    console.error(
+      "Error fetching profile data for domain:",
+      normalizedDomain,
+      error,
+    );
     return null;
   }
 }
@@ -123,7 +134,9 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
 /**
  * Update current user's profile
  */
-export async function updateCurrentUserProfile(profileData: Partial<Profile>): Promise<Profile> {
+export async function updateCurrentUserProfile(
+  profileData: Partial<Profile>,
+): Promise<Profile> {
   // Remove id and user_id from update payload (they shouldn't be changed)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id: _id, user_id: _userId, ...updateData } = profileData;
@@ -204,7 +217,6 @@ export async function getBackgroundImages(): Promise<string[]> {
  * Delete a profile image
  */
 export async function deleteProfileImage(imageUrl: string): Promise<boolean> {
-
   try {
     const res = await fetch(`/api/profile/images`, {
       method: "DELETE",
@@ -224,6 +236,143 @@ export async function deleteProfileImage(imageUrl: string): Promise<boolean> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Gallery helpers (these behave similarly to the profile image helpers above, but
+// operate on a separate S3 folder/bucket so that photos can be shown on the
+// public gallery page and managed independently in the admin panel.)
+
+export interface GalleryImage {
+  id: string;
+  url: string;
+  albumName?: string | null;
+  createdAt: string;
+}
+
+/**
+ * Upload a gallery photo. Optional albumName may be provided for organization.
+ */
+export async function uploadGalleryImage(
+  file: File,
+  albumName?: string,
+): Promise<GalleryImage> {
+  const form = new FormData();
+  form.append("file", file);
+  if (albumName) form.append("albumName", albumName);
+
+  const res = await fetch("/api/gallery/images", {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to upload gallery image");
+  }
+  const data = await res.json();
+  // the API returns publicUrl; the calling code will typically refetch the
+  // full list to get metadata such as id/createdAt.
+  return {
+    id: "",
+    url: data.publicUrl,
+    albumName: albumName || null,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * List all gallery photos for the authenticated user.
+ */
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  try {
+    const res = await fetch(`/api/gallery/images`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to fetch gallery images");
+    }
+    return res.json();
+  } catch (error) {
+    console.error("Error listing gallery images:", error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a gallery photo by URL.
+ */
+export async function deleteGalleryImage(imageId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/gallery/images`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: imageId }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to delete gallery image");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting gallery image:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch gallery images for a specific domain. This is useful for client-side
+ * components that want to render someone else's gallery (or the current domain)
+ * without requiring a server component.
+ */
+export async function getGalleryImagesForDomain(
+  domain: string,
+): Promise<GalleryImage[]> {
+  try {
+    const res = await fetch(
+      `/api/gallery/images?domain=${encodeURIComponent(domain)}`,
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to fetch gallery images");
+    }
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching gallery images for domain:", error);
+    throw error;
+  }
+}
+
+/**
+ * Update a gallery image's metadata (album name)
+ */
+export async function updateGalleryImage(
+  imageId: string,
+  albumName: string | null,
+): Promise<boolean> {
+  const res = await fetch("/api/gallery/images", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: imageId, albumName }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to update gallery image");
+  }
+  return true;
+}
+
+/**
+ * Retrieve list of album names for a given domain (or current user if no domain).
+ */
+export async function getGalleryAlbums(domain?: string): Promise<string[]> {
+  const url = domain ? `/api/gallery/albums?domain=${encodeURIComponent(domain)}` : "/api/gallery/albums";
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to fetch gallery albums");
+  }
+  return res.json();
+}
+
 /**
  * Upload a background image
  */
@@ -233,7 +382,10 @@ export async function uploadBackgroundImage(file: File): Promise<string> {
   form.append("file", file);
   form.append("bucket", "background-images");
 
-  const res = await fetch("/api/profile/images", { method: "POST", body: form });
+  const res = await fetch("/api/profile/images", {
+    method: "POST",
+    body: form,
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to upload background image");
@@ -245,7 +397,9 @@ export async function uploadBackgroundImage(file: File): Promise<string> {
 /**
  * Delete a background image
  */
-export async function deleteBackgroundImage(imageUrl: string): Promise<boolean> {
+export async function deleteBackgroundImage(
+  imageUrl: string,
+): Promise<boolean> {
   try {
     const res = await fetch(`/api/profile/images`, {
       method: "DELETE",
@@ -273,7 +427,10 @@ export async function uploadFavicon(file: File): Promise<string> {
   form.append("file", file);
   form.append("bucket", "favicons");
 
-  const res = await fetch("/api/profile/images", { method: "POST", body: form });
+  const res = await fetch("/api/profile/images", {
+    method: "POST",
+    body: form,
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to upload favicon");

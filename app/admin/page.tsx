@@ -14,6 +14,7 @@ import { ResumeManagement } from "@/components/admin/ResumeManagement";
 import { ResumeManager } from "@/components/admin/ResumeManager";
 import { ThemeEditor } from "@/components/admin/ThemeEditor";
 import { WorkExperienceManagement } from "@/components/admin/WorkExperienceManagement";
+import { GalleryManager } from "@/components/admin/GalleryManager";
 import {
   User,
   Palette,
@@ -22,6 +23,7 @@ import {
   FolderKanban,
   Briefcase,
   FileText,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const ADMIN_ITEMS = [
@@ -32,6 +34,7 @@ const ADMIN_ITEMS = [
   { value: "projects", label: "Projects", icon: FolderKanban },
   { value: "work", label: "Work Experience", icon: Briefcase },
   { value: "resumes", label: "Resumes", icon: FileText },
+  { value: "gallery", label: "Gallery", icon: ImageIcon },
 ] as const;
 
 export default function AdminPage() {
@@ -177,6 +180,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               )}
+              {section === "gallery" && <GalleryManager />}
             </div>
           </div>
         </div>

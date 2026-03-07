@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { Profile, Project } from "@/types/portfolio";
-import { hostname } from "os";
 
 // Flexible profile type that works with both full Profile and client ProfileData
 type ProfileLike =
