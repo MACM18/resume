@@ -24,6 +24,7 @@ model User {
   resumes         Resume[]
   uploadedResumes UploadedResume[]
   workExperiences WorkExperience[]
+  galleryImages   GalleryImage[]
   passwordResetTokens PasswordResetToken[]
 
   @@map("users")

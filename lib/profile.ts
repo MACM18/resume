@@ -364,7 +364,9 @@ export async function updateGalleryImage(
  * Retrieve list of album names for a given domain (or current user if no domain).
  */
 export async function getGalleryAlbums(domain?: string): Promise<string[]> {
-  const url = domain ? `/api/gallery/albums?domain=${encodeURIComponent(domain)}` : "/api/gallery/albums";
+  const url = domain
+    ? `/api/gallery/albums?domain=${encodeURIComponent(domain)}`
+    : "/api/gallery/albums";
   const res = await fetch(url);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   uploadGalleryImage,
   getGalleryImages,
   deleteGalleryImage,
+  updateGalleryImage,
+  getGalleryAlbums,
 } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,6 +32,9 @@ const MAX_IMAGES = 50;
 export function GalleryManager() {
   const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+  const [albumInput, setAlbumInput] = useState("");
+  const [albums, setAlbums] = useState<string[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<string | "All">("All");
 
   const {
     data: images,
@@ -41,13 +46,45 @@ export function GalleryManager() {
     enabled: !!session?.user.id,
   });
 
+  const albumsQuery = useQuery({
+    queryKey: ["galleryAlbums", session?.user.id],
+    queryFn: () => getGalleryAlbums(),
+    enabled: !!session?.user.id,
+  });
+
+  // keep albums state in sync when query completes
+  useEffect(() => {
+    if (albumsQuery.data) {
+      setAlbums(albumsQuery.data);
+    }
+  }, [albumsQuery.data]);
+
+  const updateGalleryImageMutation = useMutation({
+    mutationFn: async (vars: { id: string; albumName: string | null }) => {
+      return updateGalleryImage(vars.id, vars.albumName);
+    },
+    onSuccess: () => {
+      toast.success("Image updated successfully!");
+      refetchImages();
+      albumsQuery.refetch();
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to update image: ${error.message}`);
+      } else {
+        toast.error("Failed to update image.");
+      }
+    },
+  });
+
   const deleteImageMutation = useMutation({
-    mutationFn: async (imageUrl: string) => {
-      return deleteGalleryImage(imageUrl);
+    mutationFn: async (imageId: string) => {
+      return deleteGalleryImage(imageId);
     },
     onSuccess: () => {
       toast.success("Image deleted successfully!");
       refetchImages();
+      albumsQuery.refetch();
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
@@ -78,9 +115,11 @@ export function GalleryManager() {
 
     setIsUploading(true);
     try {
-      await uploadGalleryImage(file);
+      await uploadGalleryImage(file, albumInput || undefined);
       toast.success("Image uploaded successfully!");
+      setAlbumInput("");
       refetchImages();
+      albumsQuery.refetch();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to upload image.";
@@ -102,6 +141,22 @@ export function GalleryManager() {
         Upload and manage photos for your public gallery. You can store up to{" "}
         {MAX_IMAGES} images.
       </p>
+      {/* album input */}
+      <div className='flex items-center gap-4'>
+        <input
+          type='text'
+          placeholder='Album name (optional)'
+          value={albumInput}
+          onChange={(e) => setAlbumInput(e.target.value)}
+          list='album-list'
+          className='px-3 py-2 border rounded-md w-48'
+        />
+        <datalist id='album-list'>
+          {albums.map((a) => (
+            <option key={a} value={a} />
+          ))}
+        </datalist>
+      </div>
 
       {/* Image Upload */}
       <div className='flex items-center gap-4'>
@@ -137,52 +192,102 @@ export function GalleryManager() {
       {/* Existing Images */}
       {images && images.length > 0 && (
         <div className='space-y-4'>
+          {/* filter dropdown */}
+          <div className='flex items-center gap-2'>
+            <label className='text-sm'>Filter by album:</label>
+            <select
+              value={selectedAlbum}
+              onChange={(e) =>
+                setSelectedAlbum(e.target.value as string | "All")
+              }
+              className='px-2 py-1 border rounded'
+            >
+              <option value='All'>All</option>
+              {albums.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
-            {images.map((imageUrl) => (
-              <div
-                key={imageUrl}
-                className='relative group aspect-square rounded-lg overflow-hidden border border-glass-border/30 hover:border-primary/50 transition-all duration-200'
-              >
-                <Image
-                  src={imageUrl}
-                  alt='Gallery Photo'
-                  layout='fill'
-                  objectFit='cover'
-                  className='transition-all duration-500 group-hover:brightness-110'
-                />
-                <div className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
+            {images
+              .filter((img) =>
+                selectedAlbum === "All"
+                  ? true
+                  : img.albumName === selectedAlbum,
+              )
+              .map((img) => (
+                <div
+                  key={img.id}
+                  className='relative group aspect-square rounded-lg overflow-hidden border border-glass-border/30 hover:border-primary/50 transition-all duration-200'
+                >
+                  <Image
+                    src={img.url}
+                    alt='Gallery Photo'
+                    layout='fill'
+                    objectFit='cover'
+                    className='transition-all duration-500 group-hover:brightness-110'
+                  />
+                  <div className='absolute top-2 left-2 bg-black/60 text-xs text-white px-1 rounded'>
+                    {img.albumName || "Uncategorized"}
+                  </div>
+                  <div className='absolute bottom-2 right-2 bg-black/60 text-xs text-white px-1 rounded'>
+                    {new Date(img.createdAt).toLocaleDateString()}
+                  </div>
+                  <div className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                    <div className='flex gap-2'>
                       <Button
-                        variant='destructive'
                         size='sm'
-                        disabled={deleteImageMutation.isPending}
+                        onClick={() => {
+                          const newAlbum = prompt(
+                            "Enter new album name (empty for none):",
+                            img.albumName || "",
+                          );
+                          if (newAlbum !== null) {
+                            updateGalleryImageMutation.mutate({
+                              id: img.id,
+                              albumName: newAlbum || null,
+                            });
+                          }
+                        }}
+                        disabled={updateGalleryImageMutation.isPending}
                       >
-                        <Trash size={16} />
+                        Edit
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Photo?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete this photo.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteImageMutation.mutate(imageUrl)}
-                          className='bg-destructive hover:bg-destructive/90'
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant='destructive'
+                            size='sm'
+                            disabled={deleteImageMutation.isPending}
+                          >
+                            <Trash size={16} />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Photo?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete this photo.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteImageMutation.mutate(img.id)}
+                              className='bg-destructive hover:bg-destructive/90'
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}

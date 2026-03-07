@@ -1,31 +1,64 @@
 import { headers } from "next/headers";
 import Image from "next/image";
 import { getProfileDataServer } from "@/lib/profile.server";
-import { listFiles, getPublicUrl } from "@/lib/storage";
+import {
+  listGalleryImagesForUser,
+  listGalleryAlbums,
+} from "@/lib/gallery.server";
 import { normalizeDomain } from "@/lib/utils";
+import AlbumSelector from "@/components/AlbumSelector";
 
 export const dynamic = "force-dynamic";
 
-export default async function GalleryPage() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function GalleryPage({
+  searchParams,
+}: {
+  searchParams?: any;
+}) {
   // Determine current host/domain and look up user/profile
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
   const domain = normalizeDomain(host);
-  let images: string[] = [];
+  interface ImageRecord {
+    id: string;
+    url: string;
+    albumName?: string | null;
+    createdAt: string;
+  }
+
+  let images: ImageRecord[] = [];
+  let albums: string[] = [];
+  const selectedAlbum: string | null = searchParams?.album || null;
 
   if (domain) {
     const profile = await getProfileDataServer(domain);
     if (profile && profile.user_id) {
-      const files = await listFiles("gallery-images", profile.user_id);
-      images = files.map((key) => {
-        const prefix = `gallery-images/`;
-        const relative = key.startsWith(prefix)
-          ? key.slice(prefix.length)
-          : key;
-        return getPublicUrl("gallery-images", relative);
-      });
+      // fetch available album names
+      albums = (await listGalleryAlbums(profile.user_id)) || [];
+      // fetch records directly from DB
+      const records = await listGalleryImagesForUser(profile.user_id);
+      images = records.map((r) => ({
+        id: r.id,
+        url: r.url,
+        albumName: r.albumName || null,
+        createdAt: r.createdAt.toISOString(),
+      }));
+      if (selectedAlbum && selectedAlbum !== "All") {
+        images = images.filter(
+          (i) => (i.albumName || "Uncategorized") === selectedAlbum,
+        );
+      }
     }
   }
+
+  // group by album name
+  const grouped: Record<string, typeof images> = {};
+  images.forEach((img) => {
+    const key = img.albumName || "Uncategorized";
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(img);
+  });
 
   return (
     <div className='max-w-7xl mx-auto py-12 px-4'>
@@ -33,22 +66,41 @@ export default async function GalleryPage() {
       {images.length === 0 ? (
         <p className='text-foreground/60'>No photos have been uploaded yet.</p>
       ) : (
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-          {images.map((src) => (
-            <div
-              key={src}
-              className='relative w-full h-64 rounded-lg overflow-hidden'
-            >
-              <Image
-                src={src}
-                alt='Gallery photo'
-                fill
-                className='object-cover'
-                priority={false}
-              />
-            </div>
-          ))}
-        </div>
+        <>
+          {/* album selector */}
+          {/* album filter will be rendered via client component */}
+          <div className='mb-6'>
+            <AlbumSelector albums={albums} selected={selectedAlbum || "All"} />
+          </div>
+          <div className='space-y-8'>
+            {Object.entries(grouped).map(([album, imgs]) => (
+              <div key={album}>
+                {album && (
+                  <h2 className='text-2xl font-semibold mb-4'>{album}</h2>
+                )}
+                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                  {imgs.map((img) => (
+                    <div
+                      key={img.id}
+                      className='relative w-full h-64 rounded-lg overflow-hidden'
+                    >
+                      <Image
+                        src={img.url}
+                        alt='Gallery photo'
+                        fill
+                        className='object-cover'
+                        priority={false}
+                      />
+                      <div className='absolute bottom-0 left-0 bg-black/50 text-white text-xs px-2 py-1'>
+                        {new Date(img.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
