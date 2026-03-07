@@ -10,12 +10,8 @@ import AlbumSelector from "@/components/AlbumSelector";
 
 export const dynamic = "force-dynamic";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function GalleryPage({
-  searchParams,
-}: {
-  searchParams?: any;
-}) {
+export default async function GalleryPage(props: unknown) {
+  const searchParams = (props as { searchParams?: { album?: string } }).searchParams;
   // Determine current host/domain and look up user/profile
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
