@@ -10,8 +10,14 @@ import AlbumSelector from "@/components/AlbumSelector";
 
 export const dynamic = "force-dynamic";
 
-export default async function GalleryPage(props: unknown) {
-  const searchParams = (props as { searchParams?: { album?: string } }).searchParams;
+type GalleryPageProps = {
+  searchParams?: Promise<{ album?: string } | undefined>;
+};
+
+export default async function GalleryPage(props: GalleryPageProps) {
+  // Next.js warns if we access searchParams properties synchronously; await the promise before using.
+  const searchParams = await props.searchParams;
+  const selectedAlbumParam = searchParams?.album;
   // Determine current host/domain and look up user/profile
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
@@ -25,7 +31,7 @@ export default async function GalleryPage(props: unknown) {
 
   let images: ImageRecord[] = [];
   let albums: string[] = [];
-  const selectedAlbum: string | null = searchParams?.album || null;
+  const selectedAlbum: string | null = selectedAlbumParam || null;
 
   if (domain) {
     const profile = await getProfileDataServer(domain);
