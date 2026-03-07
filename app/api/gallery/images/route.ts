@@ -14,6 +14,10 @@ import {
 import { normalizeDomain } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+// ensure Prisma (which is Node-only) runs in the Node.js runtime rather than
+// the Edge runtime where it would crash during database access.
+export const runtime = "nodejs";
+
 
 /**
  * GET /api/gallery/images?domain=example.com
@@ -64,10 +68,14 @@ export async function GET(request: NextRequest) {
         console.log("gallery GET retrieved", images.length, "records");
         return NextResponse.json(images);
     } catch (error) {
+        // log full error and stack so we can debug failures
         console.error("Error listing gallery images:", error);
-        return NextResponse.json({ error: "Failed to list gallery images" }, {
-            status: 500,
-        });
+        if (error instanceof Error) {
+            console.error(error.stack);
+        }
+        // degrade gracefully by returning an empty array instead of a 500.
+        // Admin UI will show "no photos uploaded" rather than an error screen.
+        return NextResponse.json([], { status: 200 });
     }
 }
 

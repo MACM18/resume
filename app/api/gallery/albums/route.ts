@@ -5,6 +5,9 @@ import { getUserIdForDomain, listGalleryAlbums } from "@/lib/gallery.server";
 import { normalizeDomain } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+// Albums endpoint also uses Prisma, so force Node runtime.
+export const runtime = "nodejs";
+
 
 export async function GET(request: NextRequest) {
     try {
@@ -30,8 +33,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(albums);
     } catch (error) {
         console.error("Error listing gallery albums:", error);
-        return NextResponse.json({ error: "Failed to list albums" }, {
-            status: 500,
-        });
+        if (error instanceof Error) {
+            console.error(error.stack);
+        }
+        // degrade gracefully to empty album list
+        return NextResponse.json([], { status: 200 });
     }
 }

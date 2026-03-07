@@ -8,7 +8,9 @@ import {
   deleteGalleryImage,
   updateGalleryImage,
   getGalleryAlbums,
+  GalleryImage,
 } from "@/lib/profile";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
@@ -35,18 +37,30 @@ export function GalleryManager() {
   const [albumInput, setAlbumInput] = useState("");
   const [albums, setAlbums] = useState<string[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<string | "All">("All");
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+
 
   const {
     data: images,
     isLoading: isLoadingImages,
+    error: imagesError,
     refetch: refetchImages,
-  } = useQuery({
+  } = useQuery<GalleryImage[], Error>({
     queryKey: ["galleryImages", session?.user.id],
     queryFn: () => getGalleryImages(),
     enabled: !!session?.user.id,
   });
 
-  const albumsQuery = useQuery({
+  // log / toast manually since useQuery typings reject onError in this version
+  useEffect(() => {
+    if (imagesError) {
+      console.error("gallery images query error", imagesError);
+      toast.error("Failed to load gallery images");
+    }
+  }, [imagesError]);
+
+  const albumsQuery = useQuery<string[], Error>({
     queryKey: ["galleryAlbums", session?.user.id],
     queryFn: () => getGalleryAlbums(),
     enabled: !!session?.user.id,
@@ -58,6 +72,33 @@ export function GalleryManager() {
       setAlbums(albumsQuery.data);
     }
   }, [albumsQuery.data]);
+
+  const toggleSelectMode = () => {
+    if (isSelectMode) {
+      setSelectedImages([]);
+    }
+    setIsSelectMode(!isSelectMode);
+  };
+
+  const moveSelectedToAlbum = async (album: string | null) => {
+    if (selectedImages.length === 0) return;
+    try {
+      await Promise.all(
+        selectedImages.map((id) =>
+          updateGalleryImageMutation.mutateAsync({ id, albumName: album }),
+        ),
+      );
+      toast.success("Images updated");
+      setSelectedImages([]);
+      setIsSelectMode(false);
+      refetchImages();
+      albumsQuery.refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to move images");
+    }
+  };
+
 
   const updateGalleryImageMutation = useMutation({
     mutationFn: async (vars: { id: string; albumName: string | null }) => {
@@ -134,12 +175,52 @@ export function GalleryManager() {
     return <Skeleton className='h-64 w-full' />;
   }
 
+  if (imagesError) {
+    // display a single error message and log it for debugging
+    console.error("GalleryManager fetch error", imagesError);
+    return (
+      <div className='text-center text-destructive p-8'>
+        Unable to load gallery photos. Please make sure you are logged in and try again.
+      </div>
+    );
+  }
+
   return (
     <div className='space-y-6'>
+      {isSelectMode && (
+        <div className='flex items-center gap-2'>
+          <label className='text-sm font-medium'>Move selected to:</label>
+          <select
+            className='px-2 py-1 border rounded'
+            onChange={(e) =>
+              moveSelectedToAlbum(
+                e.target.value === "" ? null : e.target.value,
+              )
+            }
+            defaultValue=""
+          >
+            <option value="">Uncategorized</option>
+            {albums.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <h2 className='text-2xl font-bold text-primary'>Gallery Photos</h2>
       <p className='text-foreground/70'>
-        Upload and manage photos for your public gallery. You can store up to{" "}
+        Upload and manage photos for your public gallery. You can store up to {" "}
         {MAX_IMAGES} images.
+        <br />
+        <a
+          href='/gallery'
+          target='_blank'
+          rel='noreferrer'
+          className='text-primary underline ml-1'
+        >
+          View public gallery ↗
+        </a>
       </p>
       {/* album input */}
       <div className='flex items-center gap-4'>
@@ -156,6 +237,9 @@ export function GalleryManager() {
             <option key={a} value={a} />
           ))}
         </datalist>
+        <Button variant='secondary' onClick={toggleSelectMode}>
+          {isSelectMode ? "Cancel" : "Select photos"}
+        </Button>
       </div>
 
       {/* Image Upload */}
@@ -192,8 +276,46 @@ export function GalleryManager() {
       {/* Existing Images */}
       {images && images.length > 0 && (
         <div className='space-y-4'>
+          {/* clickable album list/pills */}
+          <div className='flex gap-2 flex-wrap mb-2'>
+            <button
+              onClick={() => setSelectedAlbum("All")}
+              className={`px-2 py-1 rounded-full text-xs border transition-all duration-150 ${
+                selectedAlbum === "All"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background/50 hover:bg-background/70"
+              }`}
+            >
+              All
+            </button>
+            {albums.map((a) => (
+              <button
+                key={a}
+                onClick={() => setSelectedAlbum(a)}
+                className={`px-2 py-1 rounded-full text-xs border transition-all duration-150 ${
+                  selectedAlbum === a
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background/50 hover:bg-background/70"
+                }`}
+              >
+                {a}
+              </button>
+            ))}
+            {images.some((img) => !img.albumName) && (
+              <button
+                onClick={() => setSelectedAlbum("Uncategorized")}
+                className={`px-2 py-1 rounded-full text-xs border transition-all duration-150 ${
+                  selectedAlbum === "Uncategorized"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background/50 hover:bg-background/70"
+                }`}
+              >
+                Uncategorized
+              </button>
+            )}
+          </div>
           {/* filter dropdown */}
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2 flex-wrap'>
             <label className='text-sm'>Filter by album:</label>
             <select
               value={selectedAlbum}
@@ -215,6 +337,8 @@ export function GalleryManager() {
               .filter((img) =>
                 selectedAlbum === "All"
                   ? true
+                  : selectedAlbum === "Uncategorized"
+                  ? !img.albumName
                   : img.albumName === selectedAlbum,
               )
               .map((img) => (
@@ -229,6 +353,24 @@ export function GalleryManager() {
                     objectFit='cover'
                     className='transition-all duration-500 group-hover:brightness-110'
                   />
+                  {isSelectMode && (
+                    <div className='absolute top-2 right-2'>
+                      <input
+                        type='checkbox'
+                        checked={selectedImages.includes(img.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedImages((prev) => [...prev, img.id]);
+                          } else {
+                            setSelectedImages((prev) =>
+                              prev.filter((id) => id !== img.id),
+                            );
+                          }
+                        }}
+                        className='h-4 w-4'
+                      />
+                    </div>
+                  )}
                   <div className='absolute top-2 left-2 bg-black/60 text-xs text-white px-1 rounded'>
                     {img.albumName || "Uncategorized"}
                   </div>
@@ -295,6 +437,7 @@ export function GalleryManager() {
         <div className='text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10'>
           <ImageIcon size={48} className='mx-auto mb-4 text-foreground/40' />
           <p>No gallery photos uploaded yet.</p>
+          <p className='mt-2 text-sm'>Use the uploader above to add your first photo.</p>
         </div>
       )}
     </div>
