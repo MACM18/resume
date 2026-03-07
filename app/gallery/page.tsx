@@ -48,7 +48,7 @@ export default async function GalleryPage(props: GalleryPageProps) {
       }));
       if (selectedAlbum && selectedAlbum !== "All") {
         images = images.filter(
-          (i) => (i.albumName || "Uncategorized") === selectedAlbum,
+          (i) => (i.albumName || "No Album") === selectedAlbum,
         );
       }
     }
@@ -57,37 +57,53 @@ export default async function GalleryPage(props: GalleryPageProps) {
   // group by album name
   const grouped: Record<string, typeof images> = {};
   images.forEach((img) => {
-    const key = img.albumName || "Uncategorized";
+    const key = img.albumName || "No Album";
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(img);
   });
 
   return (
-    <div className='max-w-7xl mx-auto py-12 px-4'>
-      <div className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-bold mb-2'>Gallery</h1>
-        <p className='text-foreground/60'>
-          {images.length} photo{images.length !== 1 ? "s" : ""} across{" "}
-          {Object.keys(grouped).length} album
-          {Object.keys(grouped).length !== 1 ? "s" : ""}
-        </p>
-      </div>
-      {images.length === 0 ? (
-        <div className='text-center py-12'>
-          <p className='text-foreground/60 mb-4'>
-            No photos have been uploaded yet.
-          </p>
-          <p className='text-sm text-foreground/40'>Come back soon!</p>
-        </div>
-      ) : (
-        <>
-          {/* album selector */}
-          <div className='mb-8'>
-            <AlbumSelector albums={albums} selected={selectedAlbum || "All"} />
+    <div className='min-h-screen relative pb-20'>
+      {/* Hero Section */}
+      <section className='pt-32 pb-20 px-6'>
+        <div className='max-w-6xl mx-auto'>
+          <div className='text-center max-w-3xl mx-auto'>
+            <h1 className='text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight'>
+              Gallery
+            </h1>
+            <p className='text-xl md:text-2xl text-foreground/60 font-light leading-relaxed'>
+              {images.length} photo{images.length !== 1 ? "s" : ""} across{" "}
+              {Object.keys(grouped).length} album
+              {Object.keys(grouped).length !== 1 ? "s" : ""}
+            </p>
           </div>
-          <ClientGallerySection grouped={grouped} />
-        </>
-      )}
+        </div>
+      </section>
+
+      {/* Content Section */}
+      <section className='px-6 pb-20'>
+        <div className='max-w-6xl mx-auto'>
+          {images.length === 0 ? (
+            <div className='text-center py-12'>
+              <p className='text-foreground/60 mb-4'>
+                No photos have been uploaded yet.
+              </p>
+              <p className='text-sm text-foreground/40'>Come back soon!</p>
+            </div>
+          ) : (
+            <>
+              {/* album selector */}
+              <div className='mb-12'>
+                <AlbumSelector
+                  albums={albums}
+                  selected={selectedAlbum || "All"}
+                />
+              </div>
+              <ClientGallerySection grouped={grouped} />
+            </>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
