@@ -34,14 +34,34 @@ export async function GET(request: NextRequest) {
             userId = await getUserIdForDomain(normalized);
         }
 
+        // if caller didn't supply either, fall back to host header so public pages can
+        // simply hit `/api/gallery/images` and get the right records for the current
+        // domain.
         if (!userId) {
+            const host = request.headers.get("host") ?? "";
+            const normalized = normalizeDomain(host);
+            console.log(
+                "gallery GET fallback using host",
+                host,
+                "normalized",
+                normalized,
+            );
+            if (normalized) {
+                userId = await getUserIdForDomain(normalized);
+            }
+        }
+
+        if (!userId) {
+            console.log("gallery GET no userId after fallback");
             return NextResponse.json(
                 { error: "userId or domain is required" },
                 { status: 400 },
             );
         }
 
+        console.log("gallery GET resolved userId", userId);
         const images = await listGalleryImagesForUser(userId);
+        console.log("gallery GET retrieved", images.length, "records");
         return NextResponse.json(images);
     } catch (error) {
         console.error("Error listing gallery images:", error);
