@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { AlbumManagementPanel } from "@/components/admin/AlbumManagementPanel";
 
 const MAX_IMAGES = 100;
 
@@ -77,25 +78,6 @@ export function GalleryManager() {
       setSelectedImages([]);
     }
     setIsSelectMode(!isSelectMode);
-  };
-
-  const moveSelectedToAlbum = async (album: string | null) => {
-    if (selectedImages.length === 0) return;
-    try {
-      await Promise.all(
-        selectedImages.map((id) =>
-          updateGalleryImageMutation.mutateAsync({ id, albumName: album }),
-        ),
-      );
-      toast.success("Images updated");
-      setSelectedImages([]);
-      setIsSelectMode(false);
-      refetchImages();
-      albumsQuery.refetch();
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to move images");
-    }
   };
 
   const updateGalleryImageMutation = useMutation({
@@ -215,251 +197,276 @@ export function GalleryManager() {
 
   return (
     <div className='space-y-6'>
-      {isSelectMode && (
-        <div className='flex items-center gap-2'>
-          <label className='text-sm font-medium'>Move selected to:</label>
-          <select
-            className='px-2 py-1 border rounded'
-            onChange={(e) =>
-              moveSelectedToAlbum(e.target.value === "" ? null : e.target.value)
-            }
-            defaultValue=''
+      <div>
+        <h2 className='text-2xl font-bold text-primary'>Gallery Photos</h2>
+        <p className='text-foreground/70 mt-2'>
+          Upload and manage photos for your public gallery. You can store up to{" "}
+          {MAX_IMAGES} images.
+          <br />
+          <a
+            href='/gallery'
+            target='_blank'
+            rel='noreferrer'
+            className='text-primary underline'
           >
-            <option value=''>Uncategorized</option>
-            {albums.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
+            View public gallery ↗
+          </a>
+        </p>
+      </div>
+
+      {/* Image Upload Section */}
+      <div className='border border-foreground/10 rounded-xl bg-background/50 backdrop-blur-sm p-6 space-y-4'>
+        <div className='flex items-center gap-4'>
+          <Button
+            asChild
+            disabled={isUploading || (images && images.length >= MAX_IMAGES)}
+          >
+            <label htmlFor='gallery-image-upload' className='cursor-pointer'>
+              {isUploading ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                <FileUp className='mr-2 h-4 w-4' />
+              )}
+              {isUploading
+                ? "Uploading..."
+                : `Upload Photos (${images?.length || 0}/${MAX_IMAGES})`}
+            </label>
+          </Button>
+          <input
+            id='gallery-image-upload'
+            type='file'
+            accept='.jpg,.jpeg,.png,.webp'
+            multiple
+            className='hidden'
+            onChange={handleFileUpload}
+            disabled={isUploading || (images && images.length >= MAX_IMAGES)}
+          />
+          {images && images.length >= MAX_IMAGES && (
+            <p className='text-sm text-destructive'>Maximum images reached.</p>
+          )}
         </div>
-      )}
-      <h2 className='text-2xl font-bold text-primary'>Gallery Photos</h2>
-      <p className='text-foreground/70'>
-        Upload and manage photos for your public gallery. You can store up to{" "}
-        {MAX_IMAGES} images.
-        <br />
-        <a
-          href='/gallery'
-          target='_blank'
-          rel='noreferrer'
-          className='text-primary underline ml-1'
-        >
-          View public gallery ↗
-        </a>
-      </p>
-      {/* album input */}
-      <div className='flex items-center gap-4'>
-        <input
-          type='text'
-          placeholder='Album name (optional)'
-          value={albumInput}
-          onChange={(e) => setAlbumInput(e.target.value)}
-          list='album-list'
-          className='px-3 py-2 border rounded-md w-48'
-        />
-        <datalist id='album-list'>
-          {albums.map((a) => (
-            <option key={a} value={a} />
-          ))}
-        </datalist>
-        <Button variant='secondary' onClick={toggleSelectMode}>
-          {isSelectMode ? "Cancel" : "Select photos"}
-        </Button>
+
+        {/* Album Input */}
+        <div className='flex items-center gap-4'>
+          <input
+            type='text'
+            placeholder='Album name (optional)'
+            value={albumInput}
+            onChange={(e) => setAlbumInput(e.target.value)}
+            list='album-list'
+            className='px-3 py-2 border rounded-md flex-1 max-w-sm'
+          />
+          <datalist id='album-list'>
+            {albums.map((a) => (
+              <option key={a} value={a} />
+            ))}
+          </datalist>
+          <p className='text-xs text-foreground/60'>
+            Photos uploaded to album: <strong>{albumInput || "None"}</strong>
+          </p>
+        </div>
       </div>
 
-      {/* Image Upload */}
-      <div className='flex items-center gap-4'>
-        <Button
-          asChild
-          variant='outline'
-          disabled={isUploading || (images && images.length >= MAX_IMAGES)}
-        >
-          <label htmlFor='gallery-image-upload' className='cursor-pointer'>
-            {isUploading ? (
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-            ) : (
-              <FileUp className='mr-2 h-4 w-4' />
-            )}
-            {isUploading
-              ? "Uploading..."
-              : `Upload New Photo (${images?.length || 0}/${MAX_IMAGES})`}
-          </label>
-        </Button>
-        <input
-          id='gallery-image-upload'
-          type='file'
-          accept='.jpg,.jpeg,.png,.webp'
-          multiple
-          className='hidden'
-          onChange={handleFileUpload}
-          disabled={isUploading || (images && images.length >= MAX_IMAGES)}
-        />
-        {images && images.length >= MAX_IMAGES && (
-          <p className='text-sm text-destructive'>Maximum images reached.</p>
-        )}
-      </div>
-
-      {/* Existing Images */}
+      {/* Main Content: Album Panel + Photos Grid */}
       {images && images.length > 0 && (
-        <div className='space-y-4'>
-          {/* clickable album list/pills */}
-          <div className='flex gap-2 flex-wrap mb-2'>
-            <button
-              onClick={() => setSelectedAlbum("All")}
-              className={`px-2 py-1 rounded-full text-xs border transition-all duration-150 ${
-                selectedAlbum === "All"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background/50 hover:bg-background/70"
-              }`}
-            >
-              All
-            </button>
-            {albums.map((a) => (
-              <button
-                key={a}
-                onClick={() => setSelectedAlbum(a)}
-                className={`px-2 py-1 rounded-full text-xs border transition-all duration-150 ${
-                  selectedAlbum === a
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-background/50 hover:bg-background/70"
-                }`}
-              >
-                {a}
-              </button>
-            ))}
-            {images.some((img) => !img.albumName) && (
-              <button
-                onClick={() => setSelectedAlbum("Uncategorized")}
-                className={`px-2 py-1 rounded-full text-xs border transition-all duration-150 ${
-                  selectedAlbum === "Uncategorized"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-background/50 hover:bg-background/70"
-                }`}
-              >
-                Uncategorized
-              </button>
-            )}
+        <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
+          {/* Left Sidebar: Album Management */}
+          <div className='lg:col-span-1'>
+            <AlbumManagementPanel
+              albums={albums}
+              selectedAlbum={selectedAlbum}
+              onSelectAlbum={setSelectedAlbum}
+              onCreateAlbum={(name) => {
+                setAlbumInput(name);
+                toast.success(`Album "${name}" ready for uploads`);
+              }}
+              selectedPhotos={selectedImages}
+              images={images}
+              onRefresh={() => {
+                refetchImages();
+                albumsQuery.refetch();
+              }}
+            />
           </div>
-          {/* filter dropdown */}
-          <div className='flex items-center gap-2 flex-wrap'>
-            <label className='text-sm'>Filter by album:</label>
-            <select
-              value={selectedAlbum}
-              onChange={(e) =>
-                setSelectedAlbum(e.target.value as string | "All")
-              }
-              className='px-2 py-1 border rounded'
-            >
-              <option value='All'>All</option>
-              {albums.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
-            {images
-              .filter((img) =>
-                selectedAlbum === "All"
-                  ? true
-                  : selectedAlbum === "Uncategorized"
-                    ? !img.albumName
-                    : img.albumName === selectedAlbum,
-              )
-              .map((img) => (
-                <div
-                  key={img.id}
-                  className='relative group aspect-square rounded-lg overflow-hidden border border-glass-border/30 hover:border-primary/50 transition-all duration-200'
-                >
-                  <Image
-                    src={img.url}
-                    alt='Gallery Photo'
-                    layout='fill'
-                    objectFit='cover'
-                    className='transition-all duration-500 group-hover:brightness-110'
-                  />
-                  {isSelectMode && (
-                    <div className='absolute top-2 right-2'>
-                      <input
-                        type='checkbox'
-                        checked={selectedImages.includes(img.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedImages((prev) => [...prev, img.id]);
-                          } else {
-                            setSelectedImages((prev) =>
-                              prev.filter((id) => id !== img.id),
-                            );
-                          }
-                        }}
-                        className='h-4 w-4'
-                      />
-                    </div>
-                  )}
-                  <div className='absolute top-2 left-2 bg-black/60 text-xs text-white px-1 rounded'>
-                    {img.albumName || "Uncategorized"}
-                  </div>
-                  <div className='absolute bottom-2 right-2 bg-black/60 text-xs text-white px-1 rounded'>
-                    {new Date(img.createdAt).toLocaleDateString()}
-                  </div>
-                  <div className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
-                    <div className='flex gap-2'>
-                      <Button
-                        size='sm'
-                        onClick={() => {
-                          const newAlbum = prompt(
-                            "Enter new album name (empty for none):",
-                            img.albumName || "",
+
+          {/* Right Content: Photo Grid */}
+          <div className='lg:col-span-3 space-y-4'>
+            {/* Toolbar with Select Mode Toggle */}
+            <div className='flex items-center justify-between bg-background/50 backdrop-blur-sm border border-foreground/10 rounded-lg p-4'>
+              <div className='flex items-center gap-2'>
+                <p className='text-sm font-medium'>
+                  {selectedAlbum === "All"
+                    ? "All Photos"
+                    : selectedAlbum === "No Album"
+                      ? "Photos without album"
+                      : `Album: ${selectedAlbum}`}
+                </p>
+                <p className='text-xs text-foreground/60'>
+                  (
+                  {images.filter((img) =>
+                    selectedAlbum === "All"
+                      ? true
+                      : selectedAlbum === "No Album"
+                        ? !img.albumName
+                        : img.albumName === selectedAlbum,
+                  ).length}
+                  )
+                </p>
+              </div>
+              <Button
+                size='sm'
+                variant={isSelectMode ? "default" : "outline"}
+                onClick={toggleSelectMode}
+              >
+                {isSelectMode
+                  ? `${selectedImages.length} Selected - Done`
+                  : "Select Photos"}
+              </Button>
+            </div>
+
+            {/* Photo Grid */}
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+              {images
+                .filter((img) =>
+                  selectedAlbum === "All"
+                    ? true
+                    : selectedAlbum === "No Album"
+                      ? !img.albumName
+                      : img.albumName === selectedAlbum,
+                )
+                .map((img) => (
+                  <div
+                    key={img.id}
+                    className={`relative group aspect-square rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer ${
+                      isSelectMode &&
+                      selectedImages.includes(img.id)
+                        ? "border-primary bg-primary/10"
+                        : "border-glass-border/30 hover:border-primary/50"
+                    }`}
+                    onClick={() => {
+                      if (isSelectMode) {
+                        if (selectedImages.includes(img.id)) {
+                          setSelectedImages((prev) =>
+                            prev.filter((id) => id !== img.id),
                           );
-                          if (newAlbum !== null) {
-                            updateGalleryImageMutation.mutate({
-                              id: img.id,
-                              albumName: newAlbum || null,
-                            });
-                          }
-                        }}
-                        disabled={updateGalleryImageMutation.isPending}
-                      >
-                        Edit
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant='destructive'
-                            size='sm'
-                            disabled={deleteImageMutation.isPending}
-                          >
-                            <Trash size={16} />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Photo?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete this photo.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteImageMutation.mutate(img.id)}
-                              className='bg-destructive hover:bg-destructive/90'
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        } else {
+                          setSelectedImages((prev) => [
+                            ...prev,
+                            img.id,
+                          ]);
+                        }
+                      }
+                    }}
+                  >
+                    <Image
+                      src={img.url}
+                      alt='Gallery Photo'
+                      layout='fill'
+                      objectFit='cover'
+                      className='transition-all duration-500 group-hover:brightness-110'
+                    />
+                    {isSelectMode && (
+                      <div className='absolute top-2 right-2 z-10'>
+                        <div
+                          className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-all ${
+                            selectedImages.includes(
+                              img.id,
+                            )
+                              ? "bg-primary border-primary"
+                              : "border-white/70"
+                          }`}
+                        >
+                          {selectedImages.includes(
+                            img.id,
+                          ) && (
+                            <span className='text-white text-xs'>✓</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <div className='absolute top-2 left-2 bg-black/60 text-xs text-white px-2 py-1 rounded'>
+                      {img.albumName || "No Album"}
                     </div>
+                    <div className='absolute bottom-2 right-2 bg-black/60 text-xs text-white px-2 py-1 rounded'>
+                      {new Date(img.createdAt).toLocaleDateString()}
+                    </div>
+                    {!isSelectMode && (
+                      <div className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                        <div className='flex gap-2'>
+                          <Button
+                            size='sm'
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newAlbum = prompt(
+                                "Enter new album name (empty for none):",
+                                img.albumName || "",
+                              );
+                              if (newAlbum !== null) {
+                                updateGalleryImageMutation.mutate({
+                                  id: img.id,
+                                  albumName: newAlbum || null,
+                                });
+                              }
+                            }}
+                            disabled={
+                              updateGalleryImageMutation.isPending
+                            }
+                          >
+                            Edit
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant='destructive'
+                                size='sm'
+                                disabled={
+                                  deleteImageMutation.isPending
+                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <Trash size={16} />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Photo?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone.
+                                  This will permanently delete
+                                  this photo.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    deleteImageMutation.mutate(
+                                      img.id,
+                                    )
+                                  }
+                                  className='bg-destructive hover:bg-destructive/90'
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                ))}
+            </div>
           </div>
         </div>
       )}
+
       {images && images.length === 0 && (
         <div className='text-center text-foreground/60 p-8 border rounded-lg bg-glass-bg/10'>
           <ImageIcon size={48} className='mx-auto mb-4 text-foreground/40' />
