@@ -29,7 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const MAX_IMAGES = 50;
+const MAX_IMAGES = 100;
 
 export function GalleryManager() {
   const { session } = useAuth();
@@ -137,35 +137,64 @@ export function GalleryManager() {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0];
-    if (!file || !session?.user.id) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0 || !session?.user.id) return;
 
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    // Validate all files
+    const validFormats = ["image/jpeg", "image/png", "image/webp"];
+    const invalidFiles = files.filter((f) => !validFormats.includes(f.type));
+    if (invalidFiles.length > 0) {
       toast.error(
-        "Invalid file type. Please upload a JPG, PNG, or WEBP image.",
+        `${invalidFiles.length} file(s) have invalid type. Please use JPG, PNG, or WEBP.`,
       );
       return;
     }
 
-    if (images && images.length >= MAX_IMAGES) {
-      toast.error(`You can only upload a maximum of ${MAX_IMAGES} images.`);
+    const totalWillBe = (images?.length || 0) + files.length;
+    if (totalWillBe > MAX_IMAGES) {
+      toast.error(
+        `You can only store ${MAX_IMAGES} images total. Uploading ${files.length} files would exceed the limit.`,
+      );
       return;
     }
 
     setIsUploading(true);
+    let successCount = 0;
+    let failureCount = 0;
+
     try {
-      await uploadGalleryImage(file, albumInput || undefined);
-      toast.success("Image uploaded successfully!");
-      setAlbumInput("");
-      refetchImages();
-      albumsQuery.refetch();
+      for (const file of files) {
+        try {
+          await uploadGalleryImage(file, albumInput || undefined);
+          successCount++;
+        } catch (error) {
+          failureCount++;
+          console.error(`Failed to upload ${file.name}:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(
+          `Uploaded ${successCount} photo${successCount > 1 ? "s" : ""}${
+            failureCount > 0 ? ` (${failureCount} failed)` : ""
+          }`,
+        );
+        setAlbumInput("");
+        refetchImages();
+        albumsQuery.refetch();
+      }
+      if (failureCount > 0 && successCount === 0) {
+        toast.error(`Failed to upload ${failureCount} photo(s)`);
+      }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to upload image.";
+        error instanceof Error ? error.message : "Failed to upload images.";
       toast.error(errorMessage);
       console.error(error);
     } finally {
       setIsUploading(false);
+      // Reset input
+      event.target.value = "";
     }
   };
 
@@ -261,6 +290,7 @@ export function GalleryManager() {
           id='gallery-image-upload'
           type='file'
           accept='.jpg,.jpeg,.png,.webp'
+          multiple
           className='hidden'
           onChange={handleFileUpload}
           disabled={isUploading || (images && images.length >= MAX_IMAGES)}

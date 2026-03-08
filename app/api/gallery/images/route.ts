@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
         // Storage limits (reuse existing logic)
         const existingFiles = await listFiles("gallery-images", userId);
-        const limit = 50;
+        const limit = 100;
         if (existingFiles.length >= limit) {
             return NextResponse.json(
                 {
