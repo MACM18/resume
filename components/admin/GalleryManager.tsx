@@ -303,13 +303,15 @@ export function GalleryManager() {
                 </p>
                 <p className='text-xs text-foreground/60'>
                   (
-                  {images.filter((img) =>
-                    selectedAlbum === "All"
-                      ? true
-                      : selectedAlbum === "No Album"
-                        ? !img.albumName
-                        : img.albumName === selectedAlbum,
-                  ).length}
+                  {
+                    images.filter((img) =>
+                      selectedAlbum === "All"
+                        ? true
+                        : selectedAlbum === "No Album"
+                          ? !img.albumName
+                          : img.albumName === selectedAlbum,
+                    ).length
+                  }
                   )
                 </p>
               </div>
@@ -338,8 +340,7 @@ export function GalleryManager() {
                   <div
                     key={img.id}
                     className={`relative group aspect-square rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer ${
-                      isSelectMode &&
-                      selectedImages.includes(img.id)
+                      isSelectMode && selectedImages.includes(img.id)
                         ? "border-primary bg-primary/10"
                         : "border-glass-border/30 hover:border-primary/50"
                     }`}
@@ -350,10 +351,7 @@ export function GalleryManager() {
                             prev.filter((id) => id !== img.id),
                           );
                         } else {
-                          setSelectedImages((prev) => [
-                            ...prev,
-                            img.id,
-                          ]);
+                          setSelectedImages((prev) => [...prev, img.id]);
                         }
                       }
                     }}
@@ -366,32 +364,28 @@ export function GalleryManager() {
                       className='transition-all duration-500 group-hover:brightness-110'
                     />
                     {isSelectMode && (
-                      <div className='absolute top-2 right-2 z-10'>
+                      <div className='absolute top-2 right-2 z-20'>
                         <div
                           className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-all ${
-                            selectedImages.includes(
-                              img.id,
-                            )
+                            selectedImages.includes(img.id)
                               ? "bg-primary border-primary"
                               : "border-white/70"
                           }`}
                         >
-                          {selectedImages.includes(
-                            img.id,
-                          ) && (
+                          {selectedImages.includes(img.id) && (
                             <span className='text-white text-xs'>✓</span>
                           )}
                         </div>
                       </div>
                     )}
-                    <div className='absolute top-2 left-2 bg-black/60 text-xs text-white px-2 py-1 rounded'>
+                    <div className='absolute top-2 left-2 bg-black/60 text-xs text-white px-2 py-1 rounded pointer-events-none'>
                       {img.albumName || "No Album"}
                     </div>
-                    <div className='absolute bottom-2 right-2 bg-black/60 text-xs text-white px-2 py-1 rounded'>
+                    <div className='absolute bottom-2 right-2 bg-black/60 text-xs text-white px-2 py-1 rounded pointer-events-none'>
                       {new Date(img.createdAt).toLocaleDateString()}
                     </div>
                     {!isSelectMode && (
-                      <div className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                      <div className='absolute inset-0 z-5 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
                         <div className='flex gap-2'>
                           <Button
                             size='sm'
@@ -408,9 +402,7 @@ export function GalleryManager() {
                                 });
                               }
                             }}
-                            disabled={
-                              updateGalleryImageMutation.isPending
-                            }
+                            disabled={updateGalleryImageMutation.isPending}
                           >
                             Edit
                           </Button>
@@ -419,9 +411,7 @@ export function GalleryManager() {
                               <Button
                                 variant='destructive'
                                 size='sm'
-                                disabled={
-                                  deleteImageMutation.isPending
-                                }
+                                disabled={deleteImageMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                 }}
@@ -435,20 +425,15 @@ export function GalleryManager() {
                                   Delete Photo?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone.
-                                  This will permanently delete
-                                  this photo.
+                                  This action cannot be undone. This will
+                                  permanently delete this photo.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>
-                                  Cancel
-                                </AlertDialogCancel>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() =>
-                                    deleteImageMutation.mutate(
-                                      img.id,
-                                    )
+                                    deleteImageMutation.mutate(img.id)
                                   }
                                   className='bg-destructive hover:bg-destructive/90'
                                 >

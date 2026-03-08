@@ -76,9 +76,7 @@ export function AlbumManagementPanel({
         ),
       );
       const album = albumName || "No Album";
-      toast.success(
-        `Moved ${selectedPhotos.length} photo(s) to ${album}`,
-      );
+      toast.success(`Moved ${selectedPhotos.length} photo(s) to ${album}`);
       onRefresh();
     } catch {
       toast.error("Failed to move photos");
