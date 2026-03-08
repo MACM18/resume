@@ -6,7 +6,6 @@ import {
   uploadGalleryImage,
   getGalleryImages,
   deleteGalleryImage,
-  updateGalleryImage,
   getGalleryAlbums,
   GalleryImage,
 } from "@/lib/profile";
@@ -14,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, FileUp, Trash, Image as ImageIcon } from "lucide-react";
+import { Loader2, FileUp, Trash, Image as ImageIcon, Edit } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import {
@@ -29,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AlbumManagementPanel } from "@/components/admin/AlbumManagementPanel";
+import { PhotoEditor } from "@/components/admin/PhotoEditor";
 
 const MAX_IMAGES = 100;
 
@@ -40,6 +40,8 @@ export function GalleryManager() {
   const [selectedAlbum, setSelectedAlbum] = useState<string | "All">("All");
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [editingImageId, setEditingImageId] = useState<string | null>(null);
+  const [editingImageUrl, setEditingImageUrl] = useState<string>("");
 
   const {
     data: images,
@@ -80,24 +82,6 @@ export function GalleryManager() {
     setIsSelectMode(!isSelectMode);
   };
 
-  const updateGalleryImageMutation = useMutation({
-    mutationFn: async (vars: { id: string; albumName: string | null }) => {
-      return updateGalleryImage(vars.id, vars.albumName);
-    },
-    onSuccess: () => {
-      toast.success("Image updated successfully!");
-      refetchImages();
-      albumsQuery.refetch();
-    },
-    onError: (error: unknown) => {
-      if (error instanceof Error) {
-        toast.error(`Failed to update image: ${error.message}`);
-      } else {
-        toast.error("Failed to update image.");
-      }
-    },
-  });
-
   const deleteImageMutation = useMutation({
     mutationFn: async (imageId: string) => {
       return deleteGalleryImage(imageId);
@@ -112,6 +96,41 @@ export function GalleryManager() {
         toast.error(`Failed to delete image: ${error.message}`);
       } else {
         toast.error("Failed to delete image.");
+      }
+    },
+  });
+
+  const editImageMutation = useMutation({
+    mutationFn: async (vars: { imageId: string; blob: Blob }) => {
+      const { imageId, blob } = vars;
+
+      // Create FormData with the blob
+      const formData = new FormData();
+      formData.append("file", blob, `edited_${Date.now()}.jpg`);
+
+      // Call the API endpoint to upload and update the image
+      const res = await fetch(`/api/gallery/images/${imageId}`, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to save edited image");
+      }
+
+      const data = await res.json();
+      return data.publicUrl;
+    },
+    onSuccess: () => {
+      toast.success("Image edited and saved!");
+      refetchImages();
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to save image: ${error.message}`);
+      } else {
+        toast.error("Failed to save image.");
       }
     },
   });
@@ -391,19 +410,11 @@ export function GalleryManager() {
                             size='sm'
                             onClick={(e) => {
                               e.stopPropagation();
-                              const newAlbum = prompt(
-                                "Enter new album name (empty for none):",
-                                img.albumName || "",
-                              );
-                              if (newAlbum !== null) {
-                                updateGalleryImageMutation.mutate({
-                                  id: img.id,
-                                  albumName: newAlbum || null,
-                                });
-                              }
+                              setEditingImageId(img.id);
+                              setEditingImageUrl(img.url);
                             }}
-                            disabled={updateGalleryImageMutation.isPending}
                           >
+                            <Edit size={16} className='mr-1' />
                             Edit
                           </Button>
                           <AlertDialog>
@@ -461,6 +472,23 @@ export function GalleryManager() {
           </p>
         </div>
       )}
+
+      {/* Photo Editor Modal */}
+      <PhotoEditor
+        isOpen={!!editingImageId}
+        onClose={() => setEditingImageId(null)}
+        imageUrl={editingImageUrl}
+        imageName='Photo'
+        onSave={async (blob) => {
+          if (editingImageId) {
+            await editImageMutation.mutateAsync({
+              imageId: editingImageId,
+              blob,
+            });
+          }
+          setEditingImageId(null);
+        }}
+      />
     </div>
   );
 }

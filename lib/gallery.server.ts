@@ -67,7 +67,7 @@ export async function deleteGalleryImageRecord(id: string) {
  */
 export async function updateGalleryImage(
     id: string,
-    data: { albumName?: string | null },
+    data: { albumName?: string | null; url?: string },
 ) {
     return db.galleryImage.update({ where: { id }, data });
 }
