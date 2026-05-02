@@ -7,8 +7,8 @@ import { getResend, getResendFromEmail } from '@/lib/resend.server';
 
 export const dynamic = 'force-dynamic';
 
-function isSuperAdminDomain(domain: string | null | undefined): boolean {
-  return domain === 'macm.dev' || domain === 'www.macm.dev';
+function isSuperAdminDomain(domains: {domain: string}[] | undefined): boolean {
+  return domains?.some(d => d.domain === 'macm.dev' || d.domain === 'www.macm.dev') ?? false;
 }
 
 function getRequestOrigin(request: NextRequest): string {
@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
 
     const currentUserProfile = await db.profile.findFirst({
       where: { user: { email: session.user.email } },
-      select: { domain: true }
+      include: { domains: true }
     });
 
-    if (!isSuperAdminDomain(currentUserProfile?.domain)) {
+    if (!isSuperAdminDomain(currentUserProfile?.domains)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

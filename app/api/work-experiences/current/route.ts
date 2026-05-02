@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Find profile by domain
     const profile = await db.profile.findFirst({
-      where: { domain: normalizedDomain },
+      where: { domains: { some: { domain: normalizedDomain } } },
       select: { userId: true },
     });
 

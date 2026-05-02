@@ -92,6 +92,6 @@ export async function listGalleryAlbums(userId: string): Promise<string[]> {
 export async function getUserIdForDomain(
     domain: string,
 ): Promise<string | null> {
-    const profile = await db.profile.findFirst({ where: { domain } });
+    const profile = await db.profile.findFirst({ where: { domains: { some: { domain } } } });
     return profile ? profile.userId : null;
 }

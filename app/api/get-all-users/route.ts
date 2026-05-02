@@ -19,10 +19,10 @@ export async function GET() {
       where: {
         user: { email: session.user.email }
       },
-      select: { domain: true }
+      include: { domains: true }
     });
 
-    if (currentUserProfile?.domain !== 'macm.dev') {
+    if (!currentUserProfile?.domains?.some(d => d.domain === 'macm.dev')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -30,7 +30,7 @@ export async function GET() {
     const users = await db.user.findMany({
       include: {
         profile: {
-          select: { domain: true }
+          include: { domains: true }
         }
       },
       orderBy: { createdAt: 'desc' }
@@ -39,7 +39,7 @@ export async function GET() {
     const result = users.map((u) => ({
       id: u.id,
       email: u.email,
-      domain: u.profile?.domain ?? '',
+      domain: u.profile?.domains?.find((d) => d.isPrimary)?.domain || u.profile?.domains?.[0]?.domain || '',
       created_at: u.createdAt.toISOString(),
       email_confirmed_at: u.emailVerified?.toISOString() ?? null,
     }));

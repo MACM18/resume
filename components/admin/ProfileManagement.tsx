@@ -19,6 +19,7 @@ export function ProfileManagement() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [hostname, setHostname] = useState("");
+  const [newDomain, setNewDomain] = useState("");
   const [openSections, setOpenSections] = useState({
     domain: true,
     profile: true,
@@ -87,7 +88,26 @@ export function ProfileManagement() {
     },
   });
 
-  const isDomainClaimed = profile?.domain === hostname;
+  const isDomainClaimed = profile?.domains?.some(d => d.domain === hostname) || profile?.domain === hostname;
+
+  const removeDomainMutation = useMutation({
+    mutationFn: async (domain: string) => {
+      // In a real app we'd have a specific endpoint to remove a domain,
+      // but for this example we can keep it simple or implement it later.
+      // Assuming we have a /api/profile/domains route
+      const res = await fetch("/api/profile/domains", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain }),
+      });
+      if (!res.ok) throw new Error("Failed to remove domain");
+    },
+    onSuccess: () => {
+      toast.success("Domain removed");
+      queryClient.invalidateQueries({ queryKey: ["profile", session?.user?.id] });
+    },
+    onError: () => toast.error("Failed to remove domain"),
+  });
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => {
@@ -166,24 +186,74 @@ export function ProfileManagement() {
         title='Domain Setup'
         description='Connect this domain to your portfolio'
       >
-        <div className='flex flex-col md:flex-row gap-4'>
-          <div className='flex-1 p-3 border border-foreground/20 rounded-lg bg-foreground/5 font-mono text-sm'>
-            {hostname}
-          </div>
-          {isDomainClaimed ? (
-            <div className='flex items-center text-green-500 font-medium'>
-              ✓ Domain claimed
+        <div className='flex flex-col gap-4'>
+          <div className='flex flex-col md:flex-row gap-4'>
+            <div className='flex-1 p-3 border border-foreground/20 rounded-lg bg-foreground/5 font-mono text-sm flex items-center justify-between'>
+              <span>Current Host: {hostname}</span>
+              {isDomainClaimed ? (
+                <span className='text-green-500 font-medium text-xs'>✓ Connected</span>
+              ) : null}
             </div>
-          ) : (
+            {!isDomainClaimed && (
+              <Button
+                onClick={() => claimDomainMutation.mutate(hostname)}
+                disabled={claimDomainMutation.isPending}
+                className='whitespace-nowrap'
+              >
+                <LinkIcon className='mr-2' size={16} />
+                {claimDomainMutation.isPending ? "Claiming..." : "Connect This Domain"}
+              </Button>
+            )}
+          </div>
+          
+          <div className="mt-4">
+            <h4 className="text-sm font-semibold mb-2">Connected Domains</h4>
+            {profile?.domains && profile.domains.length > 0 ? (
+              <ul className="space-y-2">
+                {profile.domains.map((d) => (
+                  <li key={d.domain} className="flex justify-between items-center p-3 border rounded-lg bg-background">
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm">{d.domain}</code>
+                      {d.isPrimary && <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">Primary</span>}
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => removeDomainMutation.mutate(d.domain)}
+                      disabled={removeDomainMutation.isPending && removeDomainMutation.variables === d.domain}
+                      className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Only using primary domain or none connected yet.</p>
+            )}
+          </div>
+
+          <div className="mt-4 pt-4 border-t flex flex-col md:flex-row gap-2">
+            <input 
+              type="text" 
+              placeholder="subdomain.example.com" 
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              className="flex-1 p-2 border rounded-md text-sm"
+            />
             <Button
-              onClick={() => claimDomainMutation.mutate(hostname)}
-              disabled={claimDomainMutation.isPending}
-              className='whitespace-nowrap'
+              onClick={() => {
+                if (newDomain) {
+                  claimDomainMutation.mutate(newDomain);
+                  setNewDomain("");
+                }
+              }}
+              disabled={claimDomainMutation.isPending || !newDomain}
+              variant="secondary"
             >
-              <LinkIcon className='mr-2' size={16} />
-              {claimDomainMutation.isPending ? "Claiming..." : "Claim Domain"}
+              Add Domain
             </Button>
-          )}
+          </div>
         </div>
       </Section>
 

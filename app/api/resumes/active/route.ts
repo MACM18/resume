@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     // Get profile with active resume role
     const profile = await db.profile.findFirst({
-      where: { domain: normalizedDomain },
+      where: { domains: { some: { domain: normalizedDomain } } },
       select: { userId: true, activeResumeRole: true },
     });
 

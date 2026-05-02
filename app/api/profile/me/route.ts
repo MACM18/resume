@@ -18,6 +18,7 @@ export async function GET() {
 
     const profile = await db.profile.findUnique({
       where: { userId: session.user.id },
+      include: { domains: true },
     });
 
     if (!profile) {
@@ -40,7 +41,8 @@ export async function GET() {
       selected_gradient: sel ? { id: String(sel["id"]), name: String(sel["name"]), preview_css: (sel["previewCss"] as string | null) } : undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       tagline: (p["tagline"] as string),
-      domain: (p["domain"] as string | null),
+      domain: (p["domains"] as {domain: string, isPrimary: boolean}[] | undefined)?.find(d => d.isPrimary)?.domain || (p["domains"] as {domain: string}[] | undefined)?.[0]?.domain || null,
+      domains: p["domains"],
       home_page_data: p["homePageData"],
       about_page_data: p["aboutPageData"],
       active_resume_role: (p["activeResumeRole"] as string | null),
@@ -81,7 +83,15 @@ export async function PATCH(request: NextRequest) {
     if (body.avatar_position !== undefined) updateData.avatarPosition = body.avatar_position;
     if (body.avatar_zoom !== undefined) updateData.avatarZoom = body.avatar_zoom;
     if (body.avatar_size !== undefined) updateData.avatarSize = body.avatar_size;
-    if (body.domain !== undefined) updateData.domain = body.domain;
+    if (body.domain !== undefined) {
+      updateData.domains = {
+        upsert: [{
+          where: { domain: body.domain },
+          update: { isPrimary: true },
+          create: { domain: body.domain, isPrimary: true }
+        }]
+      };
+    }
     if (body.home_page_data !== undefined) updateData.homePageData = body.home_page_data;
     if (body.about_page_data !== undefined) updateData.aboutPageData = body.about_page_data;
     if (body.active_resume_role !== undefined) updateData.activeResumeRole = body.active_resume_role;
@@ -95,6 +105,7 @@ export async function PATCH(request: NextRequest) {
     const profile = await db.profile.update({
       where: { userId: session.user.id },
       data: updateData,
+      include: { domains: true },
     });
 
     console.log("Profile updated successfully");
@@ -109,7 +120,8 @@ export async function PATCH(request: NextRequest) {
       avatar_zoom: profile.avatarZoom,
       avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
       tagline: profile.tagline,
-      domain: profile.domain,
+      domain: (profile as unknown as { domains: {domain: string, isPrimary: boolean}[] }).domains?.find(d => d.isPrimary)?.domain || (profile as unknown as { domains: {domain: string}[] }).domains?.[0]?.domain || null,
+      domains: (profile as unknown as { domains: {domain: string, isPrimary: boolean}[] }).domains,
       home_page_data: profile.homePageData,
       about_page_data: profile.aboutPageData,
       active_resume_role: profile.activeResumeRole,

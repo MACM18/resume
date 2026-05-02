@@ -23,6 +23,7 @@ export async function POST() {
     // Check if profile exists
     const existingProfile = await db.profile.findUnique({
       where: { userId },
+      include: { domains: true },
     });
 
     if (existingProfile) {
@@ -33,7 +34,7 @@ export async function POST() {
         full_name: existingProfile.fullName,
         avatar_url: existingProfile.avatarUrl,
         tagline: existingProfile.tagline,
-        domain: existingProfile.domain,
+        domain: existingProfile.domains?.[0]?.domain || null,
         home_page_data: existingProfile.homePageData,
         about_page_data: existingProfile.aboutPageData,
         active_resume_role: existingProfile.activeResumeRole,
@@ -57,6 +58,7 @@ export async function POST() {
         aboutPageData: JSON.parse(JSON.stringify(defaults.aboutPageData)),
         theme: JSON.parse(JSON.stringify(defaults.theme)),
       },
+      include: { domains: true },
     });
 
     console.log("Created new profile for user:", userId);
@@ -67,7 +69,7 @@ export async function POST() {
       full_name: newProfile.fullName,
       avatar_url: newProfile.avatarUrl,
       tagline: newProfile.tagline,
-      domain: newProfile.domain,
+      domain: newProfile.domains?.[0]?.domain || null,
       home_page_data: newProfile.homePageData,
       about_page_data: newProfile.aboutPageData,
       active_resume_role: newProfile.activeResumeRole,

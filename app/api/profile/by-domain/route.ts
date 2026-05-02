@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     const normalizedDomain = normalizeDomain(domain);
 
-    const profile = await db.profile.findFirst({ where: { domain: normalizedDomain } });
+    const profile = await db.profile.findFirst({ where: { domains: { some: { domain: normalizedDomain } } }, include: { domains: true } });
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
