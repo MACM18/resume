@@ -19,12 +19,10 @@ export async function POST(request: NextRequest) {
 
     const currentUserProfile = await db.profile.findFirst({
       where: { user: { email: session.user.email } },
-      select: { domain: true }
+      include: { domains: true }
     });
 
-    const isSuperAdmin =
-      currentUserProfile?.domain === 'macm.dev' ||
-      currentUserProfile?.domain === 'www.macm.dev';
+    const isSuperAdmin = currentUserProfile?.domains?.some(d => d.domain === 'macm.dev' || d.domain === 'www.macm.dev') ?? false;
     if (!isSuperAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

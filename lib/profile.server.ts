@@ -11,7 +11,7 @@ function transformProfile(prismaProfile: {
   avatarPosition: unknown;
   avatarZoom: number | null;
   tagline: string;
-  domain: string | null;
+  domains?: { domain: string; isPrimary: boolean }[];
   homePageData: unknown;
   aboutPageData: unknown;
   activeResumeRole: string | null;
@@ -36,7 +36,7 @@ function transformProfile(prismaProfile: {
         | number
         | undefined || undefined,
     tagline: prismaProfile.tagline,
-    domain: prismaProfile.domain,
+    domain: prismaProfile.domains?.find((d) => d.isPrimary)?.domain || prismaProfile.domains?.[0]?.domain || null,
     home_page_data: prismaProfile.homePageData as HomePageData,
     about_page_data: prismaProfile.aboutPageData as AboutPageData,
     active_resume_role: prismaProfile.activeResumeRole,
@@ -54,7 +54,8 @@ export async function getProfileDataServer(domain?: string) {
 
   try {
     const profile = await db.profile.findFirst({
-      where: { domain: effectiveDomain },
+      where: { domains: { some: { domain: effectiveDomain } } },
+      include: { domains: true },
     });
 
     if (!profile) {
@@ -94,6 +95,7 @@ export async function getProfileByUserId(
   try {
     const profile = await db.profile.findUnique({
       where: { userId },
+      include: { domains: true },
     });
 
     if (!profile) {
@@ -113,7 +115,7 @@ export async function getThemeDataServer(domain?: string) {
 
   try {
     const profile = await db.profile.findFirst({
-      where: { domain: effectiveDomain },
+      where: { domains: { some: { domain: effectiveDomain } } },
       select: {
         theme: true,
         backgroundImageUrl: true,
