@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const normalizedDomain = normalizeDomain(domain);
 
     const profile = await db.profile.findFirst({
-      where: { domain: normalizedDomain },
+      where: { domains: { some: { domain: normalizedDomain } } },
       select: {
         theme: true,
         backgroundImageUrl: true,

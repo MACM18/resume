@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       // look up profile by domain
       const normalized = normalizeDomain(queryDomain);
       const profile = await db.profile.findFirst({
-        where: { domain: normalized },
+        where: { domains: { some: { domain: normalized } } },
       });
       if (profile) {
         userId = profile.userId;

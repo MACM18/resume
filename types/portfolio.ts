@@ -138,6 +138,7 @@ export interface Profile {
   avatar_size?: number;
   tagline?: string;
   domain?: string | null;
+  domains?: { domain: string; isPrimary: boolean }[];
   home_page_data?: HomePageData;
   about_page_data?: AboutPageData;
   active_resume_role?: string | null;

@@ -51,7 +51,9 @@ async function main() {
     create: {
       id: "clprofile_chathura_001",
       userId: chathura.id,
-      domain: "macm.dev",
+      domains: {
+        create: { domain: "macm.dev", isPrimary: true },
+      },
       fullName: "Chathura Madhushanka",
       tagline: "Full Stack Developer - DevOps and AI",
       theme: {
@@ -206,7 +208,9 @@ async function main() {
     create: {
       id: "clprofile_taniya_002",
       userId: taniya.id,
-      domain: "taniya.dev",
+      domains: {
+        create: { domain: "taniya.dev", isPrimary: true },
+      },
       fullName: "Taniya Aththanayaka",
       tagline: "Welcome to my portfolio",
       theme: {
