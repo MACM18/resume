@@ -52,41 +52,14 @@ jobs:
           cache-to: type=gha,mode=max
 
       # -------------------------------
-      # UPDATE COOLIFY APPLICATION TAG ONLY
+      # DEPLOY TO DOKPLOY VIA WEBHOOKS
       # -------------------------------
 
-      - name: Update Coolify Application 1 Tag
+      - name: Deploy to Dokploy (Application 1)
         run: |
-          NEW_TAG="${{ env.TAG }}"
-          echo "Updating Coolify Application 1 tag to: $NEW_TAG"
+          curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL_ONE }}"
 
-          curl -X PATCH \
-            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            --data "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
-            "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_UUID }}"
-
-      - name: Update Coolify Application 2 Tag
+      - name: Deploy to Dokploy (Application 2)
         run: |
-          NEW_TAG="${{ env.TAG }}"
-          echo "Updating Coolify Application 2 tag to: $NEW_TAG"
+          curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL_TWO }}"
 
-          curl -X PATCH \
-            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            --data "{\"docker_registry_image_tag\": \"$NEW_TAG\"}" \
-            "${{ secrets.COOLIFY_URL }}/api/v1/applications/${{ secrets.COOLIFY_UUID_SECOND }}"
-
-
-      # 5. Notify Coolify to pull the new image
-      - name: Trigger Coolify Deployment (Resource 1)
-        run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?uuid=${{secrets.COOLIFY_UUID}}&force=false" \
-               -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
-               -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-
-      - name: Second Deployment Trigger (Resource 2)
-        run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}?uuid=${{secrets.COOLIFY_UUID_SECOND}}&force=false" \
-               -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
-               -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
