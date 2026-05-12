@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { resume, profile, projects } = await request.json();
+    const { resume, profile, projects, workExperiences } = await request.json();
 
     if (!resume || !profile) {
       return NextResponse.json(
@@ -22,7 +22,8 @@ About: ${JSON.stringify(profile.about_page_data ?? {})}
 
 Resume Data:
 Skills: ${Array.isArray(resume.skills) ? resume.skills.join(', ') : resume.skills}
-Experience: ${JSON.stringify(resume.experience ?? [])}
+
+Experience (Work History): ${JSON.stringify(workExperiences ?? [])}
 
 Projects: ${JSON.stringify(projects ?? [])}
 `.trim();
