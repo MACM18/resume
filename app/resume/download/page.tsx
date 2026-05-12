@@ -174,7 +174,7 @@ export default function ResumeDownloadPage() {
                 )}
               </div>
 
-              <div className="flex-1 bg-foreground/5 rounded-xl border border-foreground/10 overflow-hidden min-h-[500px] relative">
+              <div className="flex-1 bg-foreground/5 rounded-xl border border-foreground/10 overflow-hidden min-h-[800px] relative">
                 {isGenerating ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/50 backdrop-blur-sm">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -223,7 +223,7 @@ export default function ResumeDownloadPage() {
                 )}
               </div>
 
-              <div className="flex-1 bg-foreground/5 rounded-xl border border-foreground/10 overflow-hidden min-h-[500px] relative">
+              <div className="flex-1 bg-foreground/5 rounded-xl border border-foreground/10 overflow-hidden min-h-[800px] relative">
                 {resume.resume_url ? (
                   <iframe
                     src={`${resume.resume_url}#toolbar=0&navpanes=0&scrollbar=0`}
