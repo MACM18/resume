@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Download, Loader2, FileText, ArrowLeft, ExternalLink } from "lucide-react";
+import { Download, Loader2, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/GlassCard";
@@ -12,7 +12,7 @@ import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
 import { getVisibleWorkExperiences } from "@/lib/work-experiences";
 import { getEffectiveDomain } from "@/lib/utils";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 export default function ResumeDownloadPage() {
   const [hostname, setHostname] = useState("");
@@ -63,9 +63,14 @@ export default function ResumeDownloadPage() {
     enabled: !!hostname && !!profileData,
   });
 
-  // Generate the PDF on page load
+  // Reset generated PDF when data changes
   useEffect(() => {
-    if (resume && profileData && projects) {
+    setGeneratedPdfUrl(null);
+  }, [resume, profileData, projects, workHistory]);
+
+  // Generate the PDF on page load or when data changes
+  useEffect(() => {
+    if (resume && profileData && projects && !generatedPdfUrl && !isGenerating) {
       const generatePdf = async () => {
         setIsGenerating(true);
         try {
@@ -98,7 +103,7 @@ export default function ResumeDownloadPage() {
     return () => {
       if (generatedPdfUrl) URL.revokeObjectURL(generatedPdfUrl);
     };
-  }, [resume, profileData, projects, workHistory]);
+  }, [resume, profileData, projects, workHistory, generatedPdfUrl, isGenerating]);
 
   const handleDownload = (url: string, filename: string) => {
     const a = document.createElement("a");
@@ -230,7 +235,7 @@ export default function ResumeDownloadPage() {
                     <FileText className="text-foreground/10 mb-4" size={64} />
                     <h3 className="text-lg font-medium mb-2">No Original PDF</h3>
                     <p className="text-sm text-foreground/40 max-w-[240px]">
-                      The user hasn't uploaded a custom PDF version of this resume yet.
+                      The user hasn&apos;t uploaded a custom PDF version of this resume yet.
                     </p>
                   </div>
                 )}
