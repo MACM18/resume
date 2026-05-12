@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   Download,
   Mail,
@@ -13,14 +14,13 @@ import {
 } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getActiveResume } from "@/lib/resumes";
 import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
 import { getVisibleWorkExperiences } from "@/lib/work-experiences";
 import { Project } from "@/types/portfolio";
 import { useEffect, useState } from "react";
-import { toast } from "@/components/ui/sonner";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
 // import { SectionHeader } from "@/components/ui/section-header";
@@ -31,8 +31,6 @@ const ResumePageSkeleton = AboutPageSkeleton;
 
 const Resume = () => {
   const [hostname, setHostname] = useState("");
-  const [isDownloadingUploaded, setIsDownloadingUploaded] = useState(false);
-  const [showPdfModal, setShowPdfModal] = useState(false);
 
   useEffect(() => {
     setHostname(window.location.hostname);
@@ -77,99 +75,6 @@ const Resume = () => {
     },
     enabled: !!hostname && !!profileData,
   });
-
-  const generatePdfMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/generate-resume-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resume,
-          profile: profileData,
-          projects,
-          workExperiences: workHistory,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to generate PDF");
-      }
-
-      return response.blob();
-    },
-    onSuccess: (pdfBlob) => {
-      if (!(pdfBlob instanceof Blob)) {
-        toast.error("Failed to generate PDF: Invalid response from server.");
-        console.error("Invalid response:", pdfBlob);
-        return;
-      }
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      const sanitizedFullName = profileData?.full_name
-        .replace(/[^a-zA-Z0-9\s]/g, "")
-        .replace(/\s+/g, "-");
-      a.download = `Resume-${
-        sanitizedFullName || resume?.role || "download"
-      }.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success("Resume downloaded!");
-    },
-    onError: (error: Error | { message?: string }) => {
-      const message = error?.message || "An unknown error occurred.";
-      toast.error(`Failed to generate PDF: ${message}`);
-    },
-  });
-
-  const downloadUploadedResume = async (url: string) => {
-    setIsDownloadingUploaded(true);
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch PDF");
-      }
-
-      const blob = await response.blob();
-      const downloadUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-
-      const sanitizedFullName = profileData?.full_name
-        .replace(/[^a-zA-Z0-9\s]/g, "")
-        .replace(/\s+/g, "-");
-      a.download = `Resume-${
-        sanitizedFullName || resume?.role || "download"
-      }.pdf`;
-
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(downloadUrl);
-      toast.success("Resume downloaded!");
-    } catch (error) {
-      console.error("Download error:", error);
-      toast.error("Failed to download resume");
-    } finally {
-      setIsDownloadingUploaded(false);
-    }
-  };
-
-  const handleDownload = () => {
-    if (!resume) return;
-    if (resume.pdf_source === "generated") {
-      generatePdfMutation.mutate();
-    } else if (resume.resume_url) {
-      downloadUploadedResume(resume.resume_url);
-    } else {
-      toast.error("No PDF available for download.");
-    }
-  };
 
   const isLoading =
     isLoadingProfile || isLoadingResume || isLoadingProjects || isLoadingWork;
@@ -216,26 +121,11 @@ const Resume = () => {
               <p className='text-xl md:text-2xl text-foreground/60 font-light mb-8'>
                 {resume.title || resume.role}
               </p>
-              <Button
-                onClick={handleDownload}
-                size='lg'
-                className='px-8 py-6 text-lg'
-                disabled={
-                  generatePdfMutation.isPending ||
-                  isDownloadingUploaded ||
-                  (resume.pdf_source === "uploaded" && !resume.resume_url)
-                }
-              >
-                {generatePdfMutation.isPending || isDownloadingUploaded ? (
-                  <Loader2 className='mr-2 h-5 w-5 animate-spin' />
-                ) : (
+              <Button asChild size='lg' className='px-8 py-6 text-lg'>
+                <Link href='/resume/download'>
                   <Download className='mr-2' size={20} />
-                )}
-                {generatePdfMutation.isPending
-                  ? "Generating..."
-                  : isDownloadingUploaded
-                  ? "Downloading..."
-                  : "Download PDF"}
+                  Download PDF
+                </Link>
               </Button>
             </motion.div>
           </div>
@@ -412,34 +302,6 @@ const Resume = () => {
 
             {/* Right Sidebar */}
             <div className='space-y-6'>
-              {/* PDF Preview */}
-              {resume.resume_url && (
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                >
-                  <GlassCard variant='bordered' className='p-4 sticky top-24'>
-                    <h3 className='text-lg font-bold mb-4'>Resume Preview</h3>
-                    <div
-                      className='aspect-[8.5/11] bg-foreground/5 rounded-lg overflow-hidden border border-foreground/10 cursor-pointer group relative'
-                      onClick={() => setShowPdfModal(true)}
-                    >
-                      <iframe
-                        src={`${resume.resume_url}#toolbar=0&navpanes=0&scrollbar=0`}
-                        className='w-full h-full pointer-events-none'
-                        title='Resume Preview'
-                      />
-                      <div className='absolute inset-0 bg-background/0 group-hover:bg-background/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100'>
-                        <div className='bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium'>
-                          Click to expand
-                        </div>
-                      </div>
-                    </div>
-                  </GlassCard>
-                </motion.div>
-              )}
-
               {/* Skills */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -539,35 +401,6 @@ const Resume = () => {
             </div>
           </div>
         </div>
-
-        {/* PDF Modal */}
-        {showPdfModal && resume.resume_url && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className='fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex flex-col'
-            onClick={() => setShowPdfModal(false)}
-          >
-            <div className='flex items-center justify-between p-6 border-b border-foreground/10'>
-              <h2 className='text-2xl font-bold'>Resume</h2>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={() => setShowPdfModal(false)}
-              >
-                Close
-              </Button>
-            </div>
-            <div className='flex-1 p-6' onClick={(e) => e.stopPropagation()}>
-              <iframe
-                src={resume.resume_url}
-                className='w-full h-full rounded-xl border border-foreground/10'
-                title='Resume Full View'
-              />
-            </div>
-          </motion.div>
-        )}
       </div>
     </ErrorBoundary>
   );
