@@ -295,7 +295,7 @@ const ContactPage = () => {
                               size={20}
                             />
                             <span className='text-sm font-medium'>
-                              {social.label}
+                              {social.label.replace(/^[A-Z][a-z]?(?=[A-Z])/, '')}
                             </span>
                           </a>
                         );

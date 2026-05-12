@@ -514,36 +514,45 @@ export default function Page() {
                     delay={0.1 * index}
                   >
                     <GlassCard
-                      variant='minimal'
-                      className={`p-8 h-full ${
+                      variant='bordered'
+                      className={`p-8 h-full transition-all duration-300 group ${
                         homePageData.experienceHighlights.length === 1
-                          ? "text-center"
+                          ? "text-center flex flex-col items-center"
                           : ""
                       }`}
                       hover
                     >
                       <div
-                        className={`flex items-start gap-4 mb-4 ${
+                        className={`flex gap-6 mb-6 ${
                           homePageData.experienceHighlights.length === 1
                             ? "flex-col items-center"
-                            : ""
+                            : "flex-row items-start"
                         }`}
                       >
-                        <div className='w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0'>
-                          <span className='text-primary font-bold text-2xl'>
-                            {highlight.metric}
-                          </span>
+                        <div className='relative shrink-0'>
+                          <div className='w-16 h-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 shadow-lg shadow-primary/5 group-hover:scale-110 transition-transform duration-300'>
+                            <span className='text-primary font-extrabold text-3xl tracking-tight'>
+                              {highlight.metric}
+                            </span>
+                          </div>
+                          <div className='absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10' />
                         </div>
-                        <div>
-                          <h3 className='text-xl font-semibold mb-1'>
+                        <div
+                          className={
+                            homePageData.experienceHighlights.length === 1
+                              ? "text-center"
+                              : ""
+                          }
+                        >
+                          <h3 className='text-2xl font-bold mb-1 group-hover:text-primary transition-colors'>
                             {highlight.title}
                           </h3>
-                          <p className='text-foreground/60 text-sm'>
+                          <p className='text-primary/70 font-medium text-sm tracking-wide uppercase'>
                             {highlight.subtitle}
                           </p>
                         </div>
                       </div>
-                      <p className='text-foreground/70 leading-relaxed'>
+                      <p className='text-foreground/70 leading-relaxed text-lg border-t border-foreground/5 pt-6 group-hover:text-foreground transition-colors'>
                         {highlight.description}
                       </p>
                     </GlassCard>
