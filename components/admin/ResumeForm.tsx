@@ -36,7 +36,6 @@ import { Trash, FileUp, Loader2, CheckCircle, Sparkles } from "lucide-react";
 import { useSupabase } from "../providers/AuthProvider";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getCurrentUserProfile } from "@/lib/profile"; // Import to get profile data
 
 const resumeSchema = z.object({
@@ -46,7 +45,7 @@ const resumeSchema = z.object({
   skills: z.string().min(1, "Please add at least one skill."),
   project_ids: z.array(z.string()).optional(),
   resume_url: z.string().url().nullable(),
-  pdf_source: z.enum(["uploaded", "generated"]).default("uploaded"),
+  pdf_source: z.enum(["uploaded", "generated", "both"]).default("uploaded"),
   uploaded_resume_id: z.string().nullable().optional(), // New field for uploaded resume reference
   education: z.array(
     z.object({
@@ -181,7 +180,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
         skills: data.skills.split(",").map((t) => t.trim()),
         project_ids: data.project_ids || [],
         experience: [], // Always empty array to satisfy DB schema
-        pdf_source: "both", // Hardcode for dual availability
+        pdf_source: "both" as const, // Hardcode for dual availability
         certifications: data.certifications || [], // Ensure certifications are included
         uploaded_resume_id: data.uploaded_resume_id || null, // Include uploaded resume reference
       };
