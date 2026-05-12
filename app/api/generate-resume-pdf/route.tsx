@@ -59,6 +59,8 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     borderWidth: 2,
     borderColor: "#f1f5f9",
+    objectFit: "cover",
+    objectPosition: "center",
   },
   // Contact row
   contactRow: {
