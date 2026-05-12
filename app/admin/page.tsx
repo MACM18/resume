@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/providers/AuthProvider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProjectManagement } from "@/components/admin/ProjectManagement";
@@ -207,7 +207,7 @@ function AdminDashboardContent() {
 
           {/* Content Area */}
           <div className='min-h-[600px]'>
-            <div className='border border-foreground/10 rounded-[2rem] bg-background/40 backdrop-blur-2xl shadow-2xl overflow-hidden'>
+            <div className='border border-foreground/10 rounded-4xl bg-background/40 backdrop-blur-2xl shadow-2xl overflow-hidden'>
               <div className='p-6 md:p-10'>
                 <AnimatePresence mode='wait'>
                   <motion.div

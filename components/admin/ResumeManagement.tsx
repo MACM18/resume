@@ -135,6 +135,8 @@ export function ResumeManagement() {
                         Source:{" "}
                         {resume.pdf_source === "generated"
                           ? "Auto-generated"
+                          : resume.pdf_source === "both"
+                          ? "Both (Uploaded & Generated)"
                           : "Uploaded PDF"}
                       </p>
                     )}

@@ -222,13 +222,13 @@ function calculateTotalExperience(workExperiences?: WorkExperience[]): string {
   let currentStart = new Date(sorted[0].start_date);
   let currentEnd = sorted[0].is_current 
     ? new Date() 
-    : (sorted[0].end_date ? new Date(sorted[0].end_date) : new Date());
+    : (sorted[0].end_date ? new Date(sorted[0].end_date!) : new Date());
 
   for (let i = 1; i < sorted.length; i++) {
     const expStart = new Date(sorted[i].start_date);
     const expEnd = sorted[i].is_current 
       ? new Date() 
-      : (sorted[i].end_date ? new Date(sorted[i].end_date) : new Date());
+      : (sorted[i].end_date ? new Date(sorted[i].end_date!) : new Date());
 
     if (expStart <= currentEnd) {
       // Overlap or contiguous - extend end date
@@ -299,6 +299,7 @@ const ResumeDocument = ({
             )}
           </View>
           {profile.avatar_url && (
+            /* eslint-disable-next-line jsx-a11y/alt-text */
             <Image src={profile.avatar_url} style={styles.avatar} />
           )}
         </View>

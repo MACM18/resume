@@ -7,7 +7,6 @@ import {
   MapPin,
   Calendar,
   ExternalLink,
-  Loader2,
   Award,
   Briefcase,
   GraduationCap,
