@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addResume, updateResume, uploadResumePdf } from "@/lib/resumes";
 import { getProjectsForCurrentUser } from "@/lib/projects";
+import { getWorkExperiencesForCurrentUser } from "@/lib/work-experiences";
 import {
   getUploadedResumesForCurrentUser,
   getResumePublicUrl,
@@ -47,14 +48,6 @@ const resumeSchema = z.object({
   resume_url: z.string().url().nullable(),
   pdf_source: z.enum(["uploaded", "generated"]).default("uploaded"),
   uploaded_resume_id: z.string().nullable().optional(), // New field for uploaded resume reference
-  experience: z.array(
-    z.object({
-      company: z.string().min(1, "Company is required."),
-      position: z.string().min(1, "Position is required."),
-      duration: z.string().min(1, "Duration is required."),
-      description: z.string().min(1, "Description is required."),
-    })
-  ),
   education: z.array(
     z.object({
       degree: z.string().min(1, "Degree is required."),
@@ -93,6 +86,11 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
     queryFn: getProjectsForCurrentUser,
   });
 
+  const { data: workExperiences, isLoading: isLoadingWork } = useQuery({
+    queryKey: ["user-work-experiences"],
+    queryFn: getWorkExperiencesForCurrentUser,
+  });
+
   const { data: uploadedResumes = [] } = useQuery({
     queryKey: ["uploaded-resumes"],
     queryFn: getUploadedResumesForCurrentUser,
@@ -114,22 +112,12 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
       resume_url: resume?.resume_url || null,
       pdf_source: resume?.pdf_source || "uploaded",
       uploaded_resume_id: resume?.uploaded_resume_id || null,
-      experience:
-        resume?.experience.map((exp) => ({
-          ...exp,
-          description: exp.description.join("\n"),
-        })) || [],
       education: resume?.education || [],
       certifications: resume?.certifications || [], // Initialize certifications
       location: resume?.location || "", // Initialize location
     },
   });
 
-  const {
-    fields: expFields,
-    append: appendExp,
-    remove: removeExp,
-  } = useFieldArray({ control: form.control, name: "experience" });
   const {
     fields: eduFields,
     append: appendEdu,
@@ -143,9 +131,9 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
 
   const generateSummaryMutation = useMutation({
     mutationFn: async () => {
-      if (!profile || !projects) {
+      if (!profile || !projects || !workExperiences) {
         throw new Error(
-          "Profile or projects data not loaded for AI generation."
+          "Profile, projects, or work experiences data not loaded for AI generation."
         );
       }
       const currentResumeData = form.getValues(); // Get current form values for resume
@@ -156,10 +144,6 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
           resume: {
             ...currentResumeData,
             skills: currentResumeData.skills.split(",").map((s) => s.trim()),
-            experience: currentResumeData.experience.map((exp) => ({
-              ...exp,
-              description: exp.description.split("\n"),
-            })),
           },
           profile: {
             full_name: profile.full_name,
@@ -167,6 +151,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
             about_page_data: profile.about_page_data,
           },
           projects: projects,
+          workExperiences: workExperiences,
         }),
       });
       if (!res.ok) {
@@ -195,10 +180,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
         ...data,
         skills: data.skills.split(",").map((t) => t.trim()),
         project_ids: data.project_ids || [],
-        experience: data.experience.map((exp) => ({
-          ...exp,
-          description: exp.description.split("\n"),
-        })),
+        experience: [], // Always empty array to satisfy DB schema
         certifications: data.certifications || [], // Ensure certifications are included
         uploaded_resume_id: data.uploaded_resume_id || null, // Include uploaded resume reference
       };
@@ -242,7 +224,7 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
 
   const isGeneratingSummary = generateSummaryMutation.isPending;
   const isDataReadyForAI =
-    !isLoadingProfile && !isLoadingProjects && profile && projects;
+    !isLoadingProfile && !isLoadingProjects && !isLoadingWork && profile && projects && workExperiences;
 
   return (
     <Form {...form}>
@@ -609,95 +591,6 @@ export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
             </FormItem>
           )}
         />
-
-        {/* Experience */}
-        <div className='space-y-2'>
-          <h3 className='text-lg font-medium'>Experience</h3>
-          {expFields.map((field, index) => (
-            <div
-              key={field.id}
-              className='p-3 border rounded-md space-y-2 relative'
-            >
-              <Button
-                type='button'
-                variant='ghost'
-                size='icon'
-                className='absolute top-1 right-1 h-6 w-6'
-                onClick={() => removeExp(index)}
-              >
-                <Trash size={14} />
-              </Button>
-              <FormField
-                control={form.control}
-                name={`experience.${index}.position`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Position</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`experience.${index}.company`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`experience.${index}.duration`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`experience.${index}.description`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormDescription>One point per line.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          ))}
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            onClick={() =>
-              appendExp({
-                position: "",
-                company: "",
-                duration: "",
-                description: "",
-              })
-            }
-          >
-            Add Experience
-          </Button>
-        </div>
 
         {/* Education */}
         <div className='space-y-2'>
