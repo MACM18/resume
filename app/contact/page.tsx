@@ -67,6 +67,21 @@ const ContactPage = () => {
         throw new Error("Failed to send message");
       }
 
+      // Google Analytics tracking
+      if (typeof window !== "undefined") {
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: "generate_lead",
+            form_name: "contact_form",
+          });
+        }
+        if (typeof window.gtag === "function") {
+          window.gtag("event", "generate_lead", {
+            form_name: "contact_form",
+          });
+        }
+      }
+
       toast({
         title: "Message sent!",
         description: "Thank you for reaching out. I'll get back to you soon.",

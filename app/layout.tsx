@@ -8,7 +8,6 @@ import "./globals.css"; // or your global styles
 import AuthProvider from "@/components/providers/AuthProvider";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
 import { getProfileDataServer, getThemeDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
@@ -142,7 +141,6 @@ export default async function RootLayout({
                     <Navigation />
                     <PageTransition>{children}</PageTransition>
                     <AuthButton />
-                    <ContactButton />
                   </div>
                 </div>
               </TooltipProvider>
