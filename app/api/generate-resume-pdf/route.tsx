@@ -231,30 +231,6 @@ const ResumeDocument = ({
         </View>
       )}
 
-      {/* Inline Resume Experience (fallback if no work_experiences) */}
-      {(!workExperiences || workExperiences.length === 0) &&
-        resume.experience &&
-        resume.experience.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Experience</Text>
-            {resume.experience.map((exp, idx) => (
-              <View key={idx} style={styles.experienceItem}>
-                <View style={styles.experienceHeader}>
-                  <Text style={styles.company}>{exp.company}</Text>
-                  <Text style={styles.duration}>{exp.duration}</Text>
-                </View>
-                <Text style={styles.position}>{exp.position}</Text>
-                {exp.description?.map((bullet, bidx) => (
-                  <View key={bidx} style={styles.bulletPoint}>
-                    <Text style={styles.bullet}>•</Text>
-                    <Text style={styles.bulletText}>{bullet}</Text>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
-
       {/* Skills */}
       {resume.skills && resume.skills.length > 0 && (
         <View style={styles.section}>
