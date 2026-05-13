@@ -59,12 +59,13 @@ const ContactPage = () => {
         },
         body: JSON.stringify({
           ...formData,
-          to: profileData?.home_page_data?.callToAction?.email || "",
+          recipientEmail: profileData?.home_page_data?.callToAction?.email || "",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to send message");
       }
 
       // Google Analytics tracking
@@ -90,9 +91,10 @@ const ContactPage = () => {
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
       console.error("Contact form error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -151,6 +153,8 @@ const ContactPage = () => {
                     </label>
                     <Input
                       id='name'
+                      name='name'
+                      autoComplete='name'
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
@@ -169,7 +173,9 @@ const ContactPage = () => {
                     </label>
                     <Input
                       id='email'
+                      name='email'
                       type='email'
+                      autoComplete='email'
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
@@ -188,6 +194,7 @@ const ContactPage = () => {
                     </label>
                     <Input
                       id='subject'
+                      name='subject'
                       value={formData.subject}
                       onChange={(e) =>
                         setFormData({ ...formData, subject: e.target.value })
@@ -206,6 +213,7 @@ const ContactPage = () => {
                     </label>
                     <Textarea
                       id='message'
+                      name='message'
                       value={formData.message}
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
@@ -278,7 +286,7 @@ const ContactPage = () => {
                     <h3 className='text-xl font-semibold mb-6 bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
                       Connect on Social
                     </h3>
-                    <div className='grid grid-cols-2 gap-4'>
+                    <div className='flex flex-wrap gap-4'>
                       {socialLinks.map((social) => {
                         const Icon = getDynamicIcon(social.icon);
                         if (!Icon) return null;
@@ -288,15 +296,14 @@ const ContactPage = () => {
                             href={social.href}
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='flex items-center gap-3 p-3 rounded-lg bg-glass-bg/20 border border-glass-border/30 hover:border-primary/60 hover:bg-glass-bg/30 transition-all group'
+                            className='flex items-center justify-center w-12 h-12 rounded-xl bg-glass-bg/20 border border-glass-border/30 hover:border-primary/60 hover:bg-glass-bg/30 transition-all group'
+                            aria-label={social.platform}
+                            title={social.display_label || social.label || social.platform}
                           >
                             <Icon
                               className='text-foreground/60 group-hover:text-primary transition-colors'
-                              size={20}
+                              size={22}
                             />
-                            <span className='text-sm font-medium'>
-                              {social.label.replace(/^[A-Z][a-z]?(?=[A-Z])/, '')}
-                            </span>
                           </a>
                         );
                       })}
