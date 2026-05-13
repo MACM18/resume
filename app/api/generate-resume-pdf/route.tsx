@@ -483,6 +483,18 @@ export async function POST(request: Request) {
     let processedAvatar: string | null = null;
     if (profile.avatar_url) {
       try {
+        // SSRF Protection: Validate URL before fetching
+        const url = new URL(profile.avatar_url);
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          throw new Error("Invalid protocol");
+        }
+        
+        // Block local/internal network requests
+        const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
+        if (blockedHosts.includes(url.hostname.toLowerCase()) || url.hostname.startsWith('192.168.') || url.hostname.startsWith('10.')) {
+          throw new Error("Internal network access blocked");
+        }
+
         const response = await fetch(profile.avatar_url);
         if (response.ok) {
           const buffer = await response.arrayBuffer();
@@ -493,7 +505,7 @@ export async function POST(request: Request) {
           processedAvatar = `data:image/webp;base64,${rotatedBuffer.toString("base64")}`;
         }
       } catch (e) {
-        console.error("Error processing avatar for PDF:", e);
+        console.error("Error processing avatar for PDF (SSRF Check):", e);
       }
     }
 
