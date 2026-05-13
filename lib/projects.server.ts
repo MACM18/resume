@@ -21,7 +21,7 @@ export async function getProjectsServer(domain: string): Promise<Project[]> {
         published: true,
       },
       orderBy: {
-        created_at: "desc",
+        createdAt: "desc",
       },
     });
 
@@ -37,7 +37,7 @@ export async function getProjectsServer(domain: string): Promise<Project[]> {
       github_url: p.githubUrl || undefined,
       featured: p.featured,
       published: p.published,
-      created_at: p.created_at.toISOString(),
+      created_at: p.createdAt.toISOString(),
     }));
   } catch (error) {
     console.error("Error fetching projects (server):", error);
@@ -83,7 +83,7 @@ export async function getProjectByIdServer(
       github_url: project.githubUrl || undefined,
       featured: project.featured,
       published: project.published,
-      created_at: project.created_at.toISOString(),
+      created_at: project.createdAt.toISOString(),
     };
   } catch (error) {
     console.error("Error fetching project by id (server):", error);

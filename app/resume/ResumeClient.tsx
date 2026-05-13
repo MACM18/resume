@@ -18,7 +18,7 @@ import { getActiveResume } from "@/lib/resumes";
 import { getProjects } from "@/lib/projects";
 import { getProfileData } from "@/lib/profile";
 import { getVisibleWorkExperiences } from "@/lib/work-experiences";
-import { Project } from "@/types/portfolio";
+import type { Project, Profile, Resume, WorkExperience } from "@/types/portfolio";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
@@ -35,10 +35,10 @@ const ResumeClient = ({
   initialWork,
   hostname: serverHostname,
 }: {
-  initialProfile: any;
-  initialResume: any;
+  initialProfile: Profile;
+  initialResume: Resume | null;
   initialProjects: Project[];
-  initialWork: any;
+  initialWork: WorkExperience[];
   hostname: string;
 }) => {
   const [hostname, setHostname] = useState(serverHostname);
@@ -117,8 +117,8 @@ const ResumeClient = ({
     );
   }
 
-  const fullName = profileData.full_name;
-  const contactEmail = profileData.home_page_data.callToAction.email;
+  const fullName = profileData.full_name || "Resume";
+  const contactEmail = profileData.home_page_data?.callToAction?.email || "";
 
   return (
     <ErrorBoundary>
