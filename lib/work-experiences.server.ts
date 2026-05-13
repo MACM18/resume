@@ -22,7 +22,7 @@ export async function getVisibleWorkExperiencesServer(
         },
       },
       orderBy: {
-        start_date: "desc",
+        startDate: "desc",
       },
     });
 
@@ -32,11 +32,12 @@ export async function getVisibleWorkExperiencesServer(
       company: exp.company,
       position: exp.position,
       location: exp.location || undefined,
-      start_date: exp.start_date.toISOString(),
-      end_date: exp.end_date?.toISOString() || null,
-      is_current: exp.is_current,
+      start_date: exp.startDate.toISOString(),
+      end_date: exp.endDate?.toISOString() || null,
+      is_current: exp.isCurrent,
       description: exp.description,
-      created_at: exp.created_at.toISOString(),
+      visible: exp.visible,
+      created_at: exp.createdAt.toISOString(),
     }));
   } catch (error) {
     console.error("Error fetching work experiences (server):", error);

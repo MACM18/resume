@@ -62,27 +62,7 @@ export async function getProfileDataServer(domain?: string) {
       return null;
     }
 
-    // Transform to match frontend expectations
-    const p = profile as unknown as Record<string, unknown>;
-
-    return {
-      id: profile.id,
-      user_id: profile.userId,
-      full_name: (p["fullName"] as string) || "",
-      tagline: (p["tagline"] as string) || "",
-      home_page_data: p["homePageData"] as unknown as HomePageData,
-      about_page_data: p["aboutPageData"] as unknown as AboutPageData,
-      avatar_url: p["avatarUrl"] as string | null,
-      avatar_position: p["avatarPosition"] as
-        | { x: number; y: number }
-        | undefined,
-      avatar_zoom: (p["avatarZoom"] as number) || undefined,
-      avatar_size: (p["avatarSize"] as number) || undefined,
-      background_image_url: p["backgroundImageUrl"] as string | null,
-      favicon_url: p["faviconUrl"] as string | null,
-      contact_numbers: p["contactNumbers"],
-      active_resume_role: (p["activeResumeRole"] as string) || undefined,
-    };
+    return transformProfile(profile);
   } catch (error) {
     console.error("Error fetching profile data (server):", error);
     return null;
