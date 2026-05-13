@@ -10,6 +10,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { Resume, Profile, WorkExperience, Project } from "@/types/portfolio";
+import sharp from "sharp";
 
 export const dynamic = "force-dynamic";
 
@@ -272,6 +273,7 @@ interface ResumeDocumentProps {
   profile: Profile;
   workExperiences?: WorkExperience[];
   projects?: Project[];
+  processedAvatar?: string | null;
 }
 
 const ResumeDocument = ({
@@ -279,6 +281,7 @@ const ResumeDocument = ({
   profile,
   workExperiences,
   projects,
+  processedAvatar,
 }: ResumeDocumentProps) => {
   const totalExp = calculateTotalExperience(workExperiences);
   
@@ -300,9 +303,9 @@ const ResumeDocument = ({
               <Text style={styles.totalExp}>Total Professional Experience: {totalExp}</Text>
             )}
           </View>
-          {profile.avatar_url && (
+          {processedAvatar && (
             /* eslint-disable-next-line jsx-a11y/alt-text */
-            <Image src={profile.avatar_url} style={styles.avatar} />
+            <Image src={processedAvatar} style={styles.avatar} />
           )}
         </View>
 
@@ -476,6 +479,24 @@ export async function POST(request: Request) {
       );
     }
 
+    // Fix avatar rotation issues for PDF
+    let processedAvatar: string | null = null;
+    if (profile.avatar_url) {
+      try {
+        const response = await fetch(profile.avatar_url);
+        if (response.ok) {
+          const buffer = await response.arrayBuffer();
+          // Use sharp to auto-rotate based on EXIF and strip metadata
+          const rotatedBuffer = await sharp(Buffer.from(buffer))
+            .rotate()
+            .toBuffer();
+          processedAvatar = `data:image/webp;base64,${rotatedBuffer.toString("base64")}`;
+        }
+      } catch (e) {
+        console.error("Error processing avatar for PDF:", e);
+      }
+    }
+
     // Generate PDF
     const pdfDoc = (
       <ResumeDocument
@@ -483,6 +504,7 @@ export async function POST(request: Request) {
         profile={profile}
         workExperiences={workExperiences}
         projects={projects}
+        processedAvatar={processedAvatar}
       />
     );
 
