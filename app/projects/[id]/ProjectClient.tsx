@@ -10,6 +10,7 @@ import { getProjectById } from "@/lib/projects";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { Project } from "@/types/portfolio";
 
 export default function ProjectClient({
   id,
@@ -17,7 +18,7 @@ export default function ProjectClient({
   hostname: serverHostname,
 }: {
   id: string;
-  initialProject: any;
+  initialProject: Project | null;
   hostname: string;
 }) {
   const [hostname, setHostname] = useState(serverHostname);

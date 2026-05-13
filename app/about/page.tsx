@@ -3,6 +3,7 @@ import { getEffectiveDomain } from "@/lib/utils";
 import { getProfileDataServer } from "@/lib/profile.server";
 import AboutClient from "./AboutClient";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import { Profile } from "@/types/portfolio";
 
 export default async function Page() {
   const hdr = await headers();
@@ -21,7 +22,7 @@ export default async function Page() {
 
   return (
     <AboutClient
-      initialProfile={profileData as any}
+      initialProfile={profileData as Profile}
       hostname={host}
     />
   );

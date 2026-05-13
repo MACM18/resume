@@ -17,7 +17,7 @@ import { getProjects } from "@/lib/projects";
 import { getCurrentWork } from "@/lib/work-experiences";
 import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
 import { generateStructuredData } from "@/lib/seo";
-import { HomePageData } from "@/types/portfolio";
+import type { HomePageData, Profile, Project, WorkExperience } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
 import { generateVCard, downloadVCard } from "@/lib/vcard";
 import { HomePageSkeleton } from "@/components/ui/loading-skeleton";
@@ -30,9 +30,9 @@ export default function HomeClient({
   initialWork,
   hostname: serverHostname,
 }: {
-  initialProfile: any;
+  initialProfile: Profile;
   initialProjects: Project[];
-  initialWork: any;
+  initialWork: WorkExperience | null;
   hostname: string;
 }) {
   const [hostname, setHostname] = useState(serverHostname);

@@ -12,14 +12,14 @@ import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { ProjectsPageSkeleton } from "@/components/ui/loading-skeleton";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/GlassCard";
-import type { Project } from "@/types/portfolio";
+import type { Project, Profile } from "@/types/portfolio";
 
 const ProjectsClient = ({
   initialProfile,
   initialProjects,
   hostname: serverHostname,
 }: {
-  initialProfile: any;
+  initialProfile: Profile;
   initialProjects: Project[];
   hostname: string;
 }) => {

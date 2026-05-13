@@ -13,36 +13,14 @@ import { AboutPageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import type { AboutPageData } from "@/types/portfolio";
+import { AboutPageData, Profile } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
-
-// Define the shape of data returned by getProfileData
-interface ProfileData {
-  full_name: string;
-  tagline: string;
-  home_page_data: {
-    callToAction?: {
-      email: string;
-    };
-  };
-  about_page_data: AboutPageData;
-  avatar_url: string | null;
-  avatar_position?: { x: number; y: number };
-  avatar_zoom?: number;
-  contact_numbers?: {
-    id: string;
-    number: string;
-    label: string;
-    isActive: boolean;
-    isPrimary: boolean;
-  }[];
-}
 
 const AboutClient = ({
   initialProfile,
   hostname: serverHostname,
 }: {
-  initialProfile: ProfileData | null;
+  initialProfile: Profile | null;
   hostname: string;
 }) => {
   const [hostname, setHostname] = useState(serverHostname);
@@ -57,7 +35,7 @@ const AboutClient = ({
     data: profileData,
     isLoading,
     error,
-  } = useQuery<ProfileData | null>({
+  } = useQuery<Profile | null>({
     queryKey: ["profileData", hostname],
     queryFn: async () => {
       const domain = getEffectiveDomain(hostname);
