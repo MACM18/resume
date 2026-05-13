@@ -24,7 +24,7 @@ export async function optimizeImage(
     format = "webp",
   } = options;
 
-  let pipeline = sharp(buffer);
+  let pipeline = sharp(buffer).rotate(); // Automatically rotates based on EXIF and removes EXIF orientation tag
 
   // Get metadata to check current dimensions
   const metadata = await pipeline.metadata();

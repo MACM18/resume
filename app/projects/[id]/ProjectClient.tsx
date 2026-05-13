@@ -11,17 +11,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-export default function ProjectClient({ id }: { id: string }) {
-  const [hostname, setHostname] = useState("");
+export default function ProjectClient({
+  id,
+  initialProject,
+  hostname: serverHostname,
+}: {
+  id: string;
+  initialProject: any;
+  hostname: string;
+}) {
+  const [hostname, setHostname] = useState(serverHostname);
 
   useEffect(() => {
-    setHostname(window.location.hostname);
-  }, []);
+    if (!serverHostname) {
+      setHostname(window.location.hostname);
+    }
+  }, [serverHostname]);
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", id, hostname],
     queryFn: () => getProjectById(id, hostname),
     enabled: !!hostname,
+    initialData: initialProject,
   });
 
   if (isLoading) {
