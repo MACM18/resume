@@ -488,18 +488,25 @@ export async function POST(request: Request) {
         if (!["http:", "https:"].includes(url.protocol)) {
           throw new Error("Invalid protocol");
         }
+        if (url.username || url.password || url.port) {
+          throw new Error("Credentials and custom ports are not allowed");
+        }
 
-        // Only allow known avatar/image hosts (extend as needed)
-        const allowedHosts = ["storage.macm.dev", "storage.macm.lk","macm.dev","macm.lk"];
+        // Only allow known avatar/image hosts (exact host match only)
+        const allowedHosts = ["storage.macm.dev", "storage.macm.lk", "macm.dev", "macm.lk"];
         const hostname = url.hostname.toLowerCase();
-        const isAllowedHost = allowedHosts.some(
-          (host) => hostname === host || hostname.endsWith(`.${host}`)
-        );
-        if (!isAllowedHost) {
+        const allowedHost = allowedHosts.find((host) => hostname === host);
+        if (!allowedHost) {
           throw new Error("Avatar host is not allowed");
         }
 
-        const response = await fetch(url.toString());
+        // Disallow suspicious path patterns and reconstruct a canonical URL
+        if (url.pathname.includes("..")) {
+          throw new Error("Invalid avatar path");
+        }
+        const safeAvatarUrl = `${url.protocol}//${allowedHost}${url.pathname}${url.search}`;
+
+        const response = await fetch(safeAvatarUrl, { redirect: "error" });
         if (response.ok) {
           const buffer = await response.arrayBuffer();
           // Use sharp to auto-rotate based on EXIF and strip metadata
