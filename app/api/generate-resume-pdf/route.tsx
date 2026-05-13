@@ -483,19 +483,23 @@ export async function POST(request: Request) {
     let processedAvatar: string | null = null;
     if (profile.avatar_url) {
       try {
-        // SSRF Protection: Validate URL before fetching
+        // SSRF Protection: Validate and constrain URL before fetching
         const url = new URL(profile.avatar_url);
-        if (!['http:', 'https:'].includes(url.protocol)) {
+        if (!["http:", "https:"].includes(url.protocol)) {
           throw new Error("Invalid protocol");
         }
-        
-        // Block local/internal network requests
-        const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
-        if (blockedHosts.includes(url.hostname.toLowerCase()) || url.hostname.startsWith('192.168.') || url.hostname.startsWith('10.')) {
-          throw new Error("Internal network access blocked");
+
+        // Only allow known avatar/image hosts (extend as needed)
+        const allowedHosts = ["images.example.com", "cdn.example.com"];
+        const hostname = url.hostname.toLowerCase();
+        const isAllowedHost = allowedHosts.some(
+          (host) => hostname === host || hostname.endsWith(`.${host}`)
+        );
+        if (!isAllowedHost) {
+          throw new Error("Avatar host is not allowed");
         }
 
-        const response = await fetch(profile.avatar_url);
+        const response = await fetch(url.toString());
         if (response.ok) {
           const buffer = await response.arrayBuffer();
           // Use sharp to auto-rotate based on EXIF and strip metadata
