@@ -15,12 +15,24 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import Script from "next/script";
 import {
   PageHeaderSkeleton,
   FeatureCardSkeleton,
 } from "@/components/ui/loading-skeleton";
 import { getDynamicIcon } from "@/lib/icons";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+
+interface ReCaptcha {
+  ready: (callback: () => void) => void;
+  execute: (siteKey: string, options: { action: string }) => Promise<string>;
+}
+
+declare global {
+  interface Window {
+    grecaptcha: ReCaptcha;
+  }
+}
 
 const ContactPage = () => {
   const [hostname, setHostname] = useState("");
@@ -52,6 +64,21 @@ const ContactPage = () => {
     setIsSubmitting(true);
 
     try {
+      // Execute reCAPTCHA if site key is configured
+      let recaptchaToken = "";
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+      
+      if (siteKey && window.grecaptcha) {
+        try {
+          await new Promise<void>((resolve) => window.grecaptcha.ready(resolve));
+          recaptchaToken = await window.grecaptcha.execute(siteKey, {
+            action: "contact",
+          });
+        } catch (err) {
+          console.error("reCAPTCHA execution error:", err);
+        }
+      }
+
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -60,6 +87,7 @@ const ContactPage = () => {
         body: JSON.stringify({
           ...formData,
           recipientEmail: profileData?.home_page_data?.callToAction?.email || "",
+          recaptchaToken,
         }),
       });
 
@@ -120,9 +148,22 @@ const ContactPage = () => {
 
   const contactEmail = profileData.home_page_data?.callToAction?.email || "";
   const socialLinks = profileData.home_page_data?.socialLinks || [];
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   return (
     <ErrorBoundary>
+      {/* Hide reCAPTCHA badge as requested */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .grecaptcha-badge { visibility: hidden !important; }
+      `}} />
+      
+      {recaptchaSiteKey && (
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`}
+          strategy="afterInteractive"
+        />
+      )}
+
       <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
         <div className='max-w-6xl mx-auto'>
           {/* Header */}
