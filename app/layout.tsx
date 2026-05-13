@@ -8,7 +8,6 @@ import "./globals.css"; // or your global styles
 import AuthProvider from "@/components/providers/AuthProvider";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { ContactButton } from "@/components/ContactButton";
 import { headers } from "next/headers";
 import { getProfileDataServer, getThemeDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
@@ -17,6 +16,8 @@ import { generateCssVariables } from "@/lib/theme";
 import Analytics from "@/components/Analytics";
 import Script from "next/script";
 import { Metadata } from "next";
+import { Suspense } from "react";
+import Image from "next/image";
 
 export async function generateMetadata(): Promise<Metadata> {
   const hdr = await headers();
@@ -51,7 +52,7 @@ export default async function RootLayout({
     process.env.NEXT_PUBLIC_ENABLE_ANALYTICS !== "false";
 
   return (
-    <html lang='en'>
+    <html lang='en' className='scroll-smooth'>
       <head>
         {faviconUrl && (
           <>
@@ -67,19 +68,10 @@ export default async function RootLayout({
               dangerouslySetInnerHTML={{
                 __html: generateCssVariables(
                   themeData.theme || {},
-                  themeData.background_image_url || null,
+                  null, // Don't inject url() here, use Next.js Image instead
                 ),
               }}
             />
-            {themeData.background_image_url && (
-              <link
-                rel='preload'
-                as='image'
-                href={themeData.background_image_url}
-                // hint the browser this is important for first paint
-                fetchPriority='high'
-              />
-            )}
           </>
         )}
 
@@ -102,7 +94,7 @@ export default async function RootLayout({
           </Script>
         )}
       </head>
-      <body>
+      <body className='antialiased selection:bg-primary/30 selection:text-foreground'>
         {/* GTM noscript fallback (placed immediately after opening body tag) */}
         {ANALYTICS_ENABLED && GTM_ID && (
           <noscript
@@ -116,33 +108,49 @@ export default async function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               <TooltipProvider>
-                <div
-                  className='min-h-screen relative'
-                  style={{
-                    background: `
-                    linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background-secondary)) 100%),
-                    linear-gradient(135deg, transparent 0%, hsl(var(--primary) / 0.03) 50%, hsl(var(--secondary) / 0.02) 100%),
-                    var(--background-image-url, none)
-                  `,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                  }}
-                >
+                <div className='min-h-screen relative overflow-hidden bg-background'>
+                  {/* Optimized Background Image Layer */}
+                  {themeData?.background_image_url && (
+                    <div className='fixed inset-0 z-[-1] pointer-events-none'>
+                      <Image
+                        src={themeData.background_image_url}
+                        alt='Background'
+                        fill
+                        priority
+                        className='object-cover opacity-20'
+                        sizes='100vw'
+                        quality={85}
+                      />
+                      {/* Gradients to blend image */}
+                      <div className='absolute inset-0 bg-linear-to-b from-background/50 via-background/20 to-background/80' />
+                    </div>
+                  )}
+
+                  {/* Fallback gradients if no image */}
+                  {!themeData?.background_image_url && (
+                    <div 
+                      className='fixed inset-0 z-[-1]'
+                      style={{
+                        background: `linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background-secondary)) 100%)`
+                      }}
+                    />
+                  )}
+
                   {/* Soft accent orbs (reduced intensity) */}
-                  <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float opacity-20 pointer-events-none z-0' />
+                  <div className='fixed top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-float opacity-20 pointer-events-none z-0' />
                   <div
-                    className='fixed bottom-20 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl animate-float opacity-12 pointer-events-none z-0'
+                    className='fixed bottom-20 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-[120px] animate-float opacity-12 pointer-events-none z-0'
                     style={{ animationDelay: "3s" }}
                   />
 
                   <div className='relative z-10'>
                     <Toaster />
                     <Sonner />
-                    <Navigation />
+                    <Suspense fallback={null}>
+                      <Navigation />
+                    </Suspense>
                     <PageTransition>{children}</PageTransition>
                     <AuthButton />
-                    <ContactButton />
                   </div>
                 </div>
               </TooltipProvider>
@@ -156,3 +164,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

@@ -7,8 +7,10 @@ import {
   StyleSheet,
   pdf,
   Link,
+  Image,
 } from "@react-pdf/renderer";
-import { Resume, Profile, WorkExperience } from "@/types/portfolio";
+import { Resume, Profile, WorkExperience, Project } from "@/types/portfolio";
+import sharp from "sharp";
 
 export const dynamic = "force-dynamic";
 
@@ -18,76 +20,112 @@ const styles = StyleSheet.create({
     padding: 40,
     fontFamily: "Helvetica",
     backgroundColor: "#ffffff",
+    fontSize: 10,
+    color: "#334155",
   },
+  // Header section
   header: {
-    marginBottom: 20,
-    borderBottomWidth: 2,
-    borderBottomColor: "#2563eb",
-    paddingBottom: 15,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+    paddingBottom: 20,
+    marginBottom: 15,
+  },
+  headerLeft: {
+    flex: 1,
   },
   name: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#1e293b",
     marginBottom: 4,
   },
   title: {
     fontSize: 14,
+    color: "#2563eb",
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+  totalExp: {
+    fontSize: 10,
     color: "#64748b",
     marginBottom: 8,
   },
-  contactInfo: {
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginLeft: 20,
+    borderWidth: 2,
+    borderColor: "#f1f5f9",
+    objectFit: "cover",
+    objectPosition: "center",
+  },
+  // Contact row
+  contactRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    fontSize: 10,
+    gap: 8,
+    marginBottom: 20,
+    fontSize: 9,
     color: "#475569",
   },
   contactItem: {
-    marginRight: 15,
+    flexDirection: "row",
+    alignItems: "center",
   },
+  contactDivider: {
+    color: "#cbd5e1",
+    marginHorizontal: 4,
+  },
+  // Section common
   section: {
     marginBottom: 18,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
     color: "#1e40af",
-    marginBottom: 10,
+    marginBottom: 8,
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 0.5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+    paddingBottom: 2,
   },
+  // Summary
   summary: {
-    fontSize: 10,
-    color: "#475569",
-    lineHeight: 1.6,
+    lineHeight: 1.5,
+    textAlign: "justify",
   },
+  // Experience
   experienceItem: {
     marginBottom: 12,
   },
   experienceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    alignItems: "baseline",
+    marginBottom: 2,
   },
   company: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "bold",
     color: "#1e293b",
   },
   duration: {
-    fontSize: 10,
+    fontSize: 9,
     color: "#64748b",
   },
-  position: {
-    fontSize: 11,
-    color: "#334155",
+  positionLocation: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 4,
-  },
-  location: {
     fontSize: 9,
-    color: "#94a3b8",
-    marginBottom: 4,
+    fontStyle: "italic",
+    color: "#475569",
   },
   bulletPoint: {
     flexDirection: "row",
@@ -101,151 +139,235 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontSize: 10,
-    color: "#475569",
     lineHeight: 1.4,
   },
+  // Skills
   skillsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
+    gap: 5,
   },
-  skill: {
-    backgroundColor: "#eff6ff",
-    color: "#1e40af",
-    fontSize: 9,
-    padding: "4 8",
-    borderRadius: 4,
+  skillChip: {
+    backgroundColor: "#f1f5f9",
+    color: "#334155",
+    fontSize: 8.5,
+    padding: "3 6",
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
-  educationItem: {
-    marginBottom: 8,
+  // Projects
+  projectItem: {
+    marginBottom: 10,
   },
-  degree: {
+  projectHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 2,
+  },
+  projectTitle: {
     fontSize: 11,
     fontWeight: "bold",
     color: "#1e293b",
   },
-  school: {
-    fontSize: 10,
+  projectTech: {
+    fontSize: 8.5,
+    color: "#2563eb",
+    fontStyle: "italic",
+  },
+  projectLinks: {
+    flexDirection: "row",
+    gap: 10,
+    fontSize: 8.5,
+    marginBottom: 4,
+  },
+  projectDescription: {
+    fontSize: 9,
+    lineHeight: 1.4,
     color: "#475569",
   },
-  year: {
-    fontSize: 9,
-    color: "#94a3b8",
-  },
-  certItem: {
+  // Education & Certs
+  eduCertItem: {
     marginBottom: 6,
   },
-  certName: {
-    fontSize: 11,
+  eduCertMain: {
+    fontSize: 10,
     fontWeight: "bold",
     color: "#1e293b",
   },
-  certIssuer: {
-    fontSize: 10,
+  eduCertSub: {
+    fontSize: 9,
     color: "#475569",
   },
-  certDate: {
+  eduCertDate: {
     fontSize: 9,
-    color: "#94a3b8",
+    color: "#64748b",
   },
   link: {
     color: "#2563eb",
     textDecoration: "none",
   },
-  twoColumn: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  column: {
-    flex: 1,
-  },
 });
+
+/**
+ * Helper to calculate precise total experience duration
+ */
+function calculateTotalExperience(workExperiences?: WorkExperience[]): string {
+  if (!workExperiences || workExperiences.length === 0) return "";
+  
+  // Sort by start date to handle overlapping intervals
+  const sorted = [...workExperiences].sort(
+    (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+  );
+  
+  let totalMonths = 0;
+  let currentStart = new Date(sorted[0].start_date);
+  let currentEnd = sorted[0].is_current 
+    ? new Date() 
+    : (sorted[0].end_date ? new Date(sorted[0].end_date!) : new Date());
+
+  for (let i = 1; i < sorted.length; i++) {
+    const expStart = new Date(sorted[i].start_date);
+    const expEnd = sorted[i].is_current 
+      ? new Date() 
+      : (sorted[i].end_date ? new Date(sorted[i].end_date!) : new Date());
+
+    if (expStart <= currentEnd) {
+      // Overlap or contiguous - extend end date
+      if (expEnd > currentEnd) {
+        currentEnd = expEnd;
+      }
+    } else {
+      // Gap - add accumulated months and reset
+      totalMonths += (currentEnd.getFullYear() - currentStart.getFullYear()) * 12 + 
+                     (currentEnd.getMonth() - currentStart.getMonth());
+      currentStart = expStart;
+      currentEnd = expEnd;
+    }
+  }
+  // Add the final interval
+  totalMonths += (currentEnd.getFullYear() - currentStart.getFullYear()) * 12 + 
+                 (currentEnd.getMonth() - currentStart.getMonth());
+
+  const years = Math.floor(totalMonths / 12);
+  const remainingMonths = totalMonths % 12;
+
+  const yearStr = years > 0 ? `${years} Year${years !== 1 ? "s" : ""}` : "";
+  const monthStr = remainingMonths > 0 ? `${remainingMonths} Month${remainingMonths !== 1 ? "s" : ""}` : "";
+  
+  return [yearStr, monthStr].filter(Boolean).join(" ");
+}
+
+/**
+ * Helper function to format dates
+ */
+function formatDate(dateString?: string | null): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
 
 interface ResumeDocumentProps {
   resume: Resume;
   profile: Profile;
   workExperiences?: WorkExperience[];
+  projects?: Project[];
+  processedAvatar?: string | null;
 }
 
-// Resume PDF Document Component
 const ResumeDocument = ({
   resume,
   profile,
   workExperiences,
-}: ResumeDocumentProps) => (
-  <Document>
-    <Page size='A4' style={styles.page}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.name}>{profile.full_name}</Text>
-        {resume.title && <Text style={styles.title}>{resume.title}</Text>}
-        <View style={styles.contactInfo}>
+  projects,
+  processedAvatar,
+}: ResumeDocumentProps) => {
+  const totalExp = calculateTotalExperience(workExperiences);
+  
+  // Filter projects to only those selected in resume.project_ids
+  const selectedProjects = projects?.filter(p => resume.project_ids.includes(p.id)) || [];
+
+  const primaryPhone = profile.contact_numbers?.find(n => n.isPrimary && n.isActive) || 
+                       profile.contact_numbers?.find(n => n.isActive);
+
+  return (
+    <Document>
+      <Page size='A4' style={styles.page}>
+        {/* Header Section */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.name}>{profile.full_name}</Text>
+            <Text style={styles.title}>{resume.title || profile.tagline}</Text>
+            {totalExp && (
+              <Text style={styles.totalExp}>Total Professional Experience: {totalExp}</Text>
+            )}
+          </View>
+          {processedAvatar && (
+            /* eslint-disable-next-line jsx-a11y/alt-text */
+            <Image src={processedAvatar} style={styles.avatar} />
+          )}
+        </View>
+
+        {/* Contact Information Bar */}
+        <View style={styles.contactRow}>
           {profile.home_page_data?.callToAction?.email && (
-            <Text style={styles.contactItem}>
-              {profile.home_page_data.callToAction.email}
-            </Text>
+            <View style={styles.contactItem}>
+              <Text>{profile.home_page_data.callToAction.email}</Text>
+            </View>
+          )}
+          {primaryPhone && (
+            <View style={styles.contactItem}>
+              <Text style={styles.contactDivider}>|</Text>
+              <Text>{primaryPhone.number}</Text>
+            </View>
           )}
           {resume.location && (
-            <Text style={styles.contactItem}>{resume.location}</Text>
+            <View style={styles.contactItem}>
+              <Text style={styles.contactDivider}>|</Text>
+              <Text>{resume.location}</Text>
+            </View>
           )}
           {profile.domain && (
-            <Text style={styles.contactItem}>{profile.domain}</Text>
+            <View style={styles.contactItem}>
+              <Text style={styles.contactDivider}>|</Text>
+              <Link src={`https://${profile.domain}`} style={styles.link}>{profile.domain}</Link>
+            </View>
           )}
-        </View>
-      </View>
-
-      {/* Summary */}
-      {resume.summary && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Professional Summary</Text>
-          <Text style={styles.summary}>{resume.summary}</Text>
-        </View>
-      )}
-
-      {/* Work Experience */}
-      {workExperiences && workExperiences.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Work Experience</Text>
-          {workExperiences.map((exp) => (
-            <View key={exp.id} style={styles.experienceItem}>
-              <View style={styles.experienceHeader}>
-                <Text style={styles.company}>{exp.company}</Text>
-                <Text style={styles.duration}>
-                  {formatDate(exp.start_date)} -{" "}
-                  {exp.is_current ? "Present" : formatDate(exp.end_date)}
-                </Text>
-              </View>
-              <Text style={styles.position}>{exp.position}</Text>
-              {exp.location && (
-                <Text style={styles.location}>{exp.location}</Text>
-              )}
-              {exp.description?.map((bullet, idx) => (
-                <View key={idx} style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.bulletText}>{bullet}</Text>
-                </View>
-              ))}
+          {profile.home_page_data?.socialLinks?.map((link, idx) => (
+            <View key={idx} style={styles.contactItem}>
+              <Text style={styles.contactDivider}>|</Text>
+              <Link src={link.href} style={styles.link}>{link.platform}</Link>
             </View>
           ))}
         </View>
-      )}
 
-      {/* Inline Resume Experience (fallback if no work_experiences) */}
-      {(!workExperiences || workExperiences.length === 0) &&
-        resume.experience &&
-        resume.experience.length > 0 && (
+        {/* Professional Summary */}
+        {resume.summary && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Experience</Text>
-            {resume.experience.map((exp, idx) => (
-              <View key={idx} style={styles.experienceItem}>
+            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.summary}>{resume.summary}</Text>
+          </View>
+        )}
+
+        {/* Work Experience */}
+        {workExperiences && workExperiences.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Work Experience</Text>
+            {workExperiences.map((exp) => (
+              <View key={exp.id} style={styles.experienceItem}>
                 <View style={styles.experienceHeader}>
                   <Text style={styles.company}>{exp.company}</Text>
-                  <Text style={styles.duration}>{exp.duration}</Text>
+                  <Text style={styles.duration}>
+                    {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                  </Text>
                 </View>
-                <Text style={styles.position}>{exp.position}</Text>
-                {exp.description?.map((bullet, bidx) => (
-                  <View key={bidx} style={styles.bulletPoint}>
+                <View style={styles.positionLocation}>
+                  <Text>{exp.position}</Text>
+                  {exp.location && <Text>{exp.location}</Text>}
+                </View>
+                {exp.description?.map((bullet, idx) => (
+                  <View key={idx} style={styles.bulletPoint}>
                     <Text style={styles.bullet}>•</Text>
                     <Text style={styles.bulletText}>{bullet}</Text>
                   </View>
@@ -255,65 +377,85 @@ const ResumeDocument = ({
           </View>
         )}
 
-      {/* Skills */}
-      {resume.skills && resume.skills.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Skills</Text>
-          <View style={styles.skillsContainer}>
-            {resume.skills.map((skill, idx) => (
-              <Text key={idx} style={styles.skill}>
-                {skill}
-              </Text>
+        {/* Skills */}
+        {resume.skills && resume.skills.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Skills</Text>
+            <View style={styles.skillsContainer}>
+              {resume.skills.map((skill, idx) => (
+                <View key={idx} style={styles.skillChip}>
+                  <Text>{skill}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Projects */}
+        {selectedProjects.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Key Projects</Text>
+            {selectedProjects.map((project) => (
+              <View key={project.id} style={styles.projectItem}>
+                <View style={styles.projectHeader}>
+                  <Text style={styles.projectTitle}>{project.title}</Text>
+                  <Text style={styles.projectTech}>{project.tech.join(", ")}</Text>
+                </View>
+                <View style={styles.projectLinks}>
+                  {project.demo_url && (
+                    <Link src={project.demo_url} style={styles.link}>Live Demo</Link>
+                  )}
+                  {project.github_url && (
+                    <Link src={project.github_url} style={styles.link}>GitHub</Link>
+                  )}
+                </View>
+                <Text style={styles.projectDescription}>{project.description}</Text>
+              </View>
             ))}
           </View>
-        </View>
-      )}
+        )}
 
-      {/* Education */}
-      {resume.education && resume.education.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
-          {resume.education.map((edu, idx) => (
-            <View key={idx} style={styles.educationItem}>
-              <Text style={styles.degree}>{edu.degree}</Text>
-              <Text style={styles.school}>{edu.school}</Text>
-              <Text style={styles.year}>{edu.year}</Text>
-            </View>
-          ))}
-        </View>
-      )}
+        {/* Education */}
+        {resume.education && resume.education.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {resume.education.map((edu, idx) => (
+              <View key={idx} style={styles.eduCertItem}>
+                <View style={styles.experienceHeader}>
+                  <Text style={styles.eduCertMain}>{edu.degree}</Text>
+                  <Text style={styles.eduCertDate}>{edu.year}</Text>
+                </View>
+                <Text style={styles.eduCertSub}>{edu.school}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
-      {/* Certifications */}
-      {resume.certifications && resume.certifications.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Certifications</Text>
-          {resume.certifications.map((cert, idx) => (
-            <View key={idx} style={styles.certItem}>
-              <Text style={styles.certName}>
-                {cert.url ? (
-                  <Link src={cert.url} style={styles.link}>
-                    {cert.name}
-                  </Link>
-                ) : (
-                  cert.name
-                )}
-              </Text>
-              <Text style={styles.certIssuer}>{cert.issuer}</Text>
-              <Text style={styles.certDate}>{cert.date}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </Page>
-  </Document>
-);
-
-// Helper function to format dates
-function formatDate(dateString?: string | null): string {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
+        {/* Certifications */}
+        {resume.certifications && resume.certifications.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Certifications</Text>
+            {resume.certifications.map((cert, idx) => (
+              <View key={idx} style={styles.eduCertItem}>
+                <View style={styles.experienceHeader}>
+                  <Text style={styles.eduCertMain}>
+                    {cert.url ? (
+                      <Link src={cert.url} style={styles.link}>{cert.name}</Link>
+                    ) : (
+                      cert.name
+                    )}
+                  </Text>
+                  <Text style={styles.eduCertDate}>{cert.date}</Text>
+                </View>
+                <Text style={styles.eduCertSub}>{cert.issuer}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </Page>
+    </Document>
+  );
+};
 
 export async function POST(request: Request) {
   try {
@@ -322,10 +464,12 @@ export async function POST(request: Request) {
       resume,
       profile,
       workExperiences,
+      projects,
     }: {
       resume: Resume;
       profile: Profile;
       workExperiences?: WorkExperience[];
+      projects?: Project[];
     } = body;
 
     if (!resume || !profile) {
@@ -335,12 +479,55 @@ export async function POST(request: Request) {
       );
     }
 
+    // Fix avatar rotation issues for PDF
+    let processedAvatar: string | null = null;
+    if (profile.avatar_url) {
+      try {
+        // SSRF Protection: Validate and constrain URL before fetching
+        const url = new URL(profile.avatar_url);
+        if (!["http:", "https:"].includes(url.protocol)) {
+          throw new Error("Invalid protocol");
+        }
+        if (url.username || url.password || url.port) {
+          throw new Error("Credentials and custom ports are not allowed");
+        }
+
+        // Only allow known avatar/image hosts (exact host match only)
+        const allowedHosts = ["storage.macm.dev", "storage.macm.lk", "macm.dev", "macm.lk"];
+        const hostname = url.hostname.toLowerCase();
+        const allowedHost = allowedHosts.find((host) => hostname === host);
+        if (!allowedHost) {
+          throw new Error("Avatar host is not allowed");
+        }
+
+        // Disallow suspicious path patterns and reconstruct a canonical URL
+        if (url.pathname.includes("..")) {
+          throw new Error("Invalid avatar path");
+        }
+        const safeAvatarUrl = `${url.protocol}//${allowedHost}${url.pathname}${url.search}`;
+
+        const response = await fetch(safeAvatarUrl, { redirect: "error" });
+        if (response.ok) {
+          const buffer = await response.arrayBuffer();
+          // Use sharp to auto-rotate based on EXIF and strip metadata
+          const rotatedBuffer = await sharp(Buffer.from(buffer))
+            .rotate()
+            .toBuffer();
+          processedAvatar = `data:image/webp;base64,${rotatedBuffer.toString("base64")}`;
+        }
+      } catch (e) {
+        console.error("Error processing avatar for PDF (SSRF Check):", e);
+      }
+    }
+
     // Generate PDF
     const pdfDoc = (
       <ResumeDocument
         resume={resume}
         profile={profile}
         workExperiences={workExperiences}
+        projects={projects}
+        processedAvatar={processedAvatar}
       />
     );
 

@@ -15,12 +15,24 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
+import Script from "next/script";
 import {
   PageHeaderSkeleton,
   FeatureCardSkeleton,
 } from "@/components/ui/loading-skeleton";
 import { getDynamicIcon } from "@/lib/icons";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+
+interface ReCaptcha {
+  ready: (callback: () => void) => void;
+  execute: (siteKey: string, options: { action: string }) => Promise<string>;
+}
+
+declare global {
+  interface Window {
+    grecaptcha: ReCaptcha;
+  }
+}
 
 const ContactPage = () => {
   const [hostname, setHostname] = useState("");
@@ -52,6 +64,21 @@ const ContactPage = () => {
     setIsSubmitting(true);
 
     try {
+      // Execute reCAPTCHA if site key is configured
+      let recaptchaToken = "";
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+      
+      if (siteKey && window.grecaptcha) {
+        try {
+          await new Promise<void>((resolve) => window.grecaptcha.ready(resolve));
+          recaptchaToken = await window.grecaptcha.execute(siteKey, {
+            action: "contact",
+          });
+        } catch (err) {
+          console.error("reCAPTCHA execution error:", err);
+        }
+      }
+
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -59,12 +86,29 @@ const ContactPage = () => {
         },
         body: JSON.stringify({
           ...formData,
-          to: profileData?.home_page_data?.callToAction?.email || "",
+          recipientEmail: profileData?.home_page_data?.callToAction?.email || "",
+          recaptchaToken,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to send message");
+      }
+
+      // Google Analytics tracking
+      if (typeof window !== "undefined") {
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: "generate_lead",
+            form_name: "contact_form",
+          });
+        }
+        if (typeof window.gtag === "function") {
+          window.gtag("event", "generate_lead", {
+            form_name: "contact_form",
+          });
+        }
       }
 
       toast({
@@ -75,9 +119,10 @@ const ContactPage = () => {
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
       console.error("Contact form error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -103,9 +148,22 @@ const ContactPage = () => {
 
   const contactEmail = profileData.home_page_data?.callToAction?.email || "";
   const socialLinks = profileData.home_page_data?.socialLinks || [];
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   return (
     <ErrorBoundary>
+      {/* Hide reCAPTCHA badge as requested */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .grecaptcha-badge { visibility: hidden !important; }
+      `}} />
+      
+      {recaptchaSiteKey && (
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`}
+          strategy="afterInteractive"
+        />
+      )}
+
       <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
         <div className='max-w-6xl mx-auto'>
           {/* Header */}
@@ -136,6 +194,8 @@ const ContactPage = () => {
                     </label>
                     <Input
                       id='name'
+                      name='name'
+                      autoComplete='name'
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
@@ -154,7 +214,9 @@ const ContactPage = () => {
                     </label>
                     <Input
                       id='email'
+                      name='email'
                       type='email'
+                      autoComplete='email'
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
@@ -173,6 +235,7 @@ const ContactPage = () => {
                     </label>
                     <Input
                       id='subject'
+                      name='subject'
                       value={formData.subject}
                       onChange={(e) =>
                         setFormData({ ...formData, subject: e.target.value })
@@ -191,6 +254,7 @@ const ContactPage = () => {
                     </label>
                     <Textarea
                       id='message'
+                      name='message'
                       value={formData.message}
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
@@ -263,7 +327,7 @@ const ContactPage = () => {
                     <h3 className='text-xl font-semibold mb-6 bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent'>
                       Connect on Social
                     </h3>
-                    <div className='grid grid-cols-2 gap-4'>
+                    <div className='flex flex-wrap gap-4'>
                       {socialLinks.map((social) => {
                         const Icon = getDynamicIcon(social.icon);
                         if (!Icon) return null;
@@ -273,15 +337,14 @@ const ContactPage = () => {
                             href={social.href}
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='flex items-center gap-3 p-3 rounded-lg bg-glass-bg/20 border border-glass-border/30 hover:border-primary/60 hover:bg-glass-bg/30 transition-all group'
+                            className='flex items-center justify-center w-12 h-12 rounded-xl bg-glass-bg/20 border border-glass-border/30 hover:border-primary/60 hover:bg-glass-bg/30 transition-all group'
+                            aria-label={social.platform}
+                            title={social.display_label || social.label || social.platform}
                           >
                             <Icon
                               className='text-foreground/60 group-hover:text-primary transition-colors'
-                              size={20}
+                              size={22}
                             />
-                            <span className='text-sm font-medium'>
-                              {social.label}
-                            </span>
                           </a>
                         );
                       })}

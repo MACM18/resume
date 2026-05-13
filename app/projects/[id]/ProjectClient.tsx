@@ -10,18 +10,30 @@ import { getProjectById } from "@/lib/projects";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { Project } from "@/types/portfolio";
 
-export default function ProjectClient({ id }: { id: string }) {
-  const [hostname, setHostname] = useState("");
+export default function ProjectClient({
+  id,
+  initialProject,
+  hostname: serverHostname,
+}: {
+  id: string;
+  initialProject: Project | null;
+  hostname: string;
+}) {
+  const [hostname, setHostname] = useState(serverHostname);
 
   useEffect(() => {
-    setHostname(window.location.hostname);
-  }, []);
+    if (!serverHostname) {
+      setHostname(window.location.hostname);
+    }
+  }, [serverHostname]);
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", id, hostname],
     queryFn: () => getProjectById(id, hostname),
     enabled: !!hostname,
+    initialData: initialProject,
   });
 
   if (isLoading) {
