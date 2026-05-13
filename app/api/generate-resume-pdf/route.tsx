@@ -490,7 +490,7 @@ export async function POST(request: Request) {
         }
 
         // Only allow known avatar/image hosts (extend as needed)
-        const allowedHosts = ["images.example.com", "cdn.example.com"];
+        const allowedHosts = ["storage.macm.dev", "storage.macm.lk","macm.dev","macm.lk"];
         const hostname = url.hostname.toLowerCase();
         const isAllowedHost = allowedHosts.some(
           (host) => hostname === host || hostname.endsWith(`.${host}`)
