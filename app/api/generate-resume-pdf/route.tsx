@@ -65,11 +65,30 @@ const IconMapPin = () => (
   </Svg>
 );
 
+const isXDotComHost = (value: string) => {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return false;
+
+  const parseHostname = (input: string) => {
+    try {
+      return new URL(input).hostname.toLowerCase();
+    } catch {
+      return null;
+    }
+  };
+
+  const hostname =
+    parseHostname(trimmed) ??
+    parseHostname(`https://${trimmed}`);
+
+  return hostname === "x.com" || (hostname !== null && hostname.endsWith(".x.com"));
+};
+
 const SocialIcon = ({ platform }: { platform: string }) => {
   const p = platform.toLowerCase();
   if (p.includes('github')) return <IconGithub />;
   if (p.includes('linkedin')) return <IconLinkedin />;
-  if (p.includes('twitter') || p.includes('x.com')) return <IconTwitter />;
+  if (p.includes('twitter') || isXDotComHost(platform)) return <IconTwitter />;
   if (p.includes('mail') || p.includes('email')) return <IconMail />;
   if (p.includes('globe') || p.includes('website') || p.includes('portfolio')) return <IconGlobe />;
   if (p.includes('phone') || p.includes('call')) return <IconPhone />;
