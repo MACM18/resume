@@ -1,13 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, Github, Star } from "lucide-react";
-import { getProjects } from "@/lib/projects";
-import { getProfileData } from "@/lib/profile";
-import { getEffectiveDomain } from "@/lib/utils";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { ProjectsPageSkeleton } from "@/components/ui/loading-skeleton";
 import { Button } from "@/components/ui/button";
@@ -31,29 +27,9 @@ const ProjectsClient = ({
     }
   }, [serverHostname]);
 
-  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["profileData", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve(null);
-      return getProfileData(domain);
-    },
-    enabled: !!hostname,
-    initialData: initialProfile,
-  });
-
-  const { data: projects, isLoading: isLoadingProjects } = useQuery({
-    queryKey: ["projects", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve([]);
-      return getProjects(domain);
-    },
-    enabled: !!hostname && !!profileData,
-    initialData: initialProjects,
-  });
-
-  const isLoading = isLoadingProfile || isLoadingProjects;
+  const profileData = initialProfile;
+  const projects = initialProjects;
+  const isLoading = false;
 
   if (isLoading || !hostname) {
     return <ProjectsPageSkeleton />;

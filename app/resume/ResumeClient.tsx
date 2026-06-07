@@ -13,15 +13,10 @@ import {
 } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { getActiveResume } from "@/lib/resumes";
-import { getProjects } from "@/lib/projects";
-import { getProfileData } from "@/lib/profile";
-import { getVisibleWorkExperiences } from "@/lib/work-experiences";
-import type { Project, Profile, Resume, WorkExperience } from "@/types/portfolio";
 import { useEffect, useState } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
-import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
+import { formatDateRange } from "@/lib/utils";
+import type { Project, Profile, Resume, WorkExperience } from "@/types/portfolio";
 // import { SectionHeader } from "@/components/ui/section-header";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { AboutPageSkeleton } from "@/components/ui/loading-skeleton";
@@ -49,52 +44,11 @@ const ResumeClient = ({
     }
   }, [serverHostname]);
 
-  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["profileData", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve(null);
-      return getProfileData(domain);
-    },
-    enabled: !!hostname,
-    initialData: initialProfile,
-  });
-
-  const { data: resume, isLoading: isLoadingResume } = useQuery({
-    queryKey: ["activeResume", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve(null);
-      return getActiveResume(domain);
-    },
-    enabled: !!hostname && !!profileData,
-    initialData: initialResume,
-  });
-
-  const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
-    queryKey: ["projects", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve([] as Project[]);
-      return getProjects(domain);
-    },
-    enabled: !!hostname && !!profileData,
-    initialData: initialProjects,
-  });
-
-  const { data: workHistory = [], isLoading: isLoadingWork } = useQuery({
-    queryKey: ["work-experiences", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve([]);
-      return getVisibleWorkExperiences(domain);
-    },
-    enabled: !!hostname && !!profileData,
-    initialData: initialWork,
-  });
-
-  const isLoading =
-    isLoadingProfile || isLoadingResume || isLoadingProjects || isLoadingWork;
+  const profileData = initialProfile;
+  const resume = initialResume;
+  const projects = initialProjects;
+  const workHistory = initialWork;
+  const isLoading = false;
 
   if (isLoading || !hostname) {
     return <ResumePageSkeleton />;

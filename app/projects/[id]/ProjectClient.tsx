@@ -5,36 +5,17 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { getProjectById } from "@/lib/projects";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { Project } from "@/types/portfolio";
 
 export default function ProjectClient({
-  id,
   initialProject,
-  hostname: serverHostname,
 }: {
-  id: string;
   initialProject: Project | null;
-  hostname: string;
 }) {
-  const [hostname, setHostname] = useState(serverHostname);
-
-  useEffect(() => {
-    if (!serverHostname) {
-      setHostname(window.location.hostname);
-    }
-  }, [serverHostname]);
-
-  const { data: project, isLoading } = useQuery({
-    queryKey: ["project", id, hostname],
-    queryFn: () => getProjectById(id, hostname),
-    enabled: !!hostname,
-    initialData: initialProject,
-  });
+  const project = initialProject;
+  const isLoading = false;
 
   if (isLoading) {
     return (

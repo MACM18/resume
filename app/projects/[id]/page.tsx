@@ -15,5 +15,5 @@ export default async function Page({
   
   const project = domain ? await getProjectByIdServer(id, domain) : null;
 
-  return <ProjectClient id={id} initialProject={project} hostname={host} />;
+  return <ProjectClient initialProject={project} />;
 }

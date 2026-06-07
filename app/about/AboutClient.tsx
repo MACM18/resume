@@ -2,17 +2,14 @@
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { Code } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getProfileData } from "@/lib/profile";
 import { useEffect, useState } from "react";
-import { DomainNotClaimed } from "@/components/DomainNotClaimed";
-import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
+import Link from "next/link";
 import Image from "next/image";
-import { getEffectiveDomain } from "@/lib/utils";
+import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { AboutPageSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { AboutPageData, Profile } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
 
@@ -31,21 +28,9 @@ const AboutClient = ({
     }
   }, [serverHostname]);
 
-  const {
-    data: profileData,
-    isLoading,
-    error,
-  } = useQuery<Profile | null>({
-    queryKey: ["profileData", hostname],
-    queryFn: async () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return null;
-      return getProfileData(domain);
-    },
-    enabled: !!hostname,
-    retry: 2,
-    initialData: initialProfile,
-  });
+  const profileData = initialProfile;
+  const isLoading = false;
+  const error = null;
 
   if (isLoading || !hostname) {
     return <AboutPageSkeleton />;

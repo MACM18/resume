@@ -9,13 +9,9 @@ import { ExternalLink, Contact } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { getProfileData } from "@/lib/profile";
 import { useEffect, useState, useRef } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
-import { getProjects } from "@/lib/projects";
-import { getCurrentWork } from "@/lib/work-experiences";
-import { formatDateRange, getEffectiveDomain } from "@/lib/utils";
+import { formatDateRange } from "@/lib/utils";
 import { generateStructuredData } from "@/lib/seo";
 import type { HomePageData, Profile, Project, WorkExperience } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
@@ -118,42 +114,10 @@ export default function HomeClient({
     content?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["profileData", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve(null);
-      return getProfileData(domain);
-    },
-    enabled: !!hostname,
-    initialData: initialProfile,
-  });
-
-  const { data: allPublishedProjects, isLoading: isLoadingProjects } = useQuery(
-    {
-      queryKey: ["projects", hostname],
-      queryFn: () => {
-        const domain = getEffectiveDomain(hostname);
-        if (!domain) return Promise.resolve([]);
-        return getProjects(domain);
-      },
-      enabled: !!hostname && !!profileData,
-      initialData: initialProjects,
-    },
-  );
-
-  const { data: currentWork } = useQuery({
-    queryKey: ["current-work", hostname],
-    queryFn: () => {
-      const domain = getEffectiveDomain(hostname);
-      if (!domain) return Promise.resolve(undefined);
-      return getCurrentWork(domain);
-    },
-    enabled: !!hostname && !!profileData,
-    initialData: initialWork,
-  });
-
-  const isLoading = isLoadingProfile || isLoadingProjects;
+  const profileData = initialProfile;
+  const allPublishedProjects = initialProjects;
+  const currentWork = initialWork;
+  const isLoading = false;
 
   if (isLoading || !hostname) {
     return <HomePageSkeleton />;
@@ -392,6 +356,7 @@ export default function HomeClient({
                           fill
                           className='object-cover'
                           fetchPriority='high'
+                          sizes='(max-width: 1024px) 320px, 384px'
                           style={{
                             objectPosition: `${
                               profileData.avatar_position?.x ?? 50
