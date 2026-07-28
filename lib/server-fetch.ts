@@ -9,8 +9,30 @@ export async function fetchWithTimeout(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
+  let targetUrl: URL;
   try {
-    return await fetch(input, { ...init, signal: controller.signal });
+    if (input instanceof URL) {
+      targetUrl = input;
+    } else if (typeof input === "string") {
+      targetUrl = new URL(input);
+    } else if (input instanceof Request) {
+      targetUrl = new URL(input.url);
+    } else {
+      throw new Error("Unsupported request input");
+    }
+  } catch {
+    throw new Error("Invalid or non-absolute URL");
+  }
+
+  if (!["http:", "https:"].includes(targetUrl.protocol)) {
+    throw new Error("Only HTTP(S) URLs are allowed");
+  }
+  if (targetUrl.username || targetUrl.password || targetUrl.port) {
+    throw new Error("Credentials and custom ports are not allowed");
+  }
+
+  try {
+    return await fetch(targetUrl, { ...init, signal: controller.signal });
   } finally {
     clearTimeout(timeout);
   }
