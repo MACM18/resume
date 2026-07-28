@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import { getEffectiveDomain } from "@/lib/utils";
 import { getProjectsServer } from "@/lib/projects.server";
+import { getConfiguredSiteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -9,12 +10,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const hdr = await headers();
   const host = hdr.get("host") ?? "";
   const domain = getEffectiveDomain(host);
-  if (!domain) return [];
-
-  const baseUrl = `https://${domain}`;
+  const baseUrl = getConfiguredSiteUrl();
   let projects: Awaited<ReturnType<typeof getProjectsServer>> = [];
   try {
-    projects = await getProjectsServer(domain);
+    projects = domain ? await getProjectsServer(domain) : [];
   } catch (error) {
     console.error("Sitemap project lookup failed:", error);
   }

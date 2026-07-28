@@ -1,9 +1,16 @@
 import type { MetadataRoute } from "next";
+import { getConfiguredSiteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const baseUrl = getConfiguredSiteUrl();
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/super-admin", "/api", "/login", "/signup"] }],
+    rules: [
+      {
+        userAgent: "*",
+        allow: ["/", "/api/og/avatar"],
+        disallow: ["/admin", "/super-admin", "/api", "/login", "/signup"],
+      },
+    ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

@@ -34,18 +34,59 @@ const DEFAULT_SEO: SEOConfig = {
   // twitterHandle intentionally blank; derived dynamically from social links (X)
 };
 
-function buildTitle(profile: ProfileLike, hostname?: string) {
+function buildTitle(profile: ProfileLike, hostname?: string, origin?: string) {
   if (!profile) return DEFAULT_SEO.defaultTitle;
   const name = profile.full_name || DEFAULT_SEO.siteName;
-  return hostname ? `${name} | ${hostname}` : name;
+  try {
+    return `${name} | ${new URL(getConfiguredSiteUrl(origin, hostname)).hostname}`;
+  } catch {
+    return name;
+  }
 }
 
 export function serializeJsonLd(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }
 
-function canonicalUrl(path: string, hostname?: string): string {
-  const base = hostname ? `https://${hostname}` : DEFAULT_SEO.siteUrl;
+export function getConfiguredSiteUrl(
+  origin?: string,
+  hostname?: string
+): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configured) {
+    try {
+      return new URL(configured).origin.replace(/\/$/, "");
+    } catch {
+      return configured.replace(/\/$/, "");
+    }
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    if (origin) {
+      try {
+        return new URL(origin).origin.replace(/\/$/, "");
+      } catch {
+        return origin.replace(/\/$/, "");
+      }
+    }
+
+    if (hostname) {
+      const rawHost = hostname.trim();
+      const hostOnly = rawHost.split("/")[0];
+      const normalizedHost = hostOnly.split(":")[0].toLowerCase();
+      const isLocalHost =
+        normalizedHost === "localhost" ||
+        normalizedHost === "127.0.0.1" ||
+        normalizedHost === "::1";
+      return `${isLocalHost ? "http" : "https"}://${hostOnly}`;
+    }
+  }
+
+  return DEFAULT_SEO.siteUrl;
+}
+
+function canonicalUrl(path: string, hostname?: string, origin?: string): string {
+  const base = getConfiguredSiteUrl(origin, hostname);
   return `${base.replace(/\/$/, "")}${path}`;
 }
 
@@ -66,9 +107,10 @@ export function buildMetaDescription(profile: ProfileLike, maxLen = 255) {
 
 export function getBaseMetadata(
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ): SEOConfig {
-  const siteUrl = hostname ? `https://${hostname}` : DEFAULT_SEO.siteUrl;
+  const siteUrl = getConfiguredSiteUrl(origin, hostname);
 
   // Attempt to derive X (Twitter) handle from social links
   let derivedHandle: string | undefined;
@@ -133,7 +175,7 @@ export function getBaseMetadata(
   return {
     siteName: profile?.full_name || DEFAULT_SEO.siteName,
     siteUrl,
-    defaultTitle: profile?.full_name ? buildTitle(profile, hostname) : DEFAULT_SEO.defaultTitle,
+    defaultTitle: profile?.full_name ? buildTitle(profile, hostname, origin) : DEFAULT_SEO.defaultTitle,
     defaultDescription: profile?.tagline || DEFAULT_SEO.defaultDescription,
     defaultImage: profile?.avatar_url || DEFAULT_SEO.defaultImage,
     twitterHandle: derivedHandle,
@@ -145,14 +187,14 @@ export function generateHomeMetadata(
   hostname?: string,
   origin?: string
 ): Metadata {
-  const config = getBaseMetadata(profile, hostname);
+  const config = getBaseMetadata(profile, hostname, origin);
 
-  const title = profile ? `Home — ${buildTitle(profile, hostname)}` : config.defaultTitle;
+  const title = profile ? `Home — ${buildTitle(profile, hostname, origin)}` : config.defaultTitle;
   const description = buildMetaDescription(profile);
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.id && origin
-    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
+  const ogImageUrl = profile?.id
+    ? `${config.siteUrl}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const base: Metadata = {
@@ -198,8 +240,8 @@ export function generateHomeMetadata(
         "max-snippet": -1,
       },
     },
-    alternates: { canonical: canonicalUrl("/", hostname) },
-    metadataBase: new URL(canonicalUrl("/", hostname)),
+    alternates: { canonical: canonicalUrl("/", hostname, origin) },
+    metadataBase: new URL(config.siteUrl),
   };
   if (config.twitterHandle) {
     base.twitter = {
@@ -218,9 +260,9 @@ export function generateAboutMetadata(
   hostname?: string,
   origin?: string
 ): Metadata {
-  const config = getBaseMetadata(profile, hostname);
+  const config = getBaseMetadata(profile, hostname, origin);
 
-  const title = profile?.full_name ? `About — ${buildTitle(profile, hostname)}` : "About Me";
+  const title = profile?.full_name ? `About — ${buildTitle(profile, hostname, origin)}` : "About Me";
   const description =
     profile?.home_page_data?.about_card_description ||
     profile?.about_page_data?.subtitle ||
@@ -228,8 +270,8 @@ export function generateAboutMetadata(
     config.defaultDescription;
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.id && origin
-    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
+  const ogImageUrl = profile?.id
+    ? `${config.siteUrl}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -242,7 +284,7 @@ export function generateAboutMetadata(
       description,
       images: [ogImageUrl],
     },
-    alternates: { canonical: canonicalUrl("/about", hostname) },
+    alternates: { canonical: canonicalUrl("/about", hostname, origin) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -283,15 +325,15 @@ export function generateProjectsMetadata(
   projectTitles: string[] = [],
   currentRole?: string
 ): Metadata {
-  const config = getBaseMetadata(profile, hostname);
+  const config = getBaseMetadata(profile, hostname, origin);
 
   const title = profile?.full_name
-    ? `Projects — ${buildTitle(profile, hostname)}`
+    ? `Projects — ${buildTitle(profile, hostname, origin)}`
     : "Projects";
   const description = buildProjectsDescription(profile, projectTitles, currentRole);
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.id && origin
-    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
+  const ogImageUrl = profile?.id
+    ? `${config.siteUrl}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -304,7 +346,7 @@ export function generateProjectsMetadata(
       description,
       images: [ogImageUrl],
     },
-    alternates: { canonical: canonicalUrl("/projects", hostname) },
+    alternates: { canonical: canonicalUrl("/projects", hostname, origin) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -323,7 +365,7 @@ export function generateProjectMetadata(
   hostname?: string,
   origin?: string
 ): Metadata {
-  const config = getBaseMetadata(profile, hostname);
+  const config = getBaseMetadata(profile, hostname, origin);
 
   if (!project) {
     return {
@@ -332,14 +374,14 @@ export function generateProjectMetadata(
     };
   }
 
-  const title = `${project.title} — ${buildTitle(profile, hostname)}`;
+  const title = `${project.title} — ${buildTitle(profile, hostname, origin)}`;
   const description =
     project.description ||
     project.long_description;
 
   // Generate OG image URL if we have an avatar and origin (for fallback)
-  const fallbackImageUrl = profile?.id && origin
-    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
+  const fallbackImageUrl = profile?.id
+    ? `${config.siteUrl}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -363,7 +405,7 @@ export function generateProjectMetadata(
         : [fallbackImageUrl],
       publishedTime: project.created_at,
     },
-    alternates: { canonical: canonicalUrl(`/projects/${project.id}`, hostname) },
+    alternates: { canonical: canonicalUrl(`/projects/${project.id}`, hostname, origin) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -381,17 +423,17 @@ export function generateResumeMetadata(
   hostname?: string,
   origin?: string
 ): Metadata {
-  const config = getBaseMetadata(profile, hostname);
+  const config = getBaseMetadata(profile, hostname, origin);
 
-  const title = profile?.full_name ? `Resume — ${buildTitle(profile, hostname)}` : "Resume";
+  const title = profile?.full_name ? `Resume — ${buildTitle(profile, hostname, origin)}` : "Resume";
   const description =
     profile?.home_page_data?.about_card_description ||
     profile?.tagline ||
     "Professional resume showcasing experience, skills, and qualifications.";
 
   // Generate OG image URL if we have an avatar and origin
-  const ogImageUrl = profile?.id && origin
-    ? `${origin}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
+  const ogImageUrl = profile?.id
+    ? `${config.siteUrl}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
     : config.defaultImage;
 
   const meta: Metadata = {
@@ -404,7 +446,7 @@ export function generateResumeMetadata(
       description,
       images: [ogImageUrl],
     },
-    alternates: { canonical: canonicalUrl("/resume", hostname) },
+    alternates: { canonical: canonicalUrl("/resume", hostname, origin) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -418,9 +460,10 @@ export function generateResumeMetadata(
 
 export function generateStructuredData(
   profile: ProfileLike,
-  hostname?: string
+  hostname?: string,
+  origin?: string
 ) {
-  const config = getBaseMetadata(profile, hostname);
+  const config = getBaseMetadata(profile, hostname, origin);
 
   const personData = {
     "@context": "https://schema.org",
@@ -465,8 +508,9 @@ export function generateProjectStructuredData(
   project: Project,
   profile: ProfileLike,
   hostname?: string,
+  origin?: string,
 ) {
-  const url = canonicalUrl(`/projects/${project.id}`, hostname);
+  const url = canonicalUrl(`/projects/${project.id}`, hostname, origin);
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -478,13 +522,13 @@ export function generateProjectStructuredData(
     author: {
       "@type": "Person",
       name: profile?.full_name || "Developer",
-      url: canonicalUrl("/", hostname),
+      url: canonicalUrl("/", hostname, origin),
     },
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/", hostname) },
-        { "@type": "ListItem", position: 2, name: "Projects", item: canonicalUrl("/projects", hostname) },
+        { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/", hostname, origin) },
+        { "@type": "ListItem", position: 2, name: "Projects", item: canonicalUrl("/projects", hostname, origin) },
         { "@type": "ListItem", position: 3, name: project.title, item: url },
       ],
     },
