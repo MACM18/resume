@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
 import { Project } from "@/types/portfolio";
+import { safeAssetUrl } from "./remote-assets";
 
 export async function getProjectsServer(domain: string): Promise<Project[]> {
   const effectiveDomain = getEffectiveDomain(domain);
@@ -31,7 +32,7 @@ export async function getProjectsServer(domain: string): Promise<Project[]> {
       title: p.title,
       description: p.description,
       long_description: p.longDescription || "",
-      image: p.image || undefined,
+      image: safeAssetUrl(p.image),
       tech: p.tech,
       demo_url: p.demoUrl || undefined,
       github_url: p.githubUrl || undefined,
@@ -77,7 +78,7 @@ export async function getProjectByIdServer(
       title: project.title,
       description: project.description,
       long_description: project.longDescription || "",
-      image: project.image || undefined,
+      image: safeAssetUrl(project.image),
       tech: project.tech,
       demo_url: project.demoUrl || undefined,
       github_url: project.githubUrl || undefined,

@@ -14,6 +14,8 @@ try {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Keep rolling deployments and multiple self-hosted instances aligned.
+  deploymentId: process.env.DEPLOYMENT_VERSION,
   images: {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

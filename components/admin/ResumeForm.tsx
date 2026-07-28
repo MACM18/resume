@@ -33,7 +33,7 @@ import {
 import { Resume, UploadedResume } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
 import { Trash, FileUp, Loader2, CheckCircle, Sparkles } from "lucide-react";
-import { useSupabase } from "../providers/AuthProvider";
+import { useAuth } from "../providers/AuthProvider";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCurrentUserProfile } from "@/lib/profile"; // Import to get profile data
@@ -77,7 +77,7 @@ interface ResumeFormProps {
 
 export function ResumeForm({ resume, onSuccess }: ResumeFormProps) {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({

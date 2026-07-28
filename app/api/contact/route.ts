@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getResend, getResendFromEmail } from '@/lib/resend.server';
+import { fetchWithTimeout } from '@/lib/server-fetch';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,13 +9,14 @@ async function verifyRecaptcha(token: string) {
   if (!secretKey) return true; // Skip if no secret key configured
 
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       'https://www.google.com/recaptcha/api/siteverify',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `secret=${secretKey}&response=${token}`,
-      }
+      },
+      8_000,
     );
     const data = await response.json();
     return data.success && data.score >= 0.5;

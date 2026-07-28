@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
 import type { Resume } from "@/types/portfolio";
+import { safeAssetUrl } from "./remote-assets";
 
 export async function getActiveResumeServer(
   domain: string,
@@ -45,7 +46,7 @@ export async function getActiveResumeServer(
       education: resume.education as Resume["education"],
       certifications: (resume.certifications as Resume["certifications"]) || [],
       project_ids: resume.projectIds,
-      resume_url: resume.resumeUrl,
+      resume_url: safeAssetUrl(resume.resumeUrl) || null,
       pdf_source: (resume.pdfSource as Resume["pdf_source"]) || "uploaded",
       uploaded_resume_id: resume.uploadedResumeId,
       location: resume.location || "",

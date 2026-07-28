@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { formatDateRange } from "@/lib/utils";
-import { generateStructuredData } from "@/lib/seo";
+import { generateStructuredData, serializeJsonLd } from "@/lib/seo";
 import type { HomePageData, Profile, Project, WorkExperience } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
 import { generateVCard, downloadVCard } from "@/lib/vcard";
@@ -179,13 +179,19 @@ export default function HomeClient({
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData.person),
+          __html: serializeJsonLd(structuredData.person),
         }}
       />
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData.website),
+          __html: serializeJsonLd(structuredData.website),
+        }}
+      />
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd(structuredData.profilePage),
         }}
       />
       <div className='min-h-screen relative'>

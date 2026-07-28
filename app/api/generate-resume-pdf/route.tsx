@@ -10,11 +10,13 @@ import {
   Image,
   Svg,
   Path,
-  G,
   Circle,
 } from "@react-pdf/renderer";
 import { Resume, Profile, WorkExperience, Project } from "@/types/portfolio";
 import sharp from "sharp";
+import { db } from "@/lib/db";
+import { fetchWithTimeout, readResponseBuffer } from "@/lib/server-fetch";
+import { safeAssetUrl } from "@/lib/remote-assets";
 
 // Icon components for the PDF
 const IconGithub = () => (
@@ -299,22 +301,22 @@ const styles = StyleSheet.create({
  */
 function calculateTotalExperience(workExperiences?: WorkExperience[]): string {
   if (!workExperiences || workExperiences.length === 0) return "";
-  
+
   // Sort by start date to handle overlapping intervals
   const sorted = [...workExperiences].sort(
     (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
   );
-  
+
   let totalMonths = 0;
   let currentStart = new Date(sorted[0].start_date);
-  let currentEnd = sorted[0].is_current 
-    ? new Date() 
+  let currentEnd = sorted[0].is_current
+    ? new Date()
     : (sorted[0].end_date ? new Date(sorted[0].end_date!) : new Date());
 
   for (let i = 1; i < sorted.length; i++) {
     const expStart = new Date(sorted[i].start_date);
-    const expEnd = sorted[i].is_current 
-      ? new Date() 
+    const expEnd = sorted[i].is_current
+      ? new Date()
       : (sorted[i].end_date ? new Date(sorted[i].end_date!) : new Date());
 
     if (expStart <= currentEnd) {
@@ -324,22 +326,22 @@ function calculateTotalExperience(workExperiences?: WorkExperience[]): string {
       }
     } else {
       // Gap - add accumulated months and reset
-      totalMonths += (currentEnd.getFullYear() - currentStart.getFullYear()) * 12 + 
-                     (currentEnd.getMonth() - currentStart.getMonth());
+      totalMonths += (currentEnd.getFullYear() - currentStart.getFullYear()) * 12 +
+        (currentEnd.getMonth() - currentStart.getMonth());
       currentStart = expStart;
       currentEnd = expEnd;
     }
   }
   // Add the final interval
-  totalMonths += (currentEnd.getFullYear() - currentStart.getFullYear()) * 12 + 
-                 (currentEnd.getMonth() - currentStart.getMonth());
+  totalMonths += (currentEnd.getFullYear() - currentStart.getFullYear()) * 12 +
+    (currentEnd.getMonth() - currentStart.getMonth());
 
   const years = Math.floor(totalMonths / 12);
   const remainingMonths = totalMonths % 12;
 
   const yearStr = years > 0 ? `${years} Year${years !== 1 ? "s" : ""}` : "";
   const monthStr = remainingMonths > 0 ? `${remainingMonths} Month${remainingMonths !== 1 ? "s" : ""}` : "";
-  
+
   return [yearStr, monthStr].filter(Boolean).join(" ");
 }
 
@@ -368,12 +370,12 @@ const ResumeDocument = ({
   processedAvatar,
 }: ResumeDocumentProps) => {
   const totalExp = calculateTotalExperience(workExperiences);
-  
+
   // Filter projects to only those selected in resume.project_ids
   const selectedProjects = projects?.filter(p => resume.project_ids.includes(p.id)) || [];
 
-  const primaryPhone = profile.contact_numbers?.find(n => n.isPrimary && n.isActive) || 
-                       profile.contact_numbers?.find(n => n.isActive);
+  const primaryPhone = profile.contact_numbers?.find(n => n.isPrimary && n.isActive) ||
+    profile.contact_numbers?.find(n => n.isActive);
 
   return (
     <Document>
@@ -570,43 +572,33 @@ export async function POST(request: Request) {
 
     // Fix avatar rotation issues for PDF
     let processedAvatar: string | null = null;
-    if (profile.avatar_url) {
+    const persistedProfile = profile.id
+      ? await db.profile.findUnique({
+        where: { id: profile.id },
+        select: {
+          avatarUrl: true,
+          avatarPosition: true,
+          avatarZoom: true,
+        },
+      })
+      : null;
+
+    const avatarUrl = safeAssetUrl(persistedProfile?.avatarUrl || null);
+
+    if (avatarUrl) {
       try {
-        // SSRF Protection: Validate and constrain URL before fetching
-        const url = new URL(profile.avatar_url);
-        if (!["http:", "https:"].includes(url.protocol)) {
-          throw new Error("Invalid protocol");
-        }
-        if (url.username || url.password || url.port) {
-          throw new Error("Credentials and custom ports are not allowed");
-        }
-
-        // Only allow known avatar/image hosts (exact host match only)
-        const allowedHosts = ["storage.macm.dev", "storage.macm.lk", "macm.dev", "macm.lk"];
-        const hostname = url.hostname.toLowerCase();
-        const allowedHost = allowedHosts.find((host) => hostname === host);
-        if (!allowedHost) {
-          throw new Error("Avatar host is not allowed");
-        }
-
-        // Disallow suspicious path patterns and reconstruct a canonical URL
-        if (url.pathname.includes("..")) {
-          throw new Error("Invalid avatar path");
-        }
-        const safeAvatarUrl = `${url.protocol}//${allowedHost}${url.pathname}${url.search}`;
-
-        const response = await fetch(safeAvatarUrl, { redirect: "error" });
+        const response = await fetchWithTimeout(avatarUrl, { redirect: "error" }, 8_000);
         if (response.ok) {
-          const buffer = await response.arrayBuffer();
+          const buffer = await readResponseBuffer(response, 8 * 1024 * 1024);
           // Use sharp to auto-rotate based on EXIF and strip metadata
-          const rotatedBuffer = await sharp(Buffer.from(buffer))
+          const rotatedBuffer = await sharp(buffer)
             .rotate()
             .png()
             .toBuffer();
           processedAvatar = `data:image/png;base64,${rotatedBuffer.toString("base64")}`;
         }
       } catch (e) {
-        console.error("Error processing avatar for PDF (SSRF Check):", e);
+        console.error("Error processing avatar for PDF:", e);
       }
     }
 
