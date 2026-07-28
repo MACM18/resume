@@ -22,7 +22,7 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.STORAGE_BUCKET || "portfolio";
 
-// Bucket name mappings (from Supabase bucket names to folder prefixes)
+// Logical upload categories mapped to storage folder prefixes.
 const BUCKET_FOLDERS: Record<string, string> = {
   "profile-images": "profile-images",
   "background-images": "background-images",

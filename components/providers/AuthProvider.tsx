@@ -48,6 +48,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// Backwards compatibility alias - will be removed in future
-export const useSupabase = useAuth;

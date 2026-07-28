@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getProfileDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateProjectsMetadata } from "@/lib/seo";
+import { getProjectsServer } from "@/lib/projects.server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const hdr = await headers();
@@ -12,21 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const domain = getEffectiveDomain(host);
   const profile = domain ? await getProfileDataServer(domain) : null;
 
-  let projectTitles: string[] = [];
-  if (domain) {
-    try {
-      const res = await fetch(
-        `${origin}/api/projects/by-domain?domain=${encodeURIComponent(domain)}`,
-      );
-      if (res.ok) {
-        const data = (await res.json()) as Array<{ title?: string }>;
-        projectTitles = (data || []).map((p) => p.title).filter(Boolean) as string[];
-      }
-    } catch (err) {
-      // fail silently; metadata should still be returned
-      console.error("Error fetching projects for metadata:", err);
-    }
-  }
+  const projects = domain ? await getProjectsServer(domain) : [];
+  const projectTitles = projects.map((project) => project.title);
 
   const currentRole = profile?.active_resume_role || undefined;
   return generateProjectsMetadata(

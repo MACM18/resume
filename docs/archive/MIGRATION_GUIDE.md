@@ -1,4 +1,4 @@
-# Migration Guide: Supabase to Postgres + NextAuth + S3
+# Archived migration guide: legacy hosted database to Postgres + NextAuth + S3
 
 This document describes the migration from Supabase to a self-hosted stack with PostgreSQL, NextAuth.js, and S3-compatible storage.
 

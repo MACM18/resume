@@ -10,11 +10,12 @@ import {
   Image,
   Svg,
   Path,
-  G,
   Circle,
 } from "@react-pdf/renderer";
 import { Resume, Profile, WorkExperience, Project } from "@/types/portfolio";
 import sharp from "sharp";
+import { fetchWithTimeout, readResponseBuffer } from "@/lib/server-fetch";
+import { isAllowedAssetUrl } from "@/lib/remote-assets";
 
 // Icon components for the PDF
 const IconGithub = () => (
@@ -581,25 +582,15 @@ export async function POST(request: Request) {
           throw new Error("Credentials and custom ports are not allowed");
         }
 
-        // Only allow known avatar/image hosts (exact host match only)
-        const allowedHosts = ["storage.macm.dev", "storage.macm.lk", "macm.dev", "macm.lk"];
-        const hostname = url.hostname.toLowerCase();
-        const allowedHost = allowedHosts.find((host) => hostname === host);
-        if (!allowedHost) {
+        if (!isAllowedAssetUrl(profile.avatar_url)) {
           throw new Error("Avatar host is not allowed");
         }
 
-        // Disallow suspicious path patterns and reconstruct a canonical URL
-        if (url.pathname.includes("..")) {
-          throw new Error("Invalid avatar path");
-        }
-        const safeAvatarUrl = `${url.protocol}//${allowedHost}${url.pathname}${url.search}`;
-
-        const response = await fetch(safeAvatarUrl, { redirect: "error" });
+        const response = await fetchWithTimeout(profile.avatar_url, { redirect: "error" }, 8_000);
         if (response.ok) {
-          const buffer = await response.arrayBuffer();
+          const buffer = await readResponseBuffer(response, 8 * 1024 * 1024);
           // Use sharp to auto-rotate based on EXIF and strip metadata
-          const rotatedBuffer = await sharp(Buffer.from(buffer))
+          const rotatedBuffer = await sharp(buffer)
             .rotate()
             .png()
             .toBuffer();

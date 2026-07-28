@@ -1,6 +1,83 @@
 import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
 import { AboutPageData, HomePageData, Profile, Theme } from "@/types/portfolio";
+import { z } from "zod";
+import { safeAssetUrl } from "./remote-assets";
+
+const socialLinkSchema = z.object({
+  platform: z.string().default(""),
+  icon: z.string().default(""),
+  href: z.string().default(""),
+  label: z.string().default(""),
+  display_label: z.string().optional(),
+}).passthrough();
+
+const homePageSchema = z.object({
+  name: z.string().default(""),
+  tagline: z.string().default(""),
+  socialLinks: z.array(socialLinkSchema).default([]),
+  experienceHighlights: z.array(z.record(z.string(), z.unknown())).default([]),
+  technicalExpertise: z.array(z.object({ name: z.string().default(""), skills: z.array(z.string()).default([]) }).passthrough()).default([]),
+  achievements: z.array(z.record(z.string(), z.unknown())).default([]),
+  callToAction: z.object({
+    title: z.string().default("Let's Connect"),
+    description: z.string().default("I'm always open to discussing new opportunities."),
+    email: z.string().default(""),
+  }).passthrough().default({}),
+  availability_status: z.object({ show: z.boolean().default(false), message: z.string().default("") }).optional(),
+  about_card_description: z.string().optional(),
+  projects_card_description: z.string().optional(),
+  experience_card_description: z.string().optional(),
+}).passthrough();
+
+const aboutPageSchema = z.object({
+  title: z.string().default("About Me"),
+  subtitle: z.string().default("My Journey"),
+  story: z.array(z.string()).default([]),
+  skills: z.array(z.object({
+    category: z.string().default(""),
+    icon: z.string().default(""),
+    items: z.array(z.string()).default([]),
+  }).passthrough()).default([]),
+  callToAction: z.object({
+    title: z.string().default("Get in Touch"),
+    description: z.string().default("Let's work together!"),
+    email: z.string().default(""),
+  }).passthrough().default({}),
+}).passthrough();
+
+function normalizedHomePageData(value: unknown, fallbackName: string): HomePageData {
+  const result = homePageSchema.safeParse(value);
+  if (result.success) return { ...result.data, name: result.data.name || fallbackName } as HomePageData;
+  return {
+    name: fallbackName,
+    tagline: "Welcome to my portfolio",
+    socialLinks: [],
+    experienceHighlights: [],
+    technicalExpertise: [],
+    achievements: [],
+    callToAction: { title: "Let's Connect", description: "I'm always open to discussing new opportunities.", email: "" },
+  };
+}
+
+function normalizedAboutPageData(value: unknown): AboutPageData {
+  const result = aboutPageSchema.safeParse(value);
+  if (result.success) return result.data as AboutPageData;
+  return {
+    title: "About Me",
+    subtitle: "My Journey",
+    story: [],
+    skills: [],
+    callToAction: { title: "Get in Touch", description: "Let's work together!", email: "" },
+  };
+}
+
+function normalizedTheme(value: unknown): Theme | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+  );
+}
 
 // Transform Prisma profile to frontend Profile type
 function transformProfile(prismaProfile: {
@@ -26,7 +103,7 @@ function transformProfile(prismaProfile: {
     id: prismaProfile.id,
     user_id: prismaProfile.userId,
     full_name: prismaProfile.fullName,
-    avatar_url: prismaProfile.avatarUrl,
+    avatar_url: safeAssetUrl(prismaProfile.avatarUrl) || null,
     avatar_position: prismaProfile.avatarPosition as
       | { x: number; y: number }
       | undefined,
@@ -37,12 +114,12 @@ function transformProfile(prismaProfile: {
         | undefined || undefined,
     tagline: prismaProfile.tagline,
     domain: prismaProfile.domains?.find((d) => d.isPrimary)?.domain || prismaProfile.domains?.[0]?.domain || null,
-    home_page_data: prismaProfile.homePageData as HomePageData,
-    about_page_data: prismaProfile.aboutPageData as AboutPageData,
+    home_page_data: normalizedHomePageData(prismaProfile.homePageData, prismaProfile.fullName),
+    about_page_data: normalizedAboutPageData(prismaProfile.aboutPageData),
     active_resume_role: prismaProfile.activeResumeRole,
-    theme: prismaProfile.theme as Theme | null,
-    background_image_url: prismaProfile.backgroundImageUrl,
-    favicon_url: prismaProfile.faviconUrl,
+    theme: normalizedTheme(prismaProfile.theme),
+    background_image_url: safeAssetUrl(prismaProfile.backgroundImageUrl) || null,
+    favicon_url: safeAssetUrl(prismaProfile.faviconUrl) || null,
     contact_numbers: prismaProfile.contactNumbers as Profile["contact_numbers"],
     updated_at: prismaProfile.updatedAt.toISOString(),
   };

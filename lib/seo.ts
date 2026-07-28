@@ -26,19 +26,27 @@ export interface SEOConfig {
 
 const DEFAULT_SEO: SEOConfig = {
   siteName: "Professional Portfolio",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   defaultTitle: "Portfolio - Software Developer",
   defaultDescription:
     "Professional portfolio showcasing projects, experience, and technical expertise in software development.",
-  defaultImage: "/og-image.png",
+  defaultImage: "/og-image.svg",
   // twitterHandle intentionally blank; derived dynamically from social links (X)
 };
 
 function buildTitle(profile: ProfileLike, hostname?: string) {
   if (!profile) return DEFAULT_SEO.defaultTitle;
   const name = profile.full_name || DEFAULT_SEO.siteName;
-  const hostnameTag = hostname ? ` (${hostname})` : "";
-  return `${name} | ${hostnameTag}`;
+  return hostname ? `${name} | ${hostname}` : name;
+}
+
+export function serializeJsonLd(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+function canonicalUrl(path: string, hostname?: string): string {
+  const base = hostname ? `https://${hostname}` : DEFAULT_SEO.siteUrl;
+  return `${base.replace(/\/$/, "")}${path}`;
 }
 
 export function buildMetaDescription(profile: ProfileLike, maxLen = 255) {
@@ -190,6 +198,8 @@ export function generateHomeMetadata(
         "max-snippet": -1,
       },
     },
+    alternates: { canonical: canonicalUrl("/", hostname) },
+    metadataBase: new URL(canonicalUrl("/", hostname)),
   };
   if (config.twitterHandle) {
     base.twitter = {
@@ -232,6 +242,7 @@ export function generateAboutMetadata(
       description,
       images: [ogImageUrl],
     },
+    alternates: { canonical: canonicalUrl("/about", hostname) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -293,6 +304,7 @@ export function generateProjectsMetadata(
       description,
       images: [ogImageUrl],
     },
+    alternates: { canonical: canonicalUrl("/projects", hostname) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -351,6 +363,7 @@ export function generateProjectMetadata(
         : [fallbackImageUrl],
       publishedTime: project.created_at,
     },
+    alternates: { canonical: canonicalUrl(`/projects/${project.id}`, hostname) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -391,6 +404,7 @@ export function generateResumeMetadata(
       description,
       images: [ogImageUrl],
     },
+    alternates: { canonical: canonicalUrl("/resume", hostname) },
   };
   if (config.twitterHandle) {
     meta.twitter = {
@@ -432,8 +446,47 @@ export function generateStructuredData(
     },
   };
 
+  const profilePageData = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: `${profile?.full_name || config.siteName} portfolio`,
+    url: config.siteUrl,
+    mainEntity: personData,
+  };
+
   return {
     person: personData,
     website: websiteData,
+    profilePage: profilePageData,
+  };
+}
+
+export function generateProjectStructuredData(
+  project: Project,
+  profile: ProfileLike,
+  hostname?: string,
+) {
+  const url = canonicalUrl(`/projects/${project.id}`, hostname);
+  return {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.description || project.long_description,
+    url,
+    image: project.image ? [project.image] : undefined,
+    keywords: project.tech,
+    author: {
+      "@type": "Person",
+      name: profile?.full_name || "Developer",
+      url: canonicalUrl("/", hostname),
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/", hostname) },
+        { "@type": "ListItem", position: 2, name: "Projects", item: canonicalUrl("/projects", hostname) },
+        { "@type": "ListItem", position: 3, name: project.title, item: url },
+      ],
+    },
   };
 }

@@ -12,12 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
 import { Loader2, FileUp, Image as ImageIcon } from "lucide-react";
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 
 export function FaviconManager() {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({

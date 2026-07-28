@@ -11,8 +11,6 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error?: Error;
-  componentStack?: string | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -21,14 +19,13 @@ export class ErrorBoundary extends Component<Props, State> {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(): State {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Error boundary caught:", error, errorInfo);
-    // Attach the component stack to state for display in the UI
-    this.setState({ error, componentStack: errorInfo.componentStack });
+    this.setState({ hasError: true });
   }
 
   render() {
@@ -52,21 +49,6 @@ export class ErrorBoundary extends Component<Props, State> {
               We encountered an unexpected error. Please try refreshing the page
               or contact support if the problem persists.
             </p>
-            {this.state.error && (
-              <>
-                <pre className='text-xs text-left bg-background/50 p-4 rounded-lg mb-4 overflow-auto max-h-32'>
-                  {this.state.error.message}
-                </pre>
-                {this.state.componentStack && (
-                  <details className='text-xs text-left bg-background/50 p-3 rounded-lg mb-4 overflow-auto max-h-48'>
-                    <summary className='font-mono text-foreground/70 mb-2'>
-                      Component Stack
-                    </summary>
-                    <pre>{this.state.componentStack}</pre>
-                  </details>
-                )}
-              </>
-            )}
             <Button
               onClick={() => window.location.reload()}
               className='bg-primary hover:bg-primary/90'

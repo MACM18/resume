@@ -28,7 +28,7 @@ import { toast } from "@/components/ui/sonner";
 import { useState } from "react";
 import { FileUp, Loader2, CheckCircle, Trash, Sparkles } from "lucide-react";
 import Image from "next/image";
-import { useSupabase } from "../providers/AuthProvider";
+import { useAuth } from "../providers/AuthProvider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,7 +81,7 @@ interface ProjectFormProps {
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
   // Helper: treat placeholder or empty values as "no image"

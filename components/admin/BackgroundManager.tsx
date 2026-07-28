@@ -19,7 +19,7 @@ import {
   Trash,
   Image as ImageIcon,
 } from "lucide-react";
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import {
   AlertDialog,
@@ -37,7 +37,7 @@ const MAX_IMAGES = 5;
 
 export function BackgroundManager() {
   const queryClient = useQueryClient();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({

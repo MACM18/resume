@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { db } from "@/lib/db";
+import { fetchWithTimeout, readResponseBuffer } from "@/lib/server-fetch";
+import { isAllowedAssetUrl } from "@/lib/remote-assets";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,11 +26,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Avatar not found" }, { status: 404 });
     }
 
-    const response = await fetch(profile.avatarUrl);
+    if (!isAllowedAssetUrl(profile.avatarUrl)) {
+      return NextResponse.json({ error: "Avatar host is not allowed" }, { status: 400 });
+    }
+
+    const response = await fetchWithTimeout(profile.avatarUrl, { redirect: "error" }, 8_000);
     if (!response.ok) throw new Error("Fetch failed");
 
-    const arrayBuffer = await response.arrayBuffer();
-    const imageBuffer = Buffer.from(arrayBuffer);
+    const imageBuffer = await readResponseBuffer(response, 8 * 1024 * 1024);
 
     // --- Dynamic Parameters ---
     const targetSize = 512;

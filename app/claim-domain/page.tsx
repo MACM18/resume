@@ -6,13 +6,13 @@ import { motion } from "framer-motion";
 import { ClaimDomainForm } from "@/components/admin/ClaimDomainForm";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrentUserProfile } from "@/lib/profile";
-import { useSupabase } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 const ClaimDomainPage = () => {
   const router = useRouter();
-  const { session } = useSupabase();
+  const { session } = useAuth();
   const { data: profile, isLoading } = useQuery({
     queryKey: ["currentUserProfile"],
     queryFn: getCurrentUserProfile,
