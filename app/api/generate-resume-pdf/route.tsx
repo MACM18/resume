@@ -586,7 +586,13 @@ export async function POST(request: Request) {
           throw new Error("Avatar host is not allowed");
         }
 
-        const response = await fetchWithTimeout(profile.avatar_url, { redirect: "error" }, 8_000);
+        const avatarAllowedHosts = ["avatars.githubusercontent.com", "github.com"];
+        const response = await fetchWithTimeout(
+          profile.avatar_url,
+          { redirect: "error" },
+          8_000,
+          { allowedHosts: avatarAllowedHosts },
+        );
         if (response.ok) {
           const buffer = await readResponseBuffer(response, 8 * 1024 * 1024);
           // Use sharp to auto-rotate based on EXIF and strip metadata

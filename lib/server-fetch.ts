@@ -5,6 +5,7 @@ export async function fetchWithTimeout(
   input: RequestInfo | URL,
   init: RequestInit = {},
   timeoutMs = 8_000,
+  options: { allowedHosts?: readonly string[] } = {},
 ): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -29,6 +30,16 @@ export async function fetchWithTimeout(
   }
   if (targetUrl.username || targetUrl.password || targetUrl.port) {
     throw new Error("Credentials and custom ports are not allowed");
+  }
+
+  if (options.allowedHosts && options.allowedHosts.length > 0) {
+    const normalizedHost = targetUrl.hostname.toLowerCase();
+    const isAllowed = options.allowedHosts.some(
+      (host) => host.toLowerCase() === normalizedHost,
+    );
+    if (!isAllowed) {
+      throw new Error("Target host is not allowed");
+    }
   }
 
   try {
