@@ -26,6 +26,7 @@ model User {
   workExperiences WorkExperience[]
   galleryImages   GalleryImage[]
   passwordResetTokens PasswordResetToken[]
+  authOtps        AuthOtp[]
 
   @@map("users")
 }
@@ -42,6 +43,30 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+enum AuthOtpPurpose {
+  PASSWORD_RESET
+  EMAIL_CHANGE
+}
+
+model AuthOtp {
+  id          String        @id @default(cuid())
+  userId      String?       @map("user_id")
+  targetEmail String        @map("target_email")
+  purpose     AuthOtpPurpose
+  codeHash    String        @map("code_hash")
+  expiresAt   DateTime      @map("expires_at")
+  attempts    Int           @default(0)
+  consumedAt  DateTime?     @map("consumed_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([targetEmail, purpose, createdAt])
+  @@index([userId, purpose, createdAt])
+  @@index([expiresAt])
+  @@map("auth_otps")
 }
 
 model Profile {

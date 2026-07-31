@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/providers/AuthProvider";
 import { signOut } from "next-auth/react";
-import { Wrench, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Wrench, LogOut, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -11,8 +11,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
-import { getCurrentUserProfile } from "@/lib/profile";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -21,12 +19,6 @@ export const AuthButton = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [navContainer, setNavContainer] = useState<HTMLElement | null>(null);
-
-  const { data: profile } = useQuery({
-    queryKey: ["currentUserProfile"],
-    queryFn: getCurrentUserProfile,
-    enabled: !!session,
-  });
 
   useEffect(() => {
     setNavContainer(document.getElementById("nav-auth-container"));
@@ -37,7 +29,6 @@ export const AuthButton = () => {
     router.refresh();
   };
 
-  const isSuperAdmin = profile?.domain === "macm.dev";
   const isAdminPage = pathname?.startsWith("/admin");
 
   // Hide on admin pages to avoid clutter
@@ -52,21 +43,6 @@ export const AuthButton = () => {
     >
       {session ? (
         <>
-          {isSuperAdmin && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href='/super-admin'
-                  className='group flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 hover:bg-secondary/10'
-                >
-                  <ShieldCheck className='h-4 w-4 text-foreground/60 group-hover:text-secondary' />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Super Admin</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
@@ -154,21 +130,6 @@ export const AuthButton = () => {
                   <p>Dashboard</p>
                 </TooltipContent>
               </Tooltip>
-              {isSuperAdmin && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href='/super-admin'
-                      className='group flex items-center justify-center w-11 h-11 rounded-full bg-background/80 backdrop-blur-xl border border-foreground/10 shadow-lg transition-all duration-200 hover:bg-secondary/10 hover:border-secondary/20'
-                    >
-                      <ShieldCheck className='h-5 w-5 text-foreground/60 group-hover:text-secondary' />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side='left'>
-                    <p>Super Admin</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
             </>
           ) : (
             <Tooltip>

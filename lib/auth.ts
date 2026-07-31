@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
 import { db } from "./db";
 
+export const MIN_PASSWORD_LENGTH = 8;
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 // Extend the built-in session types
 declare module "next-auth" {
   interface Session {
@@ -38,7 +44,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await db.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: normalizeEmail(credentials.email) },
         });
 
         if (!user) {
@@ -56,7 +62,7 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: user.id,
-          email: user.email,
+          email: normalizeEmail(user.email),
         };
       },
     }),

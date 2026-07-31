@@ -15,9 +15,11 @@ import { ThemeEditor } from "@/components/admin/ThemeEditor";
 import { WorkExperienceManagement } from "@/components/admin/WorkExperienceManagement";
 import { GalleryManager } from "@/components/admin/GalleryManager";
 import { AdminOverview } from "@/components/admin/AdminOverview";
+import { AccountSecurity } from "@/components/admin/AccountSecurity";
 import { AdminLoadingState } from "@/components/admin/AdminUI";
 import {
   User,
+  ShieldCheck,
   Palette,
   Home,
   Info,
@@ -39,6 +41,7 @@ const ADMIN_GROUPS = [
     items: [
       { value: "profile", label: "Profile & Domain", icon: User },
       { value: "theme", label: "Theme & Branding", icon: Palette },
+      { value: "account", label: "Account & Security", icon: ShieldCheck },
     ],
   },
   {
@@ -225,6 +228,7 @@ function AdminDashboardContent() {
                     <ErrorBoundary>
                       {section === "overview" && <AdminOverview onNavigate={handleSectionChange} />}
                       {section === "profile" && <ProfileManagement />}
+                      {section === "account" && <AccountSecurity />}
                       {section === "theme" && <ThemeEditor />}
                       {section === "home" && <HomePageForm />}
                       {section === "about" && <AboutPageForm />}

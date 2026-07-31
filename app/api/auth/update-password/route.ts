@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { hashPassword, verifyPassword } from '@/lib/auth';
+import { hashPassword, MIN_PASSWORD_LENGTH, verifyPassword } from '@/lib/auth';
+import { AuthOtpPurpose } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -16,9 +17,9 @@ export async function POST(request: NextRequest) {
 
     const { currentPassword, newPassword } = await request.json();
 
-    if (!newPassword || newPassword.length < 6) {
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < MIN_PASSWORD_LENGTH) {
       return NextResponse.json(
-        { error: 'New password must be at least 6 characters' },
+        { error: `New password must be at least ${MIN_PASSWORD_LENGTH} characters` },
         { status: 400 }
       );
     }
@@ -32,24 +33,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // If currentPassword is provided, verify it
-    if (currentPassword) {
-      const isValid = await verifyPassword(currentPassword, user.passwordHash);
-      if (!isValid) {
-        return NextResponse.json(
-          { error: 'Current password is incorrect' },
-          { status: 400 }
-        );
-      }
+    if (typeof currentPassword !== 'string' || !currentPassword) {
+      return NextResponse.json({ error: 'Current password is required' }, { status: 400 });
+    }
+    const isValid = await verifyPassword(currentPassword, user.passwordHash);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: 'Current password is incorrect' },
+        { status: 400 }
+      );
     }
 
     // Hash and update the new password
     const newPasswordHash = await hashPassword(newPassword);
     
-    await db.user.update({
-      where: { email: session.user.email },
-      data: { passwordHash: newPasswordHash }
-    });
+    await db.$transaction([
+      db.user.update({ where: { id: user.id }, data: { passwordHash: newPasswordHash } }),
+      db.authOtp.updateMany({ where: { userId: user.id, purpose: AuthOtpPurpose.PASSWORD_RESET, consumedAt: null }, data: { consumedAt: new Date() } }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

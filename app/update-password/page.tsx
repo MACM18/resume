@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { GlassCard } from "@/components/GlassCard";
 import { motion } from "framer-motion";
@@ -28,8 +28,8 @@ const passwordSchema = z
     currentPassword: z.string().min(1, "Current password is required."),
     newPassword: z
       .string()
-      .min(6, "New password must be at least 6 characters."),
-    confirmPassword: z.string().min(6, "Please confirm your password."),
+      .min(8, "New password must be at least 8 characters."),
+    confirmPassword: z.string().min(8, "Please confirm your password."),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
@@ -41,30 +41,10 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 const UpdatePasswordPage = () => {
   const { status } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
-  // Check if this is a first-time password setup (from invite)
-  const isFirstTime = searchParams.get("first") === "true";
-
   const form = useForm<PasswordFormValues>({
-    resolver: zodResolver(
-      isFirstTime
-        ? z
-            .object({
-              newPassword: z
-                .string()
-                .min(6, "New password must be at least 6 characters."),
-              confirmPassword: z
-                .string()
-                .min(6, "Please confirm your password."),
-            })
-            .refine((data) => data.newPassword === data.confirmPassword, {
-              message: "Passwords don't match",
-              path: ["confirmPassword"],
-            })
-        : passwordSchema
-    ),
+    resolver: zodResolver(passwordSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -78,7 +58,7 @@ const UpdatePasswordPage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentPassword: isFirstTime ? undefined : data.currentPassword,
+          currentPassword: data.currentPassword,
           newPassword: data.newPassword,
         }),
       });
@@ -145,7 +125,7 @@ const UpdatePasswordPage = () => {
       >
         <GlassCard className='p-8'>
           <h2 className='text-3xl font-bold text-center mb-6 bg-gradient-primary bg-clip-text text-transparent'>
-            {isFirstTime ? "Set Your Password" : "Update Password"}
+            Update Password
           </h2>
           {error && (
             <div className='mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm'>
@@ -157,8 +137,7 @@ const UpdatePasswordPage = () => {
               onSubmit={form.handleSubmit((data) => mutate(data))}
               className='space-y-4'
             >
-              {!isFirstTime && (
-                <FormField
+              <FormField
                   control={form.control}
                   name='currentPassword'
                   render={({ field }) => (
@@ -174,8 +153,7 @@ const UpdatePasswordPage = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-              )}
+              />
               <FormField
                 control={form.control}
                 name='newPassword'

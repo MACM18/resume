@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword } from "@/lib/auth";
+import { hashPassword, MIN_PASSWORD_LENGTH, normalizeEmail } from "@/lib/auth";
 import { getDefaultProfileData } from "@/lib/profile.server";
 
 export const dynamic = "force-dynamic";
@@ -14,48 +14,49 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password, fullName } = body;
 
-    if (!email || !password) {
+    if (!email || typeof email !== "string" || !password || typeof password !== "string") {
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    // Check if user already exists
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
+    const normalizedEmail = normalizeEmail(email);
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
+    }
+    if (password.length < MIN_PASSWORD_LENGTH) {
       return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 409 }
+        { error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` },
+        { status: 400 }
       );
     }
 
-    // Hash password
-    const passwordHash = await hashPassword(password);
+    // Check if user already exists
+    const user = await db.$transaction(async (tx) => {
+      // Serialize the bootstrap check so two simultaneous requests cannot create
+      // two initial accounts.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('resume_bootstrap_signup'))`;
+      if (await tx.user.count() > 0) {
+        throw new Error("BOOTSTRAP_SIGNUP_CLOSED");
+      }
 
-    // Create user
-    const user = await db.user.create({
-      data: {
-        email,
-        passwordHash,
-      },
-    });
-
-    // Create profile for the user
-    const defaults = getDefaultProfileData(email, fullName || "New User");
-    await db.profile.create({
-      data: {
-        userId: user.id,
-        fullName: defaults.fullName,
-        tagline: defaults.tagline,
-        // Cast to JSON compatible type for Prisma
-        homePageData: JSON.parse(JSON.stringify(defaults.homePageData)),
-        aboutPageData: JSON.parse(JSON.stringify(defaults.aboutPageData)),
-        theme: JSON.parse(JSON.stringify(defaults.theme)),
-      },
+      const passwordHash = await hashPassword(password);
+      const createdUser = await tx.user.create({
+        data: { email: normalizedEmail, passwordHash },
+      });
+      const defaults = getDefaultProfileData(normalizedEmail, fullName || "New User");
+      await tx.profile.create({
+        data: {
+          userId: createdUser.id,
+          fullName: defaults.fullName,
+          tagline: defaults.tagline,
+          homePageData: JSON.parse(JSON.stringify(defaults.homePageData)),
+          aboutPageData: JSON.parse(JSON.stringify(defaults.aboutPageData)),
+          theme: JSON.parse(JSON.stringify(defaults.theme)),
+        },
+      });
+      return createdUser;
     });
 
     return NextResponse.json({
@@ -66,6 +67,12 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "BOOTSTRAP_SIGNUP_CLOSED") {
+      return NextResponse.json(
+        { error: "Initial account setup is already complete" },
+        { status: 409 }
+      );
+    }
     console.error("Signup error:", error);
     return NextResponse.json(
       { error: "Failed to create account" },
