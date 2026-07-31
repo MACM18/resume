@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions, normalizeEmail } from "@/lib/auth";
+import { authOptions, isValidEmail, normalizeEmail } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isValidOtp, isValidOtpFormat, OTP_MAX_ATTEMPTS } from "@/lib/auth-otp";
 import { AuthOtpPurpose } from "@prisma/client";
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await request.json();
     const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
-    if (!/^\S+@\S+\.\S+$/.test(email) || !isValidOtpFormat(body.code)) return NextResponse.json({ error: "Invalid or expired verification code" }, { status: 400 });
+    if (!isValidEmail(email) || !isValidOtpFormat(body.code)) return NextResponse.json({ error: "Invalid or expired verification code" }, { status: 400 });
     const otp = await db.authOtp.findFirst({ where: { userId: session.user.id, targetEmail: email, purpose: AuthOtpPurpose.EMAIL_CHANGE, consumedAt: null }, orderBy: { createdAt: "desc" } });
     if (!otp || otp.expiresAt.getTime() <= Date.now() || otp.attempts >= OTP_MAX_ATTEMPTS) return NextResponse.json({ error: "Invalid or expired verification code" }, { status: 400 });
     if (!isValidOtp(body.code, otp.codeHash)) {

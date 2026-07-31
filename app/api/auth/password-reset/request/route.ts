@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { normalizeEmail } from "@/lib/auth";
+import { isValidEmail, normalizeEmail } from "@/lib/auth";
 import { generateOtp, hashOtp, OTP_REQUEST_COOLDOWN_MS, OTP_TTL_MS } from "@/lib/auth-otp";
 import { getResend, getResendFromEmail } from "@/lib/resend.server";
 import { AuthOtpPurpose } from "@prisma/client";
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (!isValidEmail(email)) {
       return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword, MIN_PASSWORD_LENGTH, normalizeEmail } from "@/lib/auth";
+import { hashPassword, isValidEmail, MIN_PASSWORD_LENGTH, normalizeEmail } from "@/lib/auth";
 import { getDefaultProfileData } from "@/lib/profile.server";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = normalizeEmail(email);
-    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+    if (!isValidEmail(normalizedEmail)) {
       return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
     }
     if (password.length < MIN_PASSWORD_LENGTH) {

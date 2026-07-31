@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword, MIN_PASSWORD_LENGTH, normalizeEmail } from "@/lib/auth";
+import { hashPassword, isValidEmail, MIN_PASSWORD_LENGTH, normalizeEmail } from "@/lib/auth";
 import { isValidOtp, isValidOtpFormat, OTP_MAX_ATTEMPTS } from "@/lib/auth-otp";
 import { AuthOtpPurpose } from "@prisma/client";
 
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
     const code = body.code;
     const newPassword = body.newPassword;
-    if (!/^\S+@\S+\.\S+$/.test(email) || !isValidOtpFormat(code)) {
+    if (!isValidEmail(email) || !isValidOtpFormat(code)) {
       return NextResponse.json({ error: "Invalid or expired verification code" }, { status: 400 });
     }
     if (typeof newPassword !== "string" || newPassword.length < MIN_PASSWORD_LENGTH) {

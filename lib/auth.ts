@@ -9,6 +9,47 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/**
+ * Validate the basic shape of an email address without a backtracking regex.
+ * The input is bounded to the practical email maximum and checked in linear time.
+ */
+export function isValidEmail(email: string): boolean {
+  if (email.length < 3 || email.length > 254) return false;
+
+  const atIndex = email.indexOf("@");
+  if (atIndex <= 0 || atIndex !== email.lastIndexOf("@") || atIndex === email.length - 1) {
+    return false;
+  }
+
+  const localPart = email.slice(0, atIndex);
+  const domain = email.slice(atIndex + 1);
+  if (localPart.startsWith(".") || localPart.endsWith(".") || localPart.includes("..")) {
+    return false;
+  }
+
+  for (const character of localPart) {
+    const code = character.charCodeAt(0);
+    if (code <= 32 || code === 127 || "()<>[]\\,;:\"".includes(character)) {
+      return false;
+    }
+  }
+
+  if (domain.startsWith(".") || domain.endsWith(".") || domain.includes("..")) {
+    return false;
+  }
+
+  for (const character of domain) {
+    const code = character.charCodeAt(0);
+    const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    const isDigit = code >= 48 && code <= 57;
+    if (!isLetter && !isDigit && character !== "." && character !== "-") {
+      return false;
+    }
+  }
+
+  return domain.includes(".");
+}
+
 // Extend the built-in session types
 declare module "next-auth" {
   interface Session {
