@@ -9,7 +9,7 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { headers } from "next/headers";
-import { getProfileDataServer, getThemeDataServer } from "@/lib/profile.server";
+import { getProfileDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateHomeMetadata } from "@/lib/seo";
 import { generateCssVariables } from "@/lib/theme";
@@ -39,7 +39,14 @@ export default async function RootLayout({
   const host = hdr.get("host") ?? "";
   const domain = getEffectiveDomain(host);
   const profileData = domain ? await getProfileDataServer(domain) : null;
-  const themeData = domain ? await getThemeDataServer(domain) : null;
+  // Profile data already contains the sanitized theme and background URL.
+  // Reuse it here so the root layout does not issue a second profile query.
+  const themeData = profileData
+    ? {
+        theme: profileData.theme,
+        background_image_url: profileData.background_image_url,
+      }
+    : null;
   const faviconUrl = profileData?.favicon_url ?? null;
 
   // Analytics configuration (only enable in production when IDs are present)
@@ -164,4 +171,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

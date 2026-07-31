@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { getProfileDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateProjectsMetadata } from "@/lib/seo";
-import { getProjectsServer } from "@/lib/projects.server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const hdr = await headers();
@@ -13,15 +12,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const domain = getEffectiveDomain(host);
   const profile = domain ? await getProfileDataServer(domain) : null;
 
-  const projects = domain ? await getProjectsServer(domain) : [];
-  const projectTitles = projects.map((project) => project.title);
-
   const currentRole = profile?.active_resume_role || undefined;
   return generateProjectsMetadata(
     profile,
     domain || "",
     origin,
-    projectTitles,
+    [],
     currentRole,
   );
 }

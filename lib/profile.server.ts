@@ -3,6 +3,7 @@ import { getEffectiveDomain } from "./utils";
 import { AboutPageData, HomePageData, Profile, Theme } from "@/types/portfolio";
 import { z } from "zod";
 import { safeAssetUrl } from "./remote-assets";
+import { cache } from "react";
 
 const socialLinkSchema = z.object({
   platform: z.string().default(""),
@@ -125,7 +126,7 @@ function transformProfile(prismaProfile: {
   };
 }
 
-export async function getProfileDataServer(domain?: string) {
+export const getProfileDataServer = cache(async function getProfileDataServer(domain?: string) {
   const effectiveDomain = getEffectiveDomain(domain || "");
   if (!effectiveDomain) return null;
 
@@ -144,9 +145,9 @@ export async function getProfileDataServer(domain?: string) {
     console.error("Error fetching profile data (server):", error);
     return null;
   }
-}
+});
 
-export async function getProfileByUserId(
+export const getProfileByUserId = cache(async function getProfileByUserId(
   userId: string,
 ): Promise<Profile | null> {
   try {
@@ -164,9 +165,9 @@ export async function getProfileByUserId(
     console.error("Error fetching profile by user ID:", error);
     return null;
   }
-}
+});
 
-export async function getThemeDataServer(domain?: string) {
+export const getThemeDataServer = cache(async function getThemeDataServer(domain?: string) {
   const effectiveDomain = getEffectiveDomain(domain || "");
   if (!effectiveDomain) return null;
 
@@ -191,7 +192,7 @@ export async function getThemeDataServer(domain?: string) {
     console.error("Error fetching theme data (server):", error);
     return null;
   }
-}
+});
 
 /**
  * Default profile data for new users (server-safe version)

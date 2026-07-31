@@ -2,8 +2,9 @@ import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
 import type { Resume } from "@/types/portfolio";
 import { safeAssetUrl } from "./remote-assets";
+import { cache } from "react";
 
-export async function getActiveResumeServer(
+export const getActiveResumeServer = cache(async function getActiveResumeServer(
   domain: string,
 ): Promise<Resume | null> {
   const effectiveDomain = getEffectiveDomain(domain);
@@ -56,4 +57,4 @@ export async function getActiveResumeServer(
     console.error("Error fetching active resume (server):", error);
     return null;
   }
-}
+});

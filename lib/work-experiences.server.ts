@@ -1,8 +1,9 @@
 import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
 import { WorkExperience } from "@/types/portfolio";
+import { cache } from "react";
 
-export async function getVisibleWorkExperiencesServer(
+export const getVisibleWorkExperiencesServer = cache(async function getVisibleWorkExperiencesServer(
   domain: string,
 ): Promise<WorkExperience[]> {
   const effectiveDomain = getEffectiveDomain(domain);
@@ -43,9 +44,9 @@ export async function getVisibleWorkExperiencesServer(
     console.error("Error fetching work experiences (server):", error);
     return [];
   }
-}
+});
 
-export async function getCurrentWorkServer(
+export const getCurrentWorkServer = cache(async function getCurrentWorkServer(
   domain: string,
 ): Promise<WorkExperience | null> {
   const experiences = await getVisibleWorkExperiencesServer(domain);
@@ -54,4 +55,4 @@ export async function getCurrentWorkServer(
   // Prefer one marked as current, otherwise the most recent one
   const current = experiences.find((exp) => exp.is_current);
   return current || experiences[0];
-}
+});

@@ -12,10 +12,8 @@ export function PageTransition({ children }: PageTransitionProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -50 }}
       transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 30,
-        duration: 0.6,
+        duration: 0.3,
+        ease: "easeOut",
       }}
       className='min-h-screen'
     >

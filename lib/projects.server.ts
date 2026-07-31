@@ -2,8 +2,9 @@ import { db } from "./db";
 import { getEffectiveDomain } from "./utils";
 import { Project } from "@/types/portfolio";
 import { safeAssetUrl } from "./remote-assets";
+import { cache } from "react";
 
-export async function getProjectsServer(domain: string): Promise<Project[]> {
+export const getProjectsServer = cache(async function getProjectsServer(domain: string): Promise<Project[]> {
   const effectiveDomain = getEffectiveDomain(domain);
   if (!effectiveDomain) return [];
 
@@ -44,9 +45,9 @@ export async function getProjectsServer(domain: string): Promise<Project[]> {
     console.error("Error fetching projects (server):", error);
     return [];
   }
-}
+});
 
-export async function getProjectByIdServer(
+export const getProjectByIdServer = cache(async function getProjectByIdServer(
   id: string,
   domain: string,
 ): Promise<Project | null> {
@@ -90,4 +91,4 @@ export async function getProjectByIdServer(
     console.error("Error fetching project by id (server):", error);
     return null;
   }
-}
+});
