@@ -21,6 +21,7 @@ import { useState } from "react";
 import { Loader2, Pencil, Plus, Trash, Eye, EyeOff, Star } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { formatDateRange } from "@/lib/utils";
+import { AdminEmptyState, AdminSectionHeader } from "@/components/admin/AdminUI";
 
 export function WorkExperienceManagement() {
   const queryClient = useQueryClient();
@@ -71,14 +72,7 @@ export function WorkExperienceManagement() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col md:flex-row justify-between md:items-center gap-4'>
-        <div>
-          <h2 className='text-2xl md:text-3xl font-bold mb-2'>
-            Work Experience
-          </h2>
-          <p className='text-foreground/60'>Manage your career history</p>
-        </div>
-        <Button
+      <AdminSectionHeader eyebrow='Professional / Career' title='Work experience' description='Keep your public career timeline current and easy to scan.' action={<Button
           onClick={() => {
             setEditing(null);
             setOpen(true);
@@ -86,25 +80,21 @@ export function WorkExperienceManagement() {
           size='lg'
         >
           <Plus className='mr-2 h-4 w-4' /> Add Experience
-        </Button>
-      </div>
+        </Button>} />
 
       {isLoading ? (
         <div className='flex justify-center p-12'>
           <Loader2 className='h-6 w-6 animate-spin' />
         </div>
       ) : data.length === 0 ? (
-        <div className='border border-dashed border-foreground/20 rounded-xl p-12 text-center'>
-          <p className='text-foreground/60 mb-4'>No work experiences yet</p>
-          <Button
+        <AdminEmptyState title='No work experience yet' description='Add a role to build your public career timeline.' action={<Button
             onClick={() => {
               setEditing(null);
               setOpen(true);
             }}
           >
             <Plus className='mr-2 h-4 w-4' /> Add Your First Role
-          </Button>
-        </div>
+          </Button>} />
       ) : (
         <div className='space-y-4'>
           {(data as WorkExperience[]).map((exp) => (

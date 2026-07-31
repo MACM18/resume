@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { AdminEmptyState, AdminSectionHeader } from "@/components/admin/AdminUI";
 
 export function ProjectManagement() {
   const queryClient = useQueryClient();
@@ -79,12 +80,7 @@ export function ProjectManagement() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6'>
-        <div>
-          <h2 className='text-2xl md:text-3xl font-bold mb-2'>Projects</h2>
-          <p className='text-foreground/60'>Manage your portfolio projects</p>
-        </div>
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <AdminSectionHeader eyebrow='Professional / Portfolio' title='Projects' description='Manage the work that appears in your public portfolio.' action={<Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleAddNew} size='lg'>
               <Plus className='mr-2' size={20} /> Add Project
@@ -101,8 +97,7 @@ export function ProjectManagement() {
               onSuccess={() => setIsFormOpen(false)}
             />
           </DialogContent>
-        </Dialog>
-      </div>
+        </Dialog>} />
 
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>
@@ -203,12 +198,7 @@ export function ProjectManagement() {
           ))}
         </div>
       ) : (
-        <div className='border border-dashed border-foreground/20 rounded-xl p-12 text-center'>
-          <p className='text-foreground/60 mb-4'>No projects yet</p>
-          <Button onClick={handleAddNew}>
-            <Plus className='mr-2' size={20} /> Add Your First Project
-          </Button>
-        </div>
+        <AdminEmptyState title='No projects yet' description='Add your first project to start building the public portfolio.' action={<Button onClick={handleAddNew}><Plus className='mr-2' size={20} /> Add your first project</Button>} />
       )}
     </div>
   );

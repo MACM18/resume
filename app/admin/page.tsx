@@ -14,6 +14,8 @@ import { ResumeManager } from "@/components/admin/ResumeManager";
 import { ThemeEditor } from "@/components/admin/ThemeEditor";
 import { WorkExperienceManagement } from "@/components/admin/WorkExperienceManagement";
 import { GalleryManager } from "@/components/admin/GalleryManager";
+import { AdminOverview } from "@/components/admin/AdminOverview";
+import { AdminLoadingState } from "@/components/admin/AdminUI";
 import {
   User,
   Palette,
@@ -25,10 +27,13 @@ import {
   Image as ImageIcon,
   LayoutDashboard,
   ChevronRight,
-  Loader2,
 } from "lucide-react";
 
 const ADMIN_GROUPS = [
+  {
+    label: "Workspace",
+    items: [{ value: "overview", label: "Overview", icon: LayoutDashboard }],
+  },
   {
     label: "Identity",
     items: [
@@ -71,7 +76,7 @@ function AdminDashboardContent() {
   const searchParams = useSearchParams();
   
   // Derived state from URL - primary source of truth
-  const section = searchParams?.get("section") || "profile";
+  const section = searchParams?.get("section") || "overview";
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +106,7 @@ function AdminDashboardContent() {
   const currentItem = ALL_ITEMS.find((i) => i.value === section) || ALL_ITEMS[0];
 
   return (
-    <div className='min-h-screen relative pt-20 pb-24 md:pb-12 bg-background/50'>
+    <div className='min-h-screen relative pb-24 pt-24 md:pb-12 md:pt-28 bg-background/50'>
       <div className='mx-auto w-full max-w-7xl px-4 md:px-8'>
         {/* Header Section */}
         <div className='flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12'>
@@ -112,10 +117,10 @@ function AdminDashboardContent() {
           >
             <div className='flex items-center gap-3 text-primary mb-2'>
               <LayoutDashboard size={24} />
-              <span className='text-sm font-bold uppercase tracking-widest'>Admin Portal</span>
+              <span className='text-[10px] font-bold uppercase tracking-[0.24em]'>Portfolio workspace</span>
             </div>
             <h1 className='text-4xl md:text-5xl font-bold tracking-tight'>
-              Dashboard
+              Content dashboard
             </h1>
           </motion.div>
 
@@ -207,8 +212,8 @@ function AdminDashboardContent() {
 
           {/* Content Area */}
           <div className='min-h-[600px]'>
-            <div className='border border-foreground/10 rounded-4xl bg-background/40 backdrop-blur-2xl shadow-2xl overflow-hidden'>
-              <div className='p-6 md:p-10'>
+            <div className='border border-foreground/10 bg-background/40 backdrop-blur-2xl shadow-2xl overflow-hidden'>
+              <div className='p-5 md:p-9'>
                 <AnimatePresence mode='wait'>
                   <motion.div
                     key={section}
@@ -218,6 +223,7 @@ function AdminDashboardContent() {
                     transition={{ duration: 0.2 }}
                   >
                     <ErrorBoundary>
+                      {section === "overview" && <AdminOverview onNavigate={handleSectionChange} />}
                       {section === "profile" && <ProfileManagement />}
                       {section === "theme" && <ThemeEditor />}
                       {section === "home" && <HomePageForm />}
@@ -248,9 +254,7 @@ function AdminDashboardContent() {
 export default function AdminPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <div className='mx-auto min-h-screen max-w-7xl px-4 pt-28 md:px-8'><AdminLoadingState label='Loading admin workspace' /></div>
     }>
       <AdminDashboardContent />
     </Suspense>
