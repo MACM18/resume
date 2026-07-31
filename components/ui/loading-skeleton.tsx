@@ -58,16 +58,27 @@ export function FeatureCardSkeleton() {
 
 export function HomePageSkeleton() {
   return (
-    <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto'>
-      <PageHeaderSkeleton />
-      <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16'>
-        <FeatureCardSkeleton />
-        <FeatureCardSkeleton />
-        <FeatureCardSkeleton />
+    <div className='min-h-screen pt-28 pb-20'>
+      <div className='mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2'>
+        <div className='space-y-6'>
+          <Skeleton className='h-5 w-48' />
+          <Skeleton className='h-24 w-full max-w-2xl' />
+          <Skeleton className='h-8 w-3/4 max-w-xl' />
+          <Skeleton className='h-20 w-full max-w-xl' />
+          <div className='flex gap-3 pt-4'>
+            <Skeleton className='h-12 w-40 rounded-full' />
+            <Skeleton className='h-12 w-44 rounded-full' />
+          </div>
+        </div>
+        <Skeleton className='mx-auto aspect-[4/5] w-full max-w-[460px] rounded-[2rem]' />
       </div>
-      <div className='grid lg:grid-cols-2 gap-8'>
-        <ProjectCardSkeleton />
-        <ProjectCardSkeleton />
+      <div className='mx-auto mt-20 grid max-w-7xl gap-6 px-6 md:grid-cols-2'>
+        <Skeleton className='aspect-video w-full rounded-[2rem]' />
+        <div className='space-y-4 rounded-[2rem] border border-foreground/10 p-8'>
+          <Skeleton className='h-10 w-3/4' />
+          <Skeleton className='h-24 w-full' />
+          <Skeleton className='h-10 w-40 rounded-full' />
+        </div>
       </div>
     </div>
   );
