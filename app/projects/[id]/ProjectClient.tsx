@@ -1,237 +1,81 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Github } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ExternalLink, Github } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
-import { Project } from "@/types/portfolio";
+import type { Project } from "@/types/portfolio";
 
-export default function ProjectClient({
-  initialProject,
-}: {
-  initialProject: Project | null;
-}) {
+function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const reducedMotion = useReducedMotion();
+  return <motion.div initial={{ opacity: 0, y: reducedMotion ? 0 : 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.55, delay }} className={className}>{children}</motion.div>;
+}
+
+export default function ProjectClient({ initialProject }: { initialProject: Project | null }) {
   const project = initialProject;
-  const isLoading = false;
-
-  if (isLoading) {
-    return (
-      <div className='min-h-screen relative pt-32 pb-20 px-6'>
-        <div className='max-w-5xl mx-auto'>
-          <Skeleton className='h-6 w-32 mb-8' />
-          <Skeleton className='h-12 w-3/4 mb-4' />
-          <Skeleton className='h-6 w-full mb-6' />
-          <div className='flex gap-4 mb-12'>
-            <Skeleton className='h-10 w-32' />
-            <Skeleton className='h-10 w-32' />
-          </div>
-          <Skeleton className='aspect-video w-full rounded-xl mb-8' />
-          <Skeleton className='h-32 w-full' />
-        </div>
-      </div>
-    );
-  }
-
   if (!project) {
-    return (
-      <div className='min-h-screen relative pt-32 pb-20 px-6 flex items-center justify-center'>
-        <GlassCard variant='bordered' className='p-12 text-center max-w-lg'>
-          <h1 className='text-3xl font-bold mb-4'>Project Not Found</h1>
-          <p className='text-foreground/70 mb-8 leading-relaxed'>
-            The project you&apos;re looking for doesn&apos;t exist.
-          </p>
-          <Button asChild size='lg'>
-            <Link href='/projects'>
-              <ArrowLeft className='mr-2' size={16} />
-              Back to Projects
-            </Link>
-          </Button>
-        </GlassCard>
-      </div>
-    );
+    return <div className='flex min-h-[70vh] items-center justify-center px-6'><GlassCard variant='bordered' className='max-w-lg p-10 text-center'><p className='text-xs font-semibold uppercase tracking-[0.22em] text-primary'>404 / project</p><h1 className='mt-4 text-3xl font-semibold'>Project not found</h1><p className='mt-4 leading-7 text-foreground/60'>The project you&apos;re looking for may have been unpublished or moved.</p><Button asChild className='mt-8 rounded-full px-6'><Link href='/projects'><ArrowLeft size={16} /> Back to projects</Link></Button></GlassCard></div>;
   }
-  const isImageReal =
-    project.image && !project.image.includes("placeholder.svg");
+
+  const hasImage = Boolean(project.image);
+  const description = project.long_description || project.description || "More details about this project will be added soon.";
 
   return (
-    <div className='min-h-screen relative pb-20'>
-      {/* Hero Section */}
-      <section className='pt-32 pb-12 px-6'>
-        <div className='max-w-5xl mx-auto'>
-          {/* Back Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            className='mb-12'
-          >
-            <Button asChild variant='ghost'>
-              <Link href='/projects'>
-                <ArrowLeft className='mr-2' size={16} />
-                Back to Projects
-              </Link>
-            </Button>
-          </motion.div>
-
-          {/* Project Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className='mb-12'
-          >
-            <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight'>
-              {project.title}
-            </h1>
-            <p className='text-xl md:text-2xl text-foreground/70 mb-8 leading-relaxed font-light'>
-              {project.description}
-            </p>
-
-            <div className='flex flex-wrap gap-4'>
-              {project.demo_url && (
-                <Button asChild size='lg'>
-                  <a
-                    href={project.demo_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <ExternalLink className='mr-2' size={18} />
-                    View live
-                  </a>
-                </Button>
-              )}
-              {project.github_url && (
-                <Button asChild variant='outline' size='lg'>
-                  <a
-                    href={project.github_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <Github className='mr-2' size={18} />
-                    View Code
-                  </a>
-                </Button>
-              )}
+    <main className='min-h-screen pb-24'>
+      <section className='border-b border-foreground/10 px-6 pb-16 pt-28 md:pb-24 md:pt-36'>
+        <div className='mx-auto max-w-7xl'>
+          <Reveal><Link href='/projects' className='inline-flex items-center gap-2 text-sm text-foreground/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'><ArrowLeft size={15} /> All projects</Link></Reveal>
+          <div className='mt-12 grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end lg:gap-20'>
+            <div>
+              <Reveal delay={0.05}><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>{project.featured ? 'Featured case study' : 'Project case study'}</p></Reveal>
+              <Reveal delay={0.1}><h1 className='max-w-4xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl'>{project.title}</h1></Reveal>
             </div>
-          </motion.div>
-
-          {/* Project Image */}
-          {isImageReal && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div className='aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5'>
-                <Image
-                  src={project.image || ""}
-                  alt={project.title}
-                  className='w-full h-full object-cover'
-                  width={1200}
-                  height={675}
-                  priority
-                />
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className='px-6 py-16'>
-        <div className='max-w-5xl mx-auto'>
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <div className='mb-8'>
-              <h2 className='text-3xl md:text-4xl font-bold mb-2'>
-                About This Project
-              </h2>
-              <div className='w-20 h-1 bg-primary' />
-            </div>
-            <p className='text-lg text-foreground/70 leading-relaxed'>
-              {project.long_description}
-            </p>
-          </motion.section>
-
-          {/* Key Features & Tech Stack Grid */}
-          <div className='grid lg:grid-cols-3 gap-8 mt-16'>
-            {/* Key Features */}
-            <motion.section
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className='lg:col-span-2'
-            >
-              <GlassCard variant='minimal' className='p-8 h-full'>
-                <h3 className='text-2xl font-bold mb-6'>Key Features</h3>
-                {project.key_features && project.key_features.length > 0 ? (
-                  <ul className='space-y-4'>
-                    {project.key_features.map((feature, index) => (
-                      <li key={index} className='flex items-start gap-3'>
-                        <span className='w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2' />
-                        <span className='text-foreground/70 leading-relaxed'>
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className='text-foreground/60'>
-                    No key features available.
-                  </p>
-                )}
-              </GlassCard>
-            </motion.section>
-
-            {/* Sidebar Info */}
-            <div className='space-y-6'>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-              >
-                <GlassCard variant='minimal' className='p-6'>
-                  <h3 className='text-lg font-bold mb-4'>Technologies</h3>
-                  <div className='flex flex-wrap gap-2'>
-                    {project.tech.map((tech) => (
-                      <span
-                        key={tech}
-                        className='px-3 py-1 text-sm rounded-md bg-foreground/5 border border-foreground/10 text-foreground/70'
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </GlassCard>
-              </motion.div>
-
-              {project.featured && (
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
-                >
-                  <GlassCard variant='minimal' className='p-6'>
-                    <div className='flex items-center gap-2 mb-2'>
-                      <span className='w-2 h-2 bg-primary rounded-full' />
-                      <h3 className='text-lg font-bold'>Featured Project</h3>
-                    </div>
-                    <p className='text-sm text-foreground/70'>
-                      This project showcases my best work and key skills
-                    </p>
-                  </GlassCard>
-                </motion.div>
-              )}
-            </div>
+            <Reveal delay={0.16}><p className='max-w-xl text-lg leading-8 text-foreground/65'>{project.description || 'A considered digital experience built around a clear purpose.'}</p></Reveal>
           </div>
+          <Reveal delay={0.22}><div className='mt-8 flex flex-wrap gap-3'>
+            {project.demo_url && <Button asChild className='rounded-full px-6'><a href={project.demo_url} target='_blank' rel='noopener noreferrer'><ExternalLink size={16} /> View live</a></Button>}
+            {project.github_url && <Button asChild variant='outline' className='rounded-full border-foreground/20 bg-transparent px-6'><a href={project.github_url} target='_blank' rel='noopener noreferrer'><Github size={16} /> View source</a></Button>}
+          </div></Reveal>
         </div>
       </section>
-    </div>
+
+      <div className='mx-auto max-w-7xl space-y-20 px-6 pt-12 md:pt-20'>
+        <Reveal>
+          <div className='relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03]'>
+            {hasImage ? <Image src={project.image!} alt={`${project.title} project preview`} fill priority sizes='(max-width: 1024px) 100vw, 1200px' className='object-cover' /> : <div className='flex h-full items-end bg-gradient-to-br from-primary/20 via-background/40 to-secondary/20 p-8'><span className='text-sm uppercase tracking-[0.2em] text-foreground/50'>Project preview unavailable</span></div>}
+          </div>
+        </Reveal>
+
+        <div className='grid gap-14 lg:grid-cols-[1fr_280px] lg:gap-24'>
+          <Reveal>
+            <section aria-labelledby='project-overview-heading'>
+              <p className='mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary'>01 / Overview</p>
+              <h2 id='project-overview-heading' className='text-3xl font-semibold tracking-tight md:text-4xl'>The work behind the outcome.</h2>
+              <p className='mt-6 whitespace-pre-line text-lg leading-8 text-foreground/65'>{description}</p>
+            </section>
+          </Reveal>
+
+          <Reveal delay={0.08}>
+            <aside className='border-t border-foreground/10 pt-6'>
+              <p className='mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground/45'>Built with</p>
+              <div className='flex flex-wrap gap-x-4 gap-y-3 text-sm text-foreground/65'>{project.tech.length > 0 ? project.tech.map((tech) => <span key={tech}>{tech}</span>) : <span className='text-foreground/45'>Technologies coming soon</span>}</div>
+            </aside>
+          </Reveal>
+        </div>
+
+        <div className='grid gap-14 border-t border-foreground/10 pt-14 lg:grid-cols-[1fr_280px] lg:gap-24'>
+          <Reveal>
+            <section aria-labelledby='features-heading'>
+              <p className='mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary'>02 / Details</p>
+              <h2 id='features-heading' className='text-3xl font-semibold tracking-tight md:text-4xl'>What it does well.</h2>
+              {project.key_features && project.key_features.length > 0 ? <ul className='mt-7 space-y-5'>{project.key_features.map((feature, index) => <li key={`${feature}-${index}`} className='flex gap-4 border-b border-foreground/10 pb-5 text-base leading-7 text-foreground/65'><span className='text-sm font-medium text-primary'>0{index + 1}</span><span>{feature}</span></li>)}</ul> : <p className='mt-6 leading-7 text-foreground/60'>Feature details for this project will be added soon.</p>}
+            </section>
+          </Reveal>
+          <Reveal delay={0.08}><div className='border-t border-foreground/10 pt-6'><p className='mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground/45'>Continue exploring</p><Link href='/projects' className='inline-flex items-center gap-2 text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>View all projects <ArrowUpRight size={15} /></Link></div></Reveal>
+        </div>
+      </div>
+    </main>
   );
 }

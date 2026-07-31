@@ -86,21 +86,30 @@ export function HomePageSkeleton() {
 
 export function AboutPageSkeleton() {
   return (
-    <div className='min-h-screen pt-24 pb-12 px-6 max-w-4xl mx-auto'>
-      <PageHeaderSkeleton />
-      <GlassCard variant='gradient' className='p-8 mb-12'>
-        <Skeleton className='h-8 w-32 mb-6' />
-        <div className='space-y-4'>
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-3/4' />
+    <div className='min-h-screen pt-28 pb-20'>
+      <div className='mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2'>
+        <Skeleton className='mx-auto aspect-[4/5] w-full max-w-[420px] rounded-[2rem] lg:order-1' />
+        <div className='space-y-6 lg:order-2'>
+          <Skeleton className='h-5 w-40' />
+          <Skeleton className='h-20 w-full max-w-2xl' />
+          <Skeleton className='h-10 w-4/5 max-w-xl' />
+          <div className='flex gap-3 pt-4'>
+            <Skeleton className='h-12 w-44 rounded-full' />
+            <Skeleton className='h-12 w-36 rounded-full' />
+          </div>
         </div>
-      </GlassCard>
-      <div className='grid md:grid-cols-2 gap-6'>
-        <StatsCardSkeleton />
-        <StatsCardSkeleton />
-        <StatsCardSkeleton />
-        <StatsCardSkeleton />
+      </div>
+      <div className='mx-auto mt-20 max-w-7xl space-y-12 px-6'>
+        <PageHeaderSkeleton />
+        <div className='grid gap-8 md:grid-cols-2'>
+          <Skeleton className='h-32 w-full' />
+          <Skeleton className='h-32 w-full' />
+        </div>
+        <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
+          <Skeleton className='h-28 w-full' />
+          <Skeleton className='h-28 w-full' />
+          <Skeleton className='h-28 w-full' />
+        </div>
       </div>
     </div>
   );
@@ -108,104 +117,22 @@ export function AboutPageSkeleton() {
 
 export function ProjectsPageSkeleton() {
   return (
-    <div className='min-h-screen pt-24 pb-12 px-6 max-w-6xl mx-auto'>
-      <PageHeaderSkeleton />
-      <div className='grid lg:grid-cols-2 gap-8'>
-        <ProjectCardSkeleton />
-        <ProjectCardSkeleton />
-        <ProjectCardSkeleton />
-        <ProjectCardSkeleton />
-      </div>
+    <div className='min-h-screen pb-24 pt-32'>
+      <div className='border-b border-foreground/10 px-6 pb-20'><div className='mx-auto max-w-7xl space-y-5'><Skeleton className='h-4 w-56' /><Skeleton className='h-20 w-full max-w-3xl' /><Skeleton className='h-8 w-full max-w-2xl' /></div></div>
+      <div className='mx-auto max-w-7xl space-y-8 px-6 pt-20'><Skeleton className='h-5 w-36' />{[0, 1, 2].map((item) => <div key={item} className='grid gap-8 border-t border-foreground/10 py-10 md:grid-cols-[1.15fr_0.85fr]'><Skeleton className='aspect-[16/10] w-full rounded-[1.5rem]' /><div className='space-y-5'><Skeleton className='h-4 w-36' /><Skeleton className='h-10 w-3/4' /><Skeleton className='h-20 w-full' /><Skeleton className='h-9 w-40 rounded-full' /></div></div>)}</div>
     </div>
   );
 }
 
 export function ProjectDetailPageSkeleton() {
   return (
-    <div className='min-h-screen relative pt-32 pb-20 px-6'>
-      <div className='max-w-5xl mx-auto'>
-        <Skeleton className='h-10 w-36 mb-12' />
-        <Skeleton className='h-14 w-4/5 mb-6' />
-        <Skeleton className='h-7 w-full max-w-3xl mb-8' />
-        <div className='flex gap-4 mb-12'>
-          <Skeleton className='h-12 w-36' />
-          <Skeleton className='h-12 w-32' />
-        </div>
-        <Skeleton className='aspect-video w-full rounded-xl mb-16' />
-        <Skeleton className='h-10 w-64 mb-4' />
-        <Skeleton className='h-5 w-full mb-3' />
-        <Skeleton className='h-5 w-11/12 mb-12' />
-        <div className='grid lg:grid-cols-3 gap-8'>
-          <GlassCard variant='gradient' className='p-8 lg:col-span-2'>
-            <Skeleton className='h-8 w-48 mb-8' />
-            <div className='space-y-4'>
-              <Skeleton className='h-5 w-full' />
-              <Skeleton className='h-5 w-11/12' />
-              <Skeleton className='h-5 w-4/5' />
-              <Skeleton className='h-5 w-10/12' />
-            </div>
-          </GlassCard>
-          <GlassCard variant='gradient' className='p-6'>
-            <Skeleton className='h-7 w-40 mb-6' />
-            <div className='flex flex-wrap gap-2'>
-              <Skeleton className='h-8 w-20' />
-              <Skeleton className='h-8 w-24' />
-              <Skeleton className='h-8 w-16' />
-              <Skeleton className='h-8 w-28' />
-            </div>
-          </GlassCard>
-        </div>
-      </div>
-    </div>
+    <div className='min-h-screen pb-24 pt-28'><div className='border-b border-foreground/10 px-6 pb-20'><div className='mx-auto max-w-7xl space-y-8'><Skeleton className='h-5 w-32' /><div className='grid gap-8 lg:grid-cols-2'><Skeleton className='h-20 w-full' /><Skeleton className='h-24 w-full' /></div><Skeleton className='h-10 w-44 rounded-full' /></div></div><div className='mx-auto max-w-7xl space-y-16 px-6 pt-12'><Skeleton className='aspect-video w-full rounded-[1.5rem]' /><div className='grid gap-12 lg:grid-cols-[1fr_280px]'><div className='space-y-5'><Skeleton className='h-5 w-32' /><Skeleton className='h-10 w-3/4' /><Skeleton className='h-32 w-full' /></div><Skeleton className='h-28 w-full' /></div></div></div>
   );
 }
 
 export function ResumePageSkeleton() {
   return (
-    <div className='min-h-screen relative pt-32 pb-20 px-6'>
-      <div className='max-w-7xl mx-auto'>
-        <div className='text-center max-w-3xl mx-auto mb-12'>
-          <Skeleton className='h-14 w-64 mx-auto mb-6' />
-          <Skeleton className='h-7 w-80 mx-auto mb-8' />
-          <Skeleton className='h-14 w-52 mx-auto' />
-        </div>
-        <div className='grid lg:grid-cols-3 gap-8'>
-          <div className='lg:col-span-2 space-y-10'>
-            <GlassCard variant='gradient' className='p-8 md:p-10'>
-              <Skeleton className='h-9 w-64 mx-auto mb-4' />
-              <Skeleton className='h-6 w-48 mx-auto mb-8' />
-              <Skeleton className='h-5 w-full mb-3' />
-              <Skeleton className='h-5 w-11/12 mx-auto' />
-            </GlassCard>
-            <GlassCard variant='gradient' className='p-8'>
-              <Skeleton className='h-9 w-72 mb-8' />
-              <div className='space-y-6'>
-                <Skeleton className='h-28 w-full' />
-                <Skeleton className='h-28 w-full' />
-              </div>
-            </GlassCard>
-          </div>
-          <div className='space-y-8'>
-            <GlassCard variant='gradient' className='p-8'>
-              <Skeleton className='h-8 w-40 mb-8' />
-              <div className='space-y-4'>
-                <Skeleton className='h-5 w-full' />
-                <Skeleton className='h-5 w-5/6' />
-                <Skeleton className='h-5 w-4/6' />
-              </div>
-            </GlassCard>
-            <GlassCard variant='gradient' className='p-8'>
-              <Skeleton className='h-8 w-48 mb-8' />
-              <div className='space-y-4'>
-                <Skeleton className='h-5 w-full' />
-                <Skeleton className='h-5 w-11/12' />
-                <Skeleton className='h-5 w-3/4' />
-              </div>
-            </GlassCard>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div className='min-h-screen pb-24 pt-32'><div className='border-b border-foreground/10 px-6 pb-20'><div className='mx-auto max-w-7xl space-y-6'><Skeleton className='h-4 w-48' /><div className='grid gap-8 lg:grid-cols-2'><Skeleton className='h-20 w-full' /><div className='space-y-5'><Skeleton className='h-24 w-full' /><Skeleton className='h-11 w-40 rounded-full' /></div></div></div></div><div className='mx-auto max-w-7xl space-y-16 px-6 pt-20'><div className='grid gap-12 lg:grid-cols-[1fr_280px]'><div className='space-y-8'><Skeleton className='h-5 w-40' /><Skeleton className='h-10 w-72' /><Skeleton className='h-52 w-full' /></div><div className='space-y-8'><Skeleton className='h-28 w-full' /><Skeleton className='h-32 w-full' /></div></div><Skeleton className='h-48 w-full' /></div></div>
   );
 }
 
