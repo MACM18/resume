@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { normalizeDomain } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -84,11 +85,26 @@ export async function PATCH(request: NextRequest) {
     if (body.avatar_zoom !== undefined) updateData.avatarZoom = body.avatar_zoom;
     if (body.avatar_size !== undefined) updateData.avatarSize = body.avatar_size;
     if (body.domain !== undefined) {
+      const normalizedDomain = typeof body.domain === "string" ? normalizeDomain(body.domain) : "";
+      if (!normalizedDomain) {
+        return NextResponse.json({ error: "A valid domain is required" }, { status: 400 });
+      }
+      const currentProfile = await db.profile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      const existingDomain = await db.domain.findUnique({
+        where: { domain: normalizedDomain },
+        select: { profileId: true },
+      });
+      if (existingDomain && existingDomain.profileId !== currentProfile?.id) {
+        return NextResponse.json({ error: "That domain is already claimed by another user" }, { status: 409 });
+      }
       updateData.domains = {
         upsert: [{
-          where: { domain: body.domain },
+          where: { domain: normalizedDomain },
           update: { isPrimary: true },
-          create: { domain: body.domain, isPrimary: true }
+          create: { domain: normalizedDomain, isPrimary: true }
         }]
       };
     }
@@ -133,6 +149,9 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error updating profile:", error);
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
+      return NextResponse.json({ error: "That domain is already claimed by another user" }, { status: 409 });
+    }
     return NextResponse.json(
       { error: "Failed to update profile" },
       { status: 500 }

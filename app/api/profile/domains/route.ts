@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { normalizeDomain } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { domain } = await request.json();
-    if (!domain) {
+    const normalizedDomain = typeof domain === "string" ? normalizeDomain(domain) : "";
+    if (!normalizedDomain) {
       return NextResponse.json({ error: "Domain is required" }, { status: 400 });
     }
 
@@ -31,7 +33,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const domainRecord = profile.domains.find(d => d.domain === domain);
+    const domainRecord = profile.domains.find(d => d.domain === normalizedDomain);
     if (!domainRecord) {
       return NextResponse.json({ error: "Domain not found in your profile" }, { status: 404 });
     }

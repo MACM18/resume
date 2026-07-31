@@ -32,15 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
     const user = await db.$transaction(async (tx) => {
-      // Serialize the bootstrap check so two simultaneous requests cannot create
-      // two initial accounts.
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('resume_bootstrap_signup'))`;
-      if (await tx.user.count() > 0) {
-        throw new Error("BOOTSTRAP_SIGNUP_CLOSED");
-      }
-
       const passwordHash = await hashPassword(password);
       const createdUser = await tx.user.create({
         data: { email: normalizedEmail, passwordHash },
@@ -67,11 +59,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "BOOTSTRAP_SIGNUP_CLOSED") {
-      return NextResponse.json(
-        { error: "Initial account setup is already complete" },
-        { status: 409 }
-      );
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
+      return NextResponse.json({ error: "User with this email already exists" }, { status: 409 });
     }
     console.error("Signup error:", error);
     return NextResponse.json(

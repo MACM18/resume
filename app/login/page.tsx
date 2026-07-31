@@ -20,7 +20,6 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [signupAvailable, setSignupAvailable] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState<"request" | "verify">("request");
   const [forgotEmail, setForgotEmail] = useState("");
@@ -34,13 +33,6 @@ const LoginPage = () => {
       router.push("/");
     }
   }, [session, status, router]);
-
-  useEffect(() => {
-    fetch("/api/auth/signup-status")
-      .then((response) => response.json())
-      .then((data) => setSignupAvailable(data.available === true))
-      .catch(() => setSignupAvailable(false));
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,7 +179,7 @@ const LoginPage = () => {
             </form>
           )}
           <div className='mt-6 text-center'>
-            {signupAvailable && <p className='text-muted-foreground'>
+            <p className='text-muted-foreground'>
               Don&apos;t have an account?{" "}
               <Link
                 href='/signup'
@@ -195,7 +187,7 @@ const LoginPage = () => {
               >
                 Sign up
               </Link>
-            </p>}
+            </p>
           </div>
         </GlassCard>
       </motion.div>

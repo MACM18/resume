@@ -18,7 +18,6 @@ const SignupPage = () => {
   const { session, status } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [signupAvailable, setSignupAvailable] = useState<boolean | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -31,13 +30,6 @@ const SignupPage = () => {
       router.push("/");
     }
   }, [session, status, router]);
-
-  useEffect(() => {
-    fetch("/api/auth/signup-status")
-      .then((response) => response.json())
-      .then((data) => setSignupAvailable(data.available === true))
-      .catch(() => setSignupAvailable(false));
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -117,22 +109,10 @@ const SignupPage = () => {
     }
   };
 
-  if (status === "loading" || signupAvailable === null) {
+  if (status === "loading") {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <Loader2 className='h-8 w-8 animate-spin text-primary' />
-      </div>
-    );
-  }
-
-  if (!signupAvailable) {
-    return (
-      <div className='min-h-screen flex items-center justify-center pt-24 pb-32 px-6'>
-        <GlassCard className='w-full max-w-md p-8 text-center'>
-          <h1 className='mb-3 text-2xl font-bold'>Signup is closed</h1>
-          <p className='text-foreground/65'>The initial portfolio account has already been created.</p>
-          <Button className='mt-6' onClick={() => router.push("/login")}>Go to login</Button>
-        </GlassCard>
       </div>
     );
   }
