@@ -297,6 +297,47 @@ export function generateAboutMetadata(
   return meta;
 }
 
+export function generateContactMetadata(
+  profile: ProfileLike,
+  hostname?: string,
+  origin?: string,
+): Metadata {
+  const config = getBaseMetadata(profile, hostname, origin);
+  const title = profile?.full_name
+    ? `Contact — ${buildTitle(profile, hostname, origin)}`
+    : "Contact";
+  const description =
+    profile?.home_page_data?.callToAction?.description ||
+    "Start a conversation about a digital project, collaboration, or opportunity.";
+  const ogImageUrl = profile?.id
+    ? `${config.siteUrl}/api/og/avatar?profileId=${encodeURIComponent(profile.id)}`
+    : config.defaultImage;
+
+  const meta: Metadata = {
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      url: `${config.siteUrl}/contact`,
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+    alternates: { canonical: canonicalUrl("/contact", hostname, origin) },
+  };
+
+  if (config.twitterHandle) {
+    meta.twitter = {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
+    };
+  }
+
+  return meta;
+}
+
 export function buildProjectsDescription(
   profile: ProfileLike,
   projectTitles: string[] = [],

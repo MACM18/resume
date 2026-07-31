@@ -138,24 +138,29 @@ export function ResumePageSkeleton() {
 
 export function ContactPageSkeleton() {
   return (
-    <div className='min-h-screen relative pt-20 md:pt-32 pb-20 px-6'>
-      <div className='max-w-6xl mx-auto'>
-        <PageHeaderSkeleton />
-        <div className='grid lg:grid-cols-2 gap-8'>
-          <GlassCard variant='gradient' className='p-8'>
-            <Skeleton className='h-8 w-56 mb-8' />
-            <div className='space-y-6'>
-              <Skeleton className='h-11 w-full' />
-              <Skeleton className='h-11 w-full' />
-              <Skeleton className='h-11 w-full' />
-              <Skeleton className='h-32 w-full' />
-              <Skeleton className='h-11 w-40' />
-            </div>
-          </GlassCard>
-          <div className='space-y-6'>
-            <FeatureCardSkeleton />
-            <FeatureCardSkeleton />
+    <div className='min-h-screen pb-24 pt-32'>
+      <div className='border-b border-foreground/10 px-6 pb-20'>
+        <div className='mx-auto max-w-7xl space-y-5'>
+          <Skeleton className='h-4 w-56' />
+          <div className='grid gap-8 lg:grid-cols-2'>
+            <Skeleton className='h-20 w-full' />
+            <Skeleton className='h-24 w-full' />
           </div>
+        </div>
+      </div>
+      <div className='mx-auto grid max-w-7xl gap-16 px-6 pt-16 lg:grid-cols-[0.8fr_1.2fr]'>
+        <div className='space-y-8'>
+          <Skeleton className='h-5 w-40' />
+          <Skeleton className='h-10 w-full max-w-sm' />
+          <Skeleton className='h-24 w-full' />
+          <Skeleton className='h-20 w-full' />
+        </div>
+        <div className='space-y-6 border-t border-foreground/10 pt-6'>
+          <Skeleton className='h-5 w-40' />
+          <div className='grid gap-6 sm:grid-cols-2'><Skeleton className='h-11 w-full' /><Skeleton className='h-11 w-full' /></div>
+          <Skeleton className='h-11 w-full' />
+          <Skeleton className='h-48 w-full' />
+          <Skeleton className='h-12 w-40 rounded-full' />
         </div>
       </div>
     </div>
