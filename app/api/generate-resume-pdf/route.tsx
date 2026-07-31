@@ -5,12 +5,12 @@ import {
   Text,
   View,
   StyleSheet,
-  pdf,
   Link,
   Image,
   Svg,
   Path,
   Circle,
+  renderToBuffer,
 } from "@react-pdf/renderer";
 import { Resume, Profile, WorkExperience, Project } from "@/types/portfolio";
 import sharp from "sharp";
@@ -613,11 +613,10 @@ export async function POST(request: Request) {
       />
     );
 
-    const pdfBlob = await pdf(pdfDoc).toBlob();
-    const pdfBuffer = await pdfBlob.arrayBuffer();
+    const pdfBuffer = await renderToBuffer(pdfDoc);
 
     // Return PDF as response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${(
