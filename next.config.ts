@@ -33,34 +33,72 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "raw.githubusercontent.com",
         port: "",
-        pathname: "**",
+        pathname: "/**",
       },
-      // Production storage domain
+      // Production storage & CDN domains
       {
         protocol: "https",
         hostname: "storage.macm.dev",
         port: "",
-        pathname: "**",
+        pathname: "/**",
       },
-      // Dynamic storage hostname from env (supports S3, MinIO, etc.)
+      {
+        protocol: "https",
+        hostname: "cdn.macm.dev",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "storage.macm.lk",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.macm.lk",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "macm.dev",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "macm.lk",
+        port: "",
+        pathname: "/**",
+      },
+      // Cloudflare R2 bucket endpoints (e.g. <account_id>.r2.cloudflarestorage.com)
+      {
+        protocol: "https",
+        hostname: "*.r2.cloudflarestorage.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "r2.cloudflarestorage.com",
+        port: "",
+        pathname: "/**",
+      },
+      // Dynamic storage hostname from env (supports custom S3, MinIO, etc.)
       ...(storageHostname
         ? [
             {
               protocol: "https" as const,
               hostname: storageHostname,
               port: "",
-              pathname: "**",
+              pathname: "/**",
             },
-          ]
-        : []),
-      // Also support HTTP for local development
-      ...(storageHostname
-        ? [
             {
               protocol: "http" as const,
               hostname: storageHostname,
               port: "",
-              pathname: "**",
+              pathname: "/**",
             },
           ]
         : []),

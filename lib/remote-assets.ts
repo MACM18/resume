@@ -16,15 +16,29 @@ export function isAllowedAssetUrl(value: string): boolean {
       return false;
     }
 
-    const allowedHosts = new Set([
-      "storage.macm.dev",
-      "storage.macm.lk",
-      "macm.dev",
-      "macm.lk",
-      configuredStorageHost(),
-    ]);
+    const host = url.hostname.toLowerCase();
 
-    return allowedHosts.has(url.hostname.toLowerCase());
+    const allowedHosts = new Set(
+      [
+        "storage.macm.dev",
+        "storage.macm.lk",
+        "cdn.macm.dev",
+        "cdn.macm.lk",
+        "macm.dev",
+        "macm.lk",
+        "raw.githubusercontent.com",
+        configuredStorageHost(),
+      ].filter((h): h is string => Boolean(h))
+    );
+
+    if (allowedHosts.has(host)) return true;
+
+    // Support Cloudflare R2 bucket endpoints (*.r2.cloudflarestorage.com)
+    if (host === "r2.cloudflarestorage.com" || host.endsWith(".r2.cloudflarestorage.com")) {
+      return true;
+    }
+
+    return false;
   } catch {
     return false;
   }
