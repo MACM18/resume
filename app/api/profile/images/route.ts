@@ -62,13 +62,7 @@ export async function GET(request: NextRequest) {
     const files = await listFiles(bucket, userId);
 
     // map keys to public URLs
-    let urls = files.map((key) => {
-      const prefix = `${bucket}/`;
-      const relativePath = key.startsWith(prefix)
-        ? key.slice(prefix.length)
-        : key;
-      return getPublicUrl(bucket, relativePath);
-    });
+    let urls = files.map((key) => getPublicUrl(bucket, key));
 
     // only limit profile images; galleries should show all
     if (bucket === "profile-images") {

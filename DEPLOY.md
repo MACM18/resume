@@ -14,6 +14,7 @@ This file contains the minimal, reproducible commands and environment variables 
 - STORAGE_PUBLIC_URL (optional) — Public URL for served files (if different)
 - STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY (optional) — S3/MinIO credentials
 - STORAGE_BUCKET (optional) — Bucket name (default: `portfolio`)
+- STORAGE_FOLDER (optional) — Base folder/prefix inside the bucket (e.g., `my-folder`)
 - STORAGE_REGION (optional) — S3 region (default: `us-east-1`)
 - GROQ_API_KEY (optional) — Sanity/GROQ API key (used by some AI features)
 - NEXT_PUBLIC_SITE_URL (optional) — Site URL used in meta tags
