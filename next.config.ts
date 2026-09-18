@@ -1,11 +1,19 @@
 import type { NextConfig } from "next";
 
 // For S3-compatible storage (MinIO, AWS S3, etc.), extract hostname from env var
-const storageUrl = process.env.STORAGE_PUBLIC_URL || process.env.STORAGE_ENDPOINT || "";
+const storageUrl =
+  process.env.STORAGE_MAIN_DOMAIN ||
+  process.env.NEXT_PUBLIC_STORAGE_MAIN_DOMAIN ||
+  process.env.STORAGE_PUBLIC_URL ||
+  process.env.STORAGE_ENDPOINT ||
+  "";
 let storageHostname = "";
 try {
   if (storageUrl) {
-    storageHostname = new URL(storageUrl).hostname;
+    const parsed = storageUrl.startsWith("http://") || storageUrl.startsWith("https://")
+      ? storageUrl
+      : `https://${storageUrl}`;
+    storageHostname = new URL(parsed).hostname;
   }
 } catch {
   // Fallback if URL parsing fails

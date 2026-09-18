@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { extractStoragePath, resolveStorageUrl } from "./storage-urls";
 
 export interface GalleryImageRecord {
     id: string;
@@ -17,14 +18,18 @@ export async function createGalleryImage(
     url: string,
     albumName?: string | null,
 ): Promise<GalleryImageRecord> {
+    const cleanUrl = extractStoragePath(url) || url;
     const record = await db.galleryImage.create({
         data: {
             userId,
-            url,
+            url: cleanUrl,
             albumName: albumName || null,
         },
     });
-    return record as unknown as GalleryImageRecord;
+    return {
+        ...record,
+        url: resolveStorageUrl(record.url) || record.url,
+    } as unknown as GalleryImageRecord;
 }
 
 /**
@@ -45,14 +50,22 @@ export async function listGalleryImagesForUser(
         where,
         orderBy: { createdAt: "desc" },
     });
-    return images as unknown as GalleryImageRecord[];
+    return images.map((img) => ({
+        ...img,
+        url: resolveStorageUrl(img.url) || img.url,
+    })) as unknown as GalleryImageRecord[];
 }
 
 /**
  * Find a gallery image by its id.
  */
 export async function getGalleryImageById(id: string) {
-    return db.galleryImage.findUnique({ where: { id } });
+    const img = await db.galleryImage.findUnique({ where: { id } });
+    if (!img) return null;
+    return {
+        ...img,
+        url: resolveStorageUrl(img.url) || img.url,
+    };
 }
 
 /**

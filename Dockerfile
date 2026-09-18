@@ -23,10 +23,16 @@ COPY . .
 
 # Build-time env vars for Next.js image optimization config
 # These must be set during build for remotePatterns to work correctly
+ARG STORAGE_MAIN_DOMAIN
 ARG STORAGE_PUBLIC_URL
 ARG STORAGE_ENDPOINT
+ARG STORAGE_BUCKET
+ARG STORAGE_FOLDER
+ENV STORAGE_MAIN_DOMAIN=$STORAGE_MAIN_DOMAIN
 ENV STORAGE_PUBLIC_URL=$STORAGE_PUBLIC_URL
 ENV STORAGE_ENDPOINT=$STORAGE_ENDPOINT
+ENV STORAGE_BUCKET=$STORAGE_BUCKET
+ENV STORAGE_FOLDER=$STORAGE_FOLDER
 
 # Next.js collects telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -36,6 +42,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm exec prisma generate
 RUN pnpm run build
+
+# Pre-compile the migration script to plain JS so the runner can execute it directly with node
+RUN pnpm exec tsc scripts/migrate-storage-urls.ts --target es2022 --module commonjs --moduleResolution node --outDir dist-scripts --skipLibCheck
 
 # 3. Production Runner
 FROM node:22-alpine AS runner
@@ -62,12 +71,22 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # so we can run migrations in the runtime container without running npm install
 # during the image build, which avoids the earlier install errors.
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/lib ./lib
+COPY --from=builder --chown=nextjs:nodejs /app/dist-scripts ./dist-scripts
+COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN chmod +x ./docker-entrypoint.sh
 
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Execute migrations on deployment before starting server
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Note: server.js is created by next build when using standalone output
 CMD ["node", "server.js"]

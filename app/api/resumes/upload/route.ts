@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { uploadFile, getPublicUrl } from "@/lib/storage";
+import { uploadFile } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -50,17 +50,14 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    await uploadFile("resumes", filePath, buffer, contentType);
+    const { publicUrl, imagePath } = await uploadFile("resumes", filePath, buffer, contentType);
 
-    const publicUrl = getPublicUrl("resumes", filePath);
-    console.log("Uploaded resume public URL:", publicUrl, "storage endpoint:", process.env.STORAGE_PUBLIC_URL || process.env.STORAGE_ENDPOINT);
-
-    // Create DB record
+    // Create DB record storing relative path
     const uploadedResume = await db.uploadedResume.create({
       data: {
         userId,
-        filePath,
-        publicUrl,
+        filePath: imagePath,
+        publicUrl: imagePath,
         originalFilename: (file as File).name || `${safeRole}.pdf`,
         fileSize: buffer.length,
       },
@@ -70,7 +67,7 @@ export async function POST(request: NextRequest) {
       id: uploadedResume.id,
       user_id: uploadedResume.userId,
       file_path: uploadedResume.filePath,
-      public_url: uploadedResume.publicUrl,
+      public_url: publicUrl,
       original_filename: uploadedResume.originalFilename,
       file_size: uploadedResume.fileSize,
       created_at: uploadedResume.createdAt.toISOString(),

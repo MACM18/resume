@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { normalizeDomain } from "@/lib/utils";
+import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export async function GET() {
       id: (p["id"] as string),
       user_id: (p["userId"] as string),
       full_name: (p["fullName"] as string),
-      avatar_url: (p["avatarUrl"] as string | null),
+      avatar_url: resolveStorageUrl(p["avatarUrl"] as string | null),
       avatar_position: p["avatarPosition"],
       avatar_zoom: (p["avatarZoom"] as number) || undefined,
       selected_gradient_id: (p["selectedGradientId"] as string) || undefined,
@@ -48,8 +49,8 @@ export async function GET() {
       about_page_data: p["aboutPageData"],
       active_resume_role: (p["activeResumeRole"] as string | null),
       theme: p["theme"],
-      background_image_url: (p["backgroundImageUrl"] as string | null),
-      favicon_url: (p["faviconUrl"] as string | null),
+      background_image_url: resolveStorageUrl(p["backgroundImageUrl"] as string | null),
+      favicon_url: resolveStorageUrl(p["faviconUrl"] as string | null),
       contact_numbers: p["contactNumbers"],
       updated_at: (p["updatedAt"] as Date).toISOString(),
     });
@@ -80,7 +81,7 @@ export async function PATCH(request: NextRequest) {
     
     if (body.full_name !== undefined) updateData.fullName = body.full_name;
     if (body.tagline !== undefined) updateData.tagline = body.tagline;
-    if (body.avatar_url !== undefined) updateData.avatarUrl = body.avatar_url;
+    if (body.avatar_url !== undefined) updateData.avatarUrl = extractStoragePath(body.avatar_url);
     if (body.avatar_position !== undefined) updateData.avatarPosition = body.avatar_position;
     if (body.avatar_zoom !== undefined) updateData.avatarZoom = body.avatar_zoom;
     if (body.avatar_size !== undefined) updateData.avatarSize = body.avatar_size;
@@ -114,8 +115,8 @@ export async function PATCH(request: NextRequest) {
     if (body.theme !== undefined) updateData.theme = body.theme;
     if (body.selected_gradient_id !== undefined) updateData.selectedGradientId = body.selected_gradient_id;
     if (body.selected_gradient_use_theme !== undefined) updateData.selectedGradientUseTheme = body.selected_gradient_use_theme;
-    if (body.background_image_url !== undefined) updateData.backgroundImageUrl = body.background_image_url;
-    if (body.favicon_url !== undefined) updateData.faviconUrl = body.favicon_url;
+    if (body.background_image_url !== undefined) updateData.backgroundImageUrl = extractStoragePath(body.background_image_url);
+    if (body.favicon_url !== undefined) updateData.faviconUrl = extractStoragePath(body.favicon_url);
     if (body.contact_numbers !== undefined) updateData.contactNumbers = body.contact_numbers;
 
     const profile = await db.profile.update({
@@ -131,7 +132,7 @@ export async function PATCH(request: NextRequest) {
       id: profile.id,
       user_id: profile.userId,
       full_name: profile.fullName,
-      avatar_url: profile.avatarUrl,
+      avatar_url: resolveStorageUrl(profile.avatarUrl),
       avatar_position: profile.avatarPosition,
       avatar_zoom: profile.avatarZoom,
       avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
@@ -142,8 +143,8 @@ export async function PATCH(request: NextRequest) {
       about_page_data: profile.aboutPageData,
       active_resume_role: profile.activeResumeRole,
       theme: profile.theme,
-      background_image_url: profile.backgroundImageUrl,
-      favicon_url: profile.faviconUrl,
+      background_image_url: resolveStorageUrl(profile.backgroundImageUrl),
+      favicon_url: resolveStorageUrl(profile.faviconUrl),
       contact_numbers: profile.contactNumbers,
       updated_at: profile.updatedAt.toISOString(),
     });

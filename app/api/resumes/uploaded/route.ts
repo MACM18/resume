@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ function transformUploadedResume(uploadedResume: {
     id: uploadedResume.id,
     user_id: uploadedResume.userId,
     file_path: uploadedResume.filePath,
-    public_url: uploadedResume.publicUrl,
+    public_url: resolveStorageUrl(uploadedResume.publicUrl),
     original_filename: uploadedResume.originalFilename,
     file_size: uploadedResume.fileSize,
     created_at: uploadedResume.createdAt.toISOString(),
@@ -68,8 +69,8 @@ export async function POST(request: NextRequest) {
     const uploadedResume = await db.uploadedResume.create({
       data: {
         userId: session.user.id,
-        filePath: body.filePath,
-        publicUrl: body.publicUrl || null,
+        filePath: extractStoragePath(body.filePath) || body.filePath,
+        publicUrl: extractStoragePath(body.publicUrl) || null,
         originalFilename: body.originalFilename,
         fileSize: body.fileSize || null,
       },

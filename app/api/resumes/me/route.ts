@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ function transformResume(resume: {
     skills: resume.skills,
     education: resume.education,
     project_ids: resume.projectIds,
-    resume_url: resume.resumeUrl,
+    resume_url: resolveStorageUrl(resume.resumeUrl),
     pdf_source: resume.pdfSource,
     uploaded_resume_id: resume.uploadedResumeId,
     certifications: resume.certifications,
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
         skills: body.skills || [],
         education: body.education || [],
         projectIds: body.project_ids || [],
-        resumeUrl: body.resume_url || null,
+        resumeUrl: extractStoragePath(body.resume_url) || null,
         pdfSource: body.pdf_source || "generated",
         uploadedResumeId: body.uploaded_resume_id || null,
         certifications: body.certifications || null,

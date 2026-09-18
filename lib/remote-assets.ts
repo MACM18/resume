@@ -1,9 +1,8 @@
-function configuredStorageHost(): string | null {
-  const raw = process.env.STORAGE_PUBLIC_URL || process.env.STORAGE_ENDPOINT;
-  if (!raw) return null;
+import { getStorageMainDomain, resolveStorageUrl } from "./storage-urls";
 
+function configuredStorageHost(): string | null {
   try {
-    return new URL(raw).hostname.toLowerCase();
+    return new URL(getStorageMainDomain()).hostname.toLowerCase();
   } catch {
     return null;
   }
@@ -32,5 +31,15 @@ export function isAllowedAssetUrl(value: string): boolean {
 }
 
 export function safeAssetUrl(value: unknown): string | undefined {
-  return typeof value === "string" && isAllowedAssetUrl(value) ? value : undefined;
+  if (typeof value !== "string" || !value.trim()) return undefined;
+
+  const resolved = resolveStorageUrl(value);
+  if (!resolved) return undefined;
+
+  // Local site assets like /placeholder.svg
+  if (resolved.startsWith("/") && !resolved.startsWith("//")) {
+    return resolved;
+  }
+
+  return isAllowedAssetUrl(resolved) ? resolved : undefined;
 }

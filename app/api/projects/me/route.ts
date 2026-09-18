@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ function transformProject(project: {
     title: project.title,
     description: project.description,
     long_description: project.longDescription,
-    image: project.image,
+    image: resolveStorageUrl(project.image),
     tech: project.tech,
     demo_url: project.demoUrl,
     github_url: project.githubUrl,
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
         title: body.title,
         description: body.description,
         longDescription: body.long_description || "",
-        image: body.image || "/placeholder.svg",
+        image: extractStoragePath(body.image) || "/placeholder.svg",
         tech: body.tech || [],
         demoUrl: body.demo_url || null,
         githubUrl: body.github_url || null,

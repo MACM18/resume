@@ -10,8 +10,9 @@ This file contains the minimal, reproducible commands and environment variables 
 - NEXTAUTH_SECRET — Secret for NextAuth sessions (generate securely, e.g., `openssl rand -hex 32`)
 - RESEND_API_KEY — Resend API key for sending emails
 - RESEND_FROM_EMAIL — Sender email used by Resend (e.g., `noreply@yourdomain.com`)
-- STORAGE_ENDPOINT (optional) — S3/MinIO endpoint for file storage
-- STORAGE_PUBLIC_URL (optional) — Public URL for served files (if different)
+- STORAGE_MAIN_DOMAIN (optional) — Public main domain/CDN for storage (e.g., `https://storage.macm.dev`). Used to construct dynamic URLs: `STORAGE_MAIN_DOMAIN / STORAGE_BUCKET / STORAGE_FOLDER / image-path`.
+- STORAGE_ENDPOINT (optional) — S3/MinIO endpoint for internal S3 SDK operations (e.g., `http://minio:9000` or `https://storage.macm.dev`)
+- STORAGE_PUBLIC_URL (optional) — Legacy fallback / alternative to STORAGE_MAIN_DOMAIN
 - STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY (optional) — S3/MinIO credentials
 - STORAGE_BUCKET (optional) — Bucket name (default: `portfolio`)
 - STORAGE_FOLDER (optional) — Base folder/prefix inside the bucket (e.g., `my-folder`)
@@ -98,9 +99,11 @@ In CI / Production you should run:
 npx prisma migrate deploy
 # ensure the client is generated
 npx prisma generate
+# (One-time or on upgrade) Migrate legacy full storage URLs to clean relative image paths
+npm run db:migrate-storage-urls
 ```
 
-> Use `prisma migrate deploy` in your deployment pipeline (e.g., in Docker startup or CI job).
+> Use `prisma migrate deploy` in your deployment pipeline (e.g., in Docker startup or CI job). Running `npm run db:migrate-storage-urls` is idempotent and safely cleans any full legacy URLs in the database to relative paths.
 
 ---
 
@@ -166,6 +169,7 @@ npm start
 # production migrate (CI)
 npx prisma migrate deploy
 npx prisma generate
+npm run db:migrate-storage-urls
 ```
 
 ---

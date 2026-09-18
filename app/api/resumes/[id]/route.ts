@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ function transformResume(resume: {
     skills: resume.skills,
     education: resume.education,
     project_ids: resume.projectIds,
-    resume_url: resume.resumeUrl,
+    resume_url: resolveStorageUrl(resume.resumeUrl),
     pdf_source: resume.pdfSource,
     uploaded_resume_id: resume.uploadedResumeId,
     certifications: resume.certifications,
@@ -78,7 +79,7 @@ export async function PATCH(
     if (body.skills !== undefined) updateData.skills = body.skills;
     if (body.education !== undefined) updateData.education = body.education;
     if (body.project_ids !== undefined) updateData.projectIds = body.project_ids;
-    if (body.resume_url !== undefined) updateData.resumeUrl = body.resume_url;
+    if (body.resume_url !== undefined) updateData.resumeUrl = extractStoragePath(body.resume_url);
     if (body.pdf_source !== undefined) updateData.pdfSource = body.pdf_source;
     if (body.uploaded_resume_id !== undefined) updateData.uploadedResumeId = body.uploaded_resume_id;
     if (body.certifications !== undefined) updateData.certifications = body.certifications;

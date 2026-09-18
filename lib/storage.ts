@@ -20,7 +20,23 @@ const s3Client = new S3Client({
   forcePathStyle: true, // Required for MinIO
 });
 
-const BUCKET_NAME = process.env.STORAGE_BUCKET || "portfolio";
+import {
+  getStorageMainDomain,
+  getStorageBucket,
+  getStorageFolder,
+  extractStoragePath,
+  resolveStorageUrl,
+} from "./storage-urls";
+
+export {
+  getStorageMainDomain,
+  getStorageBucket,
+  getStorageFolder,
+  extractStoragePath,
+  resolveStorageUrl,
+};
+
+const BUCKET_NAME = getStorageBucket();
 
 // Logical upload categories mapped to storage folder prefixes.
 const BUCKET_FOLDERS: Record<string, string> = {
@@ -33,23 +49,11 @@ const BUCKET_FOLDERS: Record<string, string> = {
 };
 
 /**
- * Get base folder inside the bucket from environment variables
- */
-export function getStorageBaseFolder(): string {
-  const folder =
-    process.env.STORAGE_FOLDER ||
-    process.env.STORAGE_BASE_FOLDER ||
-    process.env.STORAGE_PREFIX ||
-    "";
-  return folder.replace(/^\/+|\/+$/g, "").trim();
-}
-
-/**
  * Construct full S3 object key including optional base folder and category prefix
  */
 export function getFullKey(bucket: string, filePath: string): string {
   const folderPrefix = BUCKET_FOLDERS[bucket] || bucket;
-  const baseFolder = getStorageBaseFolder();
+  const baseFolder = getStorageFolder();
   const cleanPath = filePath.replace(/^\/+/, "");
 
   // If cleanPath already starts with baseFolder + "/" + folderPrefix, it's already a full key
@@ -76,8 +80,9 @@ export function getFullKey(bucket: string, filePath: string): string {
 }
 
 export interface UploadResult {
-  filePath: string;
-  publicUrl: string;
+  filePath: string; // full S3 key
+  imagePath: string; // relative path saved to DB: e.g. "profile-images/user_123/abc.webp"
+  publicUrl: string; // resolved public URL: e.g. "https://domain/bucket/folder/profile-images/user_123/abc.webp"
 }
 
 /**
@@ -93,7 +98,12 @@ export async function uploadFile(
   file: Buffer | Blob,
   contentType: string
 ): Promise<UploadResult> {
-  const key = getFullKey(bucket, filePath);
+  const folderPrefix = BUCKET_FOLDERS[bucket] || bucket;
+  const cleanPath = filePath.replace(/^\/+/, "");
+  const imagePath = cleanPath.startsWith(`${folderPrefix}/`)
+    ? cleanPath
+    : `${folderPrefix}/${cleanPath}`;
+  const key = getFullKey(bucket, cleanPath);
 
   let buffer: Buffer;
   if (Buffer.isBuffer(file)) {
@@ -114,10 +124,11 @@ export async function uploadFile(
     })
   );
 
-  const publicUrl = getPublicUrl(bucket, filePath);
+  const publicUrl = resolveStorageUrl(imagePath)!;
 
   return {
     filePath: key,
+    imagePath,
     publicUrl,
   };
 }
@@ -163,18 +174,12 @@ export async function getSignedDownloadUrl(
  * @param filePath - Path within the bucket
  */
 export function getPublicUrl(bucket: string, filePath: string): string {
-  const key = getFullKey(bucket, filePath);
-
-  // For S3-compatible storage, construct the public URL
-  const endpoint = process.env.STORAGE_PUBLIC_URL || process.env.STORAGE_ENDPOINT;
-  
-  if (!endpoint) {
-    throw new Error("STORAGE_PUBLIC_URL or STORAGE_ENDPOINT must be set");
-  }
-
-  // Remove trailing slash and construct URL
-  const baseUrl = endpoint.replace(/\/$/, "");
-  return `${baseUrl}/${BUCKET_NAME}/${key}`;
+  const folderPrefix = BUCKET_FOLDERS[bucket] || bucket;
+  const cleanPath = filePath.replace(/^\/+/, "");
+  const imagePath = cleanPath.startsWith(`${folderPrefix}/`)
+    ? cleanPath
+    : `${folderPrefix}/${cleanPath}`;
+  return resolveStorageUrl(imagePath) || "";
 }
 
 /**
@@ -189,7 +194,7 @@ export async function listFiles(
   const { ListObjectsV2Command } = await import("@aws-sdk/client-s3");
   
   const folderPrefix = BUCKET_FOLDERS[bucket] || bucket;
-  const baseFolder = getStorageBaseFolder();
+  const baseFolder = getStorageFolder();
   const fullFolder = baseFolder ? `${baseFolder}/${folderPrefix}` : folderPrefix;
   const cleanPrefix = prefix ? prefix.replace(/^\/+/, "") : "";
   const fullPrefix = cleanPrefix ? `${fullFolder}/${cleanPrefix}` : `${fullFolder}/`;

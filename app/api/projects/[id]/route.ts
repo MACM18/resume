@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { normalizeDomain } from "@/lib/utils";
+import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ function transformProject(project: {
     title: project.title,
     description: project.description,
     long_description: project.longDescription,
-    image: project.image,
+    image: resolveStorageUrl(project.image),
     tech: project.tech,
     demo_url: project.demoUrl,
     github_url: project.githubUrl,
@@ -123,7 +124,7 @@ export async function PATCH(
     if (body.title !== undefined) updateData.title = body.title;
     if (body.description !== undefined) updateData.description = body.description;
     if (body.long_description !== undefined) updateData.longDescription = body.long_description;
-    if (body.image !== undefined) updateData.image = body.image;
+    if (body.image !== undefined) updateData.image = extractStoragePath(body.image);
     if (body.tech !== undefined) updateData.tech = body.tech;
     if (body.demo_url !== undefined) updateData.demoUrl = body.demo_url;
     if (body.github_url !== undefined) updateData.githubUrl = body.github_url;
