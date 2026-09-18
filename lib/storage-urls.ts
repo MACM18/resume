@@ -86,7 +86,8 @@ export function extractStoragePath(
 
 /**
  * Resolves a stored image path into a full public URL:
- * main domain / bucketname / foldername / image path
+ * main domain / [foldername /] image path
+ * Note: Bucket name is not included in the public URL.
  */
 export function resolveStorageUrl(
   value: string | null | undefined,
@@ -108,9 +109,8 @@ export function resolveStorageUrl(
   }
 
   const mainDomain = getStorageMainDomain();
-  const bucket = getStorageBucket();
   const folder = getStorageFolder();
 
   const pathWithFolder = folder ? `${folder}/${cleanPath}` : cleanPath;
-  return `${mainDomain}/${bucket}/${pathWithFolder}`;
+  return `${mainDomain}/${pathWithFolder}`;
 }

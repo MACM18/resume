@@ -10,11 +10,11 @@ This file contains the minimal, reproducible commands and environment variables 
 - NEXTAUTH_SECRET — Secret for NextAuth sessions (generate securely, e.g., `openssl rand -hex 32`)
 - RESEND_API_KEY — Resend API key for sending emails
 - RESEND_FROM_EMAIL — Sender email used by Resend (e.g., `noreply@yourdomain.com`)
-- STORAGE_MAIN_DOMAIN (optional) — Public main domain/CDN for storage (e.g., `https://storage.macm.dev`). Used to construct dynamic URLs: `STORAGE_MAIN_DOMAIN / STORAGE_BUCKET / STORAGE_FOLDER / image-path`.
-- STORAGE_ENDPOINT (optional) — S3/MinIO endpoint for internal S3 SDK operations (e.g., `http://minio:9000` or `https://storage.macm.dev`)
+- STORAGE_MAIN_DOMAIN (optional) — Public main domain/CDN for storage (e.g., `https://cdn.macm.dev`). Used to construct dynamic URLs: `STORAGE_MAIN_DOMAIN / [STORAGE_FOLDER /] image-path` (bucket name is not in the public URL).
+- STORAGE_ENDPOINT (optional) — S3/MinIO/R2 endpoint for internal S3 SDK operations (e.g., `https://<account_id>.r2.cloudflarestorage.com` or `http://minio:9000`)
 - STORAGE_PUBLIC_URL (optional) — Legacy fallback / alternative to STORAGE_MAIN_DOMAIN
-- STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY (optional) — S3/MinIO credentials
-- STORAGE_BUCKET (optional) — Bucket name (default: `portfolio`)
+- STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY (optional) — S3/R2 credentials
+- STORAGE_BUCKET (optional) — S3 bucket name (default: `portfolio`, used internally by the S3 client)
 - STORAGE_FOLDER (optional) — Base folder/prefix inside the bucket (e.g., `my-folder`)
 - STORAGE_REGION (optional) — S3 region (default: `us-east-1`)
 - GROQ_API_KEY (optional) — Sanity/GROQ API key (used by some AI features)

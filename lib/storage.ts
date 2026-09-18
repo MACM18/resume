@@ -82,7 +82,7 @@ export function getFullKey(bucket: string, filePath: string): string {
 export interface UploadResult {
   filePath: string; // full S3 key
   imagePath: string; // relative path saved to DB: e.g. "profile-images/user_123/abc.webp"
-  publicUrl: string; // resolved public URL: e.g. "https://domain/bucket/folder/profile-images/user_123/abc.webp"
+  publicUrl: string; // resolved public URL: e.g. "https://domain/[folder/]profile-images/user_123/abc.webp"
 }
 
 /**
