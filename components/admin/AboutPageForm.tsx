@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
-import { Loader2, Trash, Plus } from "lucide-react";
+import { BookOpen, Loader2, Phone, Plus, Save, Sparkles, Trash, UserRound, Wrench } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -64,6 +65,7 @@ const aboutPageSchema = z.object({
 type AboutPageFormValues = z.infer<typeof aboutPageSchema>;
 
 export function AboutPageForm() {
+  const [activePanel, setActivePanel] = useState("header");
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery({
@@ -153,10 +155,21 @@ export function AboutPageForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-          className='space-y-8'
+          className='about-editor space-y-5'
         >
+          <div className='rounded-xl border border-border bg-muted/20 p-3 sm:p-4'>
+            <div className='flex items-center justify-between gap-4'>
+              <div><p className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>About page editor</p><p className='mt-1 text-sm text-muted-foreground'>Move through the story, skills, contact, and CTA as separate workspaces.</p></div>
+              <span className='hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:inline-flex'>Draft workspace</span>
+            </div>
+            <div className='mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5' role='tablist' aria-label='About page content groups'>
+              {[["header", "Header", UserRound], ["story", "Story", BookOpen], ["skills", "Skills", Wrench], ["contact", "Contact", Phone], ["cta", "CTA", Sparkles]].map(([key, label, Icon]) => (
+                <button key={String(key)} type='button' role='tab' aria-selected={activePanel === key} onClick={() => setActivePanel(String(key))} className={'flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ' + (activePanel === key ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-background/50 text-muted-foreground hover:bg-muted")}><Icon size={16} aria-hidden='true' /><span>{String(label)}</span></button>
+              ))}
+            </div>
+          </div>
           {/* Page Header */}
-          <div className='space-y-6'>
+          <section className={activePanel === 'header' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
             <div>
               <h3 className='text-lg font-medium mb-4'>Page Header</h3>
               <p className='text-sm text-muted-foreground mb-4'>
@@ -202,12 +215,12 @@ export function AboutPageForm() {
                 </FormItem>
               )}
             />
-          </div>
+          </section>
 
           <Separator />
 
           {/* Story Section */}
-          <div>
+          <section className={activePanel === 'story' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
             <h3 className='text-lg font-medium mb-4'>Your Story</h3>
             <p className='text-sm text-muted-foreground mb-4'>
               Tell your professional journey in a compelling narrative. Separate
@@ -240,12 +253,12 @@ Today, I combine my technical expertise with a deep understanding of business ne
                 </FormItem>
               )}
             />
-          </div>
+          </section>
 
           <Separator />
 
           {/* Skills */}
-          <div>
+          <section className={activePanel === 'skills' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
             <h3 className='text-lg font-medium mb-4'>Skills & Expertise</h3>
             <div className='mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg'>
               <p className='text-xs text-foreground/70'>
@@ -366,12 +379,12 @@ Today, I combine my technical expertise with a deep understanding of business ne
             >
               Add Skill Category
             </Button>
-          </div>
+          </section>
 
           <Separator />
 
           {/* Contact Numbers */}
-          <div>
+          <section className={activePanel === 'contact' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
             <h3 className='text-lg font-medium mb-4'>Contact Numbers</h3>
             <p className='text-sm text-muted-foreground mb-4'>
               Add phone numbers that visitors can request to view. Active
@@ -521,12 +534,12 @@ Today, I combine my technical expertise with a deep understanding of business ne
                 Maximum of 5 contact numbers allowed.
               </p>
             )}
-          </div>
+          </section>
 
           <Separator />
 
           {/* Call to Action */}
-          <div>
+          <section className={activePanel === 'cta' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
             <h3 className='text-lg font-medium mb-2'>Call To Action</h3>
             <div className='p-3 border rounded-md space-y-2'>
               <FormField
@@ -556,15 +569,13 @@ Today, I combine my technical expertise with a deep understanding of business ne
                 )}
               />
             </div>
+          </section>
+
+          <div className='sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur'>
+            <p className='hidden text-xs text-muted-foreground sm:block'>Changes across all sections are saved together.</p>
+            <Button type='submit' disabled={mutation.isPending} className='ml-auto gap-2'>{mutation.isPending ? <Loader2 className='animate-spin' /> : <Save size={16} />} Save about page</Button>
           </div>
 
-          <Button type='submit' disabled={mutation.isPending}>
-            {mutation.isPending ? (
-              <Loader2 className='animate-spin' />
-            ) : (
-              "Save About Page"
-            )}
-          </Button>
         </form>
       </Form>
     </div>

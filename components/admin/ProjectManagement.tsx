@@ -104,11 +104,11 @@ export function ProjectManagement() {
           <Loader2 className='h-8 w-8 animate-spin text-primary' />
         </div>
       ) : projects && projects.length > 0 ? (
-        <div className='grid gap-4'>
+        <div className='grid gap-3 lg:grid-cols-2'>
           {projects?.map((project) => (
             <div
               key={project.id}
-              className='border border-foreground/10 rounded-xl p-4 md:p-6 bg-foreground/5 hover:bg-foreground/10 transition-colors'
+              className='group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/20'
             >
               <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4'>
                 <div className='flex-1'>
