@@ -340,14 +340,14 @@ function SelectedWork({ projects }: { projects: Project[] }) {
                   className={`relative block overflow-hidden ${isLead ? 'min-h-[300px] lg:min-h-[430px]' : 'aspect-[4/3]'}`}
                   aria-label={`View ${project.title} project`}
                 >
-                  <Image
-                    src={project.image || '/placeholder.svg'}
+                  {project.image ? <Image
+                    src={project.image}
                     alt={project.title}
                     fill
                     priority={index === 0}
                     sizes={isLead ? '(max-width: 1024px) 100vw, 58vw' : '(max-width: 768px) 100vw, 50vw'}
                     className='object-cover transition duration-700 group-hover:scale-105'
-                  />
+                  /> : <div className='flex h-full min-h-[220px] flex-col justify-between bg-gradient-to-br from-primary/15 via-background/70 to-secondary/15 p-6 lg:p-8'><span className='text-[10px] font-semibold uppercase tracking-[0.22em] text-primary'>Project brief</span><p className='max-w-xs text-sm leading-6 text-foreground/65'>A focused digital product built around useful outcomes.</p></div>}
                   <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent' />
                   {project.featured && (
                     <span className='absolute left-5 top-5 rounded-full border border-white/20 bg-black/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-md'>

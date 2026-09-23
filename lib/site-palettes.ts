@@ -1,13 +1,17 @@
 import type { Theme } from "@/types/portfolio";
 
 export type SiteMode = "light" | "dark";
-export type PaletteId = "ocean" | "violet" | "forest" | "amber";
+export type PaletteId = "ocean" | "violet" | "forest" | "amber" | "rose" | "slate" | "mint" | "coral";
 
 export const paletteOptions: { id: PaletteId; name: string; description: string; swatch: string }[] = [
   { id: "ocean", name: "Ocean", description: "Clear blue and cyan", swatch: "#087e91" },
   { id: "violet", name: "Violet", description: "Creative purple", swatch: "#7147b6" },
   { id: "forest", name: "Forest", description: "Grounded green", swatch: "#167854" },
   { id: "amber", name: "Amber", description: "Warm orange", swatch: "#a85b09" },
+  { id: "rose", name: "Rose", description: "Confident pink", swatch: "#b3265e" },
+  { id: "slate", name: "Slate", description: "Quiet neutral", swatch: "#475569" },
+  { id: "mint", name: "Mint", description: "Fresh teal", swatch: "#087f73" },
+  { id: "coral", name: "Coral", description: "Friendly red", swatch: "#b43b2f" },
 ];
 
 const accents: Record<PaletteId, { light: string; dark: string; lightSoft: string; darkSoft: string }> = {
@@ -15,6 +19,10 @@ const accents: Record<PaletteId, { light: string; dark: string; lightSoft: strin
   violet: { light: "264 49% 42%", dark: "265 82% 78%", lightSoft: "281 40% 39%", darkSoft: "282 74% 79%" },
   forest: { light: "155 70% 28%", dark: "151 65% 71%", lightSoft: "174 57% 28%", darkSoft: "166 65% 73%" },
   amber: { light: "32 91% 31%", dark: "41 93% 72%", lightSoft: "18 74% 34%", darkSoft: "24 91% 74%" },
+  rose: { light: "338 67% 38%", dark: "337 78% 73%", lightSoft: "350 62% 38%", darkSoft: "351 76% 75%" },
+  slate: { light: "215 25% 30%", dark: "215 25% 75%", lightSoft: "199 30% 35%", darkSoft: "199 45% 75%" },
+  mint: { light: "174 82% 27%", dark: "172 70% 70%", lightSoft: "156 58% 29%", darkSoft: "158 64% 73%" },
+  coral: { light: "5 59% 40%", dark: "7 78% 72%", lightSoft: "18 63% 37%", darkSoft: "18 80% 75%" },
 };
 
 export function getSiteMode(theme: Theme | null | undefined): SiteMode {

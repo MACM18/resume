@@ -73,6 +73,19 @@ const ALL_ITEMS: AdminNavItem[] = ADMIN_GROUPS.reduce<AdminNavItem[]>(
   []
 );
 
+const ADMIN_PAGE_META: Record<string, { eyebrow: string; description: string }> = {
+  overview: { eyebrow: "Workspace", description: "See what is published, complete, and ready for your next edit." },
+  profile: { eyebrow: "Identity", description: "Keep your public identity, media, background, and favicon in one place." },
+  theme: { eyebrow: "Branding", description: "Choose a readable palette, site mode, and custom colors." },
+  account: { eyebrow: "Security", description: "Manage account access and verification settings." },
+  home: { eyebrow: "Page content", description: "Shape the homepage story, proof points, links, and call to action." },
+  about: { eyebrow: "Page content", description: "Tell your story, organize skills, and keep contact details current." },
+  work: { eyebrow: "Professional", description: "Maintain the experience entries shown across your portfolio." },
+  projects: { eyebrow: "Professional", description: "Publish case studies, media, technologies, and project links." },
+  resumes: { eyebrow: "Professional", description: "Create versions, generate summaries, and choose the active resume." },
+  gallery: { eyebrow: "Assets", description: "Organize reusable images and albums for your public pages." },
+};
+
 function AdminDashboardContent() {
   const { session } = useAuth();
   const router = useRouter();
@@ -108,6 +121,7 @@ function AdminDashboardContent() {
   if (!session) return null;
 
   const currentItem = ALL_ITEMS.find((i) => i.value === section) || ALL_ITEMS[0];
+  const CurrentSectionIcon = currentItem.icon;
 
   return (
     <div className='min-h-screen relative pb-24 pt-24 md:pb-12 md:pt-28 bg-background/50'>
@@ -217,6 +231,15 @@ function AdminDashboardContent() {
           {/* Content Area */}
           <div className='min-w-0'>
             <div className='border border-foreground/10 bg-card/85 shadow-sm rounded-xl min-w-0'>
+              <div className='border-b border-border bg-muted/25 px-4 py-3 sm:px-6 xl:px-8'>
+                <div className='flex items-start gap-3'>
+                  <CurrentSectionIcon size={16} className='mt-0.5 shrink-0 text-primary' aria-hidden='true' />
+                  <div className='min-w-0'>
+                    <p className='text-[10px] font-semibold uppercase tracking-[0.2em] text-primary'>{ADMIN_PAGE_META[section]?.eyebrow || "Workspace"}</p>
+                    <p className='mt-1 text-sm text-muted-foreground'>{ADMIN_PAGE_META[section]?.description}</p>
+                  </div>
+                </div>
+              </div>
               <div className='admin-workspace p-4 sm:p-6 xl:p-8'>
                 <AnimatePresence mode='wait'>
                   <motion.div

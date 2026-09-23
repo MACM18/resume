@@ -42,19 +42,22 @@ export function ProjectCard({
             featured ? "aspect-[16/9]" : "aspect-video"
           )}
         >
-          <Image
-            src={project.image || "/placeholder.svg"}
-            alt={project.title}
-            className='w-full h-full object-cover transition-all duration-700 group-hover:brightness-110 group-hover:scale-105'
-            width={800}
-            height={450}
-            priority={priority}
-            style={{
-              objectFit: "cover",
-              width: "100%",
-              height: "100%",
-            }}
-          />
+          {project.image ? (
+            <Image
+              src={project.image}
+              alt={project.title}
+              className='w-full h-full object-cover transition-all duration-700 group-hover:brightness-110 group-hover:scale-105'
+              width={800}
+              height={450}
+              priority={priority}
+              style={{ objectFit: "cover", width: "100%", height: "100%" }}
+            />
+          ) : (
+            <div className='flex h-full flex-col justify-between bg-gradient-to-br from-primary/15 via-background/70 to-secondary/15 p-5'>
+              <span className='text-[10px] font-semibold uppercase tracking-[0.22em] text-primary'>Project brief</span>
+              <p className='max-w-xs text-sm leading-6 text-foreground/65'>A focused digital product built around useful outcomes.</p>
+            </div>
+          )}
           <div className='absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent' />
 
           {/* Featured Badge */}
