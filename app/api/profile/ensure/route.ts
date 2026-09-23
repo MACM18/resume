@@ -1,6 +1,5 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getDefaultProfileData } from "@/lib/profile.server";
 
@@ -12,7 +11,7 @@ export const dynamic = "force-dynamic";
  */
 export async function POST() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

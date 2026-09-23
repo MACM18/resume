@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { normalizeDomain } from "@/lib/utils";
+import { getSiteOwnerId } from "@/lib/site-owner";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/profile/by-domain?domain=example.com
- * Get profile data for a specific domain (public)
+ * Get the site owner's public profile
  */
 export async function GET(request: NextRequest) {
   // If DATABASE_URL is missing, avoid calling Prisma and return a helpful message
@@ -44,16 +44,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get("domain");
+    void request;
+    const ownerId = await getSiteOwnerId();
 
-    if (!domain) {
-      return NextResponse.json({ error: "Domain is required" }, { status: 400 });
-    }
-
-    const normalizedDomain = normalizeDomain(domain);
-
-    const profile = await db.profile.findFirst({ where: { domains: { some: { domain: normalizedDomain } } }, include: { domains: true } });
+    const profile = await db.profile.findFirst({ where: { userId: ownerId ?? "" }, include: { domains: true } });
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });

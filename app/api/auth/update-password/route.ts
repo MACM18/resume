@@ -1,15 +1,14 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, MIN_PASSWORD_LENGTH, verifyPassword } from '@/lib/auth';
 import { AuthOtpPurpose } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

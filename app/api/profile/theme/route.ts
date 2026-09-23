@@ -1,26 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { normalizeDomain } from "@/lib/utils";
+import { getSiteOwnerId } from "@/lib/site-owner";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/profile/theme?domain=example.com
- * Get theme and background image for a domain
+ * Get the site owner's theme and background image
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get("domain");
-
-    if (!domain) {
-      return NextResponse.json({ error: "Domain is required" }, { status: 400 });
-    }
-
-    const normalizedDomain = normalizeDomain(domain);
+    void request;
+    const ownerId = await getSiteOwnerId();
 
     const profile = await db.profile.findFirst({
-      where: { domains: { some: { domain: normalizedDomain } } },
+      where: { userId: ownerId ?? "" },
       select: {
         theme: true,
         backgroundImageUrl: true,

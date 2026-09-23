@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { getEffectiveDomain } from "./utils";
+import { getSiteOwnerId } from "./site-owner";
 import { AboutPageData, HomePageData, Profile, Theme } from "@/types/portfolio";
 import { z } from "zod";
 import { safeAssetUrl } from "./remote-assets";
@@ -127,12 +127,13 @@ function transformProfile(prismaProfile: {
 }
 
 export const getProfileDataServer = cache(async function getProfileDataServer(domain?: string) {
-  const effectiveDomain = getEffectiveDomain(domain || "");
-  if (!effectiveDomain) return null;
+  void domain;
+  const ownerId = await getSiteOwnerId();
+  if (!ownerId) return null;
 
   try {
     const profile = await db.profile.findFirst({
-      where: { domains: { some: { domain: effectiveDomain } } },
+      where: { userId: ownerId },
       include: { domains: true },
     });
 
@@ -168,12 +169,13 @@ export const getProfileByUserId = cache(async function getProfileByUserId(
 });
 
 export const getThemeDataServer = cache(async function getThemeDataServer(domain?: string) {
-  const effectiveDomain = getEffectiveDomain(domain || "");
-  if (!effectiveDomain) return null;
+  void domain;
+  const ownerId = await getSiteOwnerId();
+  if (!ownerId) return null;
 
   try {
     const profile = await db.profile.findFirst({
-      where: { domains: { some: { domain: effectiveDomain } } },
+      where: { userId: ownerId },
       select: {
         theme: true,
         backgroundImageUrl: true,

@@ -1,7 +1,6 @@
 "use client";
 
 import { WorkExperience } from "@/types/portfolio";
-import { normalizeDomain } from "./utils";
 
 /**
  * Get visible work experiences for a domain (public)
@@ -9,10 +8,10 @@ import { normalizeDomain } from "./utils";
 export async function getVisibleWorkExperiences(
   domain: string
 ): Promise<WorkExperience[]> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
     const response = await fetch(
-      `/api/work-experiences/by-domain?domain=${encodeURIComponent(normalizedDomain)}`
+      "/api/work-experiences/by-domain"
     );
     if (!response.ok) {
       return [];
@@ -127,10 +126,10 @@ export const setAsCurrent = setPrimaryWorkExperience;
 export async function getCurrentWork(
   domain: string
 ): Promise<WorkExperience | null> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
     const response = await fetch(
-      `/api/work-experiences/current?domain=${encodeURIComponent(normalizedDomain)}`
+      "/api/work-experiences/current"
     );
     if (!response.ok) {
       return null;

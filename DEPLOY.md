@@ -1,229 +1,59 @@
-# Deploy & First-time Setup ✅
+# Deployment and single-owner migration
 
-This file contains the minimal, reproducible commands and environment variables you need to set up the app for the first time (local dev and production). Keep this near your README for quick reference.
+This app now publishes one portfolio. The owner is stored in `site_settings`, selected once from the existing `macm.dev` domain claim. The legacy `domains` rows remain in the database for rollback but are no longer used by the application.
 
----
+## Runtime configuration
 
-## Required environment variables
+Set `OWNER=MACM` on the macm.dev application to show the content preset buttons in `/admin`. The server also checks this value for every preset request. Leave it unset on other deployments. Each button shows a warning before it changes data. “Fill missing” preserves nonempty content; “Apply recommended” replaces text in the selected section while keeping existing media and links. The Overview buttons run all sections in one database transaction. Do not use the preset buttons as a substitute for a database backup.
 
-- DATABASE_URL — Postgres connection string (used by Prisma)
-- NEXTAUTH_SECRET — Secret for NextAuth sessions (generate securely, e.g., `openssl rand -hex 32`)
-- RESEND_API_KEY — Resend API key for sending emails
-- RESEND_FROM_EMAIL — Sender email used by Resend (e.g., `noreply@yourdomain.com`)
-- STORAGE_MAIN_DOMAIN (optional) — Public main domain/CDN for storage (e.g., `https://cdn.macm.dev`). Used to construct dynamic URLs: `STORAGE_MAIN_DOMAIN / [STORAGE_FOLDER /] image-path` (bucket name is not in the public URL).
-- STORAGE_ENDPOINT (optional) — S3/MinIO/R2 endpoint for internal S3 SDK operations (e.g., `https://<account_id>.r2.cloudflarestorage.com` or `http://minio:9000`)
-- STORAGE_PUBLIC_URL (optional) — Legacy fallback / alternative to STORAGE_MAIN_DOMAIN
-- STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY (optional) — S3/R2 credentials
-- STORAGE_BUCKET (optional) — S3 bucket name (default: `portfolio`, used internally by the S3 client)
-- STORAGE_FOLDER (optional) — Base folder/prefix inside the bucket (e.g., `my-folder`)
-- STORAGE_REGION (optional) — S3 region (default: `us-east-1`)
-- GROQ_API_KEY (optional) — Sanity/GROQ API key (used by some AI features)
-- NEXT_PUBLIC_SITE_URL (optional) — Site URL used in meta tags
-- NEXT_PUBLIC_GTM_ID (optional) — Google Tag Manager container ID (e.g., GTM-XXXXXXX). If set in production, GTM script and noscript iframe are injected.
-- NEXT_PUBLIC_GA_MEASUREMENT_ID (optional) — GA4 Measurement ID (e.g., G-XXXXXXXXXX). If set, gtag.js will be loaded and configured (page_view sent from client).
-- NEXT_PUBLIC_ENABLE_ANALYTICS (optional) — Set to "false" to disable analytics in production even when IDs are present. Defaults to enabled when IDs are present and NODE_ENV=production.
 
-> Tip: Store secrets in your environment/secret manager (e.g., GitHub Actions Secrets, Vercel/Render envs, or Azure Key Vault).
+Set `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXT_PUBLIC_SITE_URL=https://macm.dev`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in the deployment environment. Configure the existing S3-compatible storage variables (`STORAGE_MAIN_DOMAIN`, `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET`, `STORAGE_FOLDER`, and `STORAGE_REGION`) as appropriate for the current deployment. `GROQ_API_KEY` is needed only for the optional AI writing tools. Keep secrets out of the image and repository.
 
----
+Use `pnpm@10.4.1` and the committed `pnpm-lock.yaml`. The Docker build uses `pnpm install --frozen-lockfile`.
 
-## Generate secrets examples
+## Existing macm.dev production rollout
 
-- Generate `NEXTAUTH_SECRET`:
+1. **Back up the database.** Record the current image tag for rollback. Check the existing claim and its content owner:
 
-```bash
-# hex
-openssl rand -hex 32
-# or base64
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-```
+   ```sql
+   SELECT d.domain, p.id AS profile_id, p.user_id, u.email,
+          (SELECT count(*) FROM projects WHERE user_id = p.user_id) AS projects,
+          (SELECT count(*) FROM resumes WHERE user_id = p.user_id) AS resumes
+   FROM domains d
+   JOIN profiles p ON p.id = d.profile_id
+   JOIN users u ON u.id = p.user_id
+   WHERE lower(d.domain) IN ('macm.dev', 'www.macm.dev');
+   ```
 
-- Confirm `RESEND_API_KEY` from your Resend account and set `RESEND_FROM_EMAIL` to a sender address you control.
+   Confirm that this is the intended owner. Check `pnpm exec prisma migrate status` against the production database. If earlier `db push` operations left migration history inconsistent, reconcile that history before releasing; the new container stops on any Prisma migration failure.
 
----
+2. **Deploy to the macm.dev Dokploy application.** The entrypoint runs `prisma migrate deploy` before starting Next.js. Migration `20260923_single_site_owner` creates `site_settings` and assigns the owner from the existing claim. It leaves all user, profile, project, resume, gallery, media, and domain rows in place. It refuses to guess an owner if profiles exist but no `macm.dev` claim does.
 
-## Local setup (first time)
+3. **Verify the deployed owner and routes:**
 
-1. Install packages:
+   ```sql
+   SELECT s.owner_user_id, u.email, p.full_name
+   FROM site_settings s
+   JOIN users u ON u.id = s.owner_user_id
+   JOIN profiles p ON p.user_id = u.id
+   WHERE s.id = 1;
+   ```
 
-```bash
-npm install
-```
+   The owner ID must match the preflight query. Check `/`, `/projects`, `/resume`, `/gallery`, and `/admin`; sign in as the owner and save a harmless dashboard edit. `POST /api/auth/signup` should return 403. Public pages should show the same content on any host routed to this application.
 
-2. Generate Prisma client (postinstall runs this automatically, but you can run manually):
+4. **Rollback if needed.** Restore the previous image tag. The migration is additive, and the older image can still read the retained `domains` rows and content. Do not seed or delete data as part of rollback.
+
+The second Dokploy webhook is opt-in through the GitHub Actions variable `DEPLOY_SECOND_APP=true`. Leave it unset until the second application's purpose and database have been checked. A separate person's database without a `macm.dev` claim cannot use this single-owner release as written.
+
+## Fresh local database
+
+The repository's historical Prisma migration directory is not a full baseline for an empty database. For local development, create a fresh schema with `pnpm db:push`, then seed a single owner:
 
 ```bash
-npm run db:generate
+pnpm install --frozen-lockfile
+pnpm db:push
+SEED_OWNER_PASSWORD='use-a-unique-long-password' pnpm db:seed
+pnpm dev
 ```
 
-3. Run the initial Prisma migrations / create DB schema (local dev):
-
-```bash
-# Creates migration and applies locally
-npx prisma migrate dev -n init
-# or use the provided npm script
-npm run db:migrate
-```
-
-4. Seed database (if needed):
-
-```bash
-npm run db:seed
-```
-
-5. Start dev server:
-
-```bash
-npm run dev
-```
-
-Open http://localhost:3000
-
----
-
-## New schema changes (example: password reset tokens)
-
-When you add or change Prisma models, run a migration locally:
-
-```bash
-# create + apply migration locally
-npx prisma migrate dev -n add_password_reset_tokens
-# publish client (same as `npm run db:generate`)
-npx prisma generate
-```
-
-In CI / Production you should run:
-
-```bash
-# Apply migrations on production database (no prompts)
-npx prisma migrate deploy
-# ensure the client is generated
-npx prisma generate
-# (One-time or on upgrade) Migrate legacy full storage URLs to clean relative image paths
-npm run db:migrate-storage-urls
-```
-
-> Use `prisma migrate deploy` in your deployment pipeline (e.g., in Docker startup or CI job). Running `npm run db:migrate-storage-urls` is idempotent and safely cleans any full legacy URLs in the database to relative paths.
-
----
-
-## Quick verification / testing commands
-
-- Check DB schema:
-
-```bash
-npx prisma db pull   # inspect live DB
-npx prisma studio    # visual DB UI
-```
-
-- Send test invite/reset flow (super-admin required):
-
-```bash
-# Invite (curl)
-curl -X POST http://localhost:3000/api/invite-user \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"test@example.com"}' \
-  -b '<your-nextauth-cookie-here>'
-
-# Reset an existing user (super-admin)
-curl -X POST http://localhost:3000/api/reset-password-for-user \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"existing@example.com"}' \
-  -b '<your-nextauth-cookie-here>'
-```
-
-- Inspect `password_reset_tokens` table (once migration applied):
-
-```sql
-select id, user_id, expires_at, used_at, created_at from password_reset_tokens order by created_at desc;
-```
-
----
-
-## Production tips
-
-- Don't run `prisma migrate dev` in production; run `npx prisma migrate deploy` from your CI/CD pipeline.
-- Ensure your host (Vercel, Fly, DigitalOcean, etc.) has all the env vars configured securely.
-- Verify your outgoing email domain and Sender identity in Resend to avoid deliverability issues.
-- Use `NEXTAUTH_SECRET` and proper cookie/session policies for security.
-
----
-
-## Commands summary (copy/paste)
-
-```bash
-# install
-npm install
-
-# local migrations & generate
-npx prisma migrate dev -n add_password_reset_tokens
-npx prisma generate
-
-# seed
-npm run db:seed
-
-# build and start (production)
-npm run build
-npm start
-
-# production migrate (CI)
-npx prisma migrate deploy
-npx prisma generate
-npm run db:migrate-storage-urls
-```
-
----
-
-## Image optimization 🖼️
-
-All uploaded images are automatically optimized for web performance:
-
-- **Format conversion**: Converted to WebP (modern, efficient format with ~30% smaller file sizes)
-- **Automatic resizing**: Images are resized to appropriate dimensions based on type:
-  - Profile images (avatars): 800×800px max
-  - Background images: 1920×1080px max
-  - Project thumbnails: 1200×800px max
-  - Favicons: 512×512px max
-- **Quality**: 85% quality setting (good balance between size and visual quality)
-- **Caching**: Images cached for 1 year via Next.js image optimization
-
-**API endpoints with built-in optimization:**
-
-- `POST /api/profile/images` — profile, background, and favicon uploads
-- `POST /api/projects/upload-image` — project image uploads
-
-All optimization happens server-side using the `sharp` library. No client-side work needed.
-
----
-
-## Frontend redesign & performance 🎨
-
-The front-end has been redesigned for elegance, speed, and visual clarity:
-
-**Design improvements:**
-
-- **Removed scale hover effects** — Cards now use subtle elevation (`whileHover={{ y: -4 }}`) and border glow instead of jarring scale transforms
-- **Cleaner spacing** — Consistent padding (pt-20/pt-32/pb-20) across all pages for better flow
-- **Elegant hover states** — Images use `brightness-110` transition instead of scale; borders transition to `primary/60`
-- **Simplified hero sections** — Reduced font sizes (5xl→7xl) and spacing for better readability
-- **Streamlined navigation cards** — Quick-access cards are now unified with consistent styling
-- **Better visual hierarchy** — Removed repetitive sections, consolidated CTAs
-
-**Technical changes:**
-
-- `GlassCard` component: hover duration increased to 500ms with smooth `y: -4` lift
-- Social icons: border glow on hover (`border-primary/60`) instead of scale
-- Project/profile images: `brightness-110` transition replaces `scale-110`
-- All pages: unified spacing (20/32 top, 20 bottom)
-
-**Performance gains:**
-
-- Fewer DOM reflows (no scale transforms triggering layout recalculation)
-- Smoother 60fps animations with GPU-accelerated transforms only
-- Reduced cumulative layout shift (CLS) scores
-
-All changes are production-ready and backward-compatible with existing content.
-
----
-
-If you want, I can add a deploy script or GitHub Actions workflow that applies migrations during your deploys and fail-safe checks for missing env vars. Want me to scaffold that next? 🔧
+Never run `pnpm db:seed` against production. For future production schema changes, use reviewed Prisma migrations and `pnpm migrate:deploy`; do not run `prisma db push` on production.

@@ -1,3 +1,4 @@
+import { getSiteOwnerId } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { isValidEmail, normalizeEmail } from "@/lib/auth";
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (recent) return NextResponse.json({ success: true, message: SAFE_MESSAGE });
 
     const user = await db.user.findUnique({ where: { email } });
-    if (!user) return NextResponse.json({ success: true, message: SAFE_MESSAGE });
+    if (!user || user.id !== await getSiteOwnerId()) return NextResponse.json({ success: true, message: SAFE_MESSAGE });
 
     const code = generateOtp();
     await db.authOtp.updateMany({

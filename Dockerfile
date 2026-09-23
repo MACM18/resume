@@ -13,7 +13,7 @@ COPY prisma ./prisma
 # Create bin dir to avoid warnings from packages attempting to write bin shims
 RUN mkdir -p /app/node_modules/.bin
 # Enable corepack and install with pnpm to respect pnpm-lock.yaml
-RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile --ignore-scripts
+RUN corepack enable && corepack prepare pnpm@10.4.1 --activate && pnpm install --frozen-lockfile --ignore-scripts
 
 # 2. Builder
 FROM node:22-alpine AS builder
@@ -39,7 +39,7 @@ ENV STORAGE_FOLDER=$STORAGE_FOLDER
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Ensure pnpm is available in the builder stage and then generate Prisma client and build
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.4.1 --activate
 RUN pnpm exec prisma generate
 RUN pnpm run build
 

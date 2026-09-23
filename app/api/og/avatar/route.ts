@@ -1,3 +1,4 @@
+import { getSiteOwnerId } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { db } from "@/lib/db";
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const profile = await db.profile.findUnique({
-      where: { id: profileId },
+      where: { id: profileId, userId: await getSiteOwnerId() ?? "" },
       select: { 
         avatarUrl: true,
         avatarPosition: true, 

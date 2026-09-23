@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getEffectiveDomain } from "@/lib/utils";
 
 import { generateCssVariables } from "@/lib/theme";
+import { getSiteMode } from "@/lib/site-palettes";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [hostname, setHostname] = useState("");
@@ -24,14 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     queryKey: ["theme", hostname],
     queryFn: async () => {
       if (!hostname) return { theme: {}, background_image_url: null };
-      const normalizedDomain = getEffectiveDomain(hostname);
-      if (!normalizedDomain) {
-        return { theme: {}, background_image_url: null };
-      }
-
-      const response = await fetch(
-        `/api/profile/theme?domain=${encodeURIComponent(normalizedDomain)}`
-      );
+      const response = await fetch("/api/profile/theme");
       if (!response.ok) {
         return { theme: {}, background_image_url: null };
       }
@@ -45,6 +38,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Only enable the client fetch if hostname is present AND server-side CSS variables are not already set
     enabled: !!hostname && !hasServerVars,
   });
+
+  useEffect(() => {
+    if (!profileData || hasServerVars) return;
+    const mode = getSiteMode(profileData.theme);
+    document.documentElement.classList.toggle("dark", mode === "dark");
+    document.documentElement.dataset.siteMode = mode;
+  }, [profileData, hasServerVars]);
 
   return (
     <>

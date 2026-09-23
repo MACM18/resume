@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { normalizeDomain } from "@/lib/utils";
+import { getSiteOwnerId } from "@/lib/site-owner";
 
 export const dynamic = "force-dynamic";
 
@@ -35,22 +35,15 @@ function transformWorkExperience(we: {
 
 /**
  * GET /api/work-experiences/by-domain?domain=example.com
- * Get visible work experiences for a domain
+ * Get the site owner's visible work experiences
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get("domain");
+    void request;
+    const ownerId = await getSiteOwnerId();
 
-    if (!domain) {
-      return NextResponse.json({ error: "Domain is required" }, { status: 400 });
-    }
-
-    const normalizedDomain = normalizeDomain(domain);
-
-    // First get the user ID for this domain
     const profile = await db.profile.findFirst({
-      where: { domains: { some: { domain: normalizedDomain } } },
+      where: { userId: ownerId ?? "" },
       select: { userId: true },
     });
 

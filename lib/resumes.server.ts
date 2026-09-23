@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { getEffectiveDomain } from "./utils";
+import { getSiteOwnerId } from "./site-owner";
 import type { Resume } from "@/types/portfolio";
 import { safeAssetUrl } from "./remote-assets";
 import { cache } from "react";
@@ -7,18 +7,13 @@ import { cache } from "react";
 export const getActiveResumeServer = cache(async function getActiveResumeServer(
   domain: string,
 ): Promise<Resume | null> {
-  const effectiveDomain = getEffectiveDomain(domain);
-  if (!effectiveDomain) return null;
+  void domain;
+  const ownerId = await getSiteOwnerId();
+  if (!ownerId) return null;
 
   try {
     const profile = await db.profile.findFirst({
-      where: {
-        domains: {
-          some: {
-            domain: effectiveDomain,
-          },
-        },
-      },
+      where: { userId: ownerId },
       select: {
         activeResumeRole: true,
         userId: true,

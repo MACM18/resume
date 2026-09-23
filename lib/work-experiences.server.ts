@@ -1,26 +1,20 @@
 import { db } from "./db";
-import { getEffectiveDomain } from "./utils";
+import { getSiteOwnerId } from "./site-owner";
 import { WorkExperience } from "@/types/portfolio";
 import { cache } from "react";
 
 export const getVisibleWorkExperiencesServer = cache(async function getVisibleWorkExperiencesServer(
   domain: string,
 ): Promise<WorkExperience[]> {
-  const effectiveDomain = getEffectiveDomain(domain);
-  if (!effectiveDomain) return [];
+  void domain;
+  const ownerId = await getSiteOwnerId();
+  if (!ownerId) return [];
 
   try {
     const experiences = await db.workExperience.findMany({
       where: {
-        user: {
-          profile: {
-            domains: {
-              some: {
-                domain: effectiveDomain,
-              },
-            },
-          },
-        },
+        userId: ownerId,
+        visible: true,
       },
       orderBy: {
         startDate: "desc",

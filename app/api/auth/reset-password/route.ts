@@ -1,3 +1,4 @@
+import { getSiteOwnerId } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
       include: { user: { select: { email: true, id: true } } },
     });
 
-    if (!record || record.user.email !== email) {
+    if (!record || record.userId !== await getSiteOwnerId() || record.user.email !== email) {
       return NextResponse.json({ error: "Invalid reset link" }, { status: 400 });
     }
 

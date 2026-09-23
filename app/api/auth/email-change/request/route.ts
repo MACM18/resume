@@ -1,6 +1,6 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions, isValidEmail, normalizeEmail } from "@/lib/auth";
+import { isValidEmail, normalizeEmail } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateOtp, hashOtp, OTP_REQUEST_COOLDOWN_MS, OTP_TTL_MS } from "@/lib/auth-otp";
 import { getResend, getResendFromEmail } from "@/lib/resend.server";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await request.json();
     const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";

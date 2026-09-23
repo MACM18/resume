@@ -2,7 +2,6 @@
 
 import { deleteFile } from "./storage";
 import { Project } from "@/types/portfolio";
-import { normalizeDomain } from "./utils";
 
 /**
  * Upload a project image (optimized server-side)
@@ -43,12 +42,12 @@ export async function deleteProjectImage(userId: string, imageUrl: string): Prom
 }
 
 /**
- * Get projects for a domain (public, published only)
+ * Get the site owner's published projects (public, published only)
  */
 export async function getProjects(domain: string): Promise<Project[]> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
-    const response = await fetch(`/api/projects/by-domain?domain=${encodeURIComponent(normalizedDomain)}`);
+    const response = await fetch("/api/projects/by-domain");
     if (!response.ok) {
       return [];
     }
@@ -79,10 +78,10 @@ export async function getProjectsForCurrentUser(): Promise<Project[]> {
  * Get a single project by ID (public, published only)
  */
 export async function getProjectById(id: string, domain: string): Promise<Project | null> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
     const response = await fetch(
-      `/api/projects/${id}?domain=${encodeURIComponent(normalizedDomain)}`
+      `/api/projects/${id}`
     );
     if (!response.ok) {
       return null;
@@ -95,13 +94,13 @@ export async function getProjectById(id: string, domain: string): Promise<Projec
 }
 
 /**
- * Get featured projects for a domain
+ * Get featured projects
  */
 export async function getFeaturedProjects(domain: string): Promise<Project[]> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
     const response = await fetch(
-      `/api/projects/by-domain?domain=${encodeURIComponent(normalizedDomain)}&featured=true`
+      "/api/projects/by-domain?featured=true"
     );
     if (!response.ok) {
       return [];

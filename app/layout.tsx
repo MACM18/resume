@@ -13,6 +13,7 @@ import { getProfileDataServer } from "@/lib/profile.server";
 import { getEffectiveDomain } from "@/lib/utils";
 import { generateHomeMetadata } from "@/lib/seo";
 import { generateCssVariables } from "@/lib/theme";
+import { getSiteMode } from "@/lib/site-palettes";
 import Analytics from "@/components/Analytics";
 import Script from "next/script";
 import { Metadata } from "next";
@@ -59,7 +60,7 @@ export default async function RootLayout({
     process.env.NEXT_PUBLIC_ENABLE_ANALYTICS !== "false";
 
   return (
-    <html lang='en' className='scroll-smooth'>
+    <html lang='en' className={`scroll-smooth ${getSiteMode(themeData?.theme) === "dark" ? "dark" : ""}`} data-site-mode={getSiteMode(themeData?.theme)}>
       <head>
         {faviconUrl && (
           <>

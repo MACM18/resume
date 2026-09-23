@@ -1,3 +1,4 @@
+import { getSiteOwnerId } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword, isValidEmail, MIN_PASSWORD_LENGTH, normalizeEmail } from "@/lib/auth";
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       where: { targetEmail: email, purpose: AuthOtpPurpose.PASSWORD_RESET, consumedAt: null },
       orderBy: { createdAt: "desc" },
     });
-    if (!otp || otp.expiresAt.getTime() <= Date.now() || otp.attempts >= OTP_MAX_ATTEMPTS) {
+    if (!otp || otp.userId !== await getSiteOwnerId() || otp.expiresAt.getTime() <= Date.now() || otp.attempts >= OTP_MAX_ATTEMPTS) {
       return NextResponse.json({ error: "Invalid or expired verification code" }, { status: 400 });
     }
     if (!isValidOtp(code, otp.codeHash)) {

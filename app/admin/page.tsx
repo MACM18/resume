@@ -17,6 +17,7 @@ import { GalleryManager } from "@/components/admin/GalleryManager";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AccountSecurity } from "@/components/admin/AccountSecurity";
 import { AdminLoadingState } from "@/components/admin/AdminUI";
+import { PresetControls } from "@/components/admin/PresetControls";
 import {
   User,
   ShieldCheck,
@@ -39,7 +40,7 @@ const ADMIN_GROUPS = [
   {
     label: "Identity",
     items: [
-      { value: "profile", label: "Profile & Domain", icon: User },
+      { value: "profile", label: "Profile", icon: User },
       { value: "theme", label: "Theme & Branding", icon: Palette },
       { value: "account", label: "Account & Security", icon: ShieldCheck },
     ],
@@ -110,9 +111,9 @@ function AdminDashboardContent() {
 
   return (
     <div className='min-h-screen relative pb-24 pt-24 md:pb-12 md:pt-28 bg-background/50'>
-      <div className='mx-auto w-full max-w-7xl px-4 md:px-8'>
+      <div className='mx-auto w-full max-w-[1720px] px-4 md:px-6 xl:px-8'>
         {/* Header Section */}
-        <div className='flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12'>
+        <div className='flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-7'>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -122,7 +123,7 @@ function AdminDashboardContent() {
               <LayoutDashboard size={24} />
               <span className='text-[10px] font-bold uppercase tracking-[0.24em]'>Portfolio workspace</span>
             </div>
-            <h1 className='text-4xl md:text-5xl font-bold tracking-tight'>
+            <h1 className='text-3xl md:text-4xl font-bold tracking-tight'>
               Content dashboard
             </h1>
           </motion.div>
@@ -136,7 +137,7 @@ function AdminDashboardContent() {
         </div>
 
         {/* Mobile Horizontal Navigation */}
-        <div className='md:hidden mb-8 -mx-4 px-4 sticky top-20 z-30 bg-background/80 backdrop-blur-md py-3 border-b border-foreground/5'>
+        <div className='md:hidden mb-5 -mx-4 px-4 sticky top-20 z-30 bg-background/80 backdrop-blur-md py-3 border-b border-foreground/5'>
           <div 
             ref={scrollContainerRef}
             className='flex gap-2 overflow-x-auto no-scrollbar pb-1'
@@ -164,19 +165,19 @@ function AdminDashboardContent() {
           </div>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-10'>
+        <div className='grid grid-cols-1 md:grid-cols-[210px_minmax(0,1fr)] xl:grid-cols-[224px_minmax(0,1fr)] gap-5 xl:gap-7'>
           {/* Desktop Sidebar */}
           <div className='hidden md:block'>
-            <div className='sticky top-32 space-y-8'>
+            <div className='sticky top-25 max-h-[calc(100vh-7rem)] overflow-y-auto space-y-5 pr-1'>
               {ADMIN_GROUPS.map((group, groupIdx) => (
                 <motion.div 
                   key={group.label}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: groupIdx * 0.1 }}
-                  className='space-y-3'
+                  transition={{ delay: groupIdx * 0.04 }}
+                  className='space-y-1.5'
                 >
-                  <h3 className='px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/30'>
+                  <h3 className='px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/30'>
                     {group.label}
                   </h3>
                   <nav className='space-y-1'>
@@ -188,19 +189,19 @@ function AdminDashboardContent() {
                         <button
                           key={item.value}
                           onClick={() => handleSectionChange(item.value)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 group relative ${
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-300 group relative ${
                             isActive
                               ? "text-primary font-bold"
                               : "text-foreground/50 hover:text-foreground hover:bg-foreground/5"
                           }`}
                         >
-                          <Icon size={20} className={isActive ? "text-primary" : "group-hover:text-foreground/70"} />
+                          <Icon size={17} className={isActive ? "text-primary" : "group-hover:text-foreground/70"} />
                           <span className='text-sm'>{item.label}</span>
                           
                           {isActive && (
                             <motion.div
                               layoutId='activeIndicator'
-                              className='absolute left-0 w-1 h-6 bg-primary rounded-full'
+                              className='absolute left-0 w-0.5 h-5 bg-primary rounded-full'
                               initial={false}
                             />
                           )}
@@ -214,9 +215,9 @@ function AdminDashboardContent() {
           </div>
 
           {/* Content Area */}
-          <div className='min-h-[600px]'>
-            <div className='border border-foreground/10 bg-background/40 backdrop-blur-2xl shadow-2xl overflow-hidden'>
-              <div className='p-5 md:p-9'>
+          <div className='min-w-0'>
+            <div className='border border-foreground/10 bg-card/85 shadow-sm rounded-xl min-w-0'>
+              <div className='admin-workspace p-4 sm:p-6 xl:p-8'>
                 <AnimatePresence mode='wait'>
                   <motion.div
                     key={section}
@@ -226,6 +227,7 @@ function AdminDashboardContent() {
                     transition={{ duration: 0.2 }}
                   >
                     <ErrorBoundary>
+                      <PresetControls section={section} />
                       {section === "overview" && <AdminOverview onNavigate={handleSectionChange} />}
                       {section === "profile" && <ProfileManagement />}
                       {section === "account" && <AccountSecurity />}
@@ -235,9 +237,9 @@ function AdminDashboardContent() {
                       {section === "projects" && <ProjectManagement />}
                       {section === "work" && <WorkExperienceManagement />}
                       {section === "resumes" && (
-                        <div className='space-y-12'>
+                        <div className='space-y-8'>
                           <ResumeManagement />
-                          <div className='pt-12 border-t border-foreground/10'>
+                          <div className='pt-8 border-t border-foreground/10'>
                             <ResumeManager />
                           </div>
                         </div>
