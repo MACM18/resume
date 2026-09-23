@@ -99,6 +99,11 @@ export function resolveStorageUrl(
   if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
     return trimmed;
   }
+  // Preset and legacy assets may deliberately point at a public CDN.
+  // Keep absolute URLs intact; callers that display remote assets validate hosts.
+  if (trimmed.startsWith("https://") || trimmed.startsWith("http://")) {
+    return trimmed;
+  }
 
   const cleanPath = extractStoragePath(trimmed);
   if (!cleanPath) return null;

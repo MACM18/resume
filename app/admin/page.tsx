@@ -17,6 +17,7 @@ import { GalleryManager } from "@/components/admin/GalleryManager";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AccountSecurity } from "@/components/admin/AccountSecurity";
 import { AdminLoadingState } from "@/components/admin/AdminUI";
+import { PresetControls } from "@/components/admin/PresetControls";
 import {
   User,
   ShieldCheck,
@@ -226,6 +227,7 @@ function AdminDashboardContent() {
                     transition={{ duration: 0.2 }}
                   >
                     <ErrorBoundary>
+                      <PresetControls section={section} />
                       {section === "overview" && <AdminOverview onNavigate={handleSectionChange} />}
                       {section === "profile" && <ProfileManagement />}
                       {section === "account" && <AccountSecurity />}

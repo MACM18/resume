@@ -4,6 +4,9 @@ This app now publishes one portfolio. The owner is stored in `site_settings`, se
 
 ## Runtime configuration
 
+Set `OWNER=MACM` on the macm.dev application to show the content preset buttons in `/admin`. The server also checks this value for every preset request. Leave it unset on other deployments. Each button shows a warning before it changes data. “Fill missing” preserves nonempty content; “Apply recommended” replaces text in the selected section while keeping existing media and links. The Overview buttons run all sections in one database transaction. Do not use the preset buttons as a substitute for a database backup.
+
+
 Set `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXT_PUBLIC_SITE_URL=https://macm.dev`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in the deployment environment. Configure the existing S3-compatible storage variables (`STORAGE_MAIN_DOMAIN`, `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET`, `STORAGE_FOLDER`, and `STORAGE_REGION`) as appropriate for the current deployment. `GROQ_API_KEY` is needed only for the optional AI writing tools. Keep secrets out of the image and repository.
 
 Use `pnpm@10.4.1` and the committed `pnpm-lock.yaml`. The Docker build uses `pnpm install --frozen-lockfile`.
