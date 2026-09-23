@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
 import { createSiteTheme, getPaletteId, getSiteMode, paletteOptions, type PaletteId, type SiteMode } from "@/lib/site-palettes";
+import { hexToHslString, hslStringToHex } from "@/lib/colors";
 
 export function ThemeEditor() {
   const router = useRouter();
@@ -19,19 +20,50 @@ export function ThemeEditor() {
   });
   const [mode, setMode] = useState<SiteMode>("dark");
   const [palette, setPalette] = useState<PaletteId>("ocean");
+  const [customHex, setCustomHex] = useState({ primary: "#087e91", secondary: "#1b8493", background: "#0b111f", foreground: "#edf2f7" });
 
   useEffect(() => {
     if (profile) {
       setMode(getSiteMode(profile.theme));
       setPalette(getPaletteId(profile.theme));
+      const source = profile.theme || {};
+      setCustomHex({
+        primary: hslStringToHex(source["--primary"] || "187 90% 28%"),
+        secondary: hslStringToHex(source["--secondary"] || "192 78% 31%"),
+        background: hslStringToHex(source["--background"] || "222 38% 7%"),
+        foreground: hslStringToHex(source["--foreground"] || "210 30% 95%"),
+      });
     }
   }, [profile]);
 
-  const preview = createSiteTheme(palette, mode);
+  const preset = createSiteTheme(palette, mode);
+  const safeHex = (value: string, fallback: string) => /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+  const preview = {
+    ...preset,
+    "--primary": hexToHslString(safeHex(customHex.primary, "#087e91")),
+    "--secondary": hexToHslString(safeHex(customHex.secondary, "#1b8493")),
+    "--accent": hexToHslString(safeHex(customHex.secondary, "#1b8493")),
+    "--ring": hexToHslString(safeHex(customHex.primary, "#087e91")),
+    "--primary-glow": hexToHslString(safeHex(customHex.primary, "#087e91")),
+    "--secondary-glow": hexToHslString(safeHex(customHex.secondary, "#1b8493")),
+    "--background": hexToHslString(safeHex(customHex.background, "#0b111f")),
+    "--foreground": hexToHslString(safeHex(customHex.foreground, "#edf2f7")),
+  };
   const previewStyle = Object.fromEntries(
     Object.entries(preview).filter(([key]) => key.startsWith("--"))
   ) as React.CSSProperties;
-  const isSaved = profile?.theme?.["site-mode"] === mode && profile?.theme?.["site-palette"] === palette;
+  const updateCustomFromPreset = (next: SiteMode, nextPalette: PaletteId) => {
+    const nextTheme = createSiteTheme(nextPalette, next);
+    setCustomHex({
+      primary: hslStringToHex(nextTheme["--primary"]),
+      secondary: hslStringToHex(nextTheme["--secondary"]),
+      background: hslStringToHex(nextTheme["--background"]),
+      foreground: hslStringToHex(nextTheme["--foreground"]),
+    });
+  };
+  const isSaved = profile?.theme?.["site-mode"] === mode && profile?.theme?.["site-palette"] === palette &&
+    profile?.theme?.["--primary"] === preview["--primary"] &&
+    profile?.theme?.["--background"] === preview["--background"];
 
   const mutation = useMutation({
     mutationFn: () => updateCurrentUserProfile({ theme: preview }),
@@ -65,7 +97,7 @@ export function ThemeEditor() {
                 { value: "light" as const, label: "Light", Icon: Sun },
                 { value: "dark" as const, label: "Dark", Icon: Moon },
               ]).map(({ value, label, Icon }) => (
-                <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}
+                <button key={value} type="button" aria-pressed={mode === value} onClick={() => { setMode(value); updateCustomFromPreset(value, palette); }}
                   className={`flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${mode === value ? "border-primary bg-primary/10 text-foreground" : "border-border hover:bg-muted"}`}>
                   <Icon size={17} /> {label}
                 </button>
@@ -75,15 +107,33 @@ export function ThemeEditor() {
 
           <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
             <h3 className="font-semibold">Color palette</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Four fixed accent sets with readable text and surfaces.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Eight fixed accent sets with readable text and surfaces. You can fine-tune the key colors below.</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2" role="group" aria-label="Site color palette">
               {paletteOptions.map((option) => (
-                <button key={option.id} type="button" aria-pressed={palette === option.id} onClick={() => setPalette(option.id)}
+                <button key={option.id} type="button" aria-pressed={palette === option.id} onClick={() => { setPalette(option.id); updateCustomFromPreset(mode, option.id); }}
                   className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${palette === option.id ? "border-primary bg-primary/10" : "border-border hover:bg-muted"}`}>
                   <span className="h-9 w-9 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: option.swatch }} />
                   <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{option.name}</span><span className="block text-xs text-muted-foreground">{option.description}</span></span>
                   {palette === option.id && <Check size={16} className="text-primary" aria-hidden="true" />}
                 </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
+            <h3 className="font-semibold">Custom colors</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Enter a hex value or use the color swatch. Contrast is previewed on the right.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {([
+                ["primary", "Primary accent"],
+                ["secondary", "Secondary accent"],
+                ["background", "Page background"],
+                ["foreground", "Main text"],
+              ] as const).map(([key, label]) => (
+                <label key={key} className="flex items-center gap-2 rounded-lg border border-border p-2">
+                  <input type="color" value={customHex[key]} onChange={(event) => setCustomHex((current) => ({ ...current, [key]: event.target.value }))} className="h-8 w-8 cursor-pointer rounded border-0 bg-transparent p-0" aria-label={label} />
+                  <span className="min-w-0 flex-1"><span className="block text-xs font-medium">{label}</span><input value={customHex[key]} onChange={(event) => setCustomHex((current) => ({ ...current, [key]: event.target.value }))} pattern="^#[0-9A-Fa-f]{6}$" className="mt-0.5 w-full bg-transparent font-mono text-xs text-muted-foreground outline-none" aria-label={label + " hex code"} /></span>
+                </label>
               ))}
             </div>
           </section>

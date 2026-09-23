@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         title: body.title,
         description: body.description,
         longDescription: body.long_description || "",
-        image: extractStoragePath(body.image) || "/placeholder.svg",
+        image: extractStoragePath(body.image) || null,
         tech: body.tech || [],
         demoUrl: body.demo_url || null,
         githubUrl: body.github_url || null,
