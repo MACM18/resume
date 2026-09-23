@@ -307,14 +307,14 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
                 disabled={
                   generateFeaturesMutation.isPending || !longDescription
                 }
-                className='mt-2'
+                className='mt-1 h-8 px-2.5 text-xs'
               >
                 {generateFeaturesMutation.isPending ? (
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 ) : (
                   <Sparkles className='mr-2' size={16} />
                 )}
-                Generate from Description
+                Draft with AI
               </Button>
               <FormMessage />
             </FormItem>

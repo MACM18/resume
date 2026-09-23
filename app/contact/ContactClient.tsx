@@ -97,6 +97,19 @@ export default function ContactClient({ initialProfile, hostname }: { initialPro
       <div className='mx-auto max-w-7xl'><Reveal><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>Contact / Start a conversation</p></Reveal><div className='grid gap-10 lg:grid-cols-[1fr_0.65fr] lg:items-end lg:gap-20'><Reveal delay={0.06}><h1 className='max-w-4xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl'>Let&apos;s make something useful.</h1></Reveal><Reveal delay={0.12}><p className='max-w-xl text-lg leading-8 text-foreground/65'>{homeData?.callToAction?.description || "Have a project, idea, or opportunity in mind? Share a little context and I’ll get back to you soon."}</p></Reveal></div></div>
     </section>
 
+    <section className='px-6 pt-10 md:pt-14' aria-labelledby='studio-heading'>
+      <Reveal>
+        <div className='mx-auto max-w-7xl overflow-hidden rounded-2xl border border-primary/25 bg-card/80 p-6 sm:p-8 lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10'>
+          <div>
+            <p className='text-xs font-semibold uppercase tracking-[0.22em] text-primary'>Also building at MACM Studio</p>
+            <h2 id='studio-heading' className='mt-3 text-2xl font-semibold tracking-tight sm:text-3xl'>Need a website or custom web app?</h2>
+            <p className='mt-3 max-w-2xl text-sm leading-7 text-foreground/65'>At <span className='font-semibold text-foreground'>macm.lk</span>, I bring design and development together for businesses that need a useful, maintainable digital presence. Explore the studio, services, and recent work.</p>
+          </div>
+          <a href='https://macm.lk' target='_blank' rel='noopener noreferrer' className='mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:mt-0'>Explore macm.lk <ArrowUpRight size={16} aria-hidden='true' /></a>
+        </div>
+      </Reveal>
+    </section>
+
     <div className='mx-auto grid max-w-7xl gap-16 px-6 pt-14 md:pt-20 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24'>
       <div className='space-y-12'>
         <Reveal><section><p className='mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary'>A good place to begin</p><h2 className='text-3xl font-semibold tracking-tight'>Tell me what you&apos;re working toward.</h2><p className='mt-5 max-w-md leading-7 text-foreground/60'>A useful first message can be brief. Goals, current context, timing, and what success looks like are more helpful than a perfect brief.</p><div className='mt-7 space-y-3 text-sm text-foreground/55'><p>01 / What are you hoping to build or improve?</p><p>02 / What stage is the idea or product at?</p><p>03 / Is there a timeline or key constraint?</p></div></section></Reveal>

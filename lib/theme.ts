@@ -5,6 +5,7 @@ export const generateCssVariables = (
   backgroundImageUrl: string | null
 ) => {
   let css = `:root { ${Object.entries(theme)
+    .filter(([key, value]) => /^--[a-z-]+$/.test(key) && /^[\d.\s%a-z(),/-]+$/i.test(value))
     .map(([key, value]) => `${key}: ${value};`)
     .join(" ")} }`;
 

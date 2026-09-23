@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { generateCssVariables } from "@/lib/theme";
+import { getSiteMode } from "@/lib/site-palettes";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [hostname, setHostname] = useState("");
@@ -37,6 +38,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Only enable the client fetch if hostname is present AND server-side CSS variables are not already set
     enabled: !!hostname && !hasServerVars,
   });
+
+  useEffect(() => {
+    if (!profileData || hasServerVars) return;
+    const mode = getSiteMode(profileData.theme);
+    document.documentElement.classList.toggle("dark", mode === "dark");
+    document.documentElement.dataset.siteMode = mode;
+  }, [profileData, hasServerVars]);
 
   return (
     <>

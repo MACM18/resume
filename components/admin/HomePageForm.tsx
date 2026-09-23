@@ -226,7 +226,7 @@ export function HomePageForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className='space-y-8'
+        className='space-y-6'
       >
         {/* Social Links */}
         <div>
@@ -235,20 +235,11 @@ export function HomePageForm() {
             Add your professional social media profiles and contact information
             to help visitors connect with you.
           </p>
-          <div className='mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg'>
-            <p className='text-xs text-foreground/70'>
-              <strong>💡 Icon Tip:</strong> Click the circular icon button to
-              select from thousands of brand and social icons. Try searching
-              for: &quot;github&quot;, &quot;linkedin&quot;,
-              &quot;twitter&quot;, &quot;email&quot;, or your preferred
-              platform.
-            </p>
-          </div>
           <div className='space-y-4'>
             {socialFields.map((field, index) => (
               <div
                 key={field.id}
-                className='p-4 border rounded-lg bg-glass-bg/10 flex gap-4 items-center'
+                className='p-3 border rounded-lg bg-card flex flex-wrap gap-3 items-start'
               >
                 <input
                   type='hidden'
@@ -287,7 +278,7 @@ export function HomePageForm() {
                   control={form.control}
                   name={`socialLinks.${index}.href`}
                   render={({ field }) => (
-                    <FormItem className='flex-1'>
+                    <FormItem className='min-w-[220px] flex-1'>
                       <FormControl>
                         <div className='flex gap-2 items-start flex-col'>
                           <Input
@@ -771,14 +762,14 @@ export function HomePageForm() {
                     !aboutPageStory ||
                     aboutPageStory.length === 0
                   }
-                  className='mt-2'
+                  className='mt-1 h-8 px-2.5 text-xs'
                 >
                   {generateAboutCardDescriptionMutation.isPending ? (
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   ) : (
                     <Sparkles className='mr-2' size={16} />
                   )}
-                  Generate from About Page Story
+                  Draft with AI
                 </Button>
                 <FormMessage />
               </FormItem>

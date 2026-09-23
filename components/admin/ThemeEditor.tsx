@@ -1,149 +1,121 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Loader2, Moon, Sun } from "lucide-react";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, RotateCcw } from "lucide-react";
-import { defaultTheme } from "@/data/theme";
-import { hslStringToHex, hexToHslString } from "@/lib/colors";
-
-const editableColors = [
-  "--background",
-  "--foreground",
-  "--primary",
-  "--secondary",
-  "--accent",
-  "--glass-bg",
-  "--glass-border",
-];
+import { createSiteTheme, getPaletteId, getSiteMode, paletteOptions, type PaletteId, type SiteMode } from "@/lib/site-palettes";
 
 export function ThemeEditor() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: profile, isLoading } = useQuery({
     queryKey: ["currentUserProfile"],
     queryFn: getCurrentUserProfile,
   });
-
-  // Keep a local theme state and default to `defaultTheme` so the UI
-  // always has values even if the stored profile theme is missing or null.
-  const [theme, setTheme] = useState<typeof defaultTheme>(defaultTheme);
+  const [mode, setMode] = useState<SiteMode>("dark");
+  const [palette, setPalette] = useState<PaletteId>("ocean");
 
   useEffect(() => {
-    // If profile has a theme object, merge it over the defaults so missing
-    // keys are still available in the editor.
     if (profile) {
-      const merged = {
-        ...defaultTheme,
-        ...(profile.theme || {}),
-      } as typeof defaultTheme;
-      setTheme(merged);
+      setMode(getSiteMode(profile.theme));
+      setPalette(getPaletteId(profile.theme));
     }
   }, [profile]);
 
-  useEffect(() => {
-    // Live preview
-    if (theme) {
-      Object.entries(theme).forEach(([key, value]) => {
-        document.documentElement.style.setProperty(key, value);
-      });
-    }
-  }, [theme]);
+  const preview = createSiteTheme(palette, mode);
+  const previewStyle = Object.fromEntries(
+    Object.entries(preview).filter(([key]) => key.startsWith("--"))
+  ) as React.CSSProperties;
+  const isSaved = profile?.theme?.["site-mode"] === mode && profile?.theme?.["site-palette"] === palette;
 
   const mutation = useMutation({
-    mutationFn: (newTheme: typeof defaultTheme) =>
-      updateCurrentUserProfile({ theme: newTheme }),
-    onSuccess: () => {
-      toast.success("Theme updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
-      queryClient.invalidateQueries({ queryKey: ["theme"] });
+    mutationFn: () => updateCurrentUserProfile({ theme: preview }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+      await queryClient.invalidateQueries({ queryKey: ["theme"] });
+      router.refresh();
+      toast.success("Site appearance updated");
     },
     onError: (error: unknown) => {
-      if (error instanceof Error) {
-        toast.error(`Failed to update theme: ${error.message}`);
-      } else {
-        toast.error("Failed to update theme.");
-      }
+      toast.error(error instanceof Error ? error.message : "Could not save site appearance");
     },
   });
 
-  const handleColorChange = (key: string, value: string) => {
-    setTheme((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleReset = () => {
-    setTheme(defaultTheme);
-    toast.info("Theme reset to default. Click save to apply.");
-  };
-
-  if (isLoading) {
-    return <Skeleton className='h-96 w-full' />;
-  }
+  if (isLoading) return <Skeleton className="h-96 w-full" />;
 
   return (
-    <div className='space-y-6'>
-      <div className='flex justify-between items-center'>
-        <div>
-          <h2 className='text-2xl font-bold text-primary'>Theme Editor</h2>
-          <p className='text-foreground/70'>
-            Customize the core colors of your portfolio. Changes are previewed
-            live.
-          </p>
-        </div>
-        <Button variant='outline' onClick={handleReset}>
-          <RotateCcw className='mr-2' size={16} /> Reset to Default
-        </Button>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight">Site appearance</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Choose a display mode and a tested color palette for every public page.</p>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {Object.entries({ ...defaultTheme, ...(theme || {}) })
-          .filter(([key]) => editableColors.includes(key))
-          .map(([key, value]) => (
-            <div key={key} className='space-y-2'>
-              <label className='text-sm font-medium capitalize'>
-                {key.replace("--", "").replace(/-/g, " ")}
-              </label>
-              <div className='flex items-center gap-2'>
-                <div className='relative w-10 h-10'>
-                  <label
-                    htmlFor={`color-picker-${key}`}
-                    className='block w-full h-full rounded-full cursor-pointer'
-                    style={{
-                      backgroundColor: hslStringToHex(value),
-                      border: "1px solid hsl(var(--border))",
-                    }}
-                  />
-                  <input
-                    id={`color-picker-${key}`}
-                    type='color'
-                    value={hslStringToHex(value)}
-                    onChange={(e) =>
-                      handleColorChange(key, hexToHslString(e.target.value))
-                    }
-                    className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
-                  />
-                </div>
-                <input
-                  type='text'
-                  value={value}
-                  onChange={(e) => handleColorChange(key, e.target.value)}
-                  className='flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm'
-                />
-              </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.8fr)]">
+        <div className="space-y-6">
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
+            <h3 className="font-semibold">Display mode</h3>
+            <p className="mt-1 text-sm text-muted-foreground">This appearance is shown to visitors on every page.</p>
+            <div className="mt-4 grid grid-cols-2 gap-2" role="group" aria-label="Site display mode">
+              {([
+                { value: "light" as const, label: "Light", Icon: Sun },
+                { value: "dark" as const, label: "Dark", Icon: Moon },
+              ]).map(({ value, label, Icon }) => (
+                <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}
+                  className={`flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${mode === value ? "border-primary bg-primary/10 text-foreground" : "border-border hover:bg-muted"}`}>
+                  <Icon size={17} /> {label}
+                </button>
+              ))}
             </div>
-          ))}
+          </section>
+
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
+            <h3 className="font-semibold">Color palette</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Four fixed accent sets with readable text and surfaces.</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2" role="group" aria-label="Site color palette">
+              {paletteOptions.map((option) => (
+                <button key={option.id} type="button" aria-pressed={palette === option.id} onClick={() => setPalette(option.id)}
+                  className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${palette === option.id ? "border-primary bg-primary/10" : "border-border hover:bg-muted"}`}>
+                  <span className="h-9 w-9 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: option.swatch }} />
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{option.name}</span><span className="block text-xs text-muted-foreground">{option.description}</span></span>
+                  {palette === option.id && <Check size={16} className="text-primary" aria-hidden="true" />}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <section className="space-y-3 xl:sticky xl:top-28 xl:self-start">
+          <h3 className="text-sm font-semibold">Preview</h3>
+          <div style={previewStyle} className="overflow-hidden rounded-xl border border-border">
+            <div className="space-y-5 p-6" style={{ background: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
+              <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: "hsl(var(--primary))" }}>MACM / Portfolio</div>
+              <div>
+                <p className="text-2xl font-semibold tracking-tight">Ideas made useful.</p>
+                <p className="mt-2 text-sm leading-6" style={{ color: "hsl(var(--muted-foreground))" }}>Clear content, readable text, and a focused call to action across the site.</p>
+              </div>
+              <div className="rounded-lg border p-4" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+                <p className="text-sm font-semibold">Featured project</p>
+                <p className="mt-1 text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>A small sample of card and body copy.</p>
+              </div>
+              <span className="inline-flex rounded-full px-4 py-2 text-sm font-semibold" style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}>View projects</span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Preview changes stay here until you save.</p>
+        </section>
       </div>
-      <Button
-        onClick={() => mutation.mutate(theme)}
-        disabled={mutation.isPending}
-      >
-        {mutation.isPending ? (
-          <Loader2 className='animate-spin' />
-        ) : (
-          "Save Theme"
-        )}
-      </Button>
+
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
+        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || isSaved}>
+          {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isSaved ? "Appearance saved" : "Save appearance"}
+        </Button>
+        {!profile?.theme?.["site-palette"] && <p className="text-xs text-muted-foreground">Saving will replace the current custom colors with this palette.</p>}
+      </div>
     </div>
   );
 }
