@@ -1,18 +1,13 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Home,
   User,
   FolderOpen,
   FileText,
-  Menu,
-  X,
-  Palette,
   Info,
-  FolderKanban,
-  Briefcase,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -26,8 +21,6 @@ const navItems = [
 
 export function Navigation() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -38,53 +31,7 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isAdmin = pathname?.startsWith("/admin");
-  const adminSection = searchParams?.get("section") ?? "profile";
-
-  const adminMobileItems = [
-    {
-      href: "/admin?section=profile",
-      key: "profile",
-      label: "Profile",
-      icon: User,
-    },
-    {
-      href: "/admin?section=theme",
-      key: "theme",
-      label: "Theme",
-      icon: Palette,
-    },
-    {
-      href: "/admin?section=home",
-      key: "home",
-      label: "Home Page",
-      icon: Home,
-    },
-    {
-      href: "/admin?section=about",
-      key: "about",
-      label: "About Page",
-      icon: Info,
-    },
-    {
-      href: "/admin?section=projects",
-      key: "projects",
-      label: "Projects",
-      icon: FolderKanban,
-    },
-    {
-      href: "/admin?section=work",
-      key: "work",
-      label: "Work Experience",
-      icon: Briefcase,
-    },
-    {
-      href: "/admin?section=resumes",
-      key: "resumes",
-      label: "Resumes",
-      icon: FileText,
-    },
-  ] as const;
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <>
@@ -198,73 +145,6 @@ export function Navigation() {
         </motion.nav>
       </div>
 
-      {/* Admin Mobile Menu Button */}
-      {isAdmin && (
-        <>
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className='fixed top-6 right-6 z-50 md:hidden p-3 rounded-full border border-white/10 bg-background/40 backdrop-blur-2xl text-foreground/70 hover:text-primary transition-all duration-200 shadow-xl'
-          >
-            <motion.div
-              animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </motion.div>
-          </motion.button>
-
-          <AnimatePresence>
-            {isMobileMenuOpen && (
-              <>
-                <motion.div
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className='fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] z-40 md:hidden bg-background/95 backdrop-blur-2xl border-l border-white/10 shadow-2xl overflow-y-auto pt-20'
-                >
-                  <div className='p-6 space-y-2'>
-                    <h2 className='text-sm font-bold uppercase tracking-widest text-foreground/40 mb-6 px-4'>
-                      Admin Controls
-                    </h2>
-                    {adminMobileItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = adminSection === item.key;
-
-                      return (
-                        <Link
-                          key={item.key}
-                          href={item.href}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 ${
-                            isActive
-                              ? "text-primary bg-primary/10 border border-primary/20"
-                              : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
-                          }`}
-                        >
-                          <Icon size={18} />
-                          <span className='text-sm font-semibold'>{item.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className='fixed inset-0 z-30 md:hidden bg-black/40 backdrop-blur-sm'
-                />
-              </>
-            )}
-          </AnimatePresence>
-        </>
-      )}
     </>
   );
 }

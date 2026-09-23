@@ -638,6 +638,16 @@ export default function HomeClient({
           <AchievementsRow data={homePageData} />
           <HomeCTA data={homePageData} />
         </div>
+        <footer className='border-t border-foreground/10 px-6 py-5'>
+          <div className='mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 text-xs text-foreground/55'>
+            <span>© {new Date().getFullYear()} {homePageData.name}</span>
+            <a href='https://macm.lk' target='_blank' rel='noopener noreferrer' className='inline-flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>
+              <Image src='https://cdn.macm.dev/macm-icon.webp' alt='' width={22} height={22} className='rounded' />
+              <span>Built by MACM · macm.lk</span>
+              <ArrowUpRight size={13} aria-hidden='true' />
+            </a>
+          </div>
+        </footer>
       </main>
     </ErrorBoundary>
   );
