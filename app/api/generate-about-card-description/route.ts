@@ -1,3 +1,4 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from 'next/server';
 import { groq } from '@/lib/groq';
 
@@ -5,6 +6,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await getOwnerSession())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { about_story } = await request.json();
 
     if (!about_story || !Array.isArray(about_story)) {

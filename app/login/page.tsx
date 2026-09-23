@@ -7,7 +7,6 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -178,17 +177,6 @@ const LoginPage = () => {
               <div className='flex gap-2'><Button type='submit' className='flex-1' disabled={forgotLoading}>{forgotLoading && <Loader2 className='animate-spin' />}{forgotStep === "request" ? "Send code" : "Reset password"}</Button>{forgotStep === "verify" && <Button type='button' variant='outline' onClick={() => setForgotStep("request")} disabled={forgotLoading}>Back</Button>}</div>
             </form>
           )}
-          <div className='mt-6 text-center'>
-            <p className='text-muted-foreground'>
-              Don&apos;t have an account?{" "}
-              <Link
-                href='/signup'
-                className='text-primary hover:text-primary-glow transition-colors font-medium'
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
         </GlassCard>
       </motion.div>
     </div>

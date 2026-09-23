@@ -2,7 +2,6 @@
 
 // Storage operations are performed on the server via API endpoints.
 import { AboutPageData, HomePageData, Profile, Theme } from "@/types/portfolio";
-import { normalizeDomain } from "./utils";
 
 interface ProfileData {
   full_name: string;
@@ -96,21 +95,17 @@ export async function ensureUserProfile(): Promise<Profile | null> {
 export async function getProfileData(
   domain: string,
 ): Promise<ProfileData | null> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
     const response = await fetch(
-      `/api/profile/by-domain?domain=${encodeURIComponent(normalizedDomain)}`,
+      "/api/profile/by-domain",
     );
     if (!response.ok) {
       return null;
     }
     return response.json();
   } catch (error) {
-    console.error(
-      "Error fetching profile data for domain:",
-      normalizedDomain,
-      error,
-    );
+    console.error("Error fetching public profile:", error);
     return null;
   }
 }
@@ -326,9 +321,10 @@ export async function deleteGalleryImage(imageId: string): Promise<boolean> {
 export async function getGalleryImagesForDomain(
   domain: string,
 ): Promise<GalleryImage[]> {
+  void domain;
   try {
     const res = await fetch(
-      `/api/gallery/images?domain=${encodeURIComponent(domain)}`,
+      "/api/gallery/images",
     );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -364,10 +360,8 @@ export async function updateGalleryImage(
  * Retrieve list of album names for a given domain (or current user if no domain).
  */
 export async function getGalleryAlbums(domain?: string): Promise<string[]> {
-  const url = domain
-    ? `/api/gallery/albums?domain=${encodeURIComponent(domain)}`
-    : "/api/gallery/albums";
-  const res = await fetch(url);
+  void domain;
+  const res = await fetch("/api/gallery/albums");
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "Failed to fetch gallery albums");

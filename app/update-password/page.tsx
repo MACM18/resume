@@ -82,7 +82,7 @@ const UpdatePasswordPage = () => {
         window.location.href = `${protocol}${profile.domain}/admin`;
       } else {
         // If they don't have a domain, they are a new user. Send to claim page.
-        router.push("/claim-domain");
+        router.push("/admin");
       }
     },
     onError: (error: Error) => {

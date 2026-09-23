@@ -89,7 +89,11 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          throw new Error("User not found");
+          throw new Error("Invalid credentials");
+        }
+        const site = await db.siteSettings.findUnique({ where: { id: 1 }, select: { ownerUserId: true } });
+        if (site?.ownerUserId !== user.id) {
+          throw new Error("Invalid credentials");
         }
 
         const isPasswordValid = await compare(

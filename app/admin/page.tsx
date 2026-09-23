@@ -39,7 +39,7 @@ const ADMIN_GROUPS = [
   {
     label: "Identity",
     items: [
-      { value: "profile", label: "Profile & Domain", icon: User },
+      { value: "profile", label: "Profile", icon: User },
       { value: "theme", label: "Theme & Branding", icon: Palette },
       { value: "account", label: "Account & Security", icon: ShieldCheck },
     ],

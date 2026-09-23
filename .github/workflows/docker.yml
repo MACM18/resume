@@ -57,6 +57,3 @@ jobs:
 
       - name: Deploy to Dokploy (Application 1)
         run: python3 .github/scripts/trigger_webhook.py "${{ secrets.DOKPLOY_WEBHOOK_URL_ONE }}"
-
-      - name: Deploy to Dokploy (Application 2)
-        run: python3 .github/scripts/trigger_webhook.py "${{ secrets.DOKPLOY_WEBHOOK_URL_TWO }}"

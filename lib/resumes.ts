@@ -2,7 +2,6 @@
 
 import { getPublicUrl } from "./storage";
 import { Resume, UploadedResume } from "@/types/portfolio";
-import { normalizeDomain } from "./utils";
 
 // ========== UPLOADED RESUMES FUNCTIONS ==========
 
@@ -118,10 +117,10 @@ export function getResumePublicUrl(filePath: string): string | null {
  * Get the active resume for a domain
  */
 export async function getActiveResume(domain: string): Promise<Resume | null> {
-  const normalizedDomain = normalizeDomain(domain);
+  void domain;
   try {
     const response = await fetch(
-      `/api/resumes/active?domain=${encodeURIComponent(normalizedDomain)}`
+      "/api/resumes/active"
     );
     if (!response.ok) {
       return null;

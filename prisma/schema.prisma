@@ -27,8 +27,18 @@ model User {
   galleryImages   GalleryImage[]
   passwordResetTokens PasswordResetToken[]
   authOtps        AuthOtp[]
+  ownedSite       SiteSettings?
 
   @@map("users")
+}
+
+// The legacy domains table remains during rolling deployment for older containers.
+model SiteSettings {
+  id          Int    @id @default(1)
+  ownerUserId String @unique @map("owner_user_id")
+  owner       User   @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+
+  @@map("site_settings")
 }
 
 model PasswordResetToken {

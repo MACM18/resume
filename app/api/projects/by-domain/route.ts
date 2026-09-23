@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { normalizeDomain } from "@/lib/utils";
+import { getSiteOwnerId } from "@/lib/site-owner";
 
 export const dynamic = "force-dynamic";
 
@@ -39,23 +39,15 @@ function transformProject(project: {
 
 /**
  * GET /api/projects/by-domain?domain=example.com&featured=true
- * Get published projects for a domain
+ * Get the site owner's published projects
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get("domain");
-    const featured = searchParams.get("featured") === "true";
+    const featured = new URL(request.url).searchParams.get("featured") === "true";
+    const ownerId = await getSiteOwnerId();
 
-    if (!domain) {
-      return NextResponse.json({ error: "Domain is required" }, { status: 400 });
-    }
-
-    const normalizedDomain = normalizeDomain(domain);
-
-    // First get the user ID for this domain
     const profile = await db.profile.findFirst({
-      where: { domains: { some: { domain: normalizedDomain } } },
+      where: { userId: ownerId ?? "" },
       select: { userId: true },
     });
 

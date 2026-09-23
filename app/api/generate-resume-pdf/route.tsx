@@ -1,3 +1,4 @@
+import { getSiteOwnerId } from "@/lib/site-owner";
 import { NextResponse } from "next/server";
 import {
   Document,
@@ -574,7 +575,7 @@ export async function POST(request: Request) {
     let processedAvatar: string | null = null;
     const persistedProfile = profile.id
       ? await db.profile.findUnique({
-        where: { id: profile.id },
+        where: { id: profile.id, userId: await getSiteOwnerId() ?? "" },
         select: {
           avatarUrl: true,
           avatarPosition: true,

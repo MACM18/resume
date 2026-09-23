@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { normalizeDomain } from "@/lib/utils";
+import { getSiteOwnerId } from "@/lib/site-owner";
 
 export const dynamic = "force-dynamic";
 
@@ -43,22 +43,15 @@ function transformResume(resume: {
 
 /**
  * GET /api/resumes/active?domain=example.com
- * Get the active resume for a domain
+ * Get the site owner's active resume
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get("domain");
+    void request;
+    const ownerId = await getSiteOwnerId();
 
-    if (!domain) {
-      return NextResponse.json({ error: "Domain is required" }, { status: 400 });
-    }
-
-    const normalizedDomain = normalizeDomain(domain);
-
-    // Get profile with active resume role
     const profile = await db.profile.findFirst({
-      where: { domains: { some: { domain: normalizedDomain } } },
+      where: { userId: ownerId ?? "" },
       select: { userId: true, activeResumeRole: true },
     });
 

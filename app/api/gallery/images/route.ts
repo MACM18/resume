@@ -1,17 +1,15 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { deleteFile, getPublicUrl, listFiles, uploadFile } from "@/lib/storage";
 import { getImageDimensions, optimizeImage } from "@/lib/image-optimization";
 import {
     createGalleryImage,
     deleteGalleryImageRecord,
     getGalleryImageById,
-    getUserIdForDomain,
     listGalleryImagesForUser,
     updateGalleryImage,
 } from "@/lib/gallery.server";
-import { normalizeDomain } from "@/lib/utils";
+import { getSiteOwnerId } from "@/lib/site-owner";
 
 export const dynamic = "force-dynamic";
 // ensure Prisma (which is Node-only) runs in the Node.js runtime rather than
@@ -25,44 +23,9 @@ export const runtime = "nodejs";
  */
 export async function GET(request: NextRequest) {
     try {
-        const url = new URL(request.url);
-        const queryDomain = url.searchParams.get("domain");
-        const queryUserId = url.searchParams.get("userId");
-        let userId: string | null = null;
-
-        if (queryUserId) {
-            userId = queryUserId;
-        } else if (queryDomain) {
-            const normalized = normalizeDomain(queryDomain);
-            userId = await getUserIdForDomain(normalized);
-        }
-
-        // if caller didn't supply either, fall back to host header so public pages can
-        // simply hit `/api/gallery/images` and get the right records for the current
-        // domain.
-        if (!userId) {
-            const host = request.headers.get("host") ?? "";
-            const normalized = normalizeDomain(host);
-            console.log(
-                "gallery GET fallback using host",
-                host,
-                "normalized",
-                normalized,
-            );
-            if (normalized) {
-                userId = await getUserIdForDomain(normalized);
-            }
-        }
-
-        if (!userId) {
-            console.log("gallery GET no userId after fallback");
-            return NextResponse.json(
-                { error: "userId or domain is required" },
-                { status: 400 },
-            );
-        }
-
-        console.log("gallery GET resolved userId", userId);
+        void request;
+        const userId = await getSiteOwnerId();
+        if (!userId) return NextResponse.json([]);
         const images = await listGalleryImagesForUser(userId);
         console.log("gallery GET retrieved", images.length, "records");
         return NextResponse.json(images);
@@ -85,7 +48,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getOwnerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, {
                 status: 401,
@@ -175,7 +138,7 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getOwnerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, {
                 status: 401,
@@ -220,7 +183,7 @@ export async function DELETE(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getOwnerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, {
                 status: 401,

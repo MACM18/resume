@@ -1,8 +1,6 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { normalizeDomain } from "@/lib/utils";
 import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +11,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -69,7 +67,7 @@ export async function GET() {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -86,28 +84,7 @@ export async function PATCH(request: NextRequest) {
     if (body.avatar_zoom !== undefined) updateData.avatarZoom = body.avatar_zoom;
     if (body.avatar_size !== undefined) updateData.avatarSize = body.avatar_size;
     if (body.domain !== undefined) {
-      const normalizedDomain = typeof body.domain === "string" ? normalizeDomain(body.domain) : "";
-      if (!normalizedDomain) {
-        return NextResponse.json({ error: "A valid domain is required" }, { status: 400 });
-      }
-      const currentProfile = await db.profile.findUnique({
-        where: { userId: session.user.id },
-        select: { id: true },
-      });
-      const existingDomain = await db.domain.findUnique({
-        where: { domain: normalizedDomain },
-        select: { profileId: true },
-      });
-      if (existingDomain && existingDomain.profileId !== currentProfile?.id) {
-        return NextResponse.json({ error: "That domain is already claimed by another user" }, { status: 409 });
-      }
-      updateData.domains = {
-        upsert: [{
-          where: { domain: normalizedDomain },
-          update: { isPrimary: true },
-          create: { domain: normalizedDomain, isPrimary: true }
-        }]
-      };
+      return NextResponse.json({ error: "Domain management is disabled" }, { status: 410 });
     }
     if (body.home_page_data !== undefined) updateData.homePageData = body.home_page_data;
     if (body.about_page_data !== undefined) updateData.aboutPageData = body.about_page_data;

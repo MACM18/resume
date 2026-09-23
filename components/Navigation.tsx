@@ -45,7 +45,7 @@ export function Navigation() {
     {
       href: "/admin?section=profile",
       key: "profile",
-      label: "Profile & Domain",
+      label: "Profile",
       icon: User,
     },
     {

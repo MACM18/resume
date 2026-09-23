@@ -6,8 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting database seed...\n");
 
-  // Hash passwords
-  const defaultPassword = await bcrypt.hash("changeme123", 12);
+  // A fresh installation must supply its own owner password.
+  const seedPassword = process.env.SEED_OWNER_PASSWORD;
+  if (!seedPassword || seedPassword.length < 12) {
+    throw new Error("Set SEED_OWNER_PASSWORD to at least 12 characters before seeding");
+  }
+  const defaultPassword = await bcrypt.hash(seedPassword, 12);
 
   // ============================================================================
   // 1. CREATE USERS
@@ -27,19 +31,6 @@ async function main() {
   });
   console.log(`  ✓ Created user: ${chathura.email}`);
 
-  const taniya = await prisma.user.upsert({
-    where: { email: "taniya@taniya.dev" },
-    update: {},
-    create: {
-      id: "cluser_taniya_002",
-      email: "taniya@taniya.dev",
-      passwordHash: defaultPassword,
-      emailVerified: new Date("2025-12-09T13:10:13.323Z"),
-      createdAt: new Date("2025-12-09T13:10:13.323Z"),
-    },
-  });
-  console.log(`  ✓ Created user: ${taniya.email}`);
-
   // ============================================================================
   // 2. CREATE PROFILES
   // ============================================================================
@@ -51,9 +42,6 @@ async function main() {
     create: {
       id: "clprofile_chathura_001",
       userId: chathura.id,
-      domains: {
-        create: { domain: "macm.dev", isPrimary: true },
-      },
       fullName: "Chathura Madhushanka",
       tagline: "Full Stack Developer - DevOps and AI",
       theme: {
@@ -200,55 +188,7 @@ async function main() {
       createdAt: new Date("2025-12-09T09:10:10.585Z"),
     },
   });
-  console.log("  ✓ Created profile: macm.dev");
-
-  await prisma.profile.upsert({
-    where: { userId: taniya.id },
-    update: {},
-    create: {
-      id: "clprofile_taniya_002",
-      userId: taniya.id,
-      domains: {
-        create: { domain: "taniya.dev", isPrimary: true },
-      },
-      fullName: "Taniya Aththanayaka",
-      tagline: "Welcome to my portfolio",
-      theme: {
-        accent: "280 80% 50%",
-        primary: "221 83% 53%",
-        "accent-glow": "280 80% 60%",
-        "primary-glow": "221 83% 63%",
-        "primary-muted": "221 83% 23%",
-        "primary-foreground": "0 0% 100%",
-      },
-      homePageData: {
-        name: "Taniya",
-        tagline: "Welcome to my portfolio",
-        socialLinks: [],
-        achievements: [],
-        callToAction: {
-          email: "machathuramadushanka@outlook.com",
-          title: "Let's Connect",
-          description: "I'm always open to discussing new opportunities.",
-        },
-        technicalExpertise: [],
-        experienceHighlights: [],
-      },
-      aboutPageData: {
-        story: ["Tell your story here..."],
-        title: "About Me",
-        skills: [],
-        subtitle: "My Journey",
-        callToAction: {
-          email: "machathuramadushanka@outlook.com",
-          title: "Get in Touch",
-          description: "Let's work together!",
-        },
-      },
-      createdAt: new Date("2025-12-09T13:10:13.323Z"),
-    },
-  });
-  console.log("  ✓ Created profile: taniya.dev");
+  console.log("  ✓ Created owner profile");
 
   // ============================================================================
   // 3. CREATE UPLOADED RESUMES
@@ -374,9 +314,14 @@ async function main() {
   });
   console.log("  ✓ Created work experience: Wordpress Developer");
 
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1, ownerUserId: chathura.id },
+  });
+
   console.log("\n✅ Database seeded successfully!");
   console.log("\n📝 Notes:");
-  console.log("   - All users have password: changeme123");
   console.log("   - Please change passwords after first login");
   console.log("   - Storage files need to be re-uploaded to S3");
 }

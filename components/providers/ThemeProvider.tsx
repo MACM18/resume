@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getEffectiveDomain } from "@/lib/utils";
 
 import { generateCssVariables } from "@/lib/theme";
 
@@ -24,14 +23,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     queryKey: ["theme", hostname],
     queryFn: async () => {
       if (!hostname) return { theme: {}, background_image_url: null };
-      const normalizedDomain = getEffectiveDomain(hostname);
-      if (!normalizedDomain) {
-        return { theme: {}, background_image_url: null };
-      }
-
-      const response = await fetch(
-        `/api/profile/theme?domain=${encodeURIComponent(normalizedDomain)}`
-      );
+      const response = await fetch("/api/profile/theme");
       if (!response.ok) {
         return { theme: {}, background_image_url: null };
       }

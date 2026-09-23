@@ -1,10 +1,8 @@
+import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { deleteFile, getPublicUrl, listFiles, uploadFile } from "@/lib/storage";
 import { getImageDimensions, optimizeImage } from "@/lib/image-optimization";
-import { normalizeDomain } from "@/lib/utils";
-import { db } from "@/lib/db";
+
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +12,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -22,43 +20,7 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const bucket = url.searchParams.get("bucket") || "profile-images";
 
-    // Determine which user id to list.  By default we use the authenticated
-    // user's ID, but callers may provide `userId` or `domain` query params to
-    // fetch someone else's gallery (public-only).  Only the gallery bucket is
-    // allowed to be viewed without authentication.
-    let userId: string | null = null;
-    const queryUserId = url.searchParams.get("userId");
-    const queryDomain = url.searchParams.get("domain");
-
-    if (queryUserId) {
-      userId = queryUserId;
-    } else if (queryDomain) {
-      // look up profile by domain
-      const normalized = normalizeDomain(queryDomain);
-      const profile = await db.profile.findFirst({
-        where: { domains: { some: { domain: normalized } } },
-      });
-      if (profile) {
-        userId = profile.userId;
-      }
-    }
-
-    if (!userId) {
-      // fallback to session-based id; if none and bucket isn't gallery we
-      // reject unauthorized
-      if (session?.user?.id) {
-        userId = session.user.id;
-      } else if (bucket === "gallery-images") {
-        // allow anonymous gallery listing without auth only if userId was
-        // resolved via domain above; otherwise it's an error
-        return NextResponse.json({ error: "Missing userId or domain" }, {
-          status: 400,
-        });
-      } else {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-
+    const userId = session.user.id;
     const files = await listFiles(bucket, userId);
 
     // map keys to public URLs
@@ -84,7 +46,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -183,7 +145,7 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getOwnerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

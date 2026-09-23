@@ -1,25 +1,18 @@
 import { db } from "./db";
-import { getEffectiveDomain } from "./utils";
+import { getSiteOwnerId } from "./site-owner";
 import { Project } from "@/types/portfolio";
 import { safeAssetUrl } from "./remote-assets";
 import { cache } from "react";
 
 export const getProjectsServer = cache(async function getProjectsServer(domain: string): Promise<Project[]> {
-  const effectiveDomain = getEffectiveDomain(domain);
-  if (!effectiveDomain) return [];
+  void domain;
+  const ownerId = await getSiteOwnerId();
+  if (!ownerId) return [];
 
   try {
     const projects = await db.project.findMany({
       where: {
-        user: {
-          profile: {
-            domains: {
-              some: {
-                domain: effectiveDomain,
-              },
-            },
-          },
-        },
+        userId: ownerId,
         published: true,
       },
       orderBy: {
@@ -51,22 +44,15 @@ export const getProjectByIdServer = cache(async function getProjectByIdServer(
   id: string,
   domain: string,
 ): Promise<Project | null> {
-  const effectiveDomain = getEffectiveDomain(domain);
-  if (!effectiveDomain) return null;
+  void domain;
+  const ownerId = await getSiteOwnerId();
+  if (!ownerId) return null;
 
   try {
     const project = await db.project.findFirst({
       where: {
         id,
-        user: {
-          profile: {
-            domains: {
-              some: {
-                domain: effectiveDomain,
-              },
-            },
-          },
-        },
+        userId: ownerId,
         published: true,
       },
     });

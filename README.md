@@ -6,7 +6,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
 
-A high-performance, AI-powered personal portfolio and resume management system built with the latest web technologies. Designed for developers who want a professional, dynamic, and highly customizable web presence.
+A high-performance, AI-powered personal portfolio and resume management system built with the latest web technologies. A single-owner portfolio with a private content dashboard. Public visitors see the same profile on every configured host.
 
 🌐 **Live:** [https://macm.dev](https://macm.dev)
 
@@ -18,7 +18,7 @@ A high-performance, AI-powered personal portfolio and resume management system b
 
 - **Glassmorphism Design:** A modern, sleek aesthetic with subtle transparency and blur effects.
 - **Dynamic Parallax:** Multi-layered parallax scrolling for a deep, immersive hero section.
-- **Theme Engine:** Domain-driven theming that allows for unique colors, backgrounds, and favicons per deployment.
+- **Theme Engine:** Portfolio-wide colors, backgrounds, and favicon managed in the dashboard.
 - **Responsive & Fluid:** Built with Tailwind CSS and Framer Motion for buttery-smooth transitions on any device.
 
 ### 🤖 AI-Powered Intelligence
@@ -98,6 +98,7 @@ A high-performance, AI-powered personal portfolio and resume management system b
 
    ```bash
    pnpm db:migrate
+   SEED_OWNER_PASSWORD="choose-a-long-random-password" pnpm db:seed  # empty local database only
    ```
 
 5. **Run Development Server:**

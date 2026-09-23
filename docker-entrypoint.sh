@@ -4,7 +4,7 @@ set -e
 # Run migrations if DATABASE_URL is provided and not explicitly skipped
 if [ "$SKIP_DB_MIGRATIONS" != "true" ] && [ -n "$DATABASE_URL" ]; then
   echo "==> Deploying Prisma schema migrations..."
-  ./node_modules/.bin/prisma migrate deploy --schema=prisma/schema.prisma || npx prisma migrate deploy --schema=prisma/schema.prisma || true
+  ./node_modules/.bin/prisma migrate deploy --schema=prisma/schema.prisma
 
   echo "==> Running storage URL migration..."
   if [ -f "dist-scripts/scripts/migrate-storage-urls.js" ]; then

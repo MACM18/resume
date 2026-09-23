@@ -98,13 +98,3 @@ export async function listGalleryAlbums(userId: string): Promise<string[]> {
         .map((r) => r.albumName)
         .filter((n): n is string => !!n);
 }
-
-/**
- * Helper that looks up user id from domain (or returns undefined if not found).
- */
-export async function getUserIdForDomain(
-    domain: string,
-): Promise<string | null> {
-    const profile = await db.profile.findFirst({ where: { domains: { some: { domain } } } });
-    return profile ? profile.userId : null;
-}
