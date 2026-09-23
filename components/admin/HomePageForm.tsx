@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
-import { Loader2, Sparkles } from "lucide-react";
+import { BarChart3, Code2, LayoutGrid, Link2, Loader2, Megaphone, Save, Sparkles, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPicker } from "./IconPicker";
 import { Separator } from "@/components/ui/separator";
@@ -84,6 +85,7 @@ const homePageSchema = z.object({
 type HomePageFormValues = z.infer<typeof homePageSchema>;
 
 export function HomePageForm() {
+  const [activePanel, setActivePanel] = useState("social");
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery({
@@ -226,10 +228,34 @@ export function HomePageForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className='space-y-6'
+        className='home-editor space-y-5'
       >
+        <div className='rounded-xl border border-border bg-muted/20 p-3 sm:p-4'>
+          <div className='flex items-center justify-between gap-4'>
+            <div>
+              <p className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>Home page editor</p>
+              <p className='mt-1 text-sm text-muted-foreground'>Edit one content group at a time. Your changes are saved together.</p>
+            </div>
+            <span className='hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:inline-flex'>Draft workspace</span>
+          </div>
+          <div className='mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8' role='tablist' aria-label='Home page content groups'>
+            {[
+              ["social", "Links", Link2],
+              ["highlights", "Highlights", BarChart3],
+              ["expertise", "Expertise", Code2],
+              ["achievements", "Proof", Trophy],
+              ["availability", "Status", LayoutGrid],
+              ["cards", "Cards", LayoutGrid],
+              ["cta", "CTA", Megaphone],
+            ].map(([key, label, Icon]) => (
+              <button key={String(key)} type='button' role='tab' aria-selected={activePanel === key} onClick={() => setActivePanel(String(key))} className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePanel === key ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-background/50 text-muted-foreground hover:bg-muted"}`}>
+                <Icon size={16} aria-hidden='true' /><span>{String(label)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         {/* Social Links */}
-        <div>
+        <section data-panel='social' className={activePanel === 'social' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>Social Links & Contact</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Add your professional social media profiles and contact information
@@ -351,12 +377,12 @@ export function HomePageForm() {
           >
             Add Social Link
           </Button>
-        </div>
+        </section>
 
         <Separator />
 
         {/* Experience Highlights */}
-        <div>
+        <section data-panel='highlights' className={activePanel === 'highlights' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>Experience Highlights</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Showcase your most impressive professional achievements with
@@ -469,12 +495,12 @@ export function HomePageForm() {
           >
             Add Highlight
           </Button>
-        </div>
+        </section>
 
         <Separator />
 
         {/* Technical Expertise */}
-        <div>
+        <section data-panel='expertise' className={activePanel === 'expertise' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>Technical Expertise</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Organize your technical skills into categories to showcase your
@@ -547,12 +573,12 @@ export function HomePageForm() {
           >
             Add Expertise Area
           </Button>
-        </div>
+        </section>
 
         <Separator />
 
         {/* Achievements */}
-        <div>
+        <section data-panel='achievements' className={activePanel === 'achievements' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>
             Achievements & Recognition
           </h3>
@@ -662,12 +688,12 @@ export function HomePageForm() {
           >
             Add Achievement
           </Button>
-        </div>
+        </section>
 
         <Separator />
 
         {/* Availability Status */}
-        <div>
+        <section data-panel='availability' className={activePanel === 'availability' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>
             Availability Status Badge
           </h3>
@@ -719,12 +745,12 @@ export function HomePageForm() {
               )}
             />
           </div>
-        </div>
+        </section>
 
         <Separator />
 
         {/* About Me Card Description */}
-        <div>
+        <section data-panel='cards' className={activePanel === 'cards' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>About Me Card Summary</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Create a compelling summary that appears on your homepage About Me
@@ -775,12 +801,12 @@ export function HomePageForm() {
               </FormItem>
             )}
           />
-        </div>
+        </section>
 
         <Separator />
 
         {/* Projects Card Description */}
-        <div>
+        <section data-panel='cards' className={activePanel === 'cards' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>Projects Card Summary</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Customize the description that appears on your homepage Projects
@@ -808,12 +834,12 @@ export function HomePageForm() {
               </FormItem>
             )}
           />
-        </div>
+        </section>
 
         <Separator />
 
         {/* Experience Card Description */}
-        <div>
+        <section data-panel='cards' className={activePanel === 'cards' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-4'>Experience Card Summary</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Customize the description that appears on your homepage Experience
@@ -840,12 +866,12 @@ export function HomePageForm() {
               </FormItem>
             )}
           />
-        </div>
+        </section>
 
         <Separator />
 
         {/* Call to Action */}
-        <div>
+        <section data-panel='cta' className={activePanel === 'cta' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
           <h3 className='text-lg font-medium mb-2'>Call to Action</h3>
           <p className='text-sm text-muted-foreground mb-4'>
             Create an engaging section that encourages visitors to get in touch
@@ -912,15 +938,16 @@ export function HomePageForm() {
               )}
             />
           </div>
+        </section>
+
+        <div className='sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur'>
+          <p className='hidden text-xs text-muted-foreground sm:block'>Changes across all sections are saved together.</p>
+          <Button type='submit' disabled={mutation.isPending} className='ml-auto gap-2'>
+            {mutation.isPending ? <Loader2 className='animate-spin' /> : <Save size={16} />}
+            Save home page
+          </Button>
         </div>
 
-        <Button type='submit' disabled={mutation.isPending}>
-          {mutation.isPending ? (
-            <Loader2 className='animate-spin' />
-          ) : (
-            "Save Home Page"
-          )}
-        </Button>
       </form>
     </Form>
   );

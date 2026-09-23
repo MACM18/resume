@@ -96,11 +96,11 @@ export function WorkExperienceManagement() {
             <Plus className='mr-2 h-4 w-4' /> Add Your First Role
           </Button>} />
       ) : (
-        <div className='space-y-4'>
+        <div className='grid gap-3 lg:grid-cols-2'>
           {(data as WorkExperience[]).map((exp) => (
             <div
               key={exp.id}
-              className='border border-foreground/10 rounded-xl p-4 md:p-6 bg-foreground/5 hover:bg-foreground/10 transition-colors'
+              className='group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/20'
             >
               <div className='flex flex-col gap-4'>
                 <div className='flex-1'>
