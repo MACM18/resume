@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, type FieldPath } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,10 +18,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
-import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
+import { getCurrentUserProfile, updateCurrentUserProfileContent } from "@/lib/profile";
+import type { AboutPageData, Profile } from "@/types/portfolio";
 import { BookOpen, Loader2, Phone, Plus, Save, Sparkles, Trash, UserRound, Wrench } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,8 +64,20 @@ const aboutPageSchema = z.object({
 
 type AboutPageFormValues = z.infer<typeof aboutPageSchema>;
 
+type AboutTab = "header" | "story" | "skills" | "contact" | "cta";
+const aboutTabFields: Record<AboutTab, FieldPath<AboutPageFormValues>[]> = {
+  header: ["title", "subtitle"],
+  story: ["story"],
+  skills: ["skills"],
+  contact: ["contactNumbers"],
+  cta: ["callToAction"],
+};
+const aboutTabLabels: Record<AboutTab, string> = {
+  header: "Header", story: "Story", skills: "Skills", contact: "Contact", cta: "CTA",
+};
+
 export function AboutPageForm() {
-  const [activePanel, setActivePanel] = useState("header");
+  const [activePanel, setActivePanel] = useState<AboutTab>("header");
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery({
@@ -91,6 +103,7 @@ export function AboutPageForm() {
           "I'm always open to discussing new opportunities and interesting projects. Let's connect and see how we can create something amazing together.",
       },
     },
+    resetOptions: { keepDirtyValues: true },
   });
 
   const {
@@ -106,37 +119,56 @@ export function AboutPageForm() {
   } = useFieldArray({ control: form.control, name: "contactNumbers" });
 
   const mutation = useMutation({
-    mutationFn: (data: AboutPageFormValues) => {
-      const processedData = {
-        ...data,
-        story: data.story.split("\n\n"),
-        skills: data.skills.map((s) => ({
-          ...s,
-          items: s.items.split(",").map((i) => i.trim()),
-        })),
-        callToAction: {
-          ...data.callToAction,
-          email: profile?.home_page_data?.callToAction?.email || "",
-        },
-      };
-      return updateCurrentUserProfile({
-        about_page_data: processedData,
-        contact_numbers: data.contactNumbers,
-      });
-    },
-    onSuccess: () => {
-      toast.success("About page data updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
-      queryClient.invalidateQueries({ queryKey: ["profileData"] });
+    mutationFn: (payload: { tab: AboutTab; patch?: Partial<AboutPageData>; contact_numbers?: Profile["contact_numbers"] }) =>
+      updateCurrentUserProfileContent({
+        about_page_data_patch: payload.patch,
+        contact_numbers: payload.contact_numbers,
+      }),
+    onSuccess: (_result, variables) => {
+      toast.success(aboutTabLabels[variables.tab] + " saved");
+      void queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+      void queryClient.invalidateQueries({ queryKey: ["profileData"] });
     },
     onError: (error: unknown) => {
-      if (error instanceof Error) {
-        toast.error(`Failed to update data: ${error.message}`);
-      } else {
-        toast.error("Failed to update data.");
-      }
+      toast.error(error instanceof Error ? error.message : "Failed to save this tab");
     },
   });
+
+  const saveActiveTab = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!(await form.trigger(aboutTabFields[activePanel], { shouldFocus: true }))) {
+      toast.error("Check the highlighted fields in this tab");
+      return;
+    }
+    const data = form.getValues();
+    let patch: Partial<AboutPageData> | undefined;
+    let contact_numbers: Profile["contact_numbers"] | undefined;
+    switch (activePanel) {
+      case "header":
+        patch = { title: data.title, subtitle: data.subtitle };
+        break;
+      case "story":
+        patch = { story: data.story.split("\n\n") };
+        break;
+      case "skills":
+        patch = { skills: data.skills.map((item) => ({
+          category: item.category,
+          icon: item.icon,
+          items: item.items.split(",").map((skill) => skill.trim()).filter(Boolean),
+        })) };
+        break;
+      case "contact":
+        contact_numbers = data.contactNumbers;
+        break;
+      case "cta":
+        patch = { callToAction: {
+          ...data.callToAction,
+          email: profile?.home_page_data?.callToAction?.email || "",
+        } };
+        break;
+    }
+    mutation.mutate({ tab: activePanel, patch, contact_numbers });
+  };
 
   if (isLoading) {
     return <Skeleton className='h-96 w-full' />;
@@ -144,27 +176,18 @@ export function AboutPageForm() {
 
   return (
     <div className='space-y-8'>
-      <div>
-        <h2 className='text-xl font-semibold mb-2'>About Page Content</h2>
-        <p className='text-sm text-muted-foreground mb-6'>
-          Create compelling content for your About page that tells your story,
-          showcases your skills, and connects with visitors.
-        </p>
-      </div>
-
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+          onSubmit={saveActiveTab}
           className='about-editor space-y-5'
         >
           <div className='rounded-xl border border-border bg-muted/20 p-3 sm:p-4'>
             <div className='flex items-center justify-between gap-4'>
-              <div><p className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>About page editor</p><p className='mt-1 text-sm text-muted-foreground'>Move through the story, skills, contact, and CTA as separate workspaces.</p></div>
-              <span className='hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:inline-flex'>Draft workspace</span>
-            </div>
-            <div className='mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5' role='tablist' aria-label='About page content groups'>
+              <div><p className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>About page editor</p><p className='mt-1 text-sm text-muted-foreground'>Edit one group at a time and save the active tab.</p></div>
+              </div>
+            <div className='mt-4 flex gap-1 overflow-x-auto rounded-lg border border-border bg-background/60 p-1' role='group' aria-label='About page content groups'>
               {[["header", "Header", UserRound], ["story", "Story", BookOpen], ["skills", "Skills", Wrench], ["contact", "Contact", Phone], ["cta", "CTA", Sparkles]].map(([key, label, Icon]) => (
-                <button key={String(key)} type='button' role='tab' aria-selected={activePanel === key} onClick={() => setActivePanel(String(key))} className={'flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ' + (activePanel === key ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-background/50 text-muted-foreground hover:bg-muted")}><Icon size={16} aria-hidden='true' /><span>{String(label)}</span></button>
+                <button key={String(key)} type='button' aria-pressed={activePanel === key} onClick={() => setActivePanel(String(key) as AboutTab)} className={'inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ' + (activePanel === key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground")}><Icon size={14} aria-hidden='true' /><span>{String(label)}</span></button>
               ))}
             </div>
           </div>
@@ -217,7 +240,6 @@ export function AboutPageForm() {
             />
           </section>
 
-          <Separator />
 
           {/* Story Section */}
           <section className={activePanel === 'story' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -255,26 +277,11 @@ Today, I combine my technical expertise with a deep understanding of business ne
             />
           </section>
 
-          <Separator />
 
           {/* Skills */}
           <section className={activePanel === 'skills' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
             <h3 className='text-lg font-medium mb-4'>Skills & Expertise</h3>
-            <div className='mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg'>
-              <p className='text-xs text-foreground/70'>
-                <strong>💡 Icon Tip:</strong> Click the circular icon button to
-                browse thousands of icons. Icons are stored as{" "}
-                <code className='bg-foreground/10 px-1 rounded'>
-                  Prefix.IconName
-                </code>{" "}
-                (e.g.,{" "}
-                <code className='bg-foreground/10 px-1 rounded'>
-                  Si.SiReact
-                </code>
-                ). Search for keywords like &quot;code&quot;, &quot;react&quot;,
-                or &quot;github&quot; to find relevant icons.
-              </p>
-            </div>
+            <p className='mb-4 text-sm text-muted-foreground'>Group skills by area and choose an icon for each group.</p>
             <div className='space-y-4'>
               {skillFields.map((field, index) => (
                 <div
@@ -381,7 +388,6 @@ Today, I combine my technical expertise with a deep understanding of business ne
             </Button>
           </section>
 
-          <Separator />
 
           {/* Contact Numbers */}
           <section className={activePanel === 'contact' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -536,7 +542,6 @@ Today, I combine my technical expertise with a deep understanding of business ne
             )}
           </section>
 
-          <Separator />
 
           {/* Call to Action */}
           <section className={activePanel === 'cta' ? 'about-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -572,8 +577,8 @@ Today, I combine my technical expertise with a deep understanding of business ne
           </section>
 
           <div className='sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur'>
-            <p className='hidden text-xs text-muted-foreground sm:block'>Changes across all sections are saved together.</p>
-            <Button type='submit' disabled={mutation.isPending} className='ml-auto gap-2'>{mutation.isPending ? <Loader2 className='animate-spin' /> : <Save size={16} />} Save about page</Button>
+            <p className='hidden text-xs text-muted-foreground sm:block'>Saving updates this tab only.</p>
+            <Button type='submit' disabled={mutation.isPending} className='ml-auto gap-2'>{mutation.isPending ? <Loader2 className='animate-spin' /> : <Save size={16} />} Save {aboutTabLabels[activePanel]}</Button>
           </div>
 
         </form>

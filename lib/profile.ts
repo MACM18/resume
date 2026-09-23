@@ -152,6 +152,23 @@ export async function updateCurrentUserProfile(
   return response.json();
 }
 
+export async function updateCurrentUserProfileContent(patch: {
+  home_page_data_patch?: Partial<HomePageData>;
+  about_page_data_patch?: Partial<AboutPageData>;
+  contact_numbers?: Profile["contact_numbers"];
+}): Promise<Profile> {
+  const response = await fetch("/api/profile/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Failed to save this section");
+  }
+  return response.json();
+}
+
 /**
  * Upload a profile image
  */

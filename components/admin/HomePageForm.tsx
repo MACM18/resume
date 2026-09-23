@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, type FieldPath } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,11 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
-import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
+import { getCurrentUserProfile, updateCurrentUserProfileContent } from "@/lib/profile";
+import type { HomePageData } from "@/types/portfolio";
 import { BarChart3, Code2, LayoutGrid, Link2, Loader2, Megaphone, Save, Sparkles, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPicker } from "./IconPicker";
-import { Separator } from "@/components/ui/separator";
 import { DeleteButton } from "../DeleteButton";
 import { Switch } from "@/components/ui/switch";
 
@@ -38,7 +38,7 @@ const homePageSchema = z.object({
           // Allow URLs or email addresses
           const urlPattern = /^https?:\/\/.+/;
           const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          return urlPattern.test(value) || emailPattern.test(value);
+          return urlPattern.test(value) || emailPattern.test(value) || (value.startsWith("mailto:") && emailPattern.test(value.slice(7)));
         }, "Must be a valid URL or email address"),
       label: z.string().min(1, "Required"),
       display_label: z.string().optional(), // Custom text shown on home page
@@ -84,8 +84,23 @@ const homePageSchema = z.object({
 
 type HomePageFormValues = z.infer<typeof homePageSchema>;
 
+type HomeTab = "social" | "highlights" | "expertise" | "achievements" | "availability" | "cards" | "cta";
+const homeTabFields: Record<HomeTab, FieldPath<HomePageFormValues>[]> = {
+  social: ["socialLinks"],
+  highlights: ["experienceHighlights"],
+  expertise: ["technicalExpertise"],
+  achievements: ["achievements"],
+  availability: ["availability_status"],
+  cards: ["about_card_description", "projects_card_description", "experience_card_description"],
+  cta: ["callToAction"],
+};
+const homeTabLabels: Record<HomeTab, string> = {
+  social: "Links", highlights: "Highlights", expertise: "Expertise",
+  achievements: "Proof", availability: "Status", cards: "Cards", cta: "CTA",
+};
+
 export function HomePageForm() {
-  const [activePanel, setActivePanel] = useState("social");
+  const [activePanel, setActivePanel] = useState<HomeTab>("social");
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery({
@@ -123,6 +138,7 @@ export function HomePageForm() {
       experience_card_description:
         profile?.home_page_data?.experience_card_description || "",
     },
+    resetOptions: { keepDirtyValues: true },
   });
 
   const {
@@ -178,47 +194,61 @@ export function HomePageForm() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: HomePageFormValues) => {
-      // Add missing HomePageData fields (name, tagline) if needed
-      const processedData = {
-        ...data,
-        name: profile?.full_name ?? "", // Ensure full_name is passed
-        tagline: profile?.tagline ?? "", // Ensure tagline is passed
-
-        // Process social links to add mailto: for email links
-        socialLinks: data.socialLinks.map((link) => ({
-          ...link,
-          href:
-            link.platform.toLowerCase() === "mail" ||
-            link.platform.toLowerCase() === "email"
-              ? link.href.startsWith("mailto:")
-                ? link.href
-                : `mailto:${link.href}`
-              : link.href,
-        })),
-
-        technicalExpertise: data.technicalExpertise.map((e) => ({
-          ...e,
-          skills: e.skills.split(",").map((s) => s.trim()),
-        })),
-      };
-      return updateCurrentUserProfile({
-        home_page_data: processedData,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Home page data updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
-      queryClient.invalidateQueries({ queryKey: ["profileData"] });
+    mutationFn: ({ patch }: { tab: HomeTab; patch: Partial<HomePageData> }) =>
+      updateCurrentUserProfileContent({ home_page_data_patch: patch }),
+    onSuccess: (_result, variables) => {
+      toast.success(homeTabLabels[variables.tab] + " saved");
+      void queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+      void queryClient.invalidateQueries({ queryKey: ["profileData"] });
     },
     onError: (error: unknown) => {
-      if (error instanceof Error) {
-        toast.error(`Failed to update data: ${error.message}`);
-      } else {
-        toast.error("Failed to update data.");
-      }
+      toast.error(error instanceof Error ? error.message : "Failed to save this tab");
     },
   });
+
+  const saveActiveTab = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!(await form.trigger(homeTabFields[activePanel], { shouldFocus: true }))) {
+      toast.error("Check the highlighted fields in this tab");
+      return;
+    }
+    const data = form.getValues();
+    let patch: Partial<HomePageData>;
+    switch (activePanel) {
+      case "social":
+        patch = { socialLinks: data.socialLinks.map((link) => ({
+          ...link,
+          href: ["mail", "email"].includes(link.platform.toLowerCase()) && !link.href.startsWith("mailto:")
+            ? "mailto:" + link.href : link.href,
+        })) };
+        break;
+      case "highlights":
+        patch = { experienceHighlights: data.experienceHighlights };
+        break;
+      case "expertise":
+        patch = { technicalExpertise: data.technicalExpertise.map((item) => ({
+          name: item.name, skills: item.skills.split(",").map((skill) => skill.trim()).filter(Boolean),
+        })) };
+        break;
+      case "achievements":
+        patch = { achievements: data.achievements };
+        break;
+      case "availability":
+        patch = { availability_status: data.availability_status };
+        break;
+      case "cards":
+        patch = {
+          about_card_description: data.about_card_description,
+          projects_card_description: data.projects_card_description,
+          experience_card_description: data.experience_card_description,
+        };
+        break;
+      case "cta":
+        patch = { callToAction: data.callToAction };
+        break;
+    }
+    mutation.mutate({ tab: activePanel, patch });
+  };
 
   if (isLoading) {
     return <Skeleton className='h-96 w-full' />;
@@ -227,18 +257,17 @@ export function HomePageForm() {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+        onSubmit={saveActiveTab}
         className='home-editor space-y-5'
       >
         <div className='rounded-xl border border-border bg-muted/20 p-3 sm:p-4'>
           <div className='flex items-center justify-between gap-4'>
             <div>
               <p className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>Home page editor</p>
-              <p className='mt-1 text-sm text-muted-foreground'>Edit one content group at a time. Your changes are saved together.</p>
+              <p className='mt-1 text-sm text-muted-foreground'>Edit one group at a time and save the active tab.</p>
             </div>
-            <span className='hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:inline-flex'>Draft workspace</span>
           </div>
-          <div className='mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8' role='tablist' aria-label='Home page content groups'>
+          <div className='mt-4 flex gap-1 overflow-x-auto rounded-lg border border-border bg-background/60 p-1' role='group' aria-label='Home page content groups'>
             {[
               ["social", "Links", Link2],
               ["highlights", "Highlights", BarChart3],
@@ -248,8 +277,8 @@ export function HomePageForm() {
               ["cards", "Cards", LayoutGrid],
               ["cta", "CTA", Megaphone],
             ].map(([key, label, Icon]) => (
-              <button key={String(key)} type='button' role='tab' aria-selected={activePanel === key} onClick={() => setActivePanel(String(key))} className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePanel === key ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-background/50 text-muted-foreground hover:bg-muted"}`}>
-                <Icon size={16} aria-hidden='true' /><span>{String(label)}</span>
+              <button key={String(key)} type='button' aria-pressed={activePanel === key} onClick={() => setActivePanel(String(key) as HomeTab)} className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePanel === key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+                <Icon size={14} aria-hidden='true' /><span>{String(label)}</span>
               </button>
             ))}
           </div>
@@ -379,7 +408,6 @@ export function HomePageForm() {
           </Button>
         </section>
 
-        <Separator />
 
         {/* Experience Highlights */}
         <section data-panel='highlights' className={activePanel === 'highlights' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -497,7 +525,6 @@ export function HomePageForm() {
           </Button>
         </section>
 
-        <Separator />
 
         {/* Technical Expertise */}
         <section data-panel='expertise' className={activePanel === 'expertise' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -575,7 +602,6 @@ export function HomePageForm() {
           </Button>
         </section>
 
-        <Separator />
 
         {/* Achievements */}
         <section data-panel='achievements' className={activePanel === 'achievements' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -690,7 +716,6 @@ export function HomePageForm() {
           </Button>
         </section>
 
-        <Separator />
 
         {/* Availability Status */}
         <section data-panel='availability' className={activePanel === 'availability' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -747,7 +772,6 @@ export function HomePageForm() {
           </div>
         </section>
 
-        <Separator />
 
         {/* About Me Card Description */}
         <section data-panel='cards' className={activePanel === 'cards' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -803,7 +827,6 @@ export function HomePageForm() {
           />
         </section>
 
-        <Separator />
 
         {/* Projects Card Description */}
         <section data-panel='cards' className={activePanel === 'cards' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -836,7 +859,6 @@ export function HomePageForm() {
           />
         </section>
 
-        <Separator />
 
         {/* Experience Card Description */}
         <section data-panel='cards' className={activePanel === 'cards' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -868,7 +890,6 @@ export function HomePageForm() {
           />
         </section>
 
-        <Separator />
 
         {/* Call to Action */}
         <section data-panel='cta' className={activePanel === 'cta' ? 'home-panel rounded-xl border border-border bg-card p-4 sm:p-6' : 'hidden'}>
@@ -941,10 +962,10 @@ export function HomePageForm() {
         </section>
 
         <div className='sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur'>
-          <p className='hidden text-xs text-muted-foreground sm:block'>Changes across all sections are saved together.</p>
+          <p className='hidden text-xs text-muted-foreground sm:block'>Saving updates this tab only.</p>
           <Button type='submit' disabled={mutation.isPending} className='ml-auto gap-2'>
             {mutation.isPending ? <Loader2 className='animate-spin' /> : <Save size={16} />}
-            Save home page
+            Save {homeTabLabels[activePanel]}
           </Button>
         </div>
 

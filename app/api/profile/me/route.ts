@@ -88,6 +88,28 @@ export async function PATCH(request: NextRequest) {
     }
     if (body.home_page_data !== undefined) updateData.homePageData = body.home_page_data;
     if (body.about_page_data !== undefined) updateData.aboutPageData = body.about_page_data;
+    if (body.home_page_data_patch !== undefined || body.about_page_data_patch !== undefined) {
+      const current = await db.profile.findUnique({
+        where: { userId: session.user.id },
+        select: { homePageData: true, aboutPageData: true },
+      });
+      if (!current) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      const allowedHome = new Set(["socialLinks", "experienceHighlights", "technicalExpertise", "achievements", "availability_status", "about_card_description", "projects_card_description", "experience_card_description", "callToAction"]);
+      const allowedAbout = new Set(["title", "subtitle", "story", "skills", "callToAction"]);
+      const validPatch = (value: unknown, allowed: Set<string>) =>
+        typeof value === "object" && value !== null && !Array.isArray(value) &&
+        Object.keys(value).every((key) => allowed.has(key));
+      if (body.home_page_data_patch !== undefined) {
+        if (!validPatch(body.home_page_data_patch, allowedHome)) return NextResponse.json({ error: "Invalid home page section" }, { status: 400 });
+        const existing = current.homePageData && typeof current.homePageData === "object" && !Array.isArray(current.homePageData) ? current.homePageData : {};
+        updateData.homePageData = { ...existing, ...body.home_page_data_patch };
+      }
+      if (body.about_page_data_patch !== undefined) {
+        if (!validPatch(body.about_page_data_patch, allowedAbout)) return NextResponse.json({ error: "Invalid about page section" }, { status: 400 });
+        const existing = current.aboutPageData && typeof current.aboutPageData === "object" && !Array.isArray(current.aboutPageData) ? current.aboutPageData : {};
+        updateData.aboutPageData = { ...existing, ...body.about_page_data_patch };
+      }
+    }
     if (body.active_resume_role !== undefined) updateData.activeResumeRole = body.active_resume_role;
     if (body.theme !== undefined) updateData.theme = body.theme;
     if (body.selected_gradient_id !== undefined) updateData.selectedGradientId = body.selected_gradient_id;
