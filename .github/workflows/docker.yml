@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://macm.dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
