@@ -24,7 +24,11 @@ const homePageSchema = z.object({
     title: z.string().default("Let's Connect"),
     description: z.string().default("I'm always open to discussing new opportunities."),
     email: z.string().default(""),
-  }).passthrough().default({}),
+  }).passthrough().default({
+    title: "Let's Connect",
+    description: "I'm always open to discussing new opportunities.",
+    email: "",
+  }),
   availability_status: z.object({ show: z.boolean().default(false), message: z.string().default("") }).optional(),
   about_card_description: z.string().optional(),
   projects_card_description: z.string().optional(),
@@ -44,7 +48,11 @@ const aboutPageSchema = z.object({
     title: z.string().default("Get in Touch"),
     description: z.string().default("Let's work together!"),
     email: z.string().default(""),
-  }).passthrough().default({}),
+  }).passthrough().default({
+    title: "Get in Touch",
+    description: "Let's work together!",
+    email: "",
+  }),
 }).passthrough();
 
 function normalizedHomePageData(value: unknown, fallbackName: string): HomePageData {
