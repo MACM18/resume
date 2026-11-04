@@ -87,12 +87,19 @@ A high-performance, AI-powered personal portfolio and resume management system b
    ```env
    DATABASE_URL="your_postgresql_url"
    NEXTAUTH_SECRET="your_secret"
+   HEALTH_CHECK_TOKEN="your_random_health_check_token"
    GROQ_API_KEY="your_groq_key"
    RESEND_API_KEY="your_resend_key"
    STORAGE_PUBLIC_URL="your_storage_url"  # Your storage domain for images
    ```
 
    > **Note:** For Docker builds, `STORAGE_PUBLIC_URL` must be provided as a build arg for Next.js image optimization to work correctly.
+
+   Set `HEALTH_CHECK_TOKEN` in the production runtime environment. `/api/health` requires
+   `Authorization: Bearer <token>` and checks the database before returning
+   `{ "status": "ok", "service": "portfolio-nextjs", "db": "ok" }`.
+   Update any existing Dokploy or external health probe to send this header;
+   unauthenticated requests return 401, and a missing token or unavailable database returns 503.
 
 4. **Database Migration:**
 
