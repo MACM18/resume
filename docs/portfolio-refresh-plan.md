@@ -27,10 +27,21 @@ GitHub links below were read from local repository remotes. Public repository vi
 | MACM Books | Bookkeeping and Sri Lankan tax filing preparation application | [MACM18/tax-system-macm](https://github.com/MACM18/tax-system-macm) | Not confirmed | Confirm a public demo URL and suitable screenshots before publishing. |
 | Daily Task & Team Monitoring PWA | Personal and team task tracking with reports | [MACM18/to-do_at1](https://github.com/MACM18/to-do_at1) | [todo.macm.dev](https://todo.macm.dev) | Existing preset contains this demo URL. |
 | Karate IKS | Karate organization and training management project | [MACM18/karate-IKS](https://github.com/MACM18/karate-IKS) | Not confirmed | Confirm the public description and demo URL before publishing. |
-| Confidential company management system (checking-ta) | Operational records, team workflows, and availability lookup | No public link included | No public link included | Keep company identity, data, screenshots, repository, and detailed workflows private. |
+| Confidential company management system (checking-ta) | A company management system with operational features for organizing company work and information | No public link included | No public link included | This high-level description is approved. Keep the company identity, customer/company data, screenshots, repository, and specific workflows private. |
 | Home lab and VPS infrastructure | Docker and Dokploy hosting, self-hosted mail, DNS, and application operations | No public link included | No public link included | Do not publish server addresses or account details. |
 
 Do not seed the CSE Asset Management project. Favor MACM Studio and NNS Enterprise, with Daymark Store Desk as another project entry. Include home lab, VPS, Docker, Dokploy, and mail server experience in the skills and infrastructure content. Keep checking-ta high-level and confidential as described above.
+
+## Decisions captured from this conversation
+
+- The portfolio should feel current, creative, and easy for a hiring manager or potential client to scan, rather than like a traditional resume site.
+- Present it as a fast, single-page animated story using existing profile and project data. Use a rounded thread/rope that travels in a gentle zigzag between story chapters, with restrained scroll progress and motion; reduce the treatment on small screens and honor reduced-motion preferences.
+- Keep front-end complexity and load time low. Prefer the current stack and small, focused interactions over a large animation/component framework.
+- Use current production images and verified GitHub/live URLs where available. Do not invent links or use placeholder images; use a compact text block when a project has no image.
+- The project list above is the proposed portfolio inventory. Keep checking-ta out of public repository, demo, image, and company-identifying details; the approved public wording is only that it is a company management system with operational features.
+- Seed the existing production owner's data through owner-scoped, reviewable admin actions after deployment. Do not reset the database, delete current projects, or include CSE Asset Management. The exact sections and production prerequisites are documented below.
+
+Earlier admin-area requirements from this conversation remain part of the product context: a dedicated dashboard layout with fixed sidebar, back-to-home action, responsive mobile drawer/top bar, no public navbar in admin, separate Overview / Content / Portfolio / Media / Settings routes, compact conventional tabs with save scoped to the current tab, and simpler well-organized editing controls. The admin should support a fixed color palette with light/dark modes, additional theme options and custom hex colors, and an `OWNER="MACM"`-gated update/fill action with a warning confirmation. The public landing page should have a small MACM.lk-branded footer and use the supplied MACM logo/icon where appropriate. These are recorded as requirements from the earlier dashboard work, separate from the current public story-page implementation.
 
 ## Production data seeding
 
