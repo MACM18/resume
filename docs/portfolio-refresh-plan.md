@@ -10,10 +10,11 @@ Turn macm.dev into a clear, creative portfolio that helps a hiring manager quick
 - Story order: introduction and primary actions; proof and current focus; selected projects; experience and approach; capabilities; short personal context; contact.
 - Add a rounded rope or thread as the visual spine. Let it move in a gentle zigzag between chapters, with a marker at each section and a subtle progress fill as the visitor scrolls.
 - Keep the rope behind the content with wide bends and generous spacing. On mobile, simplify it to a line along one side of the page.
-- Keep animation restrained: short reveals and rope progress only. Respect reduced-motion preferences.
+- Use expressive but lightweight motion: staggered entrance, portrait/orbit movement, project hover transitions, and scroll-linked rope progress. Respect reduced-motion preferences.
 - Prioritize load time and low frontend complexity. Reuse the current stack, avoid adding an animation dependency, and keep client-side behavior to small interactive elements where possible.
 - Use current profile, project, work-experience, social-link, highlight, achievement, and skill data. Avoid a database schema change for the first pass.
 - Continue using production project images and links where available. When a project has no image, show a compact project information block instead of a placeholder image.
+- Put the working contact form in the final homepage chapter and retain it on `/contact`; include the MACM Studio link and footer branding.
 
 ## Proposed portfolio projects
 
@@ -34,20 +35,16 @@ Do not seed the CSE Asset Management project. Favor MACM Studio and NNS Enterpri
 
 ## Production data seeding
 
-The user approved seeding the selected content for the existing owner/current user. The owner authenticated preset endpoint performs the work in a transaction and scopes all project, profile, and resume changes to the signed-in site owner. It does not reset the database or delete existing projects.
+`scripts/seed-owner-portfolio.ts` runs from `docker-entrypoint.sh` after Prisma migrations and the storage URL migration. It reads the existing owner from `SiteSettings.id = 1`, then seeds inside a transaction. It never creates an account, resets data, or deletes project rows. Missing project records are published; a matched row keeps its title, image, links, featured state, and published state while only blank descriptions/media/links are filled. Technologies and features are merged without duplicates. Home/About skill groups and the active resume skills are merged while other profile copy remains intact. The Prisma development seed uses the same helper.
 
-After the updated app is deployed, apply the recommended preset separately from these admin pages:
+The data set includes the current portfolio, MACM Studio, NNS, Daymark Store Desk, MACM Books, Karate IKS, the task/team PWA, the generic confidential company-management entry, and home-lab/VPS infrastructure. CSE Asset Management is excluded. The confidential entry contains no company identity, data, screenshot, repository, demo, or detailed workflow.
 
-1. **Portfolio → Projects:** Apply recommended to add/update the selected project records and publish them. The confirmation names the included projects, excludes CSE Asset Management, and describes the generic confidential entry.
-2. **Content → Home:** Apply recommended to set the story intro and infrastructure capability groups.
-3. **Content → About:** Apply recommended to set the approved profile story and skills.
-4. **Portfolio → Resumes:** Apply recommended to add the infrastructure skills to the active resume record.
+The production database has not been changed from this workspace. `DATABASE_URL` is unavailable here, and the user requested a local-only commit with no GitHub push. The new startup seed will run the next time an image containing this commit starts with database migrations enabled. Verify its startup logs and the public project list after that deployment.
 
-Apply these sections individually rather than using the all-sections preset, which also changes unrelated theme, work, and gallery content.
+## Verification status
 
-The code and confirmation flows are ready, but no production database write has happened yet: this workspace has no production `DATABASE_URL` or authenticated production session. The production actions require the updated build to be deployed and the owner to be signed in. Existing production images for the portfolio and NNS entries are reused; projects without approved images render compact text blocks.
-
-## Pending decisions
-
-- Decide whether signed-in tools such as Daymark and MACM Books should have sanitized screenshots, public demos, or code links only.
-- Deploy the updated app, then apply the four owner presets above and verify the resulting public page.
+- The implementation is committed locally; no push was made.
+- TypeScript, CSS parsing, contact-route validation, and an in-memory repeat-run/preservation check for the seeder passed.
+- The appearance editor supports custom hex colors, checks body text against a 4.5:1 contrast target, and selects readable text for accent buttons. Automated checks cover all eight fixed palettes in light and dark modes.
+- The homepage compiled in the Next development server. The production build worker was repeatedly terminated with `SIGKILL` in this environment, so a complete production build remains unverified.
+- Deployment and production database verification remain pending; there is no production database write from this workspace.

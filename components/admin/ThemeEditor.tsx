@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
 import { createSiteTheme, getPaletteId, getSiteMode, paletteOptions, type PaletteId, type SiteMode } from "@/lib/site-palettes";
-import { hexToHslString, hslStringToHex } from "@/lib/colors";
+import { contrastRatioFromHex, hexToHslString, hslStringToHex, readableTextHsl } from "@/lib/colors";
 
 export function ThemeEditor() {
   const router = useRouter();
@@ -38,11 +38,19 @@ export function ThemeEditor() {
 
   const preset = createSiteTheme(palette, mode);
   const safeHex = (value: string, fallback: string) => /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+  const colorsValid = Object.values(customHex).every((value) => /^#[0-9a-fA-F]{6}$/.test(value));
+  const textContrast = contrastRatioFromHex(customHex.foreground, customHex.background);
+  const textContrastPasses = textContrast !== null && textContrast >= 4.5;
+  const primaryForeground = readableTextHsl(safeHex(customHex.primary, "#087e91"));
+  const secondaryForeground = readableTextHsl(safeHex(customHex.secondary, "#1b8493"));
   const preview = {
     ...preset,
     "--primary": hexToHslString(safeHex(customHex.primary, "#087e91")),
+    "--primary-foreground": primaryForeground,
     "--secondary": hexToHslString(safeHex(customHex.secondary, "#1b8493")),
+    "--secondary-foreground": secondaryForeground,
     "--accent": hexToHslString(safeHex(customHex.secondary, "#1b8493")),
+    "--accent-foreground": secondaryForeground,
     "--ring": hexToHslString(safeHex(customHex.primary, "#087e91")),
     "--primary-glow": hexToHslString(safeHex(customHex.primary, "#087e91")),
     "--secondary-glow": hexToHslString(safeHex(customHex.secondary, "#1b8493")),
@@ -63,7 +71,12 @@ export function ThemeEditor() {
   };
   const isSaved = profile?.theme?.["site-mode"] === mode && profile?.theme?.["site-palette"] === palette &&
     profile?.theme?.["--primary"] === preview["--primary"] &&
-    profile?.theme?.["--background"] === preview["--background"];
+    profile?.theme?.["--secondary"] === preview["--secondary"] &&
+    profile?.theme?.["--background"] === preview["--background"] &&
+    profile?.theme?.["--foreground"] === preview["--foreground"] &&
+    profile?.theme?.["--primary-foreground"] === preview["--primary-foreground"] &&
+    profile?.theme?.["--secondary-foreground"] === preview["--secondary-foreground"] &&
+    profile?.theme?.["--accent-foreground"] === preview["--accent-foreground"];
 
   const mutation = useMutation({
     mutationFn: () => updateCurrentUserProfile({ theme: preview }),
@@ -136,6 +149,13 @@ export function ThemeEditor() {
                 </label>
               ))}
             </div>
+            <p role="status" aria-live="polite" className={`mt-4 text-sm ${textContrastPasses && colorsValid ? "text-emerald-700 dark:text-emerald-300" : "text-destructive"}`}>
+              {!colorsValid
+                ? "Enter a valid six-digit hex value for every color."
+                : textContrastPasses
+                  ? `Body text contrast: ${textContrast!.toFixed(2)}:1 (passes the 4.5:1 target). Button text updates automatically for contrast.`
+                  : `Body text contrast: ${textContrast?.toFixed(2) ?? "—"}:1. Raise it to at least 4.5:1 before saving.`}
+            </p>
           </section>
         </div>
 
@@ -160,7 +180,7 @@ export function ThemeEditor() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
-        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || isSaved}>
+        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || isSaved || !colorsValid || !textContrastPasses}>
           {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isSaved ? "Appearance saved" : "Save appearance"}
         </Button>

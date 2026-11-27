@@ -46,3 +46,35 @@ export function hexToHslString(hex: string): string {
 
   return `${h} ${s}% ${l}%`;
 }
+
+function linearChannel(value: number): number {
+  const channel = value / 255;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function luminance(hex: string): number | null {
+  if (!/^#[\da-f]{6}$/i.test(hex)) return null;
+  const red = linearChannel(parseInt(hex.slice(1, 3), 16));
+  const green = linearChannel(parseInt(hex.slice(3, 5), 16));
+  const blue = linearChannel(parseInt(hex.slice(5, 7), 16));
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+/** WCAG contrast ratio for two six-digit hex colors; null means invalid input. */
+export function contrastRatioFromHex(first: string, second: string): number | null {
+  const firstLuminance = luminance(first);
+  const secondLuminance = luminance(second);
+  if (firstLuminance === null || secondLuminance === null) return null;
+  const lighter = Math.max(firstLuminance, secondLuminance);
+  const darker = Math.min(firstLuminance, secondLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/** Return a readable light or dark HSL foreground for a hex-colored surface. */
+export function readableTextHsl(surfaceHex: string): string {
+  const darkText = "0 0% 0%";
+  const lightText = "0 0% 100%";
+  const darkRatio = contrastRatioFromHex(surfaceHex, "#000000") ?? 0;
+  const lightRatio = contrastRatioFromHex(surfaceHex, "#ffffff") ?? 0;
+  return darkRatio >= lightRatio ? darkText : lightText;
+}
