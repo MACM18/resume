@@ -15,6 +15,7 @@
     "migrate:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
     "db:studio": "prisma studio --schema=prisma/schema.prisma",
     "db:seed": "pnpm exec tsx prisma/seed.ts",
+    "db:seed-owner-portfolio": "pnpm exec tsx scripts/seed-owner-portfolio.ts",
     "db:migrate-storage-urls": "pnpm exec tsx scripts/migrate-storage-urls.ts"
   },
   "dependencies": {

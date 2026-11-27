@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { seedOwnerPortfolio } from "../lib/portfolio-seeder";
 
 const prisma = new PrismaClient();
 
@@ -305,6 +306,9 @@ async function main() {
     update: {},
     create: { id: 1, ownerUserId: chathura.id },
   });
+
+  const portfolioSeed = await prisma.$transaction((tx) => seedOwnerPortfolio(tx, chathura.id), { timeout: 60_000 });
+  console.log(`  ✓ Seeded portfolio: ${portfolioSeed.createdProjects} projects created, ${portfolioSeed.matchedProjects} existing projects preserved and filled`);
 
   console.log("\n✅ Database seeded successfully!");
   console.log("\n📝 Notes:");

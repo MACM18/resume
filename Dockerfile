@@ -45,6 +45,7 @@ RUN pnpm run build
 
 # Pre-compile the migration script to plain JS so the runner can execute it directly with node
 RUN pnpm exec tsc scripts/migrate-storage-urls.ts --target es2022 --module commonjs --moduleResolution node --outDir dist-scripts --skipLibCheck
+RUN pnpm exec tsc scripts/seed-owner-portfolio.ts --target es2022 --module commonjs --moduleResolution node --outDir dist-scripts --skipLibCheck --rootDir .
 
 # 3. Production Runner
 FROM node:22-alpine AS runner

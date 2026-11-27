@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getResend, getResendFromEmail } from '@/lib/resend.server';
 import { fetchWithTimeout } from '@/lib/server-fetch';
+import { getSiteOwnerId } from '@/lib/site-owner';
+import { db } from '@/lib/db';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const contactSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(254),
+  subject: z.string().trim().min(1).max(160),
+  message: z.string().trim().min(1).max(6000),
+  recaptchaToken: z.string().max(5000).optional().default(''),
+});
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]!);
+}
 
 async function verifyRecaptcha(token: string) {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -26,7 +43,12 @@ async function verifyRecaptcha(token: string) {
   }
 }
 
-function generateEmailHtml(name: string, email: string, message: string, domain: string) {
+function generateEmailHtml(name: string, email: string, subject: string, message: string, domain: string) {
+  name = escapeHtml(name);
+  email = escapeHtml(email);
+  subject = escapeHtml(subject);
+  message = escapeHtml(message);
+  domain = escapeHtml(domain);
   const date = new Date().toLocaleString('en-US', { 
     timeZone: 'UTC',
     dateStyle: 'full',
@@ -50,6 +72,10 @@ function generateEmailHtml(name: string, email: string, message: string, domain:
             <div>
               <span style="display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 600;">Email Address</span>
               <a href="mailto:${email}" style="color: #2563eb; font-size: 16px; font-weight: 500; text-decoration: none;">${email}</a>
+            </div>
+            <div style="margin-top: 12px;">
+              <span style="display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 600;">Subject</span>
+              <span style="color: #1e293b; font-size: 16px; font-weight: 500;">${subject}</span>
             </div>
           </div>
         </div>
@@ -87,14 +113,9 @@ function generateEmailHtml(name: string, email: string, message: string, domain:
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message, recipientEmail, recaptchaToken } = await request.json();
-
-    if (!name || !email || !message || !recipientEmail) {
-      return NextResponse.json(
-        { error: 'name, email, message, and recipientEmail are required' },
-        { status: 400 }
-      );
-    }
+    const parsed = contactSchema.safeParse(await request.json());
+    if (!parsed.success) return NextResponse.json({ error: 'Please complete each field with valid information.' }, { status: 400 });
+    const { name, email, subject, message, recaptchaToken } = parsed.data;
 
     // Verify reCAPTCHA
     const isHuman = await verifyRecaptcha(recaptchaToken);
@@ -105,15 +126,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const domain = request.headers.get('host') || 'unknown';
-    const htmlContent = generateEmailHtml(name, email, message, domain);
+    const ownerId = await getSiteOwnerId();
+    if (!ownerId) return NextResponse.json({ error: 'Contact is temporarily unavailable.' }, { status: 503 });
+    const [owner, profile] = await Promise.all([
+      db.user.findUnique({ where: { id: ownerId }, select: { email: true } }),
+      db.profile.findUnique({ where: { userId: ownerId }, select: { homePageData: true } }),
+    ]);
+    const homeData = profile?.homePageData && typeof profile.homePageData === 'object' && !Array.isArray(profile.homePageData)
+      ? profile.homePageData as Record<string, unknown>
+      : {};
+    const callToAction = homeData.callToAction && typeof homeData.callToAction === 'object'
+      ? homeData.callToAction as Record<string, unknown>
+      : {};
+    const configuredEmail = typeof callToAction.email === 'string' && z.string().email().safeParse(callToAction.email).success
+      ? callToAction.email
+      : owner?.email;
+    if (!configuredEmail) return NextResponse.json({ error: 'Contact is temporarily unavailable.' }, { status: 503 });
+
+    const domain = (request.headers.get('host') || 'macm.dev').replace(/[\r\n]/g, '');
+    const htmlContent = generateEmailHtml(name, email, subject, message, domain);
 
     const resend = getResend();
     await resend.emails.send({
       from: getResendFromEmail(),
-      to: recipientEmail,
+      to: configuredEmail,
       replyTo: email,
-      subject: `New contact from ${name} [${domain}]`,
+      subject: `Portfolio inquiry: ${subject.replace(/[\r\n]/g, ' ')} [${domain}]`,
       html: htmlContent,
     });
 

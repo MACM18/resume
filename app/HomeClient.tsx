@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SaveContactButton } from "@/components/SaveContactButton";
 import { StoryThread } from "@/components/StoryThread";
+import { ContactForm } from "@/components/ContactForm";
 import { generateStructuredData, serializeJsonLd } from "@/lib/seo";
 import { getDynamicIcon } from "@/lib/icons";
 import type { HomePageData, Profile, Project, WorkExperience } from "@/types/portfolio";
@@ -86,7 +87,7 @@ function HomeHero({
     "I help ambitious teams turn complex ideas into clear, useful digital experiences.";
 
   return (
-    <section className='relative isolate overflow-hidden border-b border-foreground/10'>
+    <section className='story-hero relative isolate overflow-hidden border-b border-foreground/10'>
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0 -z-10 opacity-70'
@@ -309,7 +310,7 @@ function SelectedWork({ projects }: { projects: Project[] }) {
         />
       </Reveal>
 
-      <div className='grid gap-6 md:grid-cols-2'>
+      <div className='story-project-grid grid gap-6 md:grid-cols-2'>
         {projects.map((project, index) => {
           const isLead = index === 0;
 
@@ -507,28 +508,20 @@ function AchievementsRow({ data }: { data: HomeData }) {
 
 function HomeCTA({ data }: { data: HomeData }) {
   return (
-    <section id='contact' className='mx-auto max-w-7xl scroll-mt-28 px-6 pb-20'>
+    <section id='contact' className='story-contact mx-auto max-w-7xl scroll-mt-28 px-6 pb-24'>
       <Reveal>
-        <div className='relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/10 px-8 py-14 text-center md:px-16 md:py-20'>
-          <div aria-hidden='true' className='absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_55%)]' />
-          <div className='relative mx-auto max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.24em] text-primary'>
-              Let&apos;s make something useful
-            </p>
-            <h2 className='mt-5 text-4xl font-semibold tracking-tight md:text-6xl'>
-              {data.callToAction.title || "Have a project in mind?"}
-            </h2>
-            <p className='mx-auto mt-5 max-w-xl text-lg leading-8 text-foreground/65'>
-              {data.callToAction.description || "Tell me what you are working on and where you want to take it."}
-            </p>
-            <div className='mt-9 flex flex-wrap justify-center gap-3'>
-              <Button asChild size='lg' className='h-12 rounded-full px-7'>
-                {data.callToAction.email
-                  ? <a href={`mailto:${data.callToAction.email}`}>Email me <ArrowUpRight size={18} /></a>
-                  : <Link href='/contact'>Contact me <ArrowUpRight size={18} /></Link>}
-              </Button>
+        <div className='story-contact-card'>
+          <div className='story-contact-copy'>
+            <p className='story-kicker'><span>06</span> / Start a conversation</p>
+            <h2>{data.callToAction.title || "Have a project in mind?"}</h2>
+            <p className='story-contact-description'>{data.callToAction.description || "Tell me what you are working on and where you want to take it."}</p>
+            <div className='story-contact-aside'>
+              <span className='story-contact-orbit' aria-hidden='true'><span /><span /><span /></span>
+              <p>Good work starts with a clear problem.<br />Tell me what you want to make possible.</p>
             </div>
+            {data.callToAction.email && <a className='story-email-link' href={`mailto:${data.callToAction.email}`}>{data.callToAction.email}<ArrowUpRight size={15} /></a>}
           </div>
+          <div className='story-contact-form-wrap'><ContactForm compact /></div>
         </div>
       </Reveal>
     </section>

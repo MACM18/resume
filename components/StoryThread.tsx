@@ -51,8 +51,12 @@ export function StoryThread() {
       </defs>
       <path className="story-thread-base" d={rope} pathLength="1" />
       <path ref={activePath} className="story-thread-progress" d={rope} pathLength="1" />
+      <path className="story-thread-weave" d={rope} pathLength="1" />
       {[130, 260, 390, 520, 650, 780, 910].map((y, index) => (
-        <circle key={y} className="story-thread-knot" cx={index % 2 ? 50 : 50} cy={y} r="4" />
+        <g key={y} className="story-thread-marker" transform={`translate(${index % 2 ? 50 : 50} ${y})`}>
+          <circle className="story-thread-knot" r="6" />
+          <circle className="story-thread-knot-core" r="2" />
+        </g>
       ))}
     </svg>
   );
