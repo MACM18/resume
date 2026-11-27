@@ -18,7 +18,7 @@ const descriptions: Record<Section, string> = {
   profile: "Name, headline and missing avatar, background or favicon links.",
   home: "Hero copy, capabilities, highlights and contact invitation. Existing social links and contact email remain.",
   about: "Story, skills and contact invitation. Phone numbers remain untouched.",
-  projects: "The four known projects, their descriptions and missing production image, demo and source links.",
+  projects: "Selected application and infrastructure case studies, including their descriptions and approved demo and source links. The CSE Asset Management project is excluded.",
   work: "Missing roles from the public production timeline. Existing roles and dates remain untouched.",
   resumes: "The active resume summary, title and skills. Existing PDF links and uploaded files remain.",
   theme: "Colors from the public production palette and a missing background image link.",
@@ -65,7 +65,7 @@ export function PresetControls({ section }: { section: string }) {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">MACM content presets</p>
           <p className="mt-1 text-sm text-foreground/70">{descriptions[presetSection]}</p>
-          <p className="mt-1 text-xs text-foreground/50">Production references captured 23 September 2026.</p>
+          <p className="mt-1 text-xs text-foreground/50">Owner approved content presets. Review each section before applying.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {modes.map((mode) => (
@@ -78,10 +78,14 @@ export function PresetControls({ section }: { section: string }) {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{mode === "fill" ? "Fill missing data?" : presetSection === "theme" ? "Restore the production colors?" : presetSection === "all" ? "Apply all recommended presets?" : "Replace this section's text?"}</AlertDialogTitle>
+                  <AlertDialogTitle>{presetSection === "projects" ? mode === "fill" ? "Add missing project records?" : "Apply and publish the selected projects?" : mode === "fill" ? "Fill missing data?" : presetSection === "theme" ? "Restore the production colors?" : presetSection === "all" ? "Apply all recommended presets?" : "Replace this section's text?"}</AlertDialogTitle>
                   <AlertDialogDescription>
                     {mode === "fill"
-                      ? "This adds missing content from the captured production portfolio. Nonempty text, uploads, links and records remain in place."
+                      ? presetSection === "projects"
+                        ? "This adds missing records for MACM Studio, NNS, Daymark Store Desk, MACM Books, the task and team PWA, Karate IKS, the confidential company management system, and the home lab/VPS infrastructure project. New records are published. Existing nonempty project fields and records remain in place. The CSE Asset Management project is excluded."
+                        : "This adds missing content from the owner approved portfolio preset. Nonempty text, uploads, links and records remain in place."
+                      : presetSection === "projects"
+                        ? "This replaces the selected project copy, publishes the selected records, and sets their featured order for the current owner. It excludes the CSE Asset Management project. The checking-ta entry uses only a generic company management description and contains no company name, demo URL, GitHub link, image, or detailed workflow."
                       : presetSection === "all"
                         ? "This applies the prepared MACM copy and production colors across the dashboard and adds missing work and gallery records. Existing nonempty media, source/demo links and contact details remain in place."
                         : presetSection === "theme"

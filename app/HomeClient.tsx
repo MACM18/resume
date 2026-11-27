@@ -1,24 +1,20 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
   CheckCircle2,
-  Contact,
   ExternalLink,
   Github,
   Sparkles,
 } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
-import { useMemo } from "react";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { SaveContactButton } from "@/components/SaveContactButton";
+import { StoryThread } from "@/components/StoryThread";
 import { generateStructuredData, serializeJsonLd } from "@/lib/seo";
 import { getDynamicIcon } from "@/lib/icons";
-import { generateVCard, downloadVCard } from "@/lib/vcard";
 import type { HomePageData, Profile, Project, WorkExperience } from "@/types/portfolio";
 
 type HomeData = HomePageData & {
@@ -38,18 +34,13 @@ function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reducedMotion = useReducedMotion();
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: reducedMotion ? 0 : 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: reducedMotion ? 0 : 0.55, delay }}
-      className={className}
+    <div
+      className={`story-reveal ${className}`}
+      style={{ "--story-delay": `${delay}s` } as React.CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -83,14 +74,13 @@ function HomeHero({
   profile,
   data,
   socialLinks,
-  onSaveContact,
+  hostname,
 }: {
   profile: Profile;
   data: HomeData;
   socialLinks: HomeData["socialLinks"];
-  onSaveContact: () => void;
+  hostname: string;
 }) {
-  const reducedMotion = useReducedMotion();
   const intro =
     data.about_card_description ||
     "I help ambitious teams turn complex ideas into clear, useful digital experiences.";
@@ -148,7 +138,7 @@ function HomeHero({
                 size='lg'
                 className='h-12 rounded-full px-7 text-base shadow-[0_0_30px_hsl(var(--primary)/0.18)]'
               >
-                <Link href='/contact'>
+                <Link href='#contact'>
                   Start a Project <ArrowUpRight size={18} />
                 </Link>
               </Button>
@@ -158,21 +148,17 @@ function HomeHero({
                 size='lg'
                 className='h-12 rounded-full border-foreground/20 bg-transparent px-7 text-base hover:border-primary/50 hover:bg-primary/5'
               >
-                <Link href='/projects'>
+                <Link href='#work'>
                   View Selected Work <ArrowRight size={18} />
                 </Link>
               </Button>
-              <Button
-                type='button'
-                variant='ghost'
-                size='icon'
-                onClick={onSaveContact}
-                className='h-12 w-12 rounded-full border border-foreground/10 text-foreground/65 hover:border-primary/40 hover:bg-primary/5 hover:text-primary'
-                aria-label='Save contact'
-                title='Save contact'
-              >
-                <Contact size={19} />
-              </Button>
+              <SaveContactButton
+                fullName={data.name}
+                email={data.callToAction.email}
+                phone={profile.contact_numbers?.[0]?.number}
+                url={`https://${hostname}`}
+                photo={profile.avatar_url || undefined}
+              />
             </div>
           </Reveal>
 
@@ -202,12 +188,7 @@ function HomeHero({
         </div>
 
         <Reveal className='relative mx-auto w-full max-w-[460px] lg:ml-auto' delay={0.12}>
-          <motion.div
-            initial={{ rotate: reducedMotion ? 0 : 2, y: reducedMotion ? 0 : 8 }}
-            animate={{ rotate: 0, y: 0 }}
-            transition={{ duration: reducedMotion ? 0 : 0.8, ease: "easeOut" }}
-            className='relative'
-          >
+          <div className='relative'>
             <div className='absolute -inset-4 rounded-[2.25rem] border border-primary/20' />
             <div className='absolute -bottom-5 -left-5 h-28 w-28 rounded-full border border-primary/30 bg-primary/5 blur-[1px]' />
             <div className='absolute -right-4 top-10 h-20 w-20 rounded-full border border-secondary/30' />
@@ -238,10 +219,10 @@ function HomeHero({
                 <span className='max-w-[14rem] text-foreground/75'>
                   Strategy, design, and engineering in one thoughtful process.
                 </span>
-                <span className='text-primary'>01 / 04</span>
+                <span className='text-primary'>01 / STORY</span>
               </div>
             </div>
-          </motion.div>
+          </div>
         </Reveal>
       </div>
     </section>
@@ -264,7 +245,7 @@ function HomeProofStrip({
   ];
 
   return (
-    <section className='border-b border-foreground/10'>
+    <section id='proof' className='scroll-mt-28 border-b border-foreground/10'>
       <div className='mx-auto grid max-w-7xl gap-8 px-6 py-8 md:grid-cols-[1.15fr_1fr_1fr_1fr] md:items-center md:gap-0'>
         <div className='flex items-start gap-3 md:border-r md:border-foreground/10 md:pr-8'>
           <CheckCircle2 className='mt-0.5 h-5 w-5 shrink-0 text-primary' />
@@ -319,7 +300,7 @@ function SelectedWork({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <section id='selected-work' className='mx-auto max-w-7xl px-6'>
+    <section id='work' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
         <SectionIntro
           eyebrow='Selected work'
@@ -337,26 +318,37 @@ function SelectedWork({ projects }: { projects: Project[] }) {
               <article className={`group overflow-hidden border border-foreground/10 bg-background/25 ${isLead ? 'grid rounded-[2rem] lg:grid-cols-[1.15fr_0.85fr]' : 'rounded-[1.5rem]'}`}>
                 <Link
                   href={`/projects/${project.id}`}
-                  className={`relative block overflow-hidden ${isLead ? 'min-h-[300px] lg:min-h-[430px]' : 'aspect-[4/3]'}`}
+                  className={`relative block overflow-hidden ${project.image ? (isLead ? 'min-h-[300px] lg:min-h-[430px]' : 'aspect-[4/3]') : 'flex min-h-20 items-center justify-between gap-4 border-b border-foreground/10 bg-background/20 px-6 py-4'}`}
                   aria-label={`View ${project.title} project`}
                 >
-                  {project.image ? <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    priority={index === 0}
-                    sizes={isLead ? '(max-width: 1024px) 100vw, 58vw' : '(max-width: 768px) 100vw, 50vw'}
-                    className='object-cover transition duration-700 group-hover:scale-105'
-                  /> : <div className='flex h-full min-h-[220px] flex-col justify-between bg-gradient-to-br from-primary/15 via-background/70 to-secondary/15 p-6 lg:p-8'><span className='text-[10px] font-semibold uppercase tracking-[0.22em] text-primary'>Project brief</span><p className='max-w-xs text-sm leading-6 text-foreground/65'>A focused digital product built around useful outcomes.</p></div>}
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent' />
-                  {project.featured && (
+                  {project.image ? (
+                    <>
+                      <Image
+                        src={project.image}
+                        alt={project.title}
+                        fill
+                        priority={index === 0}
+                        sizes={isLead ? '(max-width: 1024px) 100vw, 58vw' : '(max-width: 768px) 100vw, 50vw'}
+                        className='object-cover transition duration-700 group-hover:scale-105'
+                      />
+                      <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent' />
+                    </>
+                  ) : (
+                    <>
+                      <span className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>
+                        {String(index + 1).padStart(2, "0")} <span className='text-foreground/40'>/ Case study</span>
+                      </span>
+                      <span className='text-xs text-foreground/45'>Open project <ArrowUpRight size={14} className='ml-1 inline' aria-hidden='true' /></span>
+                    </>
+                  )}
+                  {project.featured && project.image && (
                     <span className='absolute left-5 top-5 rounded-full border border-white/20 bg-black/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-md'>
                       Featured
                     </span>
                   )}
-                  <span className='absolute bottom-5 left-5 text-sm font-medium text-white/85'>
+                  {project.image && <span className='absolute bottom-5 left-5 text-sm font-medium text-white/85'>
                     0{index + 1}
-                  </span>
+                  </span>}
                 </Link>
 
                 <div className='flex flex-col justify-between p-6 md:p-8 lg:p-10'>
@@ -413,11 +405,6 @@ function SelectedWork({ projects }: { projects: Project[] }) {
         })}
       </div>
 
-      <div className='mt-8 flex justify-end'>
-        <Button asChild variant='link' className='group px-0 text-foreground/65 hover:text-primary'>
-          <Link href='/projects'>View all projects <ArrowRight className='transition-transform group-hover:translate-x-1' size={16} /></Link>
-        </Button>
-      </div>
     </section>
   );
 }
@@ -426,7 +413,7 @@ function CapabilitiesSection({ data }: { data: HomeData }) {
   if (data.technicalExpertise.length === 0) return null;
 
   return (
-    <section className='mx-auto max-w-7xl px-6'>
+    <section id='skills' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
         <SectionIntro
           eyebrow='Capabilities'
@@ -459,7 +446,7 @@ function CapabilitiesSection({ data }: { data: HomeData }) {
 
 function AboutTeaser({ data }: { data: HomeData }) {
   return (
-    <section className='mx-auto max-w-7xl px-6'>
+    <section id='story' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
         <div className='grid overflow-hidden rounded-[2rem] border border-foreground/10 bg-gradient-to-br from-primary/10 via-background/30 to-secondary/10 lg:grid-cols-[0.8fr_1.2fr]'>
           <div className='border-b border-foreground/10 p-8 md:p-12 lg:border-b-0 lg:border-r'>
@@ -476,7 +463,7 @@ function AboutTeaser({ data }: { data: HomeData }) {
             </p>
             <div className='mt-8'>
               <Button asChild variant='outline' className='rounded-full border-foreground/20'>
-                <Link href='/about'>More about my approach <ArrowUpRight size={16} /></Link>
+                <Link href='#proof'>How I got here <ArrowUpRight size={16} /></Link>
               </Button>
             </div>
           </div>
@@ -490,7 +477,7 @@ function AchievementsRow({ data }: { data: HomeData }) {
   if (data.achievements.length === 0) return null;
 
   return (
-    <section className='mx-auto max-w-7xl px-6'>
+    <section id='experience' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
         <div className='border-y border-foreground/10 py-8'>
           <div className='mb-7 flex items-center gap-3'>
@@ -520,7 +507,7 @@ function AchievementsRow({ data }: { data: HomeData }) {
 
 function HomeCTA({ data }: { data: HomeData }) {
   return (
-    <section className='mx-auto max-w-7xl px-6 pb-20'>
+    <section id='contact' className='mx-auto max-w-7xl scroll-mt-28 px-6 pb-20'>
       <Reveal>
         <div className='relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/10 px-8 py-14 text-center md:px-16 md:py-20'>
           <div aria-hidden='true' className='absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_55%)]' />
@@ -536,13 +523,10 @@ function HomeCTA({ data }: { data: HomeData }) {
             </p>
             <div className='mt-9 flex flex-wrap justify-center gap-3'>
               <Button asChild size='lg' className='h-12 rounded-full px-7'>
-                <Link href='/contact'>Start a Project <ArrowUpRight size={18} /></Link>
+                {data.callToAction.email
+                  ? <a href={`mailto:${data.callToAction.email}`}>Email me <ArrowUpRight size={18} /></a>
+                  : <Link href='/contact'>Contact me <ArrowUpRight size={18} /></Link>}
               </Button>
-              {data.callToAction.email && (
-                <Button asChild variant='outline' size='lg' className='h-12 rounded-full border-foreground/20 bg-transparent px-7'>
-                  <a href={`mailto:${data.callToAction.email}`}>Email Me <ArrowRight size={17} /></a>
-                </Button>
-              )}
             </div>
           </div>
         </div>
@@ -564,50 +548,32 @@ export default function HomeClient({
 }) {
   const profileData = initialProfile;
   const structuredData = generateStructuredData(profileData, hostname);
-
-  const homePageData = useMemo<HomeData>(() => {
-    const raw = profileData.home_page_data;
-
-    return {
-      name: profileData.full_name || "Welcome",
-      tagline: profileData.tagline || "My Portfolio",
-      socialLinks: raw?.socialLinks || [],
-      experienceHighlights: raw?.experienceHighlights || [],
-      technicalExpertise: raw?.technicalExpertise || [],
-      achievements: raw?.achievements || [],
-      about_card_description: raw?.about_card_description,
-      about_subtitle: profileData.about_page_data?.subtitle,
-      projects_card_description: raw?.projects_card_description,
-      experience_card_description: raw?.experience_card_description,
-      availability_status: raw?.availability_status || {
-        show: true,
-        message: "Available for opportunities",
-      },
-      callToAction: raw?.callToAction || {
-        title: "Have a project in mind?",
-        description: "Tell me what you are working on and where you want to take it.",
-        email: "",
-      },
-    };
-  }, [profileData]);
-
-  const selectedProjects = useMemo(() => {
-    const featured = initialProjects.filter((project) => project.featured);
-    const remaining = initialProjects.filter((project) => !project.featured);
-    return [...featured, ...remaining].slice(0, 3);
-  }, [initialProjects]);
-
-  const handleSaveContact = () => {
-    const vcard = generateVCard({
-      fullName: homePageData.name,
-      email: homePageData.callToAction.email,
-      phone: profileData.contact_numbers?.[0]?.number,
-      url: `https://${hostname}`,
-      photo: profileData.avatar_url || undefined,
-    });
-
-    downloadVCard(vcard, `${homePageData.name.replace(/\s+/g, "_")}_contact.vcf`);
+  const raw = profileData.home_page_data;
+  const homePageData: HomeData = {
+    name: profileData.full_name || "Welcome",
+    tagline: profileData.tagline || "My Portfolio",
+    socialLinks: raw?.socialLinks || [],
+    experienceHighlights: raw?.experienceHighlights || [],
+    technicalExpertise: raw?.technicalExpertise || [],
+    achievements: raw?.achievements || [],
+    about_card_description: raw?.about_card_description,
+    about_subtitle: profileData.about_page_data?.subtitle,
+    projects_card_description: raw?.projects_card_description,
+    experience_card_description: raw?.experience_card_description,
+    availability_status: raw?.availability_status || {
+      show: true,
+      message: "Available for opportunities",
+    },
+    callToAction: raw?.callToAction || {
+      title: "Have a project in mind?",
+      description: "Tell me what you are working on and where you want to take it.",
+      email: "",
+    },
   };
+  const selectedProjects = [
+    ...initialProjects.filter((project) => project.featured),
+    ...initialProjects.filter((project) => !project.featured),
+  ];
 
   if (!profileData) {
     return <DomainNotClaimed />;
@@ -619,23 +585,24 @@ export default function HomeClient({
       <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData.website) }} />
       <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData.profilePage) }} />
 
-      <main className='relative overflow-hidden'>
+      <main data-story-root className='relative isolate overflow-hidden'>
+        <StoryThread />
         <HomeHero
           profile={profileData}
           data={homePageData}
           socialLinks={homePageData.socialLinks}
-          onSaveContact={handleSaveContact}
+          hostname={hostname}
         />
-        <div id='main-content' className='space-y-24 py-16 md:space-y-32 md:py-24'>
+        <div id='main-content' className='relative z-10 space-y-24 py-16 md:space-y-32 md:py-24'>
           <HomeProofStrip
             data={homePageData}
             currentWork={initialWork}
             projectCount={initialProjects.length}
           />
-          <SelectedWork projects={selectedProjects} />
-          <CapabilitiesSection data={homePageData} />
-          <AboutTeaser data={homePageData} />
           <AchievementsRow data={homePageData} />
+          <SelectedWork projects={selectedProjects} />
+          <AboutTeaser data={homePageData} />
+          <CapabilitiesSection data={homePageData} />
           <HomeCTA data={homePageData} />
         </div>
         <footer className='border-t border-foreground/10 px-6 py-5'>

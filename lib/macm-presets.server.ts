@@ -40,7 +40,8 @@ const recommendedHome = {
   technicalExpertise: [
     { name: "Application development", skills: ["Next.js", "TypeScript", "React", "Laravel"] },
     { name: "Data and integrations", skills: ["PostgreSQL", "Prisma", "Google APIs", "REST APIs"] },
-    { name: "Deployment and operations", skills: ["Docker", "Linux VPS", "CI/CD", "S3-compatible storage"] },
+    { name: "Homelab and VPS infrastructure", skills: ["Home lab", "Linux VPS", "Docker", "Docker Compose", "Dokploy", "CI/CD", "GitHub Actions"] },
+    { name: "Mail and network services", skills: ["Self-hosted mail servers", "DNS", "Cloudflare", "TLS", "S3-compatible storage"] },
   ],
   achievements: [],
   callToAction: {
@@ -64,7 +65,8 @@ const recommendedAbout = {
   skills: [
     { category: "Applications", icon: "Fa.FaCode", items: ["Next.js", "TypeScript", "React", "Laravel"] },
     { category: "Data and integrations", icon: "Fa.FaDatabase", items: ["PostgreSQL", "Prisma", "Google APIs"] },
-    { category: "Infrastructure", icon: "Gi.GiCloudUpload", items: ["Docker", "Linux VPS", "CI/CD", "S3-compatible storage"] },
+    { category: "Homelab and VPS", icon: "Gi.GiCloudUpload", items: ["Home lab", "Linux VPS", "Docker", "Docker Compose", "Dokploy", "GitHub Actions"] },
+    { category: "Mail and network services", icon: "Fa.FaServer", items: ["Self-hosted mail servers", "DNS", "Cloudflare", "TLS", "S3-compatible storage"] },
   ],
   callToAction: {
     title: "Let's talk about your project",
@@ -102,7 +104,47 @@ const projects = [
     keyFeatures: ["Role-based authorization", "Google Sheets integration", "PostgreSQL data management", "Authenticated dashboard"],
   },
   {
-    sourceId: "cmu44cwij0001sx01agud8z4x", oldTitle: "Automated Workflow & Task Management System", title: "Automated workflow and task management",
+    sourceId: "seed_macm_studio", oldTitle: "MACM Studio", title: "MACM Studio website and project estimator",
+    description: "Designed and built the MACM Studio website with a guided project estimator, enquiry flow, and client workspace.",
+    longDescription: "The MACM Studio platform brings the studio's public website and project planning journey together. Visitors can explore services, shape a project estimate, and send an enquiry. The private workspace supports client communication and project updates, with a focus on clear scope, careful data handling, and practical handover.",
+    image: null, tech: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "Docker", "Email and Telegram integrations"],
+    demoUrl: "https://macm.lk", githubUrl: "https://github.com/MACM18/macm-studio", featured: true,
+    keyFeatures: ["Interactive project estimator", "Lead intake workflow", "Private client workspace", "Project updates and handover"],
+  },
+  {
+    sourceId: "seed_daymark_store_desk", oldTitle: "Daymark Store Desk", title: "Daymark Store Desk",
+    description: "Built a focused store management system for checkout, inventory, cash reconciliation, and team operations.",
+    longDescription: "Daymark Store Desk supports the daily work behind a single store, from opening the cash drawer and recording sales to receiving stock, managing prices, and reviewing expenses. Role-based access keeps owner, manager, and cashier tasks clear. The installable app also supports offline checkout capture and later synchronization for interrupted connections.",
+    image: null, tech: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "PWA", "Docker"],
+    demoUrl: "https://shop.macm.dev", githubUrl: "https://github.com/MACM18/Store-system", featured: false,
+    keyFeatures: ["Checkout and cash reconciliation", "Inventory and price management", "Owner, manager, and cashier roles", "Offline checkout capture"],
+  },
+  {
+    sourceId: "seed_macm_books", oldTitle: "MACM Books", title: "MACM Books bookkeeping platform",
+    description: "Built a bookkeeping platform for small organizations, with Sri Lankan tax filing preparation workflows.",
+    longDescription: "MACM Books brings everyday bookkeeping into a guided workflow for invoices, receipts, expenses, bank statement reconciliation, and financial reports. It includes preparation tools for Sri Lankan filing periods, while keeping review and submission with the business owner. Organization roles and plan access control keep records scoped to each business.",
+    image: null, tech: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "PayHere", "Docker"],
+    demoUrl: null, githubUrl: "https://github.com/MACM18/tax-system-macm", featured: false,
+    keyFeatures: ["Guided bookkeeping workflows", "Bank statement matching and reconciliation", "Financial reports and review snapshots", "Sri Lankan filing preparation packs"],
+  },
+  {
+    sourceId: "seed_karate_iks", oldTitle: "Karate IKS", title: "Karate IKS training management system",
+    description: "Built a training and organization management system for karate programs, instructors, and student progression.",
+    longDescription: "Karate IKS brings program administration and student progress into one workspace. It supports curriculum and exam planning, attendance, belt progression, instructor and staff management, and achievement records. The interface is designed around clear workflows for instructors and administrators.",
+    image: null, tech: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Docker"],
+    demoUrl: null, githubUrl: "https://github.com/MACM18/karate-IKS", featured: false,
+    keyFeatures: ["Curriculum and exam management", "Attendance and check-in tools", "Belt progression tracking", "Instructor and staff management"],
+  },
+  {
+    sourceId: "seed_confidential_company_management", oldTitle: "Confidential company management system", title: "Confidential company management system",
+    description: "Built a company management system for operational records, team workflows, and quick availability checks.",
+    longDescription: "A confidential company management system that brings day-to-day operational records and team workflows into a searchable workspace. The system includes a concise management dashboard and availability lookup to help staff find the information they need quickly. Company identity, customer data, and detailed implementation information are intentionally omitted.",
+    image: null, tech: ["Laravel", "PHP", "MySQL", "Blade", "Docker"],
+    demoUrl: null, githubUrl: null, featured: false,
+    keyFeatures: ["Operational management dashboard", "Searchable company records", "Availability lookup", "Staff workflow support"],
+  },
+  {
+    sourceId: "cmu44cwij0001sx01agud8z4x", oldTitle: "Automated Workflow & Task Management System", title: "Daily task and team monitoring PWA",
     description: "Built a task platform with recurring schedules, backlog carryover, subtask tracking, email digests, Telegram alerts and team reporting.",
     longDescription: "TaskFlow supports both personal focus and team coordination. Unfinished tasks can roll into a backlog, recurring schedules create new work, and subtasks show progress. The application sends configurable email digests and Telegram notifications, keeps editable email logs and produces periodic reports. These automations reduce manual coordination while leaving room for review before messages are sent.",
     image: null, tech: ["Next.js", "Prisma", "PostgreSQL", "Email automation", "Telegram"],
@@ -111,11 +153,11 @@ const projects = [
   },
   {
     sourceId: "cmkikmqiz0005ln010urrv14l", oldTitle: "Mail server deployment", title: "Self-hosted mail and application infrastructure",
-    description: "Deployed and maintained a Docker-based mail server and VPS for web applications and managed client services.",
-    longDescription: "I host and maintain a dedicated mail server and VPS for my projects and client work. The setup provides centralized webmail account management, Docker-based services and Cloudflare-routed traffic. It is a practical example of operating the infrastructure behind the applications I build.",
-    image: null, tech: ["Docker", "Linux VPS", "Mailu", "Stalwart", "Coolify", "Cloudflare"],
+    description: "Built and operate a home lab and VPS setup for application hosting, Dokploy deployments, and self-hosted mail services.",
+    longDescription: "I maintain the infrastructure behind my applications, combining a home lab with Linux VPS hosting. Docker and Dokploy support repeatable deployments, while self-hosted mail services, DNS, Cloudflare routing, TLS, and backups keep the surrounding services working. This project shows the operational side of taking an application from code to a maintained service.",
+    image: null, tech: ["Home lab", "Linux VPS", "Docker", "Docker Compose", "Dokploy", "Mail servers", "Cloudflare"],
     demoUrl: "", githubUrl: "", featured: false,
-    keyFeatures: ["Dedicated mail server", "VPS application hosting", "Webmail account management", "Cloudflare traffic routing"],
+    keyFeatures: ["Home lab and VPS operations", "Docker and Dokploy deployments", "Self-hosted mail server administration", "DNS, TLS, and Cloudflare routing"],
   },
 ] as const;
 const work = [
@@ -125,7 +167,7 @@ const work = [
   { sourceId: "clwork_003", company: "Altitude1 Pvt. Ltd", position: "WordPress Developer", startDate: "2024-03-01", endDate: "2024-09-01", isCurrent: false },
 ] as const;
 const resumeSummary = "Full-stack software engineer with experience building Next.js and Laravel applications backed by PostgreSQL. I work across application features, data integrations, Docker deployment and Linux infrastructure. My projects include management dashboards, automated workflows and self-hosted services.";
-const resumeSkills = ["Next.js", "TypeScript", "React", "Laravel", "PostgreSQL", "Prisma", "Docker", "Linux"];
+const resumeSkills = ["Next.js", "TypeScript", "React", "Laravel", "PostgreSQL", "Prisma", "Home lab", "Linux VPS", "Docker", "Docker Compose", "Dokploy", "Mail server administration", "Cloudflare"];
 const education = [{ year: "2025", degree: "Bachelor of Information Communication Technology (Hons.)", school: "University of Jaffna" }];
 
 function object(value: unknown): Record<string, unknown> {
@@ -222,7 +264,10 @@ async function applySection(tx: Prisma.TransactionClient, ownerId: string, profi
         demoUrl: choose("fill", existing?.demoUrl ?? null, item.demoUrl || null),
         githubUrl: choose("fill", existing?.githubUrl ?? null, item.githubUrl || null),
       };
-      if (existing) await tx.project.update({ where: { id: existing.id }, data: content });
+      if (existing) await tx.project.update({ where: { id: existing.id }, data: {
+        ...content,
+        ...(mode === "recommended" ? { featured: item.featured, published: true } : {}),
+      } });
       else await tx.project.create({ data: { id: item.sourceId, userId: ownerId, ...content, published: true, featured: item.featured } });
       count++;
     }
