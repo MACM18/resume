@@ -43,7 +43,7 @@ async function main() {
       id: "clprofile_chathura_001",
       userId: chathura.id,
       fullName: "Chathura Madhushanka",
-      tagline: "Full Stack Developer - DevOps and AI",
+      tagline: "Full-Stack Software Engineer · Web Applications & Infrastructure",
       theme: {
         "--card": "222 47% 11%",
         "--ring": "186 100% 69%",
@@ -87,7 +87,7 @@ async function main() {
       activeResumeRole: "Full stack developer",
       homePageData: {
         name: "Chathura Madhushanka",
-        tagline: "Full Stack Developer - DevOps and AI",
+        tagline: "Full-Stack Software Engineer · Web Applications & Infrastructure",
         socialLinks: [
           {
             href: "https://github.com/MACM18",
@@ -116,34 +116,10 @@ async function main() {
             "I'm always excited to discuss new opportunities, share ideas, or explore potential collaborations. Feel free to reach out!",
         },
         technicalExpertise: [
-          { name: "Full stack development", skills: ["Next.js", "Wordpress"] },
-          {
-            name: "Frontedn development ",
-            skills: ["React", "Javascript", "Typescript", "vue", "qwik", ""],
-          },
-          {
-            name: "Backend and Database",
-            skills: [
-              "Laravel",
-              "Express",
-              "MySQL",
-              "MongoDB",
-              "Postgres",
-              "Supabase",
-            ],
-          },
-          {
-            name: "Deployment",
-            skills: [
-              "Git",
-              "Github",
-              "CI/CD",
-              "Github Actions",
-              "Linux",
-              "VPS managment",
-            ],
-          },
-          { name: "Clould platfrom", skills: ["GCP and Azure - beginner"] },
+          { name: "Application engineering", skills: ["Next.js", "TypeScript", "React", "Laravel", "WordPress"] },
+          { name: "Data and integrations", skills: ["PostgreSQL", "MySQL", "Prisma", "Google APIs", "REST APIs"] },
+          { name: "Homelab and VPS infrastructure", skills: ["Home lab", "Linux VPS", "Docker", "Docker Compose", "Dokploy", "GitHub Actions"] },
+          { name: "Mail and network services", skills: ["Self-hosted mail servers", "DNS", "Cloudflare", "TLS", "S3-compatible storage"] },
         ],
         experienceHighlights: [
           {
@@ -154,14 +130,24 @@ async function main() {
               "I have been working in the field as well as academic projects. Individual projects ",
           },
         ],
-        about_card_description: "",
+        about_card_description:
+          "I build and operate web applications end to end, from user workflows and data models to Docker deployments, Linux VPS hosting, and self-hosted mail services.",
+        projects_card_description:
+          "Selected applications and infrastructure projects, with the decisions behind each build.",
       },
       aboutPageData: {
-        story: ["story pending"],
-        title: "It's me",
-        skills: [],
-        subtitle:
-          "Started as a dev and now moving with devops, AI. Continuing to widen my area of expertise.",
+        story: [
+          "I am Chathura Madhushanka, a software engineer building web applications with Next.js, TypeScript, Laravel, and PostgreSQL. My work spans product features, backend data models, integrations, and deployment.",
+          "I began with WordPress development and moved into full-stack applications. Alongside application work, I build and maintain Docker services on Linux VPS infrastructure, including CI/CD and self-hosted mail for my projects.",
+          "I enjoy understanding the complete path from a user's problem to a running system. The projects here show the product decisions and operational work behind what I build.",
+        ],
+        title: "About me",
+        skills: [
+          { category: "Applications", icon: "Fa.FaCode", items: ["Next.js", "TypeScript", "React", "Laravel"] },
+          { category: "Homelab and VPS", icon: "Gi.GiCloudUpload", items: ["Home lab", "Linux VPS", "Docker", "Docker Compose", "Dokploy"] },
+          { category: "Mail and network services", icon: "Fa.FaServer", items: ["Self-hosted mail servers", "Cloudflare", "DNS", "TLS"] },
+        ],
+        subtitle: "Full-stack engineering with hands-on infrastructure experience.",
         callToAction: {
           email: "chathura@macm.dev",
           title: "Ready to Work Together?",

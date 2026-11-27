@@ -347,6 +347,82 @@
   }
 }
 
+.story-thread {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: max(1rem, calc((100vw - 80rem) / 2));
+  width: clamp(3.5rem, 7vw, 7rem);
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0.72;
+}
+
+.story-thread-base,
+.story-thread-progress {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.story-thread-base {
+  stroke: hsl(var(--foreground) / 0.11);
+  stroke-width: 5;
+}
+
+.story-thread-progress {
+  stroke: url(#story-thread-gradient);
+  stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.25));
+}
+
+.story-thread-knot {
+  fill: hsl(var(--background));
+  stroke: hsl(var(--primary) / 0.4);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.story-reveal {
+  animation: none;
+}
+
+@keyframes story-reveal {
+  from { opacity: 0.55; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@supports (animation-timeline: view()) {
+  .story-reveal {
+    animation: story-reveal 0.65s both;
+    animation-delay: var(--story-delay, 0s);
+    animation-timeline: view();
+    animation-range: entry 0% cover 24%;
+  }
+}
+
+@media (max-width: 767px) {
+  .story-thread {
+    right: 0;
+    width: 2.8rem;
+    opacity: 0.23;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-thread-progress {
+    stroke-dashoffset: 0 !important;
+  }
+
+  .story-reveal {
+    animation: none;
+  }
+}
+
 .card {
   padding: 2em;
 }
