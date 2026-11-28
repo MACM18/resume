@@ -649,5 +649,33 @@ input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type=
 .portfolio-page section:not(.story-contact) h2{text-wrap:balance}
 @media(max-width:767px){.route-svg-art{top:13%;right:-3rem;width:12rem;opacity:.24}.contact-page-art{top:-1.5rem;right:-1.8rem;width:8rem;opacity:.34}.portfolio-page .story-reveal{will-change:auto}}
 
+
+/* Cinematic abstract layers stay behind content and scrub with page scroll. */
+.cinematic-section{position:relative;isolation:isolate;overflow:hidden}
+.cinematic-section>.story-reveal,.cinematic-section>.story-project-grid{position:relative;z-index:1}
+.cinematic-artwork{position:absolute;inset:-5% -3%;z-index:-1;overflow:hidden;pointer-events:none;transform-origin:center;will-change:transform}
+.cinematic-artwork-image{object-fit:contain;object-position:center;user-select:none;filter:saturate(.9)}
+.cinematic-artwork--hero{inset:-9% -5%;opacity:.56}
+.cinematic-artwork--work{inset:-16% -8%;opacity:.25}
+.cinematic-artwork--story{inset:-22% -6%;opacity:.23}
+.cinematic-artwork--route{inset:-12% -8%;opacity:.28}
+.cinematic-artwork--contact{inset:-24% -10%;opacity:.19}
+.cinematic-artwork--contact-page{inset:-10% -7%;opacity:.25}
+html[data-site-mode="dark"] .cinematic-artwork{mix-blend-mode:screen}
+html[data-site-mode="light"] .cinematic-artwork{mix-blend-mode:multiply;filter:saturate(.7)}
+.story-hero{isolation:isolate}
+.story-contact-copy{isolation:isolate}
+.story-contact-copy>.cinematic-artwork{z-index:-1}
+.story-contact-copy>.contact-svg-scene{z-index:1}
+
+@media(max-width:767px){
+  .cinematic-artwork{inset:-3% -18%;opacity:.16;will-change:auto}
+  .cinematic-artwork--hero{inset:-2% -30%;opacity:.34}
+  .cinematic-artwork--work,.cinematic-artwork--story{inset:-10% -24%;opacity:.14}
+  .cinematic-artwork--route,.cinematic-artwork--contact-page{inset:-2% -26%;opacity:.16}
+  .cinematic-artwork--contact{inset:-12% -28%;opacity:.13}
+}
+@media(prefers-reduced-motion:reduce){.cinematic-artwork{will-change:auto;transform:none!important}}
+
 .auth-global-controls{position:fixed;top:1rem;right:1.25rem;z-index:60;display:flex;align-items:center;gap:.75rem}
 @media(max-width:767px){.auth-global-controls{top:1rem;right:.75rem}}

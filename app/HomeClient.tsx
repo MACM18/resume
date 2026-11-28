@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SaveContactButton } from "@/components/SaveContactButton";
 import { ChapterArt } from "@/components/portfolio/ChapterArt";
+import { CinematicArtwork } from "@/components/portfolio/CinematicArtwork";
 import { ContactForm } from "@/components/ContactForm";
 import { generateStructuredData, serializeJsonLd } from "@/lib/seo";
 import { getDynamicIcon } from "@/lib/icons";
@@ -98,6 +99,7 @@ function HomeHero({
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_42%)]' />
       </div>
 
+      <CinematicArtwork variant='hero' className='cinematic-artwork--hero' />
       <ChapterArt className='hero-svg-scene' />
       <div className='mx-auto grid min-h-[min(800px,calc(100svh-2rem))] max-w-7xl items-center gap-12 px-6 pb-16 pt-28 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:gap-20 lg:pb-20 lg:pt-32'>
         <div className='max-w-3xl'>
@@ -303,7 +305,8 @@ function SelectedWork({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <section id='work' data-chapter='work' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
+    <section id='work' data-chapter='work' className='cinematic-section cinematic-section--work mx-auto max-w-7xl scroll-mt-28 px-6'>
+      <CinematicArtwork className='cinematic-artwork--work' />
       <Reveal>
         <div className='chapter-heading-art'><ChapterArt variant='work' className='chapter-svg-mark' /><span>03 / Selected work</span></div>
         <SectionIntro
@@ -452,7 +455,8 @@ function CapabilitiesSection({ data }: { data: HomeData }) {
 
 function AboutTeaser({ data }: { data: HomeData }) {
   return (
-    <section id='story' data-chapter='story' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
+    <section id='story' data-chapter='story' className='cinematic-section cinematic-section--story mx-auto max-w-7xl scroll-mt-28 px-6'>
+      <CinematicArtwork className='cinematic-artwork--story' />
       <Reveal>
         <div className='grid overflow-hidden rounded-[2rem] border border-foreground/10 bg-gradient-to-br from-primary/10 via-background/30 to-secondary/10 lg:grid-cols-[0.8fr_1.2fr]'>
           <div className='relative border-b border-foreground/10 p-8 md:p-12 lg:border-b-0 lg:border-r'>
@@ -518,6 +522,7 @@ function HomeCTA({ data }: { data: HomeData }) {
       <Reveal>
         <div className='story-contact-card'>
           <div className='story-contact-copy'>
+            <CinematicArtwork className='cinematic-artwork--contact' />
             <ChapterArt variant='contact' className='contact-svg-scene' />
             <p className='story-kicker'><span>06</span> / Start a conversation</p>
             <h2>{data.callToAction.title || "Have a project in mind?"}</h2>

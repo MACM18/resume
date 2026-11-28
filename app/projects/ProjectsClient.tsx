@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { projectImageUrl } from "@/lib/project-images";
 import type { Project, Profile } from "@/types/portfolio";
 import { ChapterArt } from "@/components/portfolio/ChapterArt";
+import { CinematicArtwork } from "@/components/portfolio/CinematicArtwork";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reducedMotion = useReducedMotion();
@@ -17,7 +18,7 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
     <motion.div
       initial={{ opacity: 0, y: reducedMotion ? 0 : 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
+      viewport={{ once: false, amount: 0.12 }}
       transition={{ duration: reducedMotion ? 0 : 0.55, delay }}
       className={className}
     >
@@ -101,7 +102,8 @@ export default function ProjectsClient({ initialProfile, initialProjects, hostna
 
   return (
     <main className='portfolio-page min-h-screen pb-24'>
-      <section className='border-b border-foreground/10 px-6 pb-20 pt-32 md:pb-28 md:pt-40'>
+      <section className='cinematic-section cinematic-section--route relative isolate overflow-hidden border-b border-foreground/10 px-6 pb-20 pt-32 md:pb-28 md:pt-40'>
+        <CinematicArtwork className='cinematic-artwork--route' />
         <div className='relative z-10 mx-auto max-w-7xl'>
           <ChapterArt variant='work' className='route-svg-art' />
           <Reveal><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>Selected work / {String(projects.length).padStart(2, '0')} projects</p></Reveal>

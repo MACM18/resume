@@ -11,6 +11,7 @@ import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import type { AboutPageData, Profile } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
 import { ChapterArt } from "@/components/portfolio/ChapterArt";
+import { CinematicArtwork } from "@/components/portfolio/CinematicArtwork";
 
 function AboutReveal({
   children,
@@ -27,7 +28,7 @@ function AboutReveal({
     <motion.div
       initial={{ opacity: 0, y: reducedMotion ? 0 : 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
+      viewport={{ once: false, amount: 0.15 }}
       transition={{ duration: reducedMotion ? 0 : 0.55, delay }}
       className={className}
     >
@@ -80,6 +81,7 @@ function AboutHero({
         <div className='absolute bottom-0 left-[12%] h-64 w-64 rounded-full bg-secondary/10 blur-[120px]' />
       </div>
 
+      <CinematicArtwork className='cinematic-artwork--route' />
       <ChapterArt variant='story' className='route-svg-art about-svg-art' />
       <div className='relative z-10 mx-auto grid max-w-7xl items-center gap-14 px-6 pb-20 pt-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24 lg:pb-28 lg:pt-40'>
         <AboutReveal className='relative mx-auto w-full max-w-[420px] lg:order-1 lg:ml-auto'>

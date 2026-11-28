@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { projectImageUrl } from "@/lib/project-images";
 import type { Project } from "@/types/portfolio";
 import { ChapterArt } from "@/components/portfolio/ChapterArt";
+import { CinematicArtwork } from "@/components/portfolio/CinematicArtwork";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reducedMotion = useReducedMotion();
@@ -26,7 +27,8 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
 
   return (
     <main className='portfolio-page min-h-screen pb-24'>
-      <section className='border-b border-foreground/10 px-6 pb-16 pt-28 md:pb-24 md:pt-36'>
+      <section className='cinematic-section cinematic-section--route relative isolate overflow-hidden border-b border-foreground/10 px-6 pb-16 pt-28 md:pb-24 md:pt-36'>
+        <CinematicArtwork className='cinematic-artwork--route' />
         <div className='relative z-10 mx-auto max-w-7xl'>
           <ChapterArt variant='work' className='route-svg-art' />
           <Reveal><Link href='/projects' className='inline-flex items-center gap-2 text-sm text-foreground/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'><ArrowLeft size={15} /> All projects</Link></Reveal>

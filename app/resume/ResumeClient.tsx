@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import type { Project, Profile, Resume, WorkExperience } from "@/types/portfolio";
 import { formatDateRange } from "@/lib/utils";
 import { ChapterArt } from "@/components/portfolio/ChapterArt";
+import { CinematicArtwork } from "@/components/portfolio/CinematicArtwork";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reducedMotion = useReducedMotion();
-  return <motion.div initial={{ opacity: 0, y: reducedMotion ? 0 : 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: reducedMotion ? 0 : 0.5, delay }} className={className}>{children}</motion.div>;
+  return <motion.div initial={{ opacity: 0, y: reducedMotion ? 0 : 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: 0.1 }} transition={{ duration: reducedMotion ? 0 : 0.5, delay }} className={className}>{children}</motion.div>;
 }
 
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
@@ -45,7 +46,8 @@ export default function ResumeClient({ initialProfile, initialResume, initialPro
   const certifications = (resume.certifications || []).filter(Boolean);
 
   return <ErrorBoundary><main className='portfolio-page min-h-screen pb-24'>
-    <section className='resume-hero border-b border-foreground/10 px-6 pb-16 pt-32 md:pb-24 md:pt-40'>
+    <section className='cinematic-section cinematic-section--route resume-hero relative isolate border-b border-foreground/10 px-6 pb-16 pt-32 md:pb-24 md:pt-40'>
+      <CinematicArtwork className='cinematic-artwork--route' />
       <div className='relative z-10 mx-auto max-w-7xl'>
         <ChapterArt variant='story' className='route-svg-art resume-svg-art' /><Reveal><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>Resume / {fullName}</p></Reveal><div className='grid gap-10 lg:grid-cols-[1fr_0.65fr] lg:items-end lg:gap-20'><Reveal delay={0.06}><h1 className='max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl'>{role}</h1></Reveal><Reveal delay={0.12}><div><p className='text-lg leading-8 text-foreground/65'>{resume.summary || 'A concise overview of experience, capabilities, and selected work.'}</p><div className='mt-7 flex flex-wrap items-center gap-4'><Button asChild className='rounded-full px-6'><Link href='/resume/download'><Download size={16} /> Download PDF</Link></Button>{contactEmail && <a href={`mailto:${contactEmail}`} className='text-sm text-foreground/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>{contactEmail}</a>}</div></div></Reveal></div></div>
     </section>
