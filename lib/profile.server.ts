@@ -97,7 +97,6 @@ function transformProfile(prismaProfile: {
   avatarPosition: unknown;
   avatarZoom: number | null;
   tagline: string;
-  domains?: { domain: string; isPrimary: boolean }[];
   homePageData: unknown;
   aboutPageData: unknown;
   activeResumeRole: string | null;
@@ -122,7 +121,6 @@ function transformProfile(prismaProfile: {
         | number
         | undefined || undefined,
     tagline: prismaProfile.tagline,
-    domain: prismaProfile.domains?.find((d) => d.isPrimary)?.domain || prismaProfile.domains?.[0]?.domain || null,
     home_page_data: normalizedHomePageData(prismaProfile.homePageData, prismaProfile.fullName),
     about_page_data: normalizedAboutPageData(prismaProfile.aboutPageData),
     active_resume_role: prismaProfile.activeResumeRole,
@@ -142,7 +140,6 @@ export const getProfileDataServer = cache(async function getProfileDataServer(do
   try {
     const profile = await db.profile.findFirst({
       where: { userId: ownerId },
-      include: { domains: true },
     });
 
     if (!profile) {
@@ -162,7 +159,6 @@ export const getProfileByUserId = cache(async function getProfileByUserId(
   try {
     const profile = await db.profile.findUnique({
       where: { userId },
-      include: { domains: true },
     });
 
     if (!profile) {

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     void request;
     const ownerId = await getSiteOwnerId();
 
-    const profile = await db.profile.findFirst({ where: { userId: ownerId ?? "" }, include: { domains: true } });
+    const profile = await db.profile.findFirst({ where: { userId: ownerId ?? "" } });
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });

@@ -358,6 +358,7 @@ function formatDate(dateString?: string | null): string {
 interface ResumeDocumentProps {
   resume: Resume;
   profile: Profile;
+  portfolioWebsite: { href: string; label: string } | null;
   workExperiences?: WorkExperience[];
   projects?: Project[];
   processedAvatar?: string | null;
@@ -366,6 +367,7 @@ interface ResumeDocumentProps {
 const ResumeDocument = ({
   resume,
   profile,
+  portfolioWebsite,
   workExperiences,
   projects,
   processedAvatar,
@@ -418,11 +420,11 @@ const ResumeDocument = ({
               <Text>{resume.location}</Text>
             </View>
           )}
-          {profile.domain && (
+          {portfolioWebsite && (
             <View style={styles.contactItem}>
               <Text style={styles.contactDivider}>|</Text>
               <SocialIcon platform="globe" />
-              <Link src={`https://${profile.domain}`} style={styles.link}>{profile.domain}</Link>
+              <Link src={portfolioWebsite.href} style={styles.link}>{portfolioWebsite.label}</Link>
             </View>
           )}
           {profile.home_page_data?.socialLinks?.map((link, idx) => (
@@ -571,6 +573,14 @@ export async function POST(request: Request) {
       );
     }
 
+    let portfolioWebsite: { href: string; label: string } | null = null;
+    try {
+      const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://macm.dev");
+      portfolioWebsite = { href: siteUrl.origin, label: siteUrl.hostname };
+    } catch {
+      // Invalid optional configuration: omit the website from the generated resume.
+    }
+
     // Fix avatar rotation issues for PDF
     let processedAvatar: string | null = null;
     const persistedProfile = profile.id
@@ -608,6 +618,7 @@ export async function POST(request: Request) {
       <ResumeDocument
         resume={resume}
         profile={profile}
+        portfolioWebsite={portfolioWebsite}
         workExperiences={workExperiences}
         projects={projects}
         processedAvatar={processedAvatar}

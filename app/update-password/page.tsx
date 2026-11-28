@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { getCurrentUserProfile } from "@/lib/profile";
 
 const passwordSchema = z
   .object({
@@ -68,22 +67,11 @@ const UpdatePasswordPage = () => {
         throw new Error(error.error || "Failed to update password");
       }
 
-      // After successful password update, fetch the user's profile to get their domain
-      const profile = await getCurrentUserProfile();
-      return profile;
+      return true;
     },
-    onSuccess: (profile) => {
+    onSuccess: () => {
       toast.success("Password updated successfully!");
-      if (profile?.domain) {
-        // If they have a domain, redirect to their admin page
-        const protocol = profile.domain.startsWith("localhost")
-          ? "http://"
-          : "https://";
-        window.location.href = `${protocol}${profile.domain}/admin`;
-      } else {
-        // If they don't have a domain, they are a new user. Send to claim page.
-        router.push("/admin");
-      }
+      router.push("/admin");
     },
     onError: (error: Error) => {
       setError(error.message);

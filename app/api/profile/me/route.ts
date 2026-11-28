@@ -18,7 +18,6 @@ export async function GET() {
 
     const profile = await db.profile.findUnique({
       where: { userId: session.user.id },
-      include: { domains: true },
     });
 
     if (!profile) {
@@ -41,8 +40,6 @@ export async function GET() {
       selected_gradient: sel ? { id: String(sel["id"]), name: String(sel["name"]), preview_css: (sel["previewCss"] as string | null) } : undefined,
       avatar_size: (p["avatarSize"] as number) || undefined,
       tagline: (p["tagline"] as string),
-      domain: (p["domains"] as {domain: string, isPrimary: boolean}[] | undefined)?.find(d => d.isPrimary)?.domain || (p["domains"] as {domain: string}[] | undefined)?.[0]?.domain || null,
-      domains: p["domains"],
       home_page_data: p["homePageData"],
       about_page_data: p["aboutPageData"],
       active_resume_role: (p["activeResumeRole"] as string | null),
@@ -121,7 +118,6 @@ export async function PATCH(request: NextRequest) {
     const profile = await db.profile.update({
       where: { userId: session.user.id },
       data: updateData,
-      include: { domains: true },
     });
 
     console.log("Profile updated successfully");
@@ -136,8 +132,6 @@ export async function PATCH(request: NextRequest) {
       avatar_zoom: profile.avatarZoom,
       avatar_size: ((profile as unknown) as Record<string, unknown>)["avatarSize"] as number | undefined,
       tagline: profile.tagline,
-      domain: (profile as unknown as { domains: {domain: string, isPrimary: boolean}[] }).domains?.find(d => d.isPrimary)?.domain || (profile as unknown as { domains: {domain: string}[] }).domains?.[0]?.domain || null,
-      domains: (profile as unknown as { domains: {domain: string, isPrimary: boolean}[] }).domains,
       home_page_data: profile.homePageData,
       about_page_data: profile.aboutPageData,
       active_resume_role: profile.activeResumeRole,
@@ -149,9 +143,6 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error updating profile:", error);
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
-      return NextResponse.json({ error: "That domain is already claimed by another user" }, { status: 409 });
-    }
     return NextResponse.json(
       { error: "Failed to update profile" },
       { status: 500 }
