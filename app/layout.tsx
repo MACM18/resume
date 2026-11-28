@@ -2,11 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
-import { Navigation } from "@/components/Navigation";
-import { PageTransition } from "@/components/PageTransition";
 import "./globals.css"; // or your global styles
 import AuthProvider from "@/components/providers/AuthProvider";
-import { AuthButton } from "@/components/AuthButton";
+import { SiteChrome } from "@/components/SiteChrome";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { headers } from "next/headers";
 import { getProfileDataServer } from "@/lib/profile.server";
@@ -17,7 +15,6 @@ import { getSiteMode } from "@/lib/site-palettes";
 import Analytics from "@/components/Analytics";
 import Script from "next/script";
 import { Metadata } from "next";
-import { Suspense } from "react";
 import Image from "next/image";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -154,11 +151,7 @@ export default async function RootLayout({
                   <div className='relative z-10'>
                     <Toaster />
                     <Sonner />
-                    <Suspense fallback={null}>
-                      <Navigation />
-                    </Suspense>
-                    <PageTransition>{children}</PageTransition>
-                    <AuthButton />
+                    <SiteChrome>{children}</SiteChrome>
                   </div>
                 </div>
               </TooltipProvider>

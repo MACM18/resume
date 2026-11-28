@@ -37,6 +37,11 @@ export const adminGroups: AdminGroup[] = [
 ];
 
 export const adminItems: AdminItem[] = adminGroups.flatMap((group) => group.items);
+
+export function isAdminPathname(pathname: string | null | undefined): boolean {
+  return pathname === "/admin" || pathname?.startsWith("/admin/") === true;
+}
+
 export const legacyAdminPaths: Record<string, string> = {
   overview: "/admin",
   profile: "/admin/settings/profile",

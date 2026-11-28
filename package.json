@@ -18,6 +18,8 @@
     "db:seed-owner-portfolio": "pnpm exec tsx scripts/seed-owner-portfolio.ts",
     "test:colors": "node --import tsx -e 'import(\"./tests/colors.test.ts\")'",
     "test:icons": "node --import tsx -e 'import(\"./tests/icons.test.ts\")'",
+    "test:entrypoint": "node --import tsx -e 'import(\"./tests/docker-entrypoint.test.ts\")'",
+    "test:admin-routes": "node --import tsx -e 'import(\"./tests/admin-routes.test.ts\")'",
     "test:project-images": "node --import tsx -e 'import(\"./tests/project-images.test.ts\")'",
     "test:portfolio-seeder": "node --import tsx -e 'import(\"./tests/portfolio-seeder.test.ts\")'",
     "db:migrate-storage-urls": "pnpm exec tsx scripts/migrate-storage-urls.ts"
