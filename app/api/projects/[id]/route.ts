@@ -117,7 +117,7 @@ export async function PATCH(
     if (body.title !== undefined) updateData.title = body.title;
     if (body.description !== undefined) updateData.description = body.description;
     if (body.long_description !== undefined) updateData.longDescription = body.long_description;
-    if (body.image !== undefined) updateData.image = extractStoragePath(body.image);
+    if (body.image !== undefined) updateData.image = projectImageUrl(extractStoragePath(body.image));
     if (body.tech !== undefined) updateData.tech = body.tech;
     if (body.demo_url !== undefined) updateData.demoUrl = body.demo_url;
     if (body.github_url !== undefined) updateData.githubUrl = body.github_url;

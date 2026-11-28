@@ -49,4 +49,5 @@ The data set includes the current portfolio, MACM Studio, NNS, Daymark Store Des
 - Full `pnpm build` passed on 2026-11-28. `npm audit` and `pnpm audit` both reported zero known vulnerabilities.
 - The latest read-only production check returned HTTP 200. It found a contact form and `/placeholder.svg` references; the shared startup log did not show a portfolio seeder run. The production deployment has not been updated or written to.
 - Placeholder-image handling is covered by tests for local, relative, CDN, and query/hash URL variants. Seeder repeat-run checks confirm old text, titles, and publication flags remain intact as placeholder images are cleared or replaced.
+- The admin project form and create/update APIs use the same image normalization, so editing an absolute or query-suffixed placeholder cannot save it back to the database.
 - The icon editor retains React Icons and its existing saved icon names through a curated icon map. The public About page's first-load JS fell from 7.55 MB to 199 KB, and the About editor route fell from 7.6 MB to 253 KB in the production build report.

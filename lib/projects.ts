@@ -2,6 +2,7 @@
 
 import { deleteFile } from "./storage";
 import { Project } from "@/types/portfolio";
+import { projectImageUrl } from "@/lib/project-images";
 
 /**
  * Upload a project image (optimized server-side)
@@ -126,7 +127,7 @@ export async function addProject(
     // Send `null` when there's no image so the DB stores no image instead of a placeholder
     body: JSON.stringify({
       ...project,
-      image: project.image ? project.image : null,
+      image: projectImageUrl(project.image),
     }),
   });
 

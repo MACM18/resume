@@ -24,6 +24,7 @@ import {
   deleteProjectImage,
 } from "@/lib/projects";
 import { Project } from "@/types/portfolio";
+import { projectImageUrl } from "@/lib/project-images";
 import { toast } from "@/components/ui/sonner";
 import { useState } from "react";
 import { FileUp, Loader2, CheckCircle, Trash, Sparkles } from "lucide-react";
@@ -84,12 +85,7 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   const { session } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
-  // Helper: treat placeholder or empty values as "no image"
-  const isRealImageUrl = (url?: string | null) =>
-    !!url &&
-    url !== "" &&
-    url !== "/placeholder.svg" &&
-    !url.startsWith("/placeholder");
+  const isRealImageUrl = (url?: string | null) => Boolean(projectImageUrl(url));
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
