@@ -16,7 +16,7 @@
     "db:studio": "prisma studio --schema=prisma/schema.prisma",
     "db:seed": "pnpm exec tsx prisma/seed.ts",
     "db:seed-owner-portfolio": "pnpm exec tsx scripts/seed-owner-portfolio.ts",
-    "test:colors": "node --import tsx --test tests/colors.test.ts",
+    "test:colors": "node --import tsx -e 'import(\"./tests/colors.test.ts\")'",
     "db:migrate-storage-urls": "pnpm exec tsx scripts/migrate-storage-urls.ts"
   },
   "dependencies": {
