@@ -59,6 +59,8 @@ export default async function RootLayout({
   return (
     <html lang='en' className={`scroll-smooth ${getSiteMode(themeData?.theme) === "dark" ? "dark" : ""}`} data-site-mode={getSiteMode(themeData?.theme)}>
       <head>
+        <link rel='alternate' type='text/plain' href='/llms.txt' title='AI-readable portfolio summary' />
+
         {faviconUrl && (
           <>
             <link rel='icon' href={faviconUrl} />

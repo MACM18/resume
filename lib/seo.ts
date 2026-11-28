@@ -26,7 +26,7 @@ export interface SEOConfig {
 
 const DEFAULT_SEO: SEOConfig = {
   siteName: "Professional Portfolio",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://macm.dev",
   defaultTitle: "Portfolio - Software Developer",
   defaultDescription:
     "Professional portfolio showcasing projects, experience, and technical expertise in software development.",
