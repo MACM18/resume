@@ -5,7 +5,7 @@ import { seedOwnerPortfolio } from "../lib/portfolio-seeder";
 
 test("seeds missing owner projects and clears legacy placeholders without replacing existing content", async () => {
   const ownerId = "owner-test";
-  const confidentialWorkflow = portfolioProjects[7];
+  const taskPwa = portfolioProjects[7];
   const projects: any[] = [
     {
       id: portfolioProjects[0].sourceId,
@@ -23,9 +23,9 @@ test("seeds missing owner projects and clears legacy placeholders without replac
       createdAt: new Date("2026-01-01"),
     },
     {
-      id: confidentialWorkflow.sourceId,
+      id: taskPwa.sourceId,
       userId: ownerId,
-      title: confidentialWorkflow.oldTitle,
+      title: taskPwa.oldTitle,
       description: "Existing task summary",
       longDescription: "Existing task detail",
       image: "/placeholder.svg",
@@ -94,4 +94,18 @@ test("seeds missing owner projects and clears legacy placeholders without replac
   assert.equal(profile.aboutPageData.title, "Keep this too");
   assert.equal(new Set(resume.skills).size, resume.skills.length);
   assert.equal(projects.filter((project) => project.title === portfolioProjects[1].title).length, 1);
+});
+
+test("keeps confidential project details generic and excludes CSE asset management", () => {
+  const confidential = portfolioProjects.find((project) => project.sourceId === "seed_confidential_company_management");
+  assert.ok(confidential);
+  assert.equal(confidential.title, "Confidential company management system");
+  assert.equal(confidential.image, null);
+  assert.equal(confidential.demoUrl, null);
+  assert.equal(confidential.githubUrl, null);
+  assert.doesNotMatch(JSON.stringify(confidential).toLowerCase(), /checking-ta|cse asset management/);
+  assert.ok(portfolioProjects.some((project) => project.title === "MACM Studio website and project estimator"));
+  assert.ok(portfolioProjects.some((project) => project.title === "Daymark Store Desk"));
+  assert.ok(portfolioProjects.some((project) => project.title === "NNS company management dashboard"));
+  assert.equal(portfolioProjects.length, 9);
 });
