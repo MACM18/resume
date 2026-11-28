@@ -2,6 +2,7 @@ import { db } from "./db";
 import { getSiteOwnerId } from "./site-owner";
 import { Project } from "@/types/portfolio";
 import { safeAssetUrl } from "./remote-assets";
+import { projectImageUrl } from "./project-images";
 import { cache } from "react";
 
 export const getProjectsServer = cache(async function getProjectsServer(domain: string): Promise<Project[]> {
@@ -26,7 +27,7 @@ export const getProjectsServer = cache(async function getProjectsServer(domain: 
       title: p.title,
       description: p.description,
       long_description: p.longDescription || "",
-      image: safeAssetUrl(p.image),
+      image: projectImageUrl(safeAssetUrl(p.image)) ?? undefined,
       tech: p.tech,
       demo_url: p.demoUrl || undefined,
       github_url: p.githubUrl || undefined,
@@ -65,7 +66,7 @@ export const getProjectByIdServer = cache(async function getProjectByIdServer(
       title: project.title,
       description: project.description,
       long_description: project.longDescription || "",
-      image: safeAssetUrl(project.image),
+      image: projectImageUrl(safeAssetUrl(project.image)) ?? undefined,
       tech: project.tech,
       demo_url: project.demoUrl || undefined,
       github_url: project.githubUrl || undefined,

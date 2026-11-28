@@ -5,6 +5,7 @@ import {
   portfolioProjects,
   portfolioResumeSkills,
 } from "./portfolio-seed-data";
+import { projectImageUrl } from "./project-images";
 
 type Transaction = Prisma.TransactionClient;
 
@@ -108,7 +109,7 @@ export async function seedOwnerPortfolio(tx: Transaction, ownerId: string) {
       data: {
         description: current.description.trim() ? current.description : item.description,
         longDescription: current.longDescription.trim() ? current.longDescription : item.longDescription,
-        image: current.image || item.image,
+        image: projectImageUrl(current.image) || item.image,
         demoUrl: current.demoUrl || nonEmpty(item.demoUrl),
         githubUrl: current.githubUrl || nonEmpty(item.githubUrl),
         tech: mergeUnique(current.tech, item.tech),

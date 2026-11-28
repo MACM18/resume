@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowUpRight, ExternalLink, Github } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
+import { projectImageUrl } from "@/lib/project-images";
 import type { Project } from "@/types/portfolio";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -19,7 +20,7 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
     return <div className='flex min-h-[70vh] items-center justify-center px-6'><GlassCard variant='bordered' className='max-w-lg p-10 text-center'><p className='text-xs font-semibold uppercase tracking-[0.22em] text-primary'>404 / project</p><h1 className='mt-4 text-3xl font-semibold'>Project not found</h1><p className='mt-4 leading-7 text-foreground/60'>The project you&apos;re looking for may have been unpublished or moved.</p><Button asChild className='mt-8 rounded-full px-6'><Link href='/projects'><ArrowLeft size={16} /> Back to projects</Link></Button></GlassCard></div>;
   }
 
-  const hasImage = Boolean(project.image);
+  const image = projectImageUrl(project.image);
   const description = project.long_description || project.description || "More details about this project will be added soon.";
 
   return (
@@ -43,9 +44,16 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
 
       <div className='mx-auto max-w-7xl space-y-20 px-6 pt-12 md:pt-20'>
         <Reveal>
-          <div className='relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03]'>
-            {hasImage ? <Image src={project.image!} alt={`${project.title} project preview`} fill priority sizes='(max-width: 1024px) 100vw, 1200px' className='object-cover' /> : <div className='flex h-full items-end bg-gradient-to-br from-primary/20 via-background/40 to-secondary/20 p-8'><span className='text-sm uppercase tracking-[0.2em] text-foreground/50'>Project preview unavailable</span></div>}
-          </div>
+          {image ? (
+            <div className='relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03]'>
+              <Image src={image} alt={`${project.title} project preview`} fill priority sizes='(max-width: 1024px) 100vw, 1200px' className='object-cover' />
+            </div>
+          ) : (
+            <div className='flex flex-wrap items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card/50 px-5 py-4'>
+              <div><p className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>Project brief</p><p className='mt-1 text-sm text-foreground/55'>No cover image is available for this case study.</p></div>
+              <div className='flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground/50'>{project.tech.slice(0, 4).map((tech) => <span key={tech}>{tech}</span>)}</div>
+            </div>
+          )}
         </Reveal>
 
         <div className='grid gap-14 lg:grid-cols-[1fr_280px] lg:gap-24'>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSiteOwnerId } from "@/lib/site-owner";
+import { projectImageUrl } from "@/lib/project-images";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ function transformProject(project: {
     title: project.title,
     description: project.description,
     long_description: project.longDescription,
-    image: project.image,
+    image: projectImageUrl(project.image),
     tech: project.tech,
     demo_url: project.demoUrl,
     github_url: project.githubUrl,

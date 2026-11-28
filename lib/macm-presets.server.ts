@@ -3,6 +3,7 @@ import { Prisma, type Profile } from "@prisma/client";
 import { db } from "./db";
 import { extractStoragePath } from "./storage-urls";
 import { portfolioProjects } from "./portfolio-seed-data";
+import { projectImageUrl } from "./project-images";
 
 export const presetSections = ["profile", "home", "about", "projects", "work", "resumes", "theme", "gallery", "all"] as const;
 export type PresetSection = (typeof presetSections)[number];
@@ -102,7 +103,7 @@ function object(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 function populated(value: unknown): boolean {
-  return typeof value === "string" ? value.trim().length > 0 && value !== "/placeholder.svg" : Array.isArray(value) ? value.length > 0 : value !== null && value !== undefined;
+  return typeof value === "string" ? projectImageUrl(value) !== null : Array.isArray(value) ? value.length > 0 : value !== null && value !== undefined;
 }
 function choose<T>(mode: PresetMode, current: T, next: T): T {
   return mode === "recommended" || !populated(current) ? next : current;

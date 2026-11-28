@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { ProjectsPageSkeleton } from "@/components/ui/loading-skeleton";
 import { Button } from "@/components/ui/button";
+import { projectImageUrl } from "@/lib/project-images";
 import type { Project, Profile } from "@/types/portfolio";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -45,19 +46,23 @@ function ProjectLinks({ project }: { project: Project }) {
 }
 
 function FeaturedProject({ project, index }: { project: Project; index: number }) {
-  const hasImage = Boolean(project.image);
+  const image = projectImageUrl(project.image);
+  const hasImage = Boolean(image);
   return (
     <Reveal>
       <article className='grid gap-8 border-t border-foreground/10 py-8 md:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] md:items-center md:gap-12 md:py-12'>
         <Link href={`/projects/${project.id}`} className={`group relative block overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03] ${index % 2 ? 'md:order-2' : ''}`}>
-          <div className='aspect-[16/10] relative'>
-            {hasImage ? (
-              <Image src={project.image!} alt={`${project.title} project preview`} fill sizes='(max-width: 768px) 100vw, 60vw' priority={index === 0} className='object-cover transition duration-700 group-hover:scale-[1.03]' />
-            ) : (
-              <div className='flex h-full items-end bg-gradient-to-br from-primary/20 via-background/40 to-secondary/20 p-6'><span className='text-sm uppercase tracking-[0.2em] text-foreground/50'>Project preview</span></div>
-            )}
-            <div className='absolute inset-0 bg-gradient-to-t from-background/45 to-transparent opacity-70' />
-          </div>
+          {image ? (
+            <div className='relative aspect-[16/10]'>
+              <Image src={image} alt={`${project.title} project preview`} fill sizes='(max-width: 768px) 100vw, 60vw' priority={index === 0} className='object-cover transition duration-700 group-hover:scale-[1.03]' />
+              <div className='absolute inset-0 bg-gradient-to-t from-background/45 to-transparent opacity-70' />
+            </div>
+          ) : (
+            <div className='flex items-center justify-between gap-4 px-5 py-4'>
+              <span className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>Project brief / {String(index + 1).padStart(2, "0")}</span>
+              <span className='text-xs text-foreground/45'>Open case study <ArrowUpRight size={14} className='ml-1 inline' aria-hidden='true' /></span>
+            </div>
+          )}
         </Link>
         <div className={index % 2 ? 'md:order-1' : ''}>
           <div className='mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary'><span>0{index + 1}</span><span className='h-px w-10 bg-primary/50' /> Featured work</div>

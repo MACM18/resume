@@ -2,6 +2,7 @@ import { getOwnerSession } from "@/lib/site-owner";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { extractStoragePath, resolveStorageUrl } from "@/lib/storage-urls";
+import { projectImageUrl } from "@/lib/project-images";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ function transformProject(project: {
     title: project.title,
     description: project.description,
     long_description: project.longDescription,
-    image: resolveStorageUrl(project.image),
+    image: projectImageUrl(resolveStorageUrl(project.image)),
     tech: project.tech,
     demo_url: project.demoUrl,
     github_url: project.githubUrl,

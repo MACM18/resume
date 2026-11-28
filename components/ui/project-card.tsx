@@ -6,6 +6,7 @@ import { ExternalLink, Github, Star } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { projectImageUrl } from "@/lib/project-images";
 import type { Project } from "@/types/portfolio";
 
 interface ProjectCardProps {
@@ -21,6 +22,7 @@ export function ProjectCard({
   delay = 0,
   priority = false,
 }: ProjectCardProps) {
+  const image = projectImageUrl(project.image);
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -39,12 +41,14 @@ export function ProjectCard({
         <div
           className={cn(
             "relative overflow-hidden bg-glass-bg/20",
-            featured ? "aspect-[16/9]" : "aspect-video"
+            image
+              ? featured ? "aspect-[16/9]" : "aspect-video"
+              : "flex items-center justify-between gap-4 border-b border-border/60 px-5 py-4"
           )}
         >
-          {project.image ? (
+          {image ? (
             <Image
-              src={project.image}
+              src={image}
               alt={project.title}
               className='w-full h-full object-cover transition-all duration-700 group-hover:brightness-110 group-hover:scale-105'
               width={800}
@@ -53,15 +57,12 @@ export function ProjectCard({
               style={{ objectFit: "cover", width: "100%", height: "100%" }}
             />
           ) : (
-            <div className='flex h-full flex-col justify-between bg-gradient-to-br from-primary/15 via-background/70 to-secondary/15 p-5'>
-              <span className='text-[10px] font-semibold uppercase tracking-[0.22em] text-primary'>Project brief</span>
-              <p className='max-w-xs text-sm leading-6 text-foreground/65'>A focused digital product built around useful outcomes.</p>
-            </div>
+            <><span className='text-xs font-semibold uppercase tracking-[0.18em] text-primary'>Project brief</span><span className='text-xs text-foreground/45'>Open details <ExternalLink size={14} className='ml-1 inline' aria-hidden='true' /></span></>
           )}
-          <div className='absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent' />
+          {image && <div className='absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent' />}
 
           {/* Featured Badge */}
-          {featured && (
+          {image && featured && (
             <div className='absolute top-4 left-4 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm flex items-center gap-2'>
               <Star className='w-3 h-3 fill-white text-white' />
               <span className='text-xs font-semibold text-white'>Featured</span>
@@ -69,7 +70,7 @@ export function ProjectCard({
           )}
 
           {/* Quick Actions on Hover */}
-          <div className='absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4'>
+          {image && <div className='absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4'>
             {project.demo_url && (
               <Button
                 asChild
@@ -103,7 +104,7 @@ export function ProjectCard({
                 </a>
               </Button>
             )}
-          </div>
+          </div>}
         </div>
 
         {/* Project Content */}

@@ -16,6 +16,7 @@ import { StoryThread } from "@/components/StoryThread";
 import { ContactForm } from "@/components/ContactForm";
 import { generateStructuredData, serializeJsonLd } from "@/lib/seo";
 import { getDynamicIcon } from "@/lib/icons";
+import { projectImageUrl } from "@/lib/project-images";
 import type { HomePageData, Profile, Project, WorkExperience } from "@/types/portfolio";
 
 type HomeData = HomePageData & {
@@ -313,19 +314,20 @@ function SelectedWork({ projects }: { projects: Project[] }) {
       <div className='story-project-grid grid gap-6 md:grid-cols-2'>
         {projects.map((project, index) => {
           const isLead = index === 0;
+          const image = projectImageUrl(project.image);
 
           return (
             <Reveal key={project.id} delay={index * 0.06} className={isLead ? 'md:col-span-2' : ''}>
               <article className={`group overflow-hidden border border-foreground/10 bg-background/25 ${isLead ? 'grid rounded-[2rem] lg:grid-cols-[1.15fr_0.85fr]' : 'rounded-[1.5rem]'}`}>
                 <Link
                   href={`/projects/${project.id}`}
-                  className={`relative block overflow-hidden ${project.image ? (isLead ? 'min-h-[300px] lg:min-h-[430px]' : 'aspect-[4/3]') : 'flex min-h-20 items-center justify-between gap-4 border-b border-foreground/10 bg-background/20 px-6 py-4'}`}
+                  className={`relative block overflow-hidden ${image ? (isLead ? 'min-h-[300px] lg:min-h-[430px]' : 'aspect-[4/3]') : 'flex min-h-20 items-center justify-between gap-4 border-b border-foreground/10 bg-background/20 px-6 py-4'}`}
                   aria-label={`View ${project.title} project`}
                 >
-                  {project.image ? (
+                  {image ? (
                     <>
                       <Image
-                        src={project.image}
+                        src={image}
                         alt={project.title}
                         fill
                         priority={index === 0}
@@ -342,12 +344,12 @@ function SelectedWork({ projects }: { projects: Project[] }) {
                       <span className='text-xs text-foreground/45'>Open project <ArrowUpRight size={14} className='ml-1 inline' aria-hidden='true' /></span>
                     </>
                   )}
-                  {project.featured && project.image && (
+                  {project.featured && image && (
                     <span className='absolute left-5 top-5 rounded-full border border-white/20 bg-black/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-md'>
                       Featured
                     </span>
                   )}
-                  {project.image && <span className='absolute bottom-5 left-5 text-sm font-medium text-white/85'>
+                  {image && <span className='absolute bottom-5 left-5 text-sm font-medium text-white/85'>
                     0{index + 1}
                   </span>}
                 </Link>
