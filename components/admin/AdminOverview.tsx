@@ -1,7 +1,17 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, FileText, FolderKanban, Globe2, ImageIcon, Palette, UserRound } from "lucide-react";
+import {
+  FiArrowRight as ArrowRight,
+  FiBriefcase as BriefcaseBusiness,
+  FiCheckCircle as CheckCircle2,
+  FiFileText as FileText,
+  FiFolder as FolderKanban,
+  FiGlobe as Globe2,
+  FiImage as ImageIcon,
+  FiDroplet as Palette,
+  FiUser as UserRound,
+} from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserProfile } from "@/lib/profile";
 import { getProjectsForCurrentUser } from "@/lib/projects";

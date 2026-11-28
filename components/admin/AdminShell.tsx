@@ -6,9 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ArrowLeft, BriefcaseBusiness, FileText, FolderKanban, Home, ImageIcon,
-  Info, LayoutDashboard, Menu, Palette, ShieldCheck, UserRound,
-} from "lucide-react";
+  FiArrowLeft as ArrowLeft,
+  FiBriefcase as BriefcaseBusiness,
+  FiFileText as FileText,
+  FiFolder as FolderKanban,
+  FiHome as Home,
+  FiImage as ImageIcon,
+  FiInfo as Info,
+  FiGrid as LayoutDashboard,
+  FiMenu as Menu,
+  FiDroplet as Palette,
+  FiShield as ShieldCheck,
+  FiUser as UserRound,
+} from "react-icons/fi";
 import { adminGroups, adminItems } from "./admin-routes";
 
 const icons = {
