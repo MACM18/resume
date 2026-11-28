@@ -314,7 +314,8 @@ function SelectedWork({ projects }: { projects: Project[] }) {
       <div className='story-project-grid grid gap-6 md:grid-cols-2'>
         {projects.map((project, index) => {
           const isLead = index === 0;
-          const image = projectImageUrl(project.image);
+          const image = projectImageUrl(project.image) ?? "/images/project-placeholder.webp";
+          const imageAlt = project.image ? project.title : "Abstract cyan thread project artwork";
 
           return (
             <Reveal key={project.id} delay={index * 0.06} className={isLead ? 'md:col-span-2' : ''}>
@@ -328,7 +329,7 @@ function SelectedWork({ projects }: { projects: Project[] }) {
                     <>
                       <Image
                         src={image}
-                        alt={project.title}
+                        alt={imageAlt}
                         fill
                         priority={index === 0}
                         sizes={isLead ? '(max-width: 1024px) 100vw, 58vw' : '(max-width: 768px) 100vw, 50vw'}

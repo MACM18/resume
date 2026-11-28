@@ -20,7 +20,7 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
     return <div className='flex min-h-[70vh] items-center justify-center px-6'><GlassCard variant='bordered' className='max-w-lg p-10 text-center'><p className='text-xs font-semibold uppercase tracking-[0.22em] text-primary'>404 / project</p><h1 className='mt-4 text-3xl font-semibold'>Project not found</h1><p className='mt-4 leading-7 text-foreground/60'>The project you&apos;re looking for may have been unpublished or moved.</p><Button asChild className='mt-8 rounded-full px-6'><Link href='/projects'><ArrowLeft size={16} /> Back to projects</Link></Button></GlassCard></div>;
   }
 
-  const image = projectImageUrl(project.image);
+  const image = projectImageUrl(project.image) ?? "/images/project-placeholder.webp";
   const description = project.long_description || project.description || "More details about this project will be added soon.";
 
   return (
@@ -46,7 +46,7 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
         <Reveal>
           {image ? (
             <div className='relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03]'>
-              <Image src={image} alt={`${project.title} project preview`} fill priority sizes='(max-width: 1024px) 100vw, 1200px' className='object-cover' />
+              <Image src={image} alt={project.image ? `${project.title} project preview` : "Abstract cyan thread project artwork"} fill priority sizes='(max-width: 1024px) 100vw, 1200px' className='object-cover' />
             </div>
           ) : (
             <div className='flex flex-wrap items-center justify-between gap-4 rounded-xl border border-foreground/10 bg-card/50 px-5 py-4'>

@@ -46,14 +46,14 @@ function ProjectLinks({ project }: { project: Project }) {
 }
 
 function FeaturedProject({ project, index }: { project: Project; index: number }) {
-  const image = projectImageUrl(project.image);
+  const image = projectImageUrl(project.image) ?? "/images/project-placeholder.webp";
   return (
     <Reveal>
       <article className='grid gap-8 border-t border-foreground/10 py-8 md:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] md:items-center md:gap-12 md:py-12'>
         <Link href={`/projects/${project.id}`} className={`group relative block overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03] ${index % 2 ? 'md:order-2' : ''}`}>
           {image ? (
             <div className='relative aspect-[16/10]'>
-              <Image src={image} alt={`${project.title} project preview`} fill sizes='(max-width: 768px) 100vw, 60vw' priority={index === 0} className='object-cover transition duration-700 group-hover:scale-[1.03]' />
+              <Image src={image} alt={project.image ? `${project.title} project preview` : "Abstract cyan thread project artwork"} fill sizes='(max-width: 768px) 100vw, 60vw' priority={index === 0} className='object-cover transition duration-700 group-hover:scale-[1.03]' />
               <div className='absolute inset-0 bg-gradient-to-t from-background/45 to-transparent opacity-70' />
             </div>
           ) : (
