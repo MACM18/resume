@@ -13,8 +13,15 @@ Turn macm.dev into a clear, creative portfolio that helps a hiring manager quick
 - Use expressive but lightweight motion: staggered entrance, portrait/orbit movement, project hover transitions, and scroll-linked rope progress. Respect reduced-motion preferences.
 - Prioritize load time and low frontend complexity. Reuse the current stack, avoid adding an animation dependency, and keep client-side behavior to small interactive elements where possible.
 - Use current profile, project, work-experience, social-link, highlight, achievement, and skill data. Avoid a database schema change for the first pass.
-- Continue using production project images and links where available. When a project has no image, show a compact project information block instead of a placeholder image.
+- Use current project images and links where available. Projects without an image use the generated, theme-matched thread artwork at `/images/project-placeholder.webp`; this updates the earlier compact-block-only request after the later placeholder-artwork request.
 - Put the working contact form in the final homepage chapter and retain it on `/contact`; include the MACM Studio link and footer branding.
+
+## AI and search discovery
+
+- `app/robots.ts` names OpenAI search/user crawlers, GPTBot, Google-Extended, ClaudeBot, and PerplexityBot. Public routes are crawlable; admin, authentication, and private APIs remain disallowed.
+- `/llms.txt` and `/api/ai/profile` expose an allowlisted summary derived from the public profile and published projects only. The JSON feed omits account IDs and internal fields.
+- The document head links to `/llms.txt`; `NEXT_PUBLIC_SITE_URL` remains the canonical source, with `https://macm.dev` as its fallback.
+- `llms.txt` is a convenience format for compatible tools, not a ranking guarantee. Google Search uses ordinary crawl and content quality fundamentals for its AI features.
 
 ## Proposed portfolio projects
 
@@ -54,3 +61,5 @@ The data set includes the current portfolio, MACM Studio, NNS, Daymark Store Des
 - The admin project form and create/update APIs use the same image normalization, so editing an absolute or query-suffixed placeholder cannot save it back to the database.
 - Docker entrypoint regression tests verify migration-to-seed ordering, fail the container startup on a seed error, and fail closed if the image lacks the seeder artifact.
 - The icon editor retains React Icons and its existing saved icon names through a curated icon map. Admin navigation, overview, search, and editor controls share React Icons. The public About page's first-load JS fell from 7.55 MB to 199 KB, and the About editor route fell from 7.6 MB to 253 KB in the production build report.
+
+- The AI crawler and public data routes compile in the production build. A local HTTP check confirmed `/robots.txt` advertises `https://macm.dev/sitemap.xml` and blocks private paths; `/llms.txt` and `/api/ai/profile` return 404 locally because this workspace database has no owner profile. Populated feed responses still need verification after an authorized deployment with production data.
