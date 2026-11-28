@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RotateCw, Loader2 } from "lucide-react";
+import { RotateCw, Loader2 } from "@/components/admin/AdminIcons";
 import Image from "next/image";
 import {
   Dialog,

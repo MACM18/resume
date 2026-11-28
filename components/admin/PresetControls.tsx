@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Sparkles } from "@/components/admin/AdminIcons";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import {

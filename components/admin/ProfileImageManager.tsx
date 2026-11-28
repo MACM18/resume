@@ -18,7 +18,7 @@ import {
   CheckCircle,
   Trash,
   Image as ImageIcon,
-} from "lucide-react";
+} from "@/components/admin/AdminIcons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import {

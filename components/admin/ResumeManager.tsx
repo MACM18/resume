@@ -9,7 +9,7 @@ import {
   deleteUploadedResume,
 } from "@/lib/resumes";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Loader2, Trash } from "lucide-react";
+import { Loader2, Trash } from "@/components/admin/AdminIcons";
 import {
   Dialog,
   DialogContent,

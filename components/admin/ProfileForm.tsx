@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/admin/AdminIcons";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const profileSchema = z.object({

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Moon, Sun } from "lucide-react";
+import { Check, Loader2, Moon, Sun } from "@/components/admin/AdminIcons";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

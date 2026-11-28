@@ -6,7 +6,7 @@ import { getResumesForCurrentUser, deleteResume } from "@/lib/resumes";
 import { getCurrentUserProfile, updateCurrentUserProfile } from "@/lib/profile";
 // import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Loader2, CheckCircle } from "lucide-react";
+import { Plus, Edit, Trash, Loader2, CheckCircle } from "@/components/admin/AdminIcons";
 import {
   Dialog,
   DialogContent,

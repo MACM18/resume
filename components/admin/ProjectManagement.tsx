@@ -9,7 +9,7 @@ import {
 } from "@/lib/projects";
 // import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash, Loader2 } from "@/components/admin/AdminIcons";
 import {
   Dialog,
   DialogContent,

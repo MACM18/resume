@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfileContent } from "@/lib/profile";
 import type { AboutPageData, Profile } from "@/types/portfolio";
-import { BookOpen, Loader2, Phone, Plus, Save, Sparkles, Trash, UserRound, Wrench } from "lucide-react";
+import { BookOpen, Loader2, Phone, Plus, Save, Sparkles, Trash, UserRound, Wrench } from "@/components/admin/AdminIcons";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,

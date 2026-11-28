@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, LogOut, Mail, ShieldCheck } from "lucide-react";
+import { Loader2, LogOut, Mail, ShieldCheck } from "@/components/admin/AdminIcons";
 import { AdminSectionHeader } from "./AdminUI";
 
 async function readError(response: Response, fallback: string) {

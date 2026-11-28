@@ -16,7 +16,7 @@ import {
   Move,
   Square,
   Circle,
-} from "lucide-react";
+} from "@/components/admin/AdminIcons";
 import Image from "next/image";
 
 interface AdvancedAvatarEditorProps {

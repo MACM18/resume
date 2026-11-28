@@ -18,7 +18,7 @@ import {
 import { WorkExperienceForm } from "./WorkExperienceForm";
 import { WorkExperience } from "@/types/portfolio";
 import { useState } from "react";
-import { Loader2, Pencil, Plus, Trash, Eye, EyeOff, Star } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash, Eye, EyeOff, Star } from "@/components/admin/AdminIcons";
 import { toast } from "@/components/ui/sonner";
 import { formatDateRange } from "@/lib/utils";
 import { AdminEmptyState, AdminSectionHeader } from "@/components/admin/AdminUI";

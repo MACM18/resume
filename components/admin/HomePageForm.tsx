@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { getCurrentUserProfile, updateCurrentUserProfileContent } from "@/lib/profile";
 import type { HomePageData } from "@/types/portfolio";
-import { BarChart3, Code2, LayoutGrid, Link2, Loader2, Megaphone, Save, Sparkles, Trophy } from "lucide-react";
+import { BarChart3, Code2, LayoutGrid, Link2, Loader2, Megaphone, Save, Sparkles, Trophy } from "@/components/admin/AdminIcons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPicker } from "./IconPicker";
 import { DeleteButton } from "../DeleteButton";

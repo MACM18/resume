@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { updateGalleryImage } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
-import { Plus, FolderPlus } from "lucide-react";
+import { Plus, FolderPlus } from "@/components/admin/AdminIcons";
 import {
   AlertDialog,
   AlertDialogAction,

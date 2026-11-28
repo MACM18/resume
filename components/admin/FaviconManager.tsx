@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, FileUp, Image as ImageIcon } from "lucide-react";
+import { Loader2, FileUp, Image as ImageIcon } from "@/components/admin/AdminIcons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 

@@ -27,7 +27,7 @@ import { Project } from "@/types/portfolio";
 import { projectImageUrl } from "@/lib/project-images";
 import { toast } from "@/components/ui/sonner";
 import { useState } from "react";
-import { FileUp, Loader2, CheckCircle, Trash, Sparkles } from "lucide-react";
+import { FileUp, Loader2, CheckCircle, Trash, Sparkles } from "@/components/admin/AdminIcons";
 import Image from "next/image";
 import { useAuth } from "../providers/AuthProvider";
 import {

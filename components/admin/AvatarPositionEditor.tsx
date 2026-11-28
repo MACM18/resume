@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, Move, ZoomIn, ZoomOut, RotateCcw, Hand } from "lucide-react";
+import { Loader2, Move, ZoomIn, ZoomOut, RotateCcw, Hand } from "@/components/admin/AdminIcons";
 import Image from "next/image";
 
 interface AvatarPositionEditorProps {

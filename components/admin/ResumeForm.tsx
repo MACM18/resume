@@ -32,7 +32,7 @@ import {
 } from "@/lib/resumes";
 import { Resume, UploadedResume } from "@/types/portfolio";
 import { toast } from "@/components/ui/sonner";
-import { Trash, FileUp, Loader2, CheckCircle, Sparkles } from "lucide-react";
+import { Trash, FileUp, Loader2, CheckCircle, Sparkles } from "@/components/admin/AdminIcons";
 import { useAuth } from "../providers/AuthProvider";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";

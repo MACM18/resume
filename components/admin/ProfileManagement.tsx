@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AppWindow, ImageIcon, Move, UserRound, Wallpaper } from "lucide-react";
+import { AppWindow, ImageIcon, Move, UserRound, Wallpaper } from "@/components/admin/AdminIcons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { getCurrentUserProfile } from "@/lib/profile";
 import { ProfileForm } from "./ProfileForm";
