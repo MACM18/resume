@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { safeAdminReturnTo } from "@/lib/login-redirect";
 
 const LoginPage = () => {
   const { session, status } = useAuth();
@@ -26,12 +27,17 @@ const LoginPage = () => {
   const [forgotPassword, setForgotPassword] = useState("");
   const [forgotConfirm, setForgotConfirm] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [returnTo] = useState(() => {
+    if (typeof window === "undefined") return "/admin";
+    const callbackUrl = new URLSearchParams(window.location.search).get("callbackUrl");
+    return safeAdminReturnTo(callbackUrl);
+  });
 
   useEffect(() => {
     if (status === "authenticated" && session) {
-      router.push("/");
+      router.replace(returnTo);
     }
-  }, [session, status, router]);
+  }, [session, status, router, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +47,7 @@ const LoginPage = () => {
       const result = await signIn("credentials", {
         email,
         password,
+        callbackUrl: returnTo,
         redirect: false,
       });
 
@@ -52,7 +59,7 @@ const LoginPage = () => {
         );
       } else {
         toast.success("Logged in successfully!");
-        router.push("/admin");
+        router.replace(returnTo);
         router.refresh();
       }
     } catch (error) {
@@ -120,14 +127,14 @@ const LoginPage = () => {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center pt-24 pb-32 px-6'>
+    <div className='auth-page min-h-screen flex items-center justify-center pt-24 pb-32 px-6'>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className='w-full max-w-md'
       >
-        <GlassCard className='p-8'>
+        <GlassCard className='auth-login-card p-8'>
           <h2 className='text-3xl font-bold text-center mb-6 bg-gradient-primary bg-clip-text text-transparent'>
             Admin Login
           </h2>

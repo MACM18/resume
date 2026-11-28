@@ -8,6 +8,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { projectImageUrl } from "@/lib/project-images";
 import type { Project } from "@/types/portfolio";
+import { ChapterArt } from "@/components/portfolio/ChapterArt";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reducedMotion = useReducedMotion();
@@ -24,9 +25,10 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
   const description = project.long_description || project.description || "More details about this project will be added soon.";
 
   return (
-    <main className='min-h-screen pb-24'>
+    <main className='portfolio-page min-h-screen pb-24'>
       <section className='border-b border-foreground/10 px-6 pb-16 pt-28 md:pb-24 md:pt-36'>
-        <div className='mx-auto max-w-7xl'>
+        <div className='relative z-10 mx-auto max-w-7xl'>
+          <ChapterArt variant='work' className='route-svg-art' />
           <Reveal><Link href='/projects' className='inline-flex items-center gap-2 text-sm text-foreground/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'><ArrowLeft size={15} /> All projects</Link></Reveal>
           <div className='mt-12 grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end lg:gap-20'>
             <div>
@@ -42,7 +44,7 @@ export default function ProjectClient({ initialProject }: { initialProject: Proj
         </div>
       </section>
 
-      <div className='mx-auto max-w-7xl space-y-20 px-6 pt-12 md:pt-20'>
+      <div className='mx-auto max-w-7xl space-y-14 px-6 pt-12 md:space-y-20 md:pt-16'>
         <Reveal>
           {image ? (
             <div className='relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-foreground/[0.03]'>

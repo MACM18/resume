@@ -12,7 +12,7 @@ import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SaveContactButton } from "@/components/SaveContactButton";
-import { StoryThread } from "@/components/StoryThread";
+import { ChapterArt } from "@/components/portfolio/ChapterArt";
 import { ContactForm } from "@/components/ContactForm";
 import { generateStructuredData, serializeJsonLd } from "@/lib/seo";
 import { getDynamicIcon } from "@/lib/icons";
@@ -88,7 +88,7 @@ function HomeHero({
     "I help ambitious teams turn complex ideas into clear, useful digital experiences.";
 
   return (
-    <section className='story-hero relative isolate overflow-hidden border-b border-foreground/10'>
+    <section id='intro' data-chapter='intro' className='story-hero relative isolate overflow-hidden border-b border-foreground/10'>
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0 -z-10 opacity-70'
@@ -98,7 +98,8 @@ function HomeHero({
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_42%)]' />
       </div>
 
-      <div className='mx-auto grid min-h-[min(860px,calc(100svh-2rem))] max-w-7xl items-center gap-14 px-6 pb-20 pt-32 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:gap-20 lg:pb-24 lg:pt-36'>
+      <ChapterArt className='hero-svg-scene' />
+      <div className='mx-auto grid min-h-[min(800px,calc(100svh-2rem))] max-w-7xl items-center gap-12 px-6 pb-16 pt-28 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:gap-20 lg:pb-20 lg:pt-32'>
         <div className='max-w-3xl'>
           {data.availability_status?.show && (
             <Reveal>
@@ -247,7 +248,7 @@ function HomeProofStrip({
   ];
 
   return (
-    <section id='proof' className='scroll-mt-28 border-b border-foreground/10'>
+    <section id='proof' data-chapter='proof' className='scroll-mt-28 border-b border-foreground/10'>
       <div className='mx-auto grid max-w-7xl gap-8 px-6 py-8 md:grid-cols-[1.15fr_1fr_1fr_1fr] md:items-center md:gap-0'>
         <div className='flex items-start gap-3 md:border-r md:border-foreground/10 md:pr-8'>
           <CheckCircle2 className='mt-0.5 h-5 w-5 shrink-0 text-primary' />
@@ -302,8 +303,9 @@ function SelectedWork({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <section id='work' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
+    <section id='work' data-chapter='work' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
+        <div className='chapter-heading-art'><ChapterArt variant='work' className='chapter-svg-mark' /><span>03 / Selected work</span></div>
         <SectionIntro
           eyebrow='Selected work'
           title='A few things I have helped bring to life.'
@@ -417,7 +419,7 @@ function CapabilitiesSection({ data }: { data: HomeData }) {
   if (data.technicalExpertise.length === 0) return null;
 
   return (
-    <section id='skills' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
+    <section id='skills' data-chapter='skills' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
         <SectionIntro
           eyebrow='Capabilities'
@@ -450,10 +452,11 @@ function CapabilitiesSection({ data }: { data: HomeData }) {
 
 function AboutTeaser({ data }: { data: HomeData }) {
   return (
-    <section id='story' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
+    <section id='story' data-chapter='story' className='mx-auto max-w-7xl scroll-mt-28 px-6'>
       <Reveal>
         <div className='grid overflow-hidden rounded-[2rem] border border-foreground/10 bg-gradient-to-br from-primary/10 via-background/30 to-secondary/10 lg:grid-cols-[0.8fr_1.2fr]'>
-          <div className='border-b border-foreground/10 p-8 md:p-12 lg:border-b-0 lg:border-r'>
+          <div className='relative border-b border-foreground/10 p-8 md:p-12 lg:border-b-0 lg:border-r'>
+            <ChapterArt variant='story' className='chapter-svg-mark story-svg-mark' />
             <p className='text-xs font-semibold uppercase tracking-[0.24em] text-primary'>
               A little context
             </p>
@@ -511,10 +514,11 @@ function AchievementsRow({ data }: { data: HomeData }) {
 
 function HomeCTA({ data }: { data: HomeData }) {
   return (
-    <section id='contact' className='story-contact mx-auto max-w-7xl scroll-mt-28 px-6 pb-24'>
+    <section id='contact' data-chapter='contact' className='story-contact mx-auto max-w-7xl scroll-mt-28 px-6 pb-24'>
       <Reveal>
         <div className='story-contact-card'>
           <div className='story-contact-copy'>
+            <ChapterArt variant='contact' className='contact-svg-scene' />
             <p className='story-kicker'><span>06</span> / Start a conversation</p>
             <h2>{data.callToAction.title || "Have a project in mind?"}</h2>
             <p className='story-contact-description'>{data.callToAction.description || "Tell me what you are working on and where you want to take it."}</p>
@@ -581,15 +585,14 @@ export default function HomeClient({
       <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData.website) }} />
       <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData.profilePage) }} />
 
-      <main data-story-root className='relative isolate overflow-hidden'>
-        <StoryThread />
+      <main className='portfolio-page relative isolate overflow-hidden'>
         <HomeHero
           profile={profileData}
           data={homePageData}
           socialLinks={homePageData.socialLinks}
           hostname={hostname}
         />
-        <div id='main-content' className='relative z-10 space-y-24 py-16 md:space-y-32 md:py-24'>
+        <div id='main-content' className='relative z-10 space-y-14 py-12 md:space-y-20 md:py-16'>
           <HomeProofStrip
             data={homePageData}
             currentWork={initialWork}

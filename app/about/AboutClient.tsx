@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import type { AboutPageData, Profile } from "@/types/portfolio";
 import { getDynamicIcon } from "@/lib/icons";
+import { ChapterArt } from "@/components/portfolio/ChapterArt";
 
 function AboutReveal({
   children,
@@ -73,13 +74,14 @@ function AboutHero({
   const reducedMotion = useReducedMotion();
 
   return (
-    <section className='relative isolate overflow-hidden border-b border-foreground/10'>
+    <section className='about-hero relative isolate overflow-hidden border-b border-foreground/10'>
       <div aria-hidden='true' className='pointer-events-none absolute inset-0 -z-10'>
         <div className='absolute right-[10%] top-[8%] h-80 w-80 rounded-full bg-primary/10 blur-[130px]' />
         <div className='absolute bottom-0 left-[12%] h-64 w-64 rounded-full bg-secondary/10 blur-[120px]' />
       </div>
 
-      <div className='mx-auto grid max-w-7xl items-center gap-14 px-6 pb-20 pt-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24 lg:pb-28 lg:pt-40'>
+      <ChapterArt variant='story' className='route-svg-art about-svg-art' />
+      <div className='relative z-10 mx-auto grid max-w-7xl items-center gap-14 px-6 pb-20 pt-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24 lg:pb-28 lg:pt-40'>
         <AboutReveal className='relative mx-auto w-full max-w-[420px] lg:order-1 lg:ml-auto'>
           <motion.div
             initial={{ rotate: reducedMotion ? 0 : -2, y: reducedMotion ? 0 : 8 }}
@@ -317,9 +319,9 @@ const AboutClient = ({
 
   return (
     <ErrorBoundary>
-      <main className='relative overflow-hidden pb-8'>
+      <main className='portfolio-page relative overflow-hidden pb-8'>
         <AboutHero profile={profileData} data={aboutPageData} contactEmail={contactEmail} />
-        <div className='space-y-24 py-16 md:space-y-32 md:py-24'>
+        <div className='space-y-16 py-12 md:space-y-24 md:py-16'>
           <StorySection data={aboutPageData} />
           <SkillsSection data={aboutPageData} />
           <ContactSection profile={profileData} data={aboutPageData} contactEmail={contactEmail} />

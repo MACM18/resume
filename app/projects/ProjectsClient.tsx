@@ -9,6 +9,7 @@ import { ProjectsPageSkeleton } from "@/components/ui/loading-skeleton";
 import { Button } from "@/components/ui/button";
 import { projectImageUrl } from "@/lib/project-images";
 import type { Project, Profile } from "@/types/portfolio";
+import { ChapterArt } from "@/components/portfolio/ChapterArt";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reducedMotion = useReducedMotion();
@@ -99,16 +100,17 @@ export default function ProjectsClient({ initialProfile, initialProjects, hostna
   if (!profileData) return <DomainNotClaimed />;
 
   return (
-    <main className='min-h-screen pb-24'>
+    <main className='portfolio-page min-h-screen pb-24'>
       <section className='border-b border-foreground/10 px-6 pb-20 pt-32 md:pb-28 md:pt-40'>
-        <div className='mx-auto max-w-7xl'>
+        <div className='relative z-10 mx-auto max-w-7xl'>
+          <ChapterArt variant='work' className='route-svg-art' />
           <Reveal><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>Selected work / {String(projects.length).padStart(2, '0')} projects</p></Reveal>
           <Reveal delay={0.06}><h1 className='max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl'>Work with a point of view.</h1></Reveal>
           <Reveal delay={0.12}><p className='mt-7 max-w-2xl text-xl leading-8 text-foreground/60 md:text-2xl'>A collection of digital products, systems, and experiments shaped around clarity, craft, and useful outcomes.</p></Reveal>
         </div>
       </section>
 
-      <div className='mx-auto max-w-7xl space-y-24 px-6 pt-20 md:pt-28'>
+      <div className='mx-auto max-w-7xl space-y-16 px-6 pt-14 md:space-y-24 md:pt-20'>
         {displayFeatured.length > 0 ? (
           <section aria-labelledby='featured-work-heading'>
             <Reveal><div className='mb-2 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-foreground/45'><Sparkles size={15} className='text-primary' /><h2 id='featured-work-heading'>Featured work</h2></div></Reveal>

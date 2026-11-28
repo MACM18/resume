@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { ContactNumbersDisplay } from "@/components/ContactNumbersDisplay";
 import { DomainNotClaimed } from "@/components/DomainNotClaimed";
 import type { Profile } from "@/types/portfolio";
+import { ChapterArt } from "@/components/portfolio/ChapterArt";
 
 export default function ContactClient({ initialProfile }: { initialProfile: Profile; hostname: string }) {
   if (!initialProfile) return <DomainNotClaimed />;
@@ -12,9 +13,9 @@ export default function ContactClient({ initialProfile }: { initialProfile: Prof
   const contactEmail = homeData?.callToAction?.email || "";
   const contactNumbers = initialProfile.contact_numbers || [];
 
-  return <main className="story-contact-page min-h-screen px-6 pb-24 pt-32 md:pt-40">
+  return <main className="portfolio-page story-contact-page min-h-screen px-6 pb-24 pt-32 md:pt-40">
     <div className="mx-auto max-w-7xl">
-      <p className="story-kicker"><span>Contact</span> / Start a conversation</p>
+      <div className="contact-page-heading"><p className="story-kicker"><span>Contact</span> / Start a conversation</p><ChapterArt variant="contact" className="contact-page-art" /></div>
       <div className="mt-6 grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
         <div>
           <h1 className="max-w-2xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl">Let&apos;s make something useful.</h1>

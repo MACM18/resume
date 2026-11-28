@@ -9,6 +9,7 @@ import { ResumePageSkeleton } from "@/components/ui/loading-skeleton";
 import { Button } from "@/components/ui/button";
 import type { Project, Profile, Resume, WorkExperience } from "@/types/portfolio";
 import { formatDateRange } from "@/lib/utils";
+import { ChapterArt } from "@/components/portfolio/ChapterArt";
 
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reducedMotion = useReducedMotion();
@@ -43,12 +44,13 @@ export default function ResumeClient({ initialProfile, initialResume, initialPro
   const education = (resume.education || []).filter(Boolean);
   const certifications = (resume.certifications || []).filter(Boolean);
 
-  return <ErrorBoundary><main className='min-h-screen pb-24'>
-    <section className='border-b border-foreground/10 px-6 pb-16 pt-32 md:pb-24 md:pt-40'>
-      <div className='mx-auto max-w-7xl'><Reveal><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>Resume / {fullName}</p></Reveal><div className='grid gap-10 lg:grid-cols-[1fr_0.65fr] lg:items-end lg:gap-20'><Reveal delay={0.06}><h1 className='max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl'>{role}</h1></Reveal><Reveal delay={0.12}><div><p className='text-lg leading-8 text-foreground/65'>{resume.summary || 'A concise overview of experience, capabilities, and selected work.'}</p><div className='mt-7 flex flex-wrap items-center gap-4'><Button asChild className='rounded-full px-6'><Link href='/resume/download'><Download size={16} /> Download PDF</Link></Button>{contactEmail && <a href={`mailto:${contactEmail}`} className='text-sm text-foreground/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>{contactEmail}</a>}</div></div></Reveal></div></div>
+  return <ErrorBoundary><main className='portfolio-page min-h-screen pb-24'>
+    <section className='resume-hero border-b border-foreground/10 px-6 pb-16 pt-32 md:pb-24 md:pt-40'>
+      <div className='relative z-10 mx-auto max-w-7xl'>
+        <ChapterArt variant='story' className='route-svg-art resume-svg-art' /><Reveal><p className='mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-primary'>Resume / {fullName}</p></Reveal><div className='grid gap-10 lg:grid-cols-[1fr_0.65fr] lg:items-end lg:gap-20'><Reveal delay={0.06}><h1 className='max-w-5xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl'>{role}</h1></Reveal><Reveal delay={0.12}><div><p className='text-lg leading-8 text-foreground/65'>{resume.summary || 'A concise overview of experience, capabilities, and selected work.'}</p><div className='mt-7 flex flex-wrap items-center gap-4'><Button asChild className='rounded-full px-6'><Link href='/resume/download'><Download size={16} /> Download PDF</Link></Button>{contactEmail && <a href={`mailto:${contactEmail}`} className='text-sm text-foreground/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>{contactEmail}</a>}</div></div></Reveal></div></div>
     </section>
 
-    <div className='mx-auto max-w-7xl space-y-20 px-6 pt-16 md:pt-24'>
+    <div className='mx-auto max-w-7xl space-y-14 px-6 pt-12 md:space-y-20 md:pt-18'>
       <div className='grid gap-14 lg:grid-cols-[1fr_280px] lg:gap-24'>
         <Reveal><section aria-labelledby='experience-heading'><SectionHeading eyebrow='01 / Experience' title='A record of useful work.' />{workHistory.length > 0 ? <div>{workHistory.map((experience, index) => <TimelineItem key={'id' in experience ? experience.id : `${experience.company}-${index}`} experience={experience} index={index} />)}</div> : <p className='leading-7 text-foreground/60'>Professional experience will be added soon.</p>}</section></Reveal>
         <Reveal delay={0.08}><aside className='space-y-10'><div className='border-t border-foreground/10 pt-6'><p className='mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground/45'>Profile</p><div className='space-y-3 text-sm text-foreground/65'>{resume.location && <p className='flex items-center gap-2'><MapPin size={15} className='text-primary' />{resume.location}</p>}{contactEmail && <a href={`mailto:${contactEmail}`} className='block transition-colors hover:text-primary'>{contactEmail}</a>}</div></div>{skills.length > 0 && <div className='border-t border-foreground/10 pt-6'><p className='mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground/45'>Skills</p><div className='flex flex-wrap gap-x-3 gap-y-2 text-sm text-foreground/65'>{skills.map((skill) => <span key={skill}>{skill}</span>)}</div></div>}</aside></Reveal>
