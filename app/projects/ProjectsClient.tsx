@@ -47,7 +47,6 @@ function ProjectLinks({ project }: { project: Project }) {
 
 function FeaturedProject({ project, index }: { project: Project; index: number }) {
   const image = projectImageUrl(project.image);
-  const hasImage = Boolean(image);
   return (
     <Reveal>
       <article className='grid gap-8 border-t border-foreground/10 py-8 md:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] md:items-center md:gap-12 md:py-12'>
